@@ -1,0 +1,2 @@
+# temaJournal
+Gestionale TeMA Journal
