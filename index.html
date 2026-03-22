@@ -459,13 +459,7 @@ const SC = {
 const EDITORS = ['Carmen Guida','Floriana Zucaro','Gerardo Carpentieri','Peppe Mazzeo','Romano Fistola','Rosa Anna La Rocca','Rosaria Battarra','Stefano Franco'];
 const COPYEDITORS = ['Gerardo Carpentieri','Laura Ascione',"Nunzia D'Amico",'Stella Pennino','Tonia Stiuso','Valerio Martinelli'];
 const LS_KEY = 'tema-journal-v2';
-const GH_USER   = 'temalabunina-cmyk';
-const GH_REPO   = 'TeMAJournal';
-const GH_TOKEN  = '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';
-const GH_FILE   = 'dati.json';
-const GH_BRANCH = 'main';
-const GH_API    = 'https://api.github.com/repos/'+GH_USER+'/'+GH_REPO+'/contents/'+GH_FILE;
-var ghFileSha = null;
+const GS_URL = 'https://script.google.com/macros/s/AKfycbyv4gKj-TVf2uDdvmaVoNEWPHvfa3nVICcq9kiqtd970_-2y9x4R2qKllGl4pxnssw/exec';
 
 let issues = [], articles = [], editingArtId = null, editingIssKey = null;
 let saveTimer = null, sessionUnlocked = false, pendingAction = null;
@@ -494,7 +488,7 @@ function saveCiteScores() {
 }
 
 function loadData() {
-  // Load from localStorage as fallback while fetching from GitHub
+  // Carica localStorage come fallback immediato
   try {
     var d = JSON.parse(localStorage.getItem(LS_KEY) || '{}');
     issues   = (d.issues   && d.issues.length)   ? d.issues   : JSON.parse(JSON.stringify(DEF_ISSUES));
@@ -503,35 +497,29 @@ function loadData() {
     issues   = JSON.parse(JSON.stringify(DEF_ISSUES));
     articles = JSON.parse(JSON.stringify(DEF_ARTICLES));
   }
-  // Fetch from GitHub
+  // Carica da Google Sheets
   setSaving(true);
-  document.getElementById('saveLbl').textContent = 'Caricamento da GitHub...';
-  fetch(GH_API+'?ref='+GH_BRANCH, {
-    headers: {
-      'Authorization': 'token '+GH_TOKEN,
-      'Accept': 'application/vnd.github.v3+json'
-    }
-  })
-  .then(function(r){ return r.json(); })
-  .then(function(data) {
-    if (data.content && data.sha) {
-      ghFileSha = data.sha;
-      var decoded = JSON.parse(atob(data.content.replace(/\n/g,'')));
-      if (decoded.issues   && decoded.issues.length)   issues   = decoded.issues;
-      if (decoded.articles && decoded.articles.length) articles = decoded.articles;
-      localStorage.setItem(LS_KEY, JSON.stringify({issues:issues, articles:articles}));
-    }
-    setSaving(false);
-    document.getElementById('saveLbl').textContent = 'Dati sincronizzati';
-    rebuildIssFilters();
-    refresh();
-  })
-  .catch(function(e) {
-    setSaving(false);
-    document.getElementById('saveLbl').textContent = 'Dati locali (GitHub non raggiungibile)';
-    rebuildIssFilters();
-    refresh();
-  });
+  document.getElementById('saveLbl').textContent = 'Caricamento...';
+  fetch(GS_URL)
+    .then(function(r){ return r.text(); })
+    .then(function(text) {
+      try {
+        var data = JSON.parse(text);
+        if (data.issues   && data.issues.length)   issues   = data.issues;
+        if (data.articles && data.articles.length) articles = data.articles;
+        localStorage.setItem(LS_KEY, JSON.stringify({issues:issues, articles:articles}));
+      } catch(e) {}
+      setSaving(false);
+      document.getElementById('saveLbl').textContent = 'Dati sincronizzati';
+      rebuildIssFilters();
+      refresh();
+    })
+    .catch(function() {
+      setSaving(false);
+      document.getElementById('saveLbl').textContent = 'Dati locali (rete non disponibile)';
+      rebuildIssFilters();
+      refresh();
+    });
 }
 function setSaving(s) {
   var dot = document.getElementById('saveDot'), lbl = document.getElementById('saveLbl');
@@ -541,34 +529,19 @@ function setSaving(s) {
 function persist() {
   setSaving(true);
   var payload = JSON.stringify({issues:issues, articles:articles});
-  // Always save to localStorage as backup
   try { localStorage.setItem(LS_KEY, payload); } catch(e) {}
-  // Save to GitHub
-  var body = {
-    message: 'Aggiornamento dati TeMA Journal',
-    content: btoa(unescape(encodeURIComponent(payload))),
-    branch: GH_BRANCH
-  };
-  if (ghFileSha) body.sha = ghFileSha;
-  fetch(GH_API, {
-    method: 'PUT',
-    headers: {
-      'Authorization': 'token '+GH_TOKEN,
-      'Accept': 'application/vnd.github.v3+json',
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(body)
+  fetch(GS_URL, {
+    method: 'POST',
+    body: payload
   })
-  .then(function(r){ return r.json(); })
-  .then(function(data) {
-    if (data.content && data.content.sha) ghFileSha = data.content.sha;
+  .then(function() {
     setSaving(false);
-    document.getElementById('saveLbl').textContent = 'Salvato su GitHub';
+    document.getElementById('saveLbl').textContent = 'Salvato';
     setTimeout(function(){ document.getElementById('saveLbl').textContent = 'Dati salvati'; }, 2000);
   })
-  .catch(function(e) {
+  .catch(function() {
     setSaving(false);
-    document.getElementById('saveLbl').textContent = 'Errore salvataggio GitHub';
+    document.getElementById('saveLbl').textContent = 'Salvato in locale';
   });
 }
 function schedSave() { setSaving(true); clearTimeout(saveTimer); saveTimer = setTimeout(persist, 600); }
