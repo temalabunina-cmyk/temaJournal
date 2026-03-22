@@ -354,13 +354,19 @@ body{font-family:Georgia,serif;background:var(--bg);color:var(--tx);font-size:14
   <div class="fsl">Processo di revisione</div>
   <div id="revList"></div>
   <button class="btn" id="btnAddRev" style="margin-bottom:10px;font-size:12px">+ Aggiungi revisore</button>
-  <div class="fr" style="margin-top:6px;margin-bottom:12px"><label>Decisione dell'editor</label><select id="fDecisioneEditor" onchange="checkDecisioneEditor()"><option value="">&#8212;</option><option value="Accept submission">Accept submission</option><option value="Revisions required">Revisions required</option><option value="Resubmit for Review">Resubmit for Review</option><option value="Resubmit Elsewhere">Resubmit Elsewhere</option><option value="Decline submission">Decline submission</option></select></div>
+  <div class="g2" style="margin-top:6px;margin-bottom:12px;align-items:end">
+    <div class="fr" style="margin-bottom:0"><label>Decisione dell'editor</label><select id="fDecisioneEditor" onchange="checkDecisioneEditor()"><option value="">&#8212;</option><option value="Accept submission">Accept submission</option><option value="Revisions required">Revisions required</option><option value="Resubmit for Review">Resubmit for Review</option><option value="Resubmit Elsewhere">Resubmit Elsewhere</option><option value="Decline submission">Decline submission</option></select></div>
+    <div class="fr" id="fDataRevisioneWrap" style="margin-bottom:0;display:none"><label>Data consegna versione revisionata</label><input type="date" id="fDataRevisione"></div>
+  </div>
   <!-- Secondo processo di revisione (visibile solo con Resubmit for Review) -->
   <div id="rev2Section" style="display:none;border-top:1.5px dashed var(--brd);padding-top:1rem;margin-top:.5rem">
     <div class="fsl" style="margin-top:0;border-top:none;padding-top:0">Processo di revisione 2</div>
     <div id="revList2"></div>
     <button class="btn" id="btnAddRev2" style="margin-bottom:10px;font-size:12px">+ Aggiungi revisore (2° round)</button>
-    <div class="fr" style="margin-top:6px"><label>Decisione dell'editor (2° round)</label><select id="fDecisioneEditor2" onchange="saveDecisioneEditor2()"><option value="">&#8212;</option><option value="Accept submission">Accept submission</option><option value="Revisions required">Revisions required</option><option value="Resubmit for Review">Resubmit for Review</option><option value="Resubmit Elsewhere">Resubmit Elsewhere</option><option value="Decline submission">Decline submission</option></select></div>
+    <div class="g2" style="margin-top:6px;align-items:end">
+      <div class="fr" style="margin-bottom:0"><label>Decisione dell'editor (2° round)</label><select id="fDecisioneEditor2" onchange="checkDecisioneEditor2()"><option value="">&#8212;</option><option value="Accept submission">Accept submission</option><option value="Revisions required">Revisions required</option><option value="Resubmit for Review">Resubmit for Review</option><option value="Resubmit Elsewhere">Resubmit Elsewhere</option><option value="Decline submission">Decline submission</option></select></div>
+      <div class="fr" id="fDataRevisione2Wrap" style="margin-bottom:0;display:none"><label>Data consegna versione revisionata (2°)</label><input type="date" id="fDataRevisione2"></div>
+    </div>
   </div>
   <div class="fsl">Note</div>
   <div class="fr"><textarea id="fNotes" rows="3"></textarea></div>
@@ -684,6 +690,16 @@ function artCard(a, showEdit) {
     '</div>' +
     metaHtml + revHtml +
     (a.notes ? '<div class="note-box">'+esc(a.notes)+'</div>' : '') +
+    (function(){
+      var dr1 = a.dataRevisione ? new Date(a.dataRevisione).toLocaleDateString('it-IT') : null;
+      var dr2 = a.dataRevisione2 ? new Date(a.dataRevisione2).toLocaleDateString('it-IT') : null;
+      if (!dr1 && !dr2) return '';
+      var txt = '&#128336; ';
+      if (dr1) txt += 'Consegna rev.: ' + dr1;
+      if (dr1 && dr2) txt += ' &middot; ';
+      if (dr2) txt += '2&#176; round: ' + dr2;
+      return '<div style="font-size:12px;color:var(--amber-tx);font-weight:600;margin-top:6px;font-family:sans-serif">'+txt+'</div>';
+    })() +
     // Footer: step badge (color by status) + copyeditor + deadline
         (a.copyeditor ? '<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--brd)"><span class="badge b-purple">'+esc(a.copyeditor)+'</span></div>' : '') +
   '</div>';
@@ -1104,12 +1120,18 @@ function printVerbale() {
 
 var currentRevisori2 = [];
 
-function saveDecisioneEditor2() {}
-
 function checkDecisioneEditor() {
   var val = document.getElementById('fDecisioneEditor').value;
   var sec = document.getElementById('rev2Section');
   if (sec) sec.style.display = (val === 'Resubmit for Review') ? 'block' : 'none';
+  var wrap = document.getElementById('fDataRevisioneWrap');
+  if (wrap) wrap.style.display = (val === 'Revisions required') ? 'block' : 'none';
+}
+
+function checkDecisioneEditor2() {
+  var val = document.getElementById('fDecisioneEditor2').value;
+  var wrap = document.getElementById('fDataRevisione2Wrap');
+  if (wrap) wrap.style.display = (val === 'Revisions required') ? 'block' : 'none';
 }
 
 function renderRevList2() {
@@ -1279,7 +1301,9 @@ function openNewArt() {
   currentRevisori2=[]; renderRevList2();
   document.getElementById('fDecisioneEditor').value='';
   document.getElementById('fDecisioneEditor2').value='';
-  checkDecisioneEditor();
+  document.getElementById('fDataRevisione').value='';
+  document.getElementById('fDataRevisione2').value='';
+  checkDecisioneEditor(); checkDecisioneEditor2();
   buildIssOpts('fIssArt','');
   lockAllGroups();
   document.getElementById('artModal').classList.add('open');
@@ -1327,7 +1351,9 @@ function openEditArt(id) {
   currentRevisori2=JSON.parse(JSON.stringify(a.revisori2||[])); renderRevList2();
   document.getElementById('fDecisioneEditor').value=a.decisioneEditor||'';
   document.getElementById('fDecisioneEditor2').value=a.decisioneEditor2||'';
-  checkDecisioneEditor();
+  document.getElementById('fDataRevisione').value=a.dataRevisione||'';
+  document.getElementById('fDataRevisione2').value=a.dataRevisione2||'';
+  checkDecisioneEditor(); checkDecisioneEditor2();
   buildIssOpts('fIssArt',a.issue||'');
   lockAllGroups();
   document.getElementById('artModal').classList.add('open');
@@ -1368,7 +1394,9 @@ function saveArt() {
     revisori:JSON.parse(JSON.stringify(currentRevisori)),
     revisori2:JSON.parse(JSON.stringify(currentRevisori2)),
     decisioneEditor:document.getElementById('fDecisioneEditor').value,
-    decisioneEditor2:document.getElementById('fDecisioneEditor2').value
+    decisioneEditor2:document.getElementById('fDecisioneEditor2').value,
+    dataRevisione:document.getElementById('fDataRevisione').value,
+    dataRevisione2:document.getElementById('fDataRevisione2').value
   };
   if (!data.id||!data.title){ alert('ID e Titolo sono obbligatori.'); return; }
   if (editingArtId) {
