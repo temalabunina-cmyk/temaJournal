@@ -405,36 +405,8 @@ body{font-family:Georgia,serif;background:var(--bg);color:var(--tx);font-size:14
 </div>
 
 <script>
-const DEF_ISSUES=[
-  {key:'01/2026',label:'TeMA 01/2026',type:'ordinario',year:2026,num:1,theme:'The city challenges and external agents',deadline:'2026-04-30',note:'Pubblicazione prevista 30/04/2026'},
-  {key:'02/2026',label:'TeMA 02/2026',type:'ordinario',year:2026,num:2,theme:'',deadline:'',note:''},
-  {key:'03/2026',label:'TeMA 03/2026',type:'ordinario',year:2026,num:3,theme:'',deadline:'',note:''},
-  {key:'SI-LWC',label:'SI Convegno Brescia (LWC)',type:'si',theme:'Living With Climate',deadline:'2026-03-30',note:'10 contributi completi. Editoriale e sommario pronti.'},
-  {key:'SI-AI',label:'SI Intelligenza Artificiale',type:'si',theme:'Romano Fistola & Rosa Anna La Rocca',deadline:'',note:'Call messa a punto. 11 esperti individuati. Volume Springer.'},
-];
-const DEF_ARTICLES=[
-  {id:'12621',title:'The Impact of Land Use and Land Cover (LULC) Changes on Coastal Dynamics Through Landscape Structure',authors:'Makbulenur Onur',affiliation:'Karadeniz Technical University, Turchia',nationality:'Turchia',intl:'si',abstract:'',length:0,section:'Focus',status:'Revisione autore',step:'8',issue:'01/2026',articleNum:1,deadline:'2026-03-25',editor:'Floriana Zucaro',copyeditor:'',gatekeeper:'Lilli Gargiulo',similarity:null,aiPercent:null,refsTotal:0,citeTeMA:0,citeTeMA2226:0,citeJCR:0,citeJCR2y:0,notes:'Revisione richiesta da entrambi i revisori. Versione revisionata attesa per il 25 marzo.'},
-  {id:'12656',title:'Spatial and temporal evolution of urban reserve available land resources in the karst region of North China from 1990 to 2020',authors:'Shujin Wang, Shanzhong Qi',affiliation:'Shandong Normal University, China',nationality:'Cina',intl:'si',abstract:'',length:0,section:'Focus',status:'In referaggio',step:'6',issue:'01/2026',articleNum:2,deadline:'2026-03-29',editor:'Floriana Zucaro',copyeditor:'',gatekeeper:'Lilli Gargiulo',similarity:null,aiPercent:null,refsTotal:0,citeTeMA:0,citeTeMA2226:0,citeJCR:0,citeJCR2y:0,notes:'Arezoo Salamatnia (Tehran) ha richiesto modifiche. Zijuan Zhu (Beijing) scadenza 29 marzo.'},
-  {id:'12394',title:'Assessing Urban Growth and Pollution through Nightlight Data: A Case Study in Thailand',authors:'Chaichana Kulworatit, Phuvis Kerdpramote, Saranya Saetang',affiliation:'KMITL Bangkok',nationality:'Tailandia',intl:'si',abstract:'',length:0,section:'LUME',status:'Concluso',step:'12',issue:'01/2026',articleNum:3,deadline:'',editor:'',copyeditor:'',gatekeeper:'',similarity:null,aiPercent:null,refsTotal:0,citeTeMA:0,citeTeMA2226:0,citeJCR:0,citeJCR2y:0,notes:''},
-  {id:'12458',title:'Exploring Governance Challenges in Coastal and Marine Tourism',authors:'Barbara Gasparini, Emanuel Giannotti, Vittore Negretto, Denis Maragno',affiliation:'IUAV',nationality:'Italia',intl:'no',abstract:'',length:0,section:'LUME',status:'Concluso',step:'12',issue:'01/2026',articleNum:4,deadline:'',editor:'',copyeditor:'',gatekeeper:'',similarity:null,aiPercent:null,refsTotal:0,citeTeMA:0,citeTeMA2226:0,citeJCR:0,citeJCR2y:0,notes:''},
-  {id:'12634',title:'Beyond the Map Decision Support Systems for Spatial and Mobility Planning',authors:'Mara Ladu, Ginevra Balletto, Tanja Congiu, Gianfranco Fancello, Ernesto Fontes Pupo',affiliation:'Università di Cagliari',nationality:'Italia',intl:'no',abstract:'',length:0,section:'LUME',status:'Concluso',step:'12',issue:'01/2026',articleNum:5,deadline:'',editor:'',copyeditor:'',gatekeeper:'',similarity:null,aiPercent:null,refsTotal:0,citeTeMA:0,citeTeMA2226:0,citeJCR:0,citeJCR2y:0,notes:''},
-  {id:'11322',title:'Biodiversity and Ecological Network: GeoAI for Modica Green city',authors:'Chiara Spadaro, Celestina Fazia',affiliation:'Università Kore',nationality:'Italia',intl:'no',abstract:'',length:0,section:'LUME',status:'Concluso',step:'12',issue:'01/2026',articleNum:6,deadline:'',editor:'',copyeditor:'',gatekeeper:'',similarity:null,aiPercent:null,refsTotal:0,citeTeMA:0,citeTeMA2226:0,citeJCR:0,citeJCR2y:0,notes:''},
-  {id:'12696',title:'Impact of Renewable Energy Systems on Water Ecosystem Services',authors:'Maria Cristina Marino, Beniamino Murgante',affiliation:'Università della Basilicata',nationality:'Italia',intl:'no',abstract:'',length:0,section:'LUME',status:'Revisione autore',step:'8',issue:'01/2026',articleNum:7,deadline:'2026-03-21',editor:'Gerardo Carpentieri',copyeditor:'',gatekeeper:'Lilli Gargiulo',similarity:null,aiPercent:null,refsTotal:0,citeTeMA:0,citeTeMA2226:0,citeJCR:0,citeJCR2y:0,notes:'Versione revisionata attesa per il 21 marzo.'},
-  {id:'12803',title:'Examining the temporal and spatial change of current land cover types in Demre District using machine learning',authors:'Sibel Akten, Hüseyin Batuhan Dündar, Atila Gül',affiliation:'Suleyman University, Turchia',nationality:'Turchia',intl:'si',abstract:'',length:0,section:'LUME',status:'In referaggio',step:'5',issue:'01/2026',articleNum:8,deadline:'2026-03-09',editor:'Carmen Guida',copyeditor:'',gatekeeper:'Lilli Gargiulo',similarity:null,aiPercent:null,refsTotal:0,citeTeMA:0,citeTeMA2226:0,citeJCR:0,citeJCR2y:0,notes:'Paulo Batista (Aveiro) ha accettato. In attesa di Ahmet Benliay.'},
-  {id:'11344',title:'Evaluating Urban Fabric Transformations Using GeoAI',authors:'Alessandro Vitale',affiliation:'Università della Calabria',nationality:'Italia',intl:'no',abstract:'',length:0,section:'LUME',status:'Concluso',step:'12',issue:'01/2026',articleNum:9,deadline:'',editor:'',copyeditor:'',gatekeeper:'',similarity:null,aiPercent:null,refsTotal:0,citeTeMA:0,citeTeMA2226:0,citeJCR:0,citeJCR2y:0,notes:''},
-  {id:'11551',title:'CITISENSE. Enhancing Urban Well-being through Smart Design, Data and AI',authors:'Pierfrancesco Celani, Daniel Enrique Sardo, Massimo Zupi, Margherita Tufarelli, Adriano Bisello',affiliation:'Università della Calabria; Università di Firenze; ITESO Guadalajara',nationality:'Italia / Messico',intl:'si',abstract:'',length:0,section:'LUME',status:'Concluso',step:'12',issue:'01/2026',articleNum:10,deadline:'',editor:'',copyeditor:'',gatekeeper:'',similarity:null,aiPercent:null,refsTotal:0,citeTeMA:0,citeTeMA2226:0,citeJCR:0,citeJCR2y:0,notes:''},
-  {id:'11378',title:'AI as a Tool for Urban Regeneration Processes',authors:'Carlo Adornetto',affiliation:'Università della Calabria',nationality:'Italia',intl:'no',abstract:'',length:0,section:'LUME',status:'Copyediting',step:'12',issue:'',articleNum:null,deadline:'',editor:'Romano Fistola',copyeditor:'',gatekeeper:'Lilli Gargiulo',similarity:null,aiPercent:null,refsTotal:0,citeTeMA:0,citeTeMA2226:0,citeJCR:0,citeJCR2y:0,notes:'SI Francini. In attesa di secondo referee.'},
-  {id:'12735',title:'Planning for Sustainable Tourism in Protected Areas',authors:'Rachele Gatto, Francesco Scorza',affiliation:'Università della Basilicata',nationality:'Italia',intl:'no',abstract:'',length:0,section:'—',status:'Revisione autore',step:'7',issue:'',articleNum:null,deadline:'2026-03-16',editor:'Rosa Anna La Rocca',copyeditor:'',gatekeeper:'Lilli Gargiulo',similarity:null,aiPercent:null,refsTotal:0,citeTeMA:0,citeTeMA2226:0,citeJCR:0,citeJCR2y:0,notes:'Autori invieranno versione revisionata entro il 16 marzo.'},
-  {id:'12609',title:'Liberal and deliberative democracy in planning paradigms: reflections on upper-scale planning in Türkiye',authors:'Büşra Durmaz, Cihan Ercetin',affiliation:'KU Leuven, Belgio',nationality:'Belgio / Turchia',intl:'si',abstract:'',length:0,section:'LUME',status:'In referaggio',step:'6',issue:'',articleNum:null,deadline:'2026-02-28',editor:'Romano Fistola',copyeditor:'',gatekeeper:'Lilli Gargiulo',similarity:null,aiPercent:null,refsTotal:0,citeTeMA:0,citeTeMA2226:0,citeJCR:0,citeJCR2y:0,notes:'Elisabetta Venco (Pavia) ha completato. Patrizia Battilani (Bologna) scadenza 28 feb.'},
-  {id:'13110',title:'Identification and mapping of traffic congestion hotspots in urban areas',authors:'Frederic Laurent esse esse',affiliation:'University of Douala, Cameroon',nationality:'Camerun',intl:'si',abstract:'',length:0,section:'Focus',status:'GateKeeper evaluation',step:'1',issue:'',articleNum:null,deadline:'',editor:'',copyeditor:'',gatekeeper:'Lilli Gargiulo',similarity:null,aiPercent:null,refsTotal:0,citeTeMA:0,citeTeMA2226:0,citeJCR:0,citeJCR2y:0,notes:'In attesa di risposta da Eric Elder (Gothenburg). Possibile rifiuto.'},
-  {id:'13143',title:'Evaluating the efficacy of smart technologies in disseminating transportation systems information during earthquake scenarios',authors:'Izza Anwer, Irfan Yousuf',affiliation:'Susan University of Engineering and Technology, Lahore',nationality:'Pakistan',intl:'si',abstract:'',length:0,section:'Focus',status:'Sottomesso',step:'2',issue:'',articleNum:null,deadline:'',editor:'Peppe Mazzeo',copyeditor:'',gatekeeper:'Lilli Gargiulo',similarity:null,aiPercent:null,refsTotal:0,citeTeMA:0,citeTeMA2226:0,citeJCR:0,citeJCR2y:0,notes:''},
-  {id:'13165',title:'Methodological Approaches for Food Security Mapping',authors:'Silvia Zannin, Denis Maragno',affiliation:'IUAV',nationality:'Italia',intl:'no',abstract:'',length:0,section:'LUME',status:'Sottomesso',step:'2',issue:'',articleNum:null,deadline:'',editor:'Rosaria Battarra',copyeditor:'',gatekeeper:'Lilli Gargiulo',similarity:null,aiPercent:null,refsTotal:0,citeTeMA:0,citeTeMA2226:0,citeJCR:0,citeJCR2y:0,notes:''},
-  {id:'13052',title:'Climate Adaptation and Mitigation. A Multicriteria Decision-Support System for the Basilicata Region',authors:'Alfonso Annunziata, Francesco Scorza',affiliation:'Università della Basilicata',nationality:'Italia',intl:'no',abstract:'',length:0,section:'Focus',status:'Sottomesso',step:'2',issue:'',articleNum:null,deadline:'',editor:'Rosaria Battarra',copyeditor:'',gatekeeper:'Lilli Gargiulo',similarity:null,aiPercent:null,refsTotal:0,citeTeMA:0,citeTeMA2226:0,citeJCR:0,citeJCR2y:0,notes:''},
-  {id:'13329',title:'Tactical Urbanism in Rome. Toward an Alliance for Bottom-Up Interventions on Public Spaces',authors:'Francesca Paola Mondelli, Chiara Amato',affiliation:'Università Roma Tre',nationality:'Italia',intl:'no',abstract:'',length:0,section:'—',status:'GateKeeper evaluation',step:'1',issue:'',articleNum:null,deadline:'',editor:'',copyeditor:'',gatekeeper:'Lilli Gargiulo',similarity:null,aiPercent:null,refsTotal:0,citeTeMA:0,citeTeMA2226:0,citeJCR:0,citeJCR2y:0,notes:''},
-  {id:'13275',title:'AI-Driven Public Transport Corridor Design for Sustainable Urban Mobility',authors:'Agus Mansur, Rizal Syarifuddin, Hari Purnomo, Winda Nur Cahyo',affiliation:'Universitas Islam, Indonesia',nationality:'Indonesia',intl:'si',abstract:'',length:0,section:'—',status:'In referaggio',step:'5',issue:'',articleNum:null,deadline:'2026-03-28',editor:'Gerardo Carpentieri',copyeditor:'',gatekeeper:'Lilli Gargiulo',similarity:null,aiPercent:null,refsTotal:0,citeTeMA:0,citeTeMA2226:0,citeJCR:0,citeJCR2y:0,notes:'Ivan Gunawan (Surabaya) ha completato. Rangga Primadasa scadenza 28 marzo.'},
-  {id:'13276',title:'Role of tourism in environment sustainability: evidence from most carbon emitting countries',authors:'Rafaqet Ali, Khuda Bakhsh, Muhammad Asim Yasin',affiliation:'Comsats University Islamabad',nationality:'Pakistan',intl:'si',abstract:'',length:0,section:'—',status:'Sottomesso',step:'2',issue:'',articleNum:null,deadline:'',editor:'Rosa Anna La Rocca',copyeditor:'',gatekeeper:'Lilli Gargiulo',similarity:null,aiPercent:null,refsTotal:0,citeTeMA:0,citeTeMA2226:0,citeJCR:0,citeJCR2y:0,notes:''},
-  {id:'13357',title:'Geospatial analysis on metro-induced land use change for inclusive transit-oriented development in Chennai',authors:'Kaviya Asokan, Sudhan Srinivas',affiliation:'Hindustan Institute of Technology and Science, India',nationality:'India',intl:'si',abstract:'',length:0,section:'—',status:'GateKeeper evaluation',step:'1',issue:'',articleNum:null,deadline:'',editor:'',copyeditor:'',gatekeeper:'Lilli Gargiulo',similarity:null,aiPercent:null,refsTotal:0,citeTeMA:0,citeTeMA2226:0,citeJCR:0,citeJCR2y:0,notes:'Revisori individuati: Geoff Boeing (USC) e Massimo Palme (Trieste).'},
-];
+const DEF_ISSUES=[{"key":"01/2026","label":"TeMA 01/2026","type":"ordinario","year":2026,"num":1,"theme":"The city challenges and external agents","deadline":"2026-04-30","note":"Pubblicazione prevista 30/04/2026"},{"key":"SI-LWC","label":"SI Convegno Brescia (LWC)","type":"si","theme":"Living With Climate","deadline":"2026-03-30","note":"10 contributi completi. Editoriale e sommario pronti."},{"key":"SI-AI","label":"SI Intelligenza Artificiale","type":"si","theme":"Romano Fistola & Rosa Anna La Rocca","deadline":"","note":"Call messa a punto. 11 esperti individuati. Volume Springer."}];
+const DEF_ARTICLES=[{"id":"12621","title":"The Impact of Land Use and Land Cover (LULC) Changes on Coastal Dynamics Through Landscape Structure","authors":"Makbulenur Onur","affiliation":"Karadeniz Technical University, Turchia","nationality":"Turchia","intl":"si","abstract":"","length":0,"section":"Focus","status":"Revisione autore","step":"8","issue":"01/2026","articleNum":1,"deadline":"2026-03-25","editor":"Floriana Zucaro","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"Revisione richiesta da entrambi i revisori. Versione revisionata attesa per il 25 marzo."},{"id":"12656","title":"Spatial and temporal evolution of urban reserve available land resources in the karst region of North China from 1990 to 2020","authors":"Shujin Wang, Shanzhong Qi","affiliation":"Shandong Normal University, China","nationality":"Cina","intl":"si","abstract":"","length":0,"section":"Focus","status":"In referaggio","step":"6","issue":"01/2026","articleNum":2,"deadline":"2026-03-29","editor":"Floriana Zucaro","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"Arezoo Salamatnia (Tehran) ha richiesto modifiche. Zijuan Zhu (Beijing) scadenza 29 marzo."},{"id":"12394","title":"Assessing Urban Growth and Pollution through Nightlight Data: A Case Study in Thailand","authors":"Chaichana Kulworatit, Phuvis Kerdpramote, Saranya Saetang","affiliation":"KMITL Bangkok","nationality":"Tailandia","intl":"si","abstract":"","length":0,"section":"LUME","status":"Concluso","step":"8b","issue":"01/2026","articleNum":3,"deadline":"","editor":"","copyeditor":"","gatekeeper":"","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[]},{"id":"12458","title":"Exploring Governance Challenges in Coastal and Marine Tourism","authors":"Barbara Gasparini, Emanuel Giannotti, Vittore Negretto, Denis Maragno","affiliation":"IUAV","nationality":"Italia","intl":"no","abstract":"","length":0,"section":"LUME","status":"Concluso","step":"8b","issue":"01/2026","articleNum":4,"deadline":"","editor":"","copyeditor":"","gatekeeper":"","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[]},{"id":"12634","title":"Beyond the Map Decision Support Systems for Spatial and Mobility Planning","authors":"Mara Ladu, Ginevra Balletto, Tanja Congiu, Gianfranco Fancello, Ernesto Fontes Pupo","affiliation":"Università di Cagliari","nationality":"Italia","intl":"no","abstract":"","length":0,"section":"LUME","status":"Concluso","step":"8b","issue":"01/2026","articleNum":5,"deadline":"","editor":"","copyeditor":"","gatekeeper":"","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[]},{"id":"11322","title":"Biodiversity and Ecological Network: GeoAI for Modica Green city","authors":"Chiara Spadaro, Celestina Fazia","affiliation":"Università Kore","nationality":"Italia","intl":"no","abstract":"","length":0,"section":"LUME","status":"Concluso","step":"12","issue":"01/2026","articleNum":6,"deadline":"","editor":"Romano Fistola","copyeditor":"Valerio Martinelli","gatekeeper":"","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[]},{"id":"12696","title":"Impact of Renewable Energy Systems on Water Ecosystem Services","authors":"Maria Cristina Marino, Beniamino Murgante","affiliation":"Università della Basilicata","nationality":"Italia","intl":"no","abstract":"","length":0,"section":"LUME","status":"Revisione autore","step":"8","issue":"01/2026","articleNum":7,"deadline":"2026-03-21","editor":"Gerardo Carpentieri","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"Versione revisionata attesa per il 21 marzo."},{"id":"12803","title":"Examining the temporal and spatial change of current land cover types in Demre District using machine learning","authors":"Sibel Akten, Hüseyin Batuhan Dündar, Atila Gül","affiliation":"Suleyman University, Turchia","nationality":"Turchia","intl":"si","abstract":"","length":0,"section":"LUME","status":"In referaggio","step":"5","issue":"01/2026","articleNum":8,"deadline":"2026-03-09","editor":"Carmen Guida","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"Paulo Batista (Aveiro) ha accettato. In attesa di Ahmet Benliay."},{"id":"11344","title":"Evaluating Urban Fabric Transformations Using GeoAI","authors":"Alessandro Vitale","affiliation":"Università della Calabria","nationality":"Italia","intl":"no","abstract":"","length":0,"section":"LUME","status":"Concluso","step":"12","issue":"01/2026","articleNum":9,"deadline":"","editor":"Rosa Anna La Rocca","copyeditor":"Nunzia D'Amico","gatekeeper":"","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[]},{"id":"11551","title":"CITISENSE. Enhancing Urban Well-being through Smart Design, Data and AI","authors":"Pierfrancesco Celani, Daniel Enrique Sardo, Massimo Zupi, Margherita Tufarelli, Adriano Bisello","affiliation":"Università della Calabria; Università di Firenze; ITESO Guadalajara","nationality":"Italia / Messico","intl":"si","abstract":"","length":0,"section":"LUME","status":"Concluso","step":"12","issue":"01/2026","articleNum":10,"deadline":"","editor":"Gerardo Carpentieri","copyeditor":"Gerardo Carpentieri","gatekeeper":"","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[]},{"id":"11378","title":"AI as a Tool for Urban Regeneration Processes","authors":"Carlo Adornetto","affiliation":"Università della Calabria","nationality":"Italia","intl":"no","abstract":"","length":0,"section":"LUME","status":"Copyediting","step":"12","issue":"","articleNum":null,"deadline":"","editor":"Romano Fistola","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"SI Francini. In attesa di secondo referee."},{"id":"12735","title":"Planning for Sustainable Tourism in Protected Areas","authors":"Rachele Gatto, Francesco Scorza","affiliation":"Università della Basilicata","nationality":"Italia","intl":"no","abstract":"","length":0,"section":"—","status":"Revisione autore","step":"7","issue":"","articleNum":null,"deadline":"2026-03-16","editor":"Rosa Anna La Rocca","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"Autori invieranno versione revisionata entro il 16 marzo."},{"id":"12609","title":"Liberal and deliberative democracy in planning paradigms: reflections on upper-scale planning in Türkiye","authors":"Büşra Durmaz, Cihan Ercetin","affiliation":"KU Leuven, Belgio","nationality":"Belgio / Turchia","intl":"si","abstract":"","length":0,"section":"LUME","status":"In referaggio","step":"6","issue":"","articleNum":null,"deadline":"2026-02-28","editor":"Romano Fistola","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"Elisabetta Venco (Pavia) ha completato. Patrizia Battilani (Bologna) scadenza 28 feb."},{"id":"13110","title":"Identification and mapping of traffic congestion hotspots in urban areas","authors":"Frederic Laurent esse esse","affiliation":"University of Douala, Cameroon","nationality":"Camerun","intl":"si","abstract":"","length":0,"section":"Focus","status":"GateKeeper evaluation","step":"8b","issue":"","articleNum":null,"deadline":"","editor":"","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"L'articolo è stato rifiutato il 16 marzo 2026 percè l'autore non ha inviato la lista dei possibili revisori e non ha risposto alle mail","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[]},{"id":"13143","title":"Evaluating the efficacy of smart technologies in disseminating transportation systems information during earthquake scenarios","authors":"Izza Anwer, Irfan Yousuf","affiliation":"Susan University of Engineering and Technology, Lahore","nationality":"Pakistan","intl":"si","abstract":"","length":0,"section":"Focus","status":"Sottomesso","step":"2","issue":"","articleNum":null,"deadline":"","editor":"Peppe Mazzeo","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":""},{"id":"13165","title":"Methodological Approaches for Food Security Mapping","authors":"Silvia Zannin, Denis Maragno","affiliation":"IUAV","nationality":"Italia","intl":"no","abstract":"","length":0,"section":"LUME","status":"Sottomesso","step":"2","issue":"","articleNum":null,"deadline":"","editor":"Rosaria Battarra","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":""},{"id":"13052","title":"Climate Adaptation and Mitigation. A Multicriteria Decision-Support System for the Basilicata Region","authors":"Alfonso Annunziata, Francesco Scorza","affiliation":"Università della Basilicata","nationality":"Italia","intl":"no","abstract":"","length":0,"section":"Focus","status":"Sottomesso","step":"2","issue":"","articleNum":null,"deadline":"","editor":"Rosaria Battarra","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":""},{"id":"13329","title":"Tactical Urbanism in Rome. Toward an Alliance for Bottom-Up Interventions on Public Spaces","authors":"Francesca Paola Mondelli, Chiara Amato","affiliation":"Università Roma Tre","nationality":"Italia","intl":"no","abstract":"","length":0,"section":"—","status":"GateKeeper evaluation","step":"8","issue":"","articleNum":null,"deadline":"","editor":"Carmen Guida","copyeditor":"","gatekeeper":"","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"Please submit the revised version of the paper within one month of receiving this email. If the revised manuscript is not received within this timeframe, we will need to cancel the current submission. You will still be welcome to submit the updated version as a new submission at a later stage. in data 6 marzo 2023","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[]},{"id":"13275","title":"AI-Driven Public Transport Corridor Design for Sustainable Urban Mobility","authors":"Agus Mansur, Rizal Syarifuddin, Hari Purnomo, Winda Nur Cahyo","affiliation":"Universitas Islam, Indonesia","nationality":"Indonesia","intl":"si","abstract":"","length":0,"section":"—","status":"In referaggio","step":"5","issue":"","articleNum":null,"deadline":"2026-03-28","editor":"Gerardo Carpentieri","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"Ivan Gunawan (Surabaya) ha completato. Rangga Primadasa scadenza 28 marzo."},{"id":"13276","title":"Role of tourism in environment sustainability: evidence from most carbon emitting countries","authors":"Rafaqet Ali, Khuda Bakhsh, Muhammad Asim Yasin","affiliation":"Comsats University Islamabad","nationality":"Pakistan","intl":"si","abstract":"","length":0,"section":"—","status":"Sottomesso","step":"2","issue":"","articleNum":null,"deadline":"","editor":"Rosa Anna La Rocca","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":""},{"id":"13357","title":"Geospatial analysis on metro-induced land use change for inclusive transit-oriented development in Chennai","authors":"Kaviya Asokan, Sudhan Srinivas","affiliation":"Hindustan Institute of Technology and Science, India","nationality":"India","intl":"si","abstract":"","length":0,"section":"—","status":"GateKeeper evaluation","step":"6","issue":"","articleNum":null,"deadline":"","editor":"Carmen Guida","copyeditor":"","gatekeeper":"","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[{"nome":"Caterina Pietra","affiliazione":"University of pavia","dataConsegna":"2026-03-13","accettazione":"accettato","dataProroga":"","giudizio":""},{"nome":"Geoff Boeing","affiliazione":"","dataConsegna":"2026-03-13","accettazione":"in attesa","dataProroga":"","giudizio":""},{"nome":"Massimo Palme","affiliazione":"","dataConsegna":"2026-03-13","accettazione":"in attesa","dataProroga":"","giudizio":""}]},{"id":"13371","title":"Spatial analysis and urban development through the integration of ChatGPT-like large language models and QGIS","authors":"Valerio della Sala","affiliation":"Autonomous University of Barcelona","nationality":"Spagna","intl":"si","abstract":"The rapid convergence of artificial intelligence (AI), geographic information systems (GIS) and urban planning is reshaping how cities are analysed, designed and governed. Advances in large language models (LLMs) such as ChatGPT, together with the maturity of open‑source GIS platforms like QGIS, open new possibilities for natural language interaction with spatial data, automated geoprocessing, and human–AI co-production of planning knowledge. This article examines the conceptual, technical and governance implications of integrating ChatGPT-like models with QGIS for spatial analysis and urban development.\nDrawing on a systematic review of literature on generative AI in urban planning, AI-driven design, LLM-powered spatial intelligence, and planning support systems, the paper outlines the state of the art in AI-based planning support and GeoAI. It then proposes a framework for coupling LLM agents with QGIS via plugins and natural language interfaces, highlighting workflows for data interpretation, modelling, scenario analysis, and decision support.\nFour case study groups are discussed: LLM-enabled GIS processing; ChatGPT-assisted planning support systems; urban digital twins in cities such as Barcelona, Sofia, Dresden, Riyadh and Sedra; and AI-driven land‑use modelling. The article argues that coupling ChatGPT-like models and QGIS can lower cognitive barriers, support participatory planning, and enhance inclusive, transparent, and accountable urban development.","length":57892,"section":"Focus","status":"Sottomesso","step":"1","issue":"","articleNum":null,"deadline":"","editor":"","copyeditor":"","gatekeeper":"","similarity":1,"aiPercent":89,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"","comunicazioneInviata":true,"dataComunicazione":"2026-03-10","rispostaAutori":"","revisori":[]},{"id":"13419","title":"ROLE OF TOURISM IN ENVIRONMENT SUSTAINABILITY: EVIDENCE FROM MOST CARBON EMITTING COUNTRIES","authors":"Rafaqet Ali, Khuda Bakhsh, Muhammad Asim Yasin","affiliation":"COMSATS University Islamabad","nationality":"Pakistan","intl":"si","abstract":"Tourism has expanded during recent decades all over the world due to growth in global economy, emergence of middle class along with expansion in cross border modern transport facilities. It is evident from the literature that the impact of tourism on carbon emission is inconclusive. This study examines the impact of tourism on carbon emission in top ten carbon emitting countries. For this purpose, annual date for the period 1995-2019 is used and latest panel econometric techniques are applied. All the variables are found non-stationary at level, however, integrated at order one I(1) and cointegration prevails among the variables. The results of panel FMOLS and DOLS confirms that tourism is beneficial for environment quality in the long run. However, no short run causality prevails between tourism and carbon emission. These findings imply that incentives for development tourism industry need to be given for the sake of environment quality.","length":45017,"section":"Focus","status":"Sottomesso","step":"1","issue":"","articleNum":null,"deadline":"","editor":"","copyeditor":"","gatekeeper":"","similarity":16,"aiPercent":0,"refsTotal":46,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":8,"citeJCR2y":0,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[]},{"id":"13416","title":"Detection of Floating Debris Zones in the Chao Phraya River in Thailand Using Sentinel-2 Imagery. Floating Debris Detection in the Chao Phraya River","authors":"Chaichana Kulworatit, Niphat Craypo","affiliation":"King Mongkut's Institute of Technology Ladkrabang","nationality":"Thailandia","intl":"si","abstract":"Floating debris in urban rivers is an increasing environmental concern due to its impacts on water quality, aquatic ecosystems, and river management. This study aimed to detect suspected floating debris accumulation zones in a section of the Chao Phraya River, Bangkok, Thailand, using Sentinel-2 imagery and Google Earth Engine (GEE). A rule-based workflow was developed, including cloud and shadow masking, water surface extraction using the Normalized Difference Water Index (NDWI), and debris detection using the Floating Debris Index (FDI) with additional spectral thresholds for refinement. Based on 34 Sentinel-2 images, the final result identified 93 suspected debris patches covering a total area of 85,029.13 m² (8.50 ha). The detected patches appeared as discrete accumulation zones rather than continuous coverage. Although the method does not directly confirm plastic waste, the results demonstrate that the proposed approach can serve as a practical first-stage screening tool for river monitoring, hotspot identification, and future environmental management.","length":49366,"section":"Focus","status":"Sottomesso","step":"1","issue":"","articleNum":null,"deadline":"","editor":"","copyeditor":"","gatekeeper":"","similarity":8,"aiPercent":77,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[]}];
 
 const STEPS = {
   '1':'Ricevimento della richiesta di pubblicazione',
@@ -495,7 +467,38 @@ function saveCiteScores() {
 }
 
 function loadData() {
-  // Carica localStorage come fallback immediato
+  // Show loading indicator immediately
+  setSaving(true);
+  document.getElementById('saveLbl').textContent = 'Caricamento da Google Sheets...';
+
+  // Try Google Sheets first — it is the single source of truth
+  fetch(GS_URL)
+    .then(function(r){ return r.text(); })
+    .then(function(text) {
+      try {
+        var data = JSON.parse(text);
+        if (data.issues && data.issues.length && data.articles && data.articles.length) {
+          // Google Sheets has data — use it and update localStorage
+          issues   = data.issues;
+          articles = data.articles;
+          localStorage.setItem(LS_KEY, JSON.stringify({issues:issues, articles:articles}));
+          setSaving(false);
+          document.getElementById('saveLbl').textContent = 'Dati sincronizzati';
+          rebuildIssFilters();
+          refresh();
+          return;
+        }
+      } catch(e) {}
+      // Google Sheets returned empty or invalid — fall back to localStorage then defaults
+      loadLocalData();
+    })
+    .catch(function() {
+      // Network error — fall back to localStorage then defaults
+      loadLocalData();
+    });
+}
+
+function loadLocalData() {
   try {
     var d = JSON.parse(localStorage.getItem(LS_KEY) || '{}');
     issues   = (d.issues   && d.issues.length)   ? d.issues   : JSON.parse(JSON.stringify(DEF_ISSUES));
@@ -504,29 +507,10 @@ function loadData() {
     issues   = JSON.parse(JSON.stringify(DEF_ISSUES));
     articles = JSON.parse(JSON.stringify(DEF_ARTICLES));
   }
-  // Carica da Google Sheets
-  setSaving(true);
-  document.getElementById('saveLbl').textContent = 'Caricamento...';
-  fetch(GS_URL)
-    .then(function(r){ return r.text(); })
-    .then(function(text) {
-      try {
-        var data = JSON.parse(text);
-        if (data.issues   && data.issues.length)   issues   = data.issues;
-        if (data.articles && data.articles.length) articles = data.articles;
-        localStorage.setItem(LS_KEY, JSON.stringify({issues:issues, articles:articles}));
-      } catch(e) {}
-      setSaving(false);
-      document.getElementById('saveLbl').textContent = 'Dati sincronizzati';
-      rebuildIssFilters();
-      refresh();
-    })
-    .catch(function() {
-      setSaving(false);
-      document.getElementById('saveLbl').textContent = 'Dati locali (rete non disponibile)';
-      rebuildIssFilters();
-      refresh();
-    });
+  setSaving(false);
+  document.getElementById('saveLbl').textContent = 'Dati locali (Google Sheets non raggiungibile)';
+  rebuildIssFilters();
+  refresh();
 }
 function setSaving(s) {
   var dot = document.getElementById('saveDot'), lbl = document.getElementById('saveLbl');
@@ -739,16 +723,37 @@ function gkCard(a) {
   } else if (bothLow) {
     card = card.replace('<div class="card">', '<div class="card" style="background:#f0fff4;border-color:#9ae6b4;">');
   }
+  // Build a single unified metrics row (sim + AI + citations all together)
+  var metricsRow = '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">' +
+    (simVal ? '<span class="badge mm '+simCls(a.similarity)+'">Sim. '+a.similarity+'%</span>' : '<span class="mm">Sim. —</span>') +
+    (aiVal  ? '<span class="badge mm '+simCls(a.aiPercent)+'">AI '+a.aiPercent+'%</span>'     : '<span class="mm">AI —</span>') +
+    '<span class="mm">Refs: '+(a.refsTotal||0)+'</span>' +
+    '<span class="mm">TeMA: '+(a.citeTeMA||0)+'</span>' +
+    '<span class="mm">TeMA 22-26: '+(a.citeTeMA2226||0)+'</span>' +
+    '<span class="mm">JCR: '+(a.citeJCR||0)+'</span>' +
+    '<span class="mm">JCR 2y: '+(a.citeJCR2y||0)+'</span>' +
+    '</div>' +
+    ((simHigh || aiHigh) && a.comunicazioneInviata && a.dataComunicazione ?
+      '<div style="margin-top:5px;font-size:11px;color:var(--red);font-family:sans-serif">'
+      + '&#9993; Comunicazione inviata il '
+      + new Date(a.dataComunicazione).toLocaleDateString('it-IT')
+      + (a.rispostaAutori && a.rispostaAutori !== '' ? ' &middot; Risposta: ' + esc(a.rispostaAutori) : '')
+      + '</div>' : '') +
+    ((simHigh || aiHigh) && a.comunicazioneInviata && !a.dataComunicazione ?
+      '<div style="margin-top:5px;font-size:11px;color:var(--red);font-family:sans-serif">'
+      + '&#9993; Comunicazione inviata</div>' : '');
+  // Remove any existing metaHtml row (sim/AI badges already generated by artCard)
+  // and replace with our unified row
+  var existingMetaRe = /<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">(<span class="badge mm [^<]*>[^<]*<\/span>|<span class="mm">[^<]*<\/span>)+<\/div>/;
+  if (existingMetaRe.test(card)) {
+    card = card.replace(existingMetaRe, metricsRow);
+  } else {
+    // No existing row — insert before footer
+    var footerMarker = '<div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;padding-top:8px;border-top';
+    var pos = card.lastIndexOf(footerMarker);
+    if (pos >= 0) card = card.slice(0, pos) + metricsRow + card.slice(pos);
+  }
   return card;
-}
-
-function toggleAccordion(id) {
-  var el = document.getElementById(id);
-  var icon = document.getElementById(id+'-icon');
-  if (!el) return;
-  var open = el.style.display !== 'none';
-  el.style.display = open ? 'none' : 'block';
-  if (icon) icon.innerHTML = open ? '&#9658;' : '&#9660;';
 }
 
 function renderGk() {
@@ -1401,6 +1406,26 @@ function renderRifTur() {
     '<div style="text-align:center;padding:3rem;color:var(--tx2);font-family:sans-serif">Nessun articolo.</div>';
 }
 
+function updateTabCounts() {
+  var gkCount = articles.filter(function(a) {
+    return (a.step === '1' || a.status === 'GateKeeper evaluation') && (!a.editor || a.editor === '');
+  }).length;
+  var listaCount = articles.filter(function(a) {
+    var sim = parseFloat(a.similarity), ai = parseFloat(a.aiPercent);
+    if (a.status === 'Pubblicato' || a.step === '18') return false;
+    if (a.step === '8b' || a.step === '7b') return false;
+    if ((a.step === '1' || a.status === 'GateKeeper evaluation') && (!a.editor || a.editor === '')) return false;
+    if (a.rispostaAutori && a.rispostaAutori !== '' && (sim > 30 || ai > 30)) return false;
+    if (!a.editor || a.editor === '') return false;
+    return true;
+  }).length;
+  document.querySelectorAll('.tab').forEach(function(btn) {
+    var tab = btn.dataset.tab;
+    if (tab === 'gatekeeper') btn.textContent = 'GateKeeper evaluation (' + gkCount + ')';
+    if (tab === 'lista') btn.textContent = 'Articoli in lavorazione (' + listaCount + ')';
+  });
+}
+
 function switchTab(name) {
   document.querySelectorAll('.tab').forEach(function(t){ t.classList.toggle('active',t.dataset.tab===name); });
   document.querySelectorAll('.sec').forEach(function(s){ s.classList.toggle('active',s.id==='sec-'+name); });
@@ -1414,6 +1439,7 @@ function switchTab(name) {
 }
 function refresh() {
   renderStats();
+  updateTabCounts();
   var active=document.querySelector('.tab.active');
   if (active) switchTab(active.dataset.tab);
 }
@@ -1431,7 +1457,7 @@ function initFilters() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-  loadCiteScores(); initFilters(); renderStats(); renderGk(); loadData();
+  loadCiteScores(); initFilters(); renderStats(); updateTabCounts(); renderGk(); loadData();
   document.getElementById('vDate').value=new Date().toISOString().slice(0,10);
 
   document.querySelectorAll('.tab').forEach(function(btn){
