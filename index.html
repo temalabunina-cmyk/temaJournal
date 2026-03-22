@@ -1048,7 +1048,14 @@ function renderRevList() {
           '<input type="date" value="'+esc(r.dataProroga||'')+'" oninput="currentRevisori['+i+'].dataProroga=this.value"></div>' +
       '</div>' +
       '<div class="fr" style="margin-top:4px"><label>Giudizio</label>' +
-        '<textarea rows="3" oninput="currentRevisori['+i+'].giudizio=this.value">'+esc(r.giudizio||'')+'</textarea></div>' +
+        '<select onchange="currentRevisori['+i+'].giudizio=this.value">' +
+          '<option value=""'+(r.giudizio===''||!r.giudizio?' selected':'')+'>&#8212;</option>' +
+          '<option value="Accept submission"'+(r.giudizio==='Accept submission'?' selected':'')+'>Accept submission</option>' +
+          '<option value="Revisions required"'+(r.giudizio==='Revisions required'?' selected':'')+'>Revisions required</option>' +
+          '<option value="Resubmit for Review"'+(r.giudizio==='Resubmit for Review'?' selected':'')+'>Resubmit for Review</option>' +
+          '<option value="Resubmit Elsewhere"'+(r.giudizio==='Resubmit Elsewhere'?' selected':'')+'>Resubmit Elsewhere</option>' +
+          '<option value="Decline submission"'+(r.giudizio==='Decline submission'?' selected':'')+'>Decline submission</option>' +
+        '</select></div>' +
     '</div>';
   });
   c.innerHTML = h;
