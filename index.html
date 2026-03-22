@@ -32,6 +32,8 @@ body{font-family:Georgia,serif;background:var(--bg);color:var(--tx);font-size:14
 .stats-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:1.5rem}
 .stat{background:var(--sur);border:1px solid var(--brd);border-radius:var(--rl);padding:1rem;text-align:center;box-shadow:var(--sh)}
 .stat-edit{outline:none;font-size:22px;font-weight:700;width:80px;text-align:center;border:none;border-bottom:1.5px dashed var(--brd2);background:transparent;color:var(--blue);font-family:Georgia,serif;cursor:text}
+.field-locked{pointer-events:none;opacity:.55;cursor:not-allowed}
+.field-locked select{background:var(--sur2)}
 .stat-lbl{font-size:11px;color:var(--tx2);margin-bottom:4px;line-height:1.3;font-family:sans-serif}
 .stat-val{font-size:22px;font-weight:700}
 .stat-sub{font-size:11px;color:var(--tx3);margin-top:2px;font-family:sans-serif}
@@ -237,9 +239,9 @@ body{font-family:Georgia,serif;background:var(--bg);color:var(--tx);font-size:14
 <div class="modal-bg" id="artModal">
 <div class="modal">
   <h3 id="artModalTitle">Nuovo articolo</h3>
-  <div class="fsl first">Identificazione</div>
-  <div class="g4">
-    <div class="fr"><label>ID Manoscritto *</label><input id="fId"></div>
+  <div class="fsl first" style="display:flex;align-items:center;justify-content:space-between">Identificazione</div>
+  <div class="g2">
+    <div class="fr"><label>ID Manoscritto *</label><div style="display:flex;align-items:center;gap:6px"><input id="fId" style="flex:1" disabled><button type="button" class="btn" id="btnUnlockId" style="font-size:11px;padding:2px 8px;flex-shrink:0">&#128274;</button></div></div>
     <div class="fr">
       <label>Step editoriale <span class="stt"><span style="font-size:10px;background:var(--purple-bg);color:var(--purple-tx);padding:1px 6px;border-radius:20px;cursor:help;font-family:sans-serif">?</span><div class="spop" id="stepHint"></div></span></label>
       <select id="fStep">
@@ -266,8 +268,6 @@ body{font-family:Georgia,serif;background:var(--bg);color:var(--tx);font-size:14
         <option value="18">St 18 &middot; Pubblicazione</option>
       </select>
     </div>
-    <div class="fr"><label>Fascicolo</label><select id="fIssArt"></select></div>
-    <div class="fr"><label>N&deg; nel fascicolo</label><input id="fArtNum" type="number" min="1"></div>
   </div>
   <div class="fr"><label>Titolo *</label><textarea id="fTitle" rows="2"></textarea></div>
   <div class="fsl">Autori</div>
@@ -279,11 +279,9 @@ body{font-family:Georgia,serif;background:var(--bg);color:var(--tx);font-size:14
   </div>
   <div class="fsl">Contenuto</div>
   <div class="fr"><label>Abstract</label><textarea id="fAbstract" rows="3"></textarea></div>
-  <div class="g2">
-    <div class="fr"><label>Lunghezza (parole)</label><input id="fLen" type="number"></div>
-    <div class="fr"><label>Sezione</label><select id="fSecArt"><option>Focus</option><option>LUME</option><option>SI</option><option>—</option></select></div>
-  </div>
-  <div class="fsl">Antiplagio e AI</div>
+  <div class="fr"><label>Lunghezza (parole)</label><input id="fLen" type="number"></div>
+  <div class="fsl" style="display:flex;align-items:center;justify-content:space-between">Antiplagio e AI<button type="button" class="btn" id="btnUnlockAnti" style="font-size:11px;padding:2px 8px">&#128274; Sblocca</button></div>
+  <div class="field-locked" id="antiGroup">
   <div class="g2">
     <div class="fr"><label>% Similarit&agrave; (Turnitin)</label><input id="fSim" type="number" min="0" max="100" step="0.1" oninput="checkAntiplagio()"></div>
     <div class="fr"><label>% Contenuto AI</label><input id="fAi" type="number" min="0" max="100" step="0.1" oninput="checkAntiplagio()"></div>
@@ -309,10 +307,11 @@ body{font-family:Georgia,serif;background:var(--bg);color:var(--tx);font-size:14
       </div>
     </div>
   </div>
-  <div class="fsl">Processo editoriale</div>
+  </div>
+  <div class="fsl" style="display:flex;align-items:center;justify-content:space-between">Processo editoriale<button type="button" class="btn" id="btnUnlockProc" style="font-size:11px;padding:2px 8px">&#128274; Sblocca</button></div>
   <input type="hidden" id="fStatus" value="Sottomesso">
   <input type="hidden" id="fDead" value="">
-  <div class="g3">
+  <div class="g3 field-locked" id="procGroup">
     <div class="fr" id="gkRow"><label>GateKeeper</label>
       <select id="fGk"><option value="">— Seleziona —</option><option>Lilli Gargiulo</option></select>
     </div>
@@ -348,6 +347,14 @@ body{font-family:Georgia,serif;background:var(--bg);color:var(--tx);font-size:14
   <button class="btn" id="btnAddRev" style="margin-bottom:10px;font-size:12px">+ Aggiungi revisore</button>
   <div class="fsl">Note</div>
   <div class="fr"><textarea id="fNotes" rows="3"></textarea></div>
+  <div class="fsl" style="display:flex;align-items:center;justify-content:space-between">Pubblicazione<button type="button" class="btn" id="btnUnlockPub" style="font-size:11px;padding:2px 8px">&#128274; Sblocca</button></div>
+  <div class="field-locked" id="pubGroup">
+  <div class="g3">
+    <div class="fr"><label>Fascicolo</label><select id="fIssArt"></select></div>
+    <div class="fr"><label>Sezione</label><select id="fSecArt"><option>Focus</option><option>LUME</option><option>SI</option><option>—</option></select></div>
+    <div class="fr"><label>N&deg; nel fascicolo</label><input id="fArtNum" type="number" min="1"></div>
+  </div>
+  </div>
   <div class="mfoot">
     <button class="btn btn-d" id="btnDel" style="margin-right:auto;display:none">Elimina</button>
     <button class="btn" id="btnArtCancel">Annulla</button>
@@ -1100,6 +1107,50 @@ function renderRevList() {
 }
 function removeRev(i) { currentRevisori.splice(i,1); renderRevList(); }
 
+function makeUnlocker(groupId, btnId) {
+  return function() {
+    requirePwd(function() {
+      var grp = document.getElementById(groupId);
+      var btn = document.getElementById(btnId);
+      if (grp) grp.classList.remove('field-locked');
+      if (btn) { btn.textContent = '\u{1F513} Sbloccato'; btn.disabled = true; }
+    });
+  };
+}
+
+function lockAllGroups() {
+  // Lock fId individually
+  var fId = document.getElementById('fId');
+  var btnId = document.getElementById('btnUnlockId');
+  if (fId) fId.disabled = true;
+  if (btnId) { btnId.textContent = '\u{1F512}'; btnId.disabled = false; }
+  // Lock groups
+  ['antiGroup','pubGroup','procGroup'].forEach(function(id) {
+    var grp = document.getElementById(id);
+    if (grp) grp.classList.add('field-locked');
+  });
+  ['btnUnlockAnti','btnUnlockPub','btnUnlockProc'].forEach(function(id) {
+    var btn = document.getElementById(id);
+    if (btn) { btn.textContent = '\u{1F512} Sblocca'; btn.disabled = false; }
+  });
+}
+
+function unlockProcGroup() {
+  requirePwd(function() {
+    var grp = document.getElementById('procGroup');
+    var btn = document.getElementById('btnUnlockProc');
+    if (grp) grp.classList.remove('field-locked');
+    if (btn) { btn.textContent = '\u{1F513} Sbloccato'; btn.disabled = true; }
+  });
+}
+
+function lockProcGroup() {
+  var grp = document.getElementById('procGroup');
+  var btn = document.getElementById('btnUnlockProc');
+  if (grp) grp.classList.add('field-locked');
+  if (btn) { btn.textContent = '\u{1F512} Sblocca'; btn.disabled = false; }
+}
+
 function checkAntiplagio() {
   var sim = parseFloat(document.getElementById('fSim').value) || 0;
   var ai  = parseFloat(document.getElementById('fAi').value)  || 0;
@@ -1125,6 +1176,7 @@ function openNewArt() {
   document.getElementById('stepHint').textContent='';
   currentRevisori=[]; renderRevList();
   buildIssOpts('fIssArt','');
+  lockAllGroups();
   document.getElementById('artModal').classList.add('open');
 }
 function openEditArt(id) {
@@ -1165,6 +1217,7 @@ function openEditArt(id) {
   document.getElementById('stepHint').textContent=a.step&&STEPS[a.step]?STEPS[a.step]:'';
   currentRevisori=JSON.parse(JSON.stringify(a.revisori||[])); renderRevList();
   buildIssOpts('fIssArt',a.issue||'');
+  lockAllGroups();
   document.getElementById('artModal').classList.add('open');
 }
 function saveArt() {
@@ -1195,6 +1248,7 @@ function saveArt() {
     citeJCR:parseInt(document.getElementById('fCJCR').value)||0,
     citeJCR2y:parseInt(document.getElementById('fCJCR2y').value)||0,
     notes:document.getElementById('fNotes').value.trim(),
+
     comunicazioneInviata:document.getElementById('fComunicazioneInviata').checked,
     dataComunicazione:document.getElementById('fDataComunicazione').value,
     rispostaAutori:document.getElementById('fRispostaAutori').value,
@@ -1393,6 +1447,16 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('iNumRow').style.display=this.value==='ordinario'?'block':'none';
   });
   document.getElementById('btnArtSave').addEventListener('click',saveArt);
+  document.getElementById('btnUnlockProc').addEventListener('click',unlockProcGroup);
+  document.getElementById('btnUnlockId').addEventListener('click',function(){
+    requirePwd(function(){
+      var f=document.getElementById('fId'), b=document.getElementById('btnUnlockId');
+      if(f){f.disabled=false; f.focus();}
+      if(b){b.textContent='\u{1F513}'; b.disabled=true;}
+    });
+  });
+  document.getElementById('btnUnlockAnti').addEventListener('click',makeUnlocker('antiGroup','btnUnlockAnti'));
+  document.getElementById('btnUnlockPub').addEventListener('click',makeUnlocker('pubGroup','btnUnlockPub'));
   document.getElementById('btnDel').addEventListener('click',deleteArt);
   document.getElementById('btnArtCancel').addEventListener('click',function(){ document.getElementById('artModal').classList.remove('open'); });
   document.getElementById('btnAddRev').addEventListener('click',function(){ currentRevisori.push({nome:'',affiliazione:'',dataConsegna:'',accettazione:'',dataProroga:'',giudizio:''}); renderRevList(); });
