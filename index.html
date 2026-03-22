@@ -893,16 +893,21 @@ function renderNumeri() {
 
   function issCard(iss) {
     var artRow = function(a) {
-      return '<div class="arow">' +
-        '<div class="anum">'+(a.articleNum||'&#8212;')+'</div>' +
-        '<div><div style="font-size:12px;font-weight:600;line-height:1.4">'+(a.title.length>80?a.title.slice(0,80)+'...':a.title)+'</div>' +
-        '<div style="font-size:11px;color:var(--tx2);margin-top:2px;font-family:sans-serif">'+esc(a.authors)+(a.affiliation?' &middot; '+esc(a.affiliation):'')+'</div>' +
-        '<div style="font-size:11px;color:var(--tx3);font-family:sans-serif;margin-top:2px">'+stepFull(a.step)+(a.editor?' &middot; '+esc(a.editor):'')+'</div>' +
+      return '<div class="arow" style="align-items:start">' +
+        '<div class="anum" style="padding-top:2px">'+(a.articleNum||'&#8212;')+'</div>' +
+        '<div>' +
+          '<div style="display:flex;align-items:baseline;gap:6px;margin-bottom:2px">' +
+            '<span style="font-size:10px;font-weight:700;color:var(--tx3);font-family:monospace;flex-shrink:0">#'+esc(a.id)+'</span>' +
+            '<span style="font-size:12px;font-weight:600;line-height:1.4">'+(a.title.length>80?a.title.slice(0,80)+'...':a.title)+'</span>' +
+          '</div>' +
+          '<div style="font-size:11px;color:var(--tx2);margin-top:2px;font-family:sans-serif">'+esc(a.authors)+(a.affiliation?' &middot; '+esc(a.affiliation):'')+'</div>' +
+          (a.editor ? '<div style="font-size:11px;color:var(--blue-tx);font-weight:600;font-family:sans-serif;margin-top:2px">'+esc(a.editor)+'</div>' : '') +
         '</div>' +
-        '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px">' +
-        (a.step ? '<span style="font-size:11px;color:var(--purple-tx);font-weight:600;font-family:sans-serif;white-space:nowrap">'+stepFull(a.step)+'</span>' : '') +
-        (a.intl==='si'?'<span class="badge b-teal" style="white-space:nowrap">Intl.</span>':'') +
-        '</div></div>';
+        '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;padding-top:2px">' +
+          (a.step ? '<span style="font-size:11px;color:var(--purple-tx);font-weight:600;font-family:sans-serif;white-space:nowrap;text-align:right">'+stepFull(a.step)+'</span>' : '') +
+          (a.intl==='si'?'<span class="badge b-teal" style="white-space:nowrap">Intl.</span>':'') +
+        '</div>' +
+      '</div>';
     };
     var ia = articles.filter(function(a){ return a.issue===iss.key; });
     var focus = ia.filter(function(a){return a.section==='Focus';}).sort(function(a,b){return (a.articleNum||999)-(b.articleNum||999);});
