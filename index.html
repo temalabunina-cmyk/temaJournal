@@ -2,12 +2,10 @@
 <html lang="it">
 <head>
 <meta charset="utf-8">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap" rel="stylesheet">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>TeMA Journal — Gestione Editoriale</title>
 <style>
+
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
   --bg:#f8f7f4;--sur:#fff;--sur2:#f2f0ec;--brd:#e0ddd8;--brd2:#ccc9c2;
@@ -106,363 +104,53 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
 .rev-card{background:var(--sur2);border:1px solid var(--brd);border-radius:var(--r);padding:10px 12px;margin-bottom:8px}
 @media(max-width:900px){.stats-grid{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:600px){.stats-grid{grid-template-columns:repeat(2,1fr)};.g3,.g4{grid-template-columns:1fr 1fr}}
+
+#loginScreen{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center}
+#loginBox{background:var(--sur);border:1px solid var(--brd);border-radius:var(--rl);padding:2.5rem 2rem;width:min(380px,90vw);box-shadow:0 8px 40px rgba(0,0,0,.12);text-align:center}
+#loginErr{color:var(--red);font-size:12px;margin-top:8px;font-family:sans-serif;display:none}
 </style>
 </head>
 <body>
-<script>if(sessionStorage.getItem("tema_auth")!=="1"){document.documentElement.style.overflow="hidden";}</script>
+
 <div id="loginScreen">
   <div id="loginBox">
-    <div class="brand">TeMA Journal</div>
-    <div class="sub">Gestione editoriale &mdash; Accesso riservato</div>
-    <div class="fr" style="text-align:left;margin-bottom:10px">
+    <div style="font-size:22px;font-weight:700;margin-bottom:.25rem">TeMA Journal</div>
+    <div style="font-size:12px;color:var(--tx2);font-family:sans-serif;margin-bottom:1.75rem">Gestione editoriale &mdash; Accesso riservato</div>
+    <div style="text-align:left">
       <label style="font-size:12px;color:var(--tx2);font-family:sans-serif;display:block;margin-bottom:3px">Username</label>
-      <input type="text" id="loginUser" style="width:100%;padding:8px 10px;border:1px solid var(--brd);border-radius:var(--r);font-size:13px;font-family:sans-serif" placeholder="Username" autocomplete="username">
-    </div>
-    <div class="fr" style="text-align:left;margin-bottom:16px">
+      <input type="text" id="loginUser" style="width:100%;padding:8px 10px;border:1px solid var(--brd);border-radius:var(--r);font-size:13px;font-family:sans-serif;box-sizing:border-box;margin-bottom:12px" placeholder="Username" autocomplete="username">
       <label style="font-size:12px;color:var(--tx2);font-family:sans-serif;display:block;margin-bottom:3px">Password</label>
-      <input type="password" id="loginPass" style="width:100%;padding:8px 10px;border:1px solid var(--brd);border-radius:var(--r);font-size:13px;font-family:sans-serif" placeholder="Password" autocomplete="current-password">
+      <input type="password" id="loginPass" style="width:100%;padding:8px 10px;border:1px solid var(--brd);border-radius:var(--r);font-size:13px;font-family:sans-serif;box-sizing:border-box;margin-bottom:16px" placeholder="Password" autocomplete="current-password">
     </div>
     <button onclick="doLogin()" style="width:100%;padding:10px;background:var(--tx);color:var(--sur);border:none;border-radius:var(--r);font-size:13px;font-weight:600;cursor:pointer;font-family:sans-serif">Accedi</button>
     <div id="loginErr">Username o password errati.</div>
   </div>
 </div>
-<div class="app" id="mainApp" style="display:none;visibility:hidden">
-<div class="topbar">
-  <div>
-      <div class="brand-name">TeMA Journal</div>
-      <div class="brand-sub">Gestione editoriale</div>
-    </div>
-  </div>
-  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-    <span class="save-dot" id="saveDot"></span>
-    <span class="save-lbl" id="saveLbl">Dati salvati</span>
-    <button class="btn btn-p" id="btnNuovo">+ Nuovo articolo</button>
-  </div>
-</div>
-<input type="file" id="importFile" accept=".json" style="display:none">
-<div class="stats-grid" id="statsGrid"></div>
-<div class="tabs">
-  <button class="tab active" data-tab="gatekeeper">GateKeeper evaluation</button>
-  <button class="tab" data-tab="lista">Articoli in lavorazione</button>
-  <button class="tab" data-tab="editori">Assegnazioni</button>
-  <button class="tab" data-tab="numeri">Fascicoli</button>
-  <button class="tab" data-tab="verbale">Verbale PDF</button>
-  <button class="tab" data-tab="pubblicati">Articoli pubblicati</button>
-  <button class="tab" data-tab="rifiutati">Rifiutati</button>
-  <button class="tab" data-tab="tutti">Tutti gli articoli</button>
-</div>
-<div class="sec" id="sec-gatekeeper">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
-    <div style="font-size:16px;font-weight:700">GateKeeper evaluation</div>
-    <span id="gkCount" style="font-size:20px;color:var(--tx2);font-family:sans-serif"></span>
-  </div>
-  <div class="toolbar"><input class="srch" type="text" id="srchGk" placeholder="Cerca..."></div>
-  <div id="gkEl"></div>
-</div>
-<div class="sec" id="sec-lista">
-  <div class="toolbar">
-    <input class="srch" type="text" id="srchLista" placeholder="Cerca titolo, autore, ID...">
-    <select id="fEd"></select>
-    <select id="fSt"><option value="">Tutti gli step</option></select>
-    <select id="fSec"><option value="">Tutte le sezioni</option><option>Focus</option><option>LUME</option><option>SI</option></select>
-    <select id="fIntl"><option value="">Tutti</option><option value="si">Internazionali</option><option value="no">Nazionali</option></select>
-    <select id="fIss"></select>
-  </div>
-  <div id="listaEl"></div>
-</div>
-<div class="sec" id="sec-editori"><div id="teamEl"></div></div>
-<div class="sec" id="sec-numeri">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
-    <div style="font-size:16px;font-weight:700">Fascicoli</div>
-    <button class="btn" id="btnNuovoFasc">+ Nuovo fascicolo</button>
-  </div>
-  <div id="numeriEl"></div>
-</div>
-<div class="sec" id="sec-verbale">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:10px">
-    <div style="font-size:16px;font-weight:700">Generatore verbale</div>
-    <div style="display:flex;gap:8px">
-      <button class="btn" id="btnRefreshVerbale">Aggiorna anteprima</button>
-      <button class="btn btn-p" id="btnPrintVerbale">Stampa / Salva PDF</button>
-    </div>
-  </div>
-  <div class="vform">
-    <div class="fsl first">Intestazione</div>
-    <div class="g3">
-      <div class="fr"><label>Numero verbale</label><input id="vNum" placeholder="es. 8/26"></div>
-      <div class="fr"><label>Data riunione</label><input id="vDate" type="date"></div>
-      <div class="fr"><label>Fascicolo di riferimento</label><select id="vIss"></select></div>
-    </div>
-    <div class="fr"><label>Presenti</label><input id="vPresenti"></div>
-    <div class="fr"><label>Temi affrontati</label><textarea id="vIntro" rows="3"></textarea></div>
-    <div class="fr"><label>Ordine del giorno prossima riunione</label><textarea id="vOutro" rows="2"></textarea></div>
-  </div>
-  <div id="verbalePreview"></div>
-</div>
-<div class="sec" id="sec-pubblicati">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
-    <div style="font-size:16px;font-weight:700">Articoli pubblicati</div>
-    <span id="pubCount" style="font-size:20px;color:var(--tx2);font-family:sans-serif"></span>
-  </div>
-  <div class="toolbar">
-    <input class="srch" type="text" id="srchPub" placeholder="Cerca...">
-    <select id="fIssPub"></select>
-  </div>
-  <div id="pubEl"></div>
-</div>
-<div class="sec" id="sec-rifiutati">
-  <div style="font-size:16px;font-weight:700;margin-bottom:1rem">Rifiutati</div>
 
-  <div style="border:1px solid var(--brd);border-radius:var(--r);margin-bottom:8px;overflow:hidden">
-    <div onclick="toggleAccordion('acc-ref')" style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;cursor:pointer;background:var(--sur2);user-select:none">
-      <span style="font-size:20px;font-weight:700;font-family:sans-serif">Rifiutato dal referaggio</span>
-      <div style="display:flex;align-items:center;gap:10px">
-        <span id="rifRefCount" style="font-size:20px;color:var(--tx2);font-family:sans-serif"></span>
-        <span id="acc-ref-icon" style="font-size:20px;color:var(--tx2)">&#9660;</span>
-      </div>
-    </div>
-    <div id="acc-ref" style="padding:12px;display:block">
-      <div class="toolbar" style="margin-bottom:10px"><input class="srch" type="text" id="srchRifRef" placeholder="Cerca..." oninput="renderRifRef()"></div>
-      <div id="rifRefEl"></div>
-    </div>
-  </div>
-
-  <div style="border:1px solid var(--brd);border-radius:var(--r);margin-bottom:8px;overflow:hidden">
-    <div onclick="toggleAccordion('acc-gk')" style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;cursor:pointer;background:var(--sur2);user-select:none">
-      <span style="font-size:20px;font-weight:700;font-family:sans-serif">Rifiutato dal GateKeeper</span>
-      <div style="display:flex;align-items:center;gap:10px">
-        <span id="rifGkCount" style="font-size:20px;color:var(--tx2);font-family:sans-serif"></span>
-        <span id="acc-gk-icon" style="font-size:20px;color:var(--tx2)">&#9660;</span>
-      </div>
-    </div>
-    <div id="acc-gk" style="padding:12px;display:none">
-      <div class="toolbar" style="margin-bottom:10px"><input class="srch" type="text" id="srchRifGk" placeholder="Cerca..." oninput="renderRifGk()"></div>
-      <div id="rifGkEl"></div>
-    </div>
-  </div>
-
-  <div style="border:1px solid var(--brd);border-radius:var(--r);margin-bottom:8px;overflow:hidden">
-    <div onclick="toggleAccordion('acc-tur')" style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;cursor:pointer;background:var(--sur2);user-select:none">
-      <span style="font-size:20px;font-weight:700;font-family:sans-serif">Rifiutati dal controllo Turnitin</span>
-      <div style="display:flex;align-items:center;gap:10px">
-        <span id="rifTurCount" style="font-size:20px;color:var(--tx2);font-family:sans-serif"></span>
-        <span id="acc-tur-icon" style="font-size:20px;color:var(--tx2)">&#9660;</span>
-      </div>
-    </div>
-    <div id="acc-tur" style="padding:12px;display:none">
-      <div class="toolbar" style="margin-bottom:10px"><input class="srch" type="text" id="srchRifTur" placeholder="Cerca..." oninput="renderRifTur()"></div>
-      <div id="rifTurEl"></div>
-    </div>
-  </div>
-</div>
-
-<div class="sec" id="sec-tutti">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
-    <div style="font-size:22px;font-weight:700">Tutti gli articoli</div>
-    <span id="tuttiCount" style="font-size:20px;color:var(--tx)"></span>
-  </div>
-  <div class="toolbar">
-    <input class="srch" type="text" id="srchTutti" placeholder="Cerca titolo, autore, ID...">
-  </div>
-  <div id="tuttiEl"></div>
-</div>
-</div>
-
-<!-- ARTICLE MODAL -->
-<div class="modal-bg" id="artModal">
-<div class="modal">
-  <h3 id="artModalTitle">Nuovo articolo</h3>
-  <div class="fsl first" style="display:flex;align-items:center;justify-content:space-between">Identificazione</div>
-  <div class="g2">
-    <div class="fr"><label>ID Manoscritto *</label><div style="display:flex;align-items:center;gap:6px"><input id="fId" style="flex:1" disabled><button type="button" class="btn" id="btnUnlockId" style="font-size:20px;padding:2px 8px;flex-shrink:0">&#128274;</button></div></div>
-    <div class="fr"><label>Data di sottomissione</label><div style="display:flex;align-items:center;gap:6px"><input type="date" id="fDataSottomissione" style="flex:1" disabled><button type="button" class="btn" id="btnUnlockDataSott" style="font-size:11px;padding:2px 8px;flex-shrink:0">&#128274;</button></div></div>
-    <div class="fr">
-      <label>Step editoriale <span class="stt"><span style="font-size:10px;background:var(--purple-bg);color:var(--purple-tx);padding:1px 6px;border-radius:20px;cursor:help;font-family:sans-serif">?</span><div class="spop" id="stepHint"></div></span></label>
-      <select id="fStep">
-        <option value="">—</option>
-        <option value="1">St 1 &middot; Ricevimento</option>
-        <option value="2">St 2 &middot; Assegnazione editor</option>
-        <option value="3">St 3 &middot; Invito integrazione</option>
-        <option value="4">St 4 &middot; Individuazione revisori</option>
-        <option value="5">St 5 &middot; Invio ai revisori</option>
-        <option value="6">St 6 &middot; Risposta positiva 1 revisore</option>
-        <option value="7">St 7 &middot; Risposta positiva entrambi</option>
-        <option value="7b">St 7bis &middot; Risposta negativa</option>
-        <option value="8">St 8 &middot; Invio per modifiche</option>
-        <option value="8b">St 8bis &middot; Rifiuto articolo</option>
-        <option value="9">St 9 &middot; Ricezione articolo rivisto</option>
-        <option value="10">St 10 &middot; Riassegnazione revisori</option>
-        <option value="11">St 11 &middot; Verifica metadati e citazioni</option>
-        <option value="12">St 12 &middot; Impaginazione</option>
-        <option value="13">St 13 &middot; Traduzione abstract cinese</option>
-        <option value="14">St 14 &middot; Composizione PDF</option>
-        <option value="15">St 15 &middot; Copertina, prefazione, sommario</option>
-        <option value="16">St 16 &middot; Numero completo PDF</option>
-        <option value="17">St 17 &middot; Formato digitale</option>
-        <option value="18">St 18 &middot; Pubblicazione</option>
-      </select>
-    </div>
-  </div>
-  <div class="fr"><label>Titolo *</label><textarea id="fTitle" rows="2"></textarea></div>
-  <div class="fsl">Autori</div>
-  <div class="fr"><label>Autori</label><input id="fAuthors"></div>
-  <div class="fr"><label>Affiliazione</label><input id="fAffil"></div>
-  <div class="g2">
-    <div class="fr"><label>Nazionalit&agrave;</label><input id="fNat"></div>
-    <div class="fr"><label>Internazionale</label><select id="fIntlArt"><option value="">—</option><option value="si">S&igrave;</option><option value="no">No</option></select></div>
-  </div>
-  <div class="fsl">Contenuto</div>
-  <div class="fr"><label>Abstract</label><textarea id="fAbstract" rows="3"></textarea></div>
-  <div class="g2">
-    <div class="fr"><label>Lunghezza (parole)</label><input id="fLen" type="number"></div>
-    <div class="fr" style="display:flex;align-items:center;padding-top:22px">
-      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:20px;font-weight:600;color:var(--green-tx)">
-        <input type="checkbox" id="fImpaginato" style="width:auto;accent-color:var(--green);width:16px;height:16px">
-        Articolo impaginato
-      </label>
-    </div>
-  </div>
-  <div class="fsl" style="display:flex;align-items:center;justify-content:space-between">Antiplagio e AI<button type="button" class="btn" id="btnUnlockAnti" style="font-size:20px;padding:2px 8px">&#128274; Sblocca</button></div>
-  <div class="field-locked" id="antiGroup">
-  <div class="g2">
-    <div class="fr"><label>% Similarit&agrave; (Turnitin)</label><input id="fSim" type="number" min="0" max="100" step="0.1" oninput="checkAntiplagio()"></div>
-    <div class="fr"><label>% Contenuto AI (Turnitin)</label><input id="fAi" type="number" min="0" max="100" step="0.1" oninput="checkAntiplagio()"></div>
-  </div>
-  <div id="antiplagioAlert" style="display:none;background:#fff5f5;border:1px solid #f5b7b1;border-radius:var(--r);padding:12px 14px;margin-top:8px">
-    <div style="font-size:20px;font-weight:700;color:var(--red);margin-bottom:10px;font-family:sans-serif">&#9888; Valori superiori al 30% — gestione comunicazione autori</div>
-    <div class="g2">
-      <div class="fr">
-        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-bottom:6px">
-          <input type="checkbox" id="fComunicazioneInviata" style="width:auto;accent-color:var(--red)">
-          <span>Comunicazione inviata agli autori</span>
-        </label>
-        <label style="font-size:20px;color:var(--tx2);font-family:sans-serif">Data invio comunicazione</label>
-        <input type="date" id="fDataComunicazione">
-      </div>
-      <div class="fr"><label>Risposta degli autori</label>
-        <select id="fRispostaAutori">
-          <option value="">&#8212; In attesa &#8212;</option>
-          <option value="risposto">Hanno risposto</option>
-          <option value="non_risposto">Non hanno risposto</option>
-          <option value="ritirato">Hanno ritirato l'articolo</option>
-        </select>
-      </div>
-    </div>
-  </div>
-  </div>
-  <div class="fsl" style="display:flex;align-items:center;justify-content:space-between">Processo editoriale<button type="button" class="btn" id="btnUnlockProc" style="font-size:20px;padding:2px 8px">&#128274; Sblocca</button></div>
-  <input type="hidden" id="fStatus" value="Sottomesso">
-  <input type="hidden" id="fDead" value="">
-  <div class="g3 field-locked" id="procGroup">
-    <div class="fr" id="gkRow"><label>GateKeeper</label>
-      <select id="fGk"><option value="">— Seleziona —</option><option>Lilli Gargiulo</option></select>
-    </div>
-    <div class="fr"><label>Editor</label>
-      <select id="fEd2">
-        <option value="">— Seleziona —</option>
-        <option>Carmen Guida</option><option>Floriana Zucaro</option><option>Gerardo Carpentieri</option>
-        <option>Peppe Mazzeo</option><option>Romano Fistola</option><option>Rosa Anna La Rocca</option>
-        <option>Rosaria Battarra</option><option>Stefano Franco</option>
-      </select>
-    </div>
-    <div class="fr"><label>Copyeditor</label>
-      <select id="fCopy">
-        <option value="">— Seleziona —</option>
-        <option>Gerardo Carpentieri</option><option>Laura Ascione</option><option>Nunzia D'Amico</option>
-        <option>Stella Pennino</option><option>Tonia Stiuso</option><option>Valerio Martinelli</option>
-      </select>
-    </div>
-  </div>
-  <div class="fsl">Metriche citazionali</div>
-  <div style="margin-bottom:10px"><a href="https://claude.ai/public/artifacts/13b10d82-0944-44de-9059-94e46c366e7d" target="_blank" rel="noopener" class="btn" style="font-size:20px;display:inline-flex;align-items:center;gap:6px">&#128200; Calcola indicatori citazionali</a></div>
-  <div class="g3">
-    <div class="fr"><label>References totali</label><input id="fRefs" type="number" min="0"></div>
-    <div class="fr"><label>Citazioni TeMA</label><input id="fCTeMA" type="number" min="0"></div>
-    <div class="fr"><label>Citazioni TeMA 2022&ndash;2026</label><input id="fCTeMA2226" type="number" min="0"></div>
-  </div>
-  <div class="g2">
-    <div class="fr"><label>Citazioni JCR totale</label><input id="fCJCR" type="number" min="0"></div>
-    <div class="fr"><label>Citazioni JCR last 2 years</label><input id="fCJCR2y" type="number" min="0"></div>
-  </div>
-  <div class="fsl">Processo di revisione</div>
-  <div id="revList"></div>
-  <button class="btn" id="btnAddRev" style="margin-bottom:10px;font-size:20px">+ Aggiungi revisore</button>
-  <div class="g2" style="margin-top:6px;margin-bottom:12px;align-items:end">
-    <div class="fr" style="margin-bottom:0"><label>Decisione dell'editor</label><select id="fDecisioneEditor" onchange="checkDecisioneEditor()"><option value="">&#8212;</option><option value="Accept submission">Accept submission</option><option value="Revisions required">Revisions required</option><option value="Resubmit for Review">Resubmit for Review</option><option value="Resubmit Elsewhere">Resubmit Elsewhere</option><option value="Decline submission">Decline submission</option></select></div>
-    <div class="fr" id="fDataRevisioneWrap" style="margin-bottom:0;display:none"><label>Data consegna versione revisionata</label><input type="date" id="fDataRevisione"></div>
-  </div>
-  <!-- Secondo processo di revisione (visibile solo con Resubmit for Review) -->
-  <div id="rev2Section" style="display:none;border-top:1.5px dashed var(--brd);padding-top:1rem;margin-top:.5rem">
-    <div class="fsl" style="margin-top:0;border-top:none;padding-top:0">Processo di revisione 2</div>
-    <div id="revList2"></div>
-    <button class="btn" id="btnAddRev2" style="margin-bottom:10px;font-size:20px">+ Aggiungi revisore (2° round)</button>
-    <div class="g2" style="margin-top:6px;align-items:end">
-      <div class="fr" style="margin-bottom:0"><label>Decisione dell'editor (2° round)</label><select id="fDecisioneEditor2" onchange="checkDecisioneEditor2()"><option value="">&#8212;</option><option value="Accept submission">Accept submission</option><option value="Revisions required">Revisions required</option><option value="Resubmit for Review">Resubmit for Review</option><option value="Resubmit Elsewhere">Resubmit Elsewhere</option><option value="Decline submission">Decline submission</option></select></div>
-      <div class="fr" id="fDataRevisione2Wrap" style="margin-bottom:0;display:none"><label>Data consegna versione revisionata (2°)</label><input type="date" id="fDataRevisione2"></div>
-    </div>
-  </div>
-  <div class="fsl">Note</div>
-  <div class="fr"><textarea id="fNotes" rows="3"></textarea></div>
-  <div class="fsl" style="display:flex;align-items:center;justify-content:space-between">Pubblicazione<button type="button" class="btn" id="btnUnlockPub" style="font-size:20px;padding:2px 8px">&#128274; Sblocca</button></div>
-  <div class="field-locked" id="pubGroup">
-  <div class="g3">
-    <div class="fr"><label>Fascicolo</label><select id="fIssArt"></select></div>
-    <div class="fr"><label>Sezione</label><select id="fSecArt"><option>Focus</option><option>LUME</option><option>SI</option><option>—</option></select></div>
-    <div class="fr"><label>N&deg; nel fascicolo</label><input id="fArtNum" type="number" min="1"></div>
-  </div>
-  </div>
-  <div class="mfoot">
-    <button class="btn btn-d" id="btnDel" style="margin-right:auto;display:none">Elimina</button>
-    <button class="btn" id="btnRifiutoGK" style="display:none;background:var(--orange-bg);color:var(--orange-tx);border-color:#f5b7a0">Rifiuto GateKeeper</button>
-    <button class="btn" id="btnRifiutoTur" style="display:none;background:var(--amber-bg);color:var(--amber-tx);border-color:#f5d5a0">Rifiuto Turnitin</button>
-    <button class="btn" id="btnArtCancel">Annulla</button>
-    <button class="btn btn-p" id="btnArtSave">Salva</button>
-  </div>
-</div>
-</div>
-
-<!-- ISSUE MODAL -->
-<div class="modal-bg" id="issModal">
-<div class="modal" style="max-width:420px">
-  <h3 id="issModalTitle">Nuovo fascicolo</h3>
-  <div class="fr"><label>Tipo</label>
-    <select id="iType"><option value="ordinario">Numero ordinario</option><option value="si">Numero Speciale (SI)</option></select>
-  </div>
-  <div class="fr" id="iYearRow"><label>Anno</label><input id="iYear" type="number" value="2026" min="2020" max="2040"></div>
-  <div class="fr" id="iNumRow"><label>Numero (1&ndash;3)</label>
-    <select id="iNum"><option value="1">01</option><option value="2">02</option><option value="3">03</option></select>
-  </div>
-  <div class="fr"><label>Tema / Titolo</label><input id="iTheme"></div>
-  <div class="fr"><label>Data prevista pubblicazione</label><input id="iDeadline" type="date"></div>
-  <div class="fr"><label>Note</label><textarea id="iNotes" rows="2"></textarea></div>
-  <div class="fr" style="display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--brd);margin-top:4px">
-    <input type="checkbox" id="iPub" style="width:auto;accent-color:var(--green)">
-    <label for="iPub" style="font-size:20px;font-weight:600;color:var(--green-tx);cursor:pointer;margin:0;font-family:sans-serif">Fascicolo pubblicato &mdash; sposta tutti gli articoli in Pubblicati</label>
-  </div>
-  <div class="mfoot">
-    <button class="btn btn-d" id="btnDelIss" style="margin-right:auto;display:none">Elimina fascicolo</button>
-    <button class="btn" id="btnIssCancel">Annulla</button>
-    <button class="btn btn-p" id="btnIssSave">Salva</button>
-  </div>
-</div>
-</div>
-
-<!-- PASSWORD MODAL -->
-<div class="modal-bg" id="pwdModal" style="z-index:200">
-<div class="modal" style="max-width:340px;text-align:center">
-  <div style="font-size:28px;margin-bottom:.5rem">&#128274;</div>
-  <h3 style="margin-bottom:.5rem">Accesso riservato</h3>
-  <p style="font-size:20px;color:var(--tx2);margin-bottom:1rem;font-family:sans-serif">Inserisci la password per procedere.</p>
-  <div class="fr" style="text-align:left"><label>Password</label><input type="password" id="pwdInput"></div>
-  <div id="pwdErr" style="font-size:20px;color:var(--red);margin-top:4px;display:none;font-family:sans-serif">Password errata.</div>
-  <div style="display:flex;gap:8px;justify-content:center;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--brd)">
-    <button class="btn" id="btnPwdCancel">Annulla</button>
-    <button class="btn btn-p" id="btnPwdOk">Accedi</button>
-  </div>
-</div>
-</div>
+<div id="appRoot"></div>
 
 <script>
+var _h = "PGRpdiBjbGFzcz0iYXBwIiBpZD0ibWFpbkFwcCI+CjxkaXYgY2xhc3M9InRvcGJhciI+CiAgPGRpdj4KICAgICAgPGRpdiBjbGFzcz0iYnJhbmQtbmFtZSI+VGVNQSBKb3VybmFsPC9kaXY+CiAgICAgIDxkaXYgY2xhc3M9ImJyYW5kLXN1YiI+R2VzdGlvbmUgZWRpdG9yaWFsZTwvZGl2PgogICAgPC9kaXY+CiAgPC9kaXY+CiAgPGRpdiBzdHlsZT0iZGlzcGxheTpmbGV4O2FsaWduLWl0ZW1zOmNlbnRlcjtnYXA6MTBweDtmbGV4LXdyYXA6d3JhcCI+CiAgICA8c3BhbiBjbGFzcz0ic2F2ZS1kb3QiIGlkPSJzYXZlRG90Ij48L3NwYW4+CiAgICA8c3BhbiBjbGFzcz0ic2F2ZS1sYmwiIGlkPSJzYXZlTGJsIj5EYXRpIHNhbHZhdGk8L3NwYW4+CiAgICA8YnV0dG9uIGNsYXNzPSJidG4gYnRuLXAiIGlkPSJidG5OdW92byI+KyBOdW92byBhcnRpY29sbzwvYnV0dG9uPgogIDwvZGl2Pgo8L2Rpdj4KPGlucHV0IHR5cGU9ImZpbGUiIGlkPSJpbXBvcnRGaWxlIiBhY2NlcHQ9Ii5qc29uIj4KPGRpdiBjbGFzcz0ic3RhdHMtZ3JpZCIgaWQ9InN0YXRzR3JpZCI+PC9kaXY+CjxkaXYgY2xhc3M9InRhYnMiPgogIDxidXR0b24gY2xhc3M9InRhYiBhY3RpdmUiIGRhdGEtdGFiPSJnYXRla2VlcGVyIj5HYXRlS2VlcGVyIGV2YWx1YXRpb248L2J1dHRvbj4KICA8YnV0dG9uIGNsYXNzPSJ0YWIiIGRhdGEtdGFiPSJsaXN0YSI+QXJ0aWNvbGkgaW4gbGF2b3JhemlvbmU8L2J1dHRvbj4KICA8YnV0dG9uIGNsYXNzPSJ0YWIiIGRhdGEtdGFiPSJlZGl0b3JpIj5Bc3NlZ25hemlvbmk8L2J1dHRvbj4KICA8YnV0dG9uIGNsYXNzPSJ0YWIiIGRhdGEtdGFiPSJudW1lcmkiPkZhc2NpY29saTwvYnV0dG9uPgogIDxidXR0b24gY2xhc3M9InRhYiIgZGF0YS10YWI9InZlcmJhbGUiPlZlcmJhbGUgUERGPC9idXR0b24+CiAgPGJ1dHRvbiBjbGFzcz0idGFiIiBkYXRhLXRhYj0icHViYmxpY2F0aSI+QXJ0aWNvbGkgcHViYmxpY2F0aTwvYnV0dG9uPgogIDxidXR0b24gY2xhc3M9InRhYiIgZGF0YS10YWI9InJpZml1dGF0aSI+UmlmaXV0YXRpPC9idXR0b24+CiAgPGJ1dHRvbiBjbGFzcz0idGFiIiBkYXRhLXRhYj0idHV0dGkiPlR1dHRpIGdsaSBhcnRpY29saTwvYnV0dG9uPgo8L2Rpdj4KPGRpdiBjbGFzcz0ic2VjIiBpZD0ic2VjLWdhdGVrZWVwZXIiPgogIDxkaXYgc3R5bGU9ImRpc3BsYXk6ZmxleDthbGlnbi1pdGVtczpjZW50ZXI7anVzdGlmeS1jb250ZW50OnNwYWNlLWJldHdlZW47bWFyZ2luLWJvdHRvbToxcmVtIj4KICAgIDxkaXYgc3R5bGU9ImZvbnQtc2l6ZToxNnB4O2ZvbnQtd2VpZ2h0OjcwMCI+R2F0ZUtlZXBlciBldmFsdWF0aW9uPC9kaXY+CiAgICA8c3BhbiBpZD0iZ2tDb3VudCIgc3R5bGU9ImZvbnQtc2l6ZToyMHB4O2NvbG9yOnZhcigtLXR4Mik7Zm9udC1mYW1pbHk6c2Fucy1zZXJpZiI+PC9zcGFuPgogIDwvZGl2PgogIDxkaXYgY2xhc3M9InRvb2xiYXIiPjxpbnB1dCBjbGFzcz0ic3JjaCIgdHlwZT0idGV4dCIgaWQ9InNyY2hHayIgcGxhY2Vob2xkZXI9IkNlcmNhLi4uIj48L2Rpdj4KICA8ZGl2IGlkPSJna0VsIj48L2Rpdj4KPC9kaXY+CjxkaXYgY2xhc3M9InNlYyIgaWQ9InNlYy1saXN0YSI+CiAgPGRpdiBjbGFzcz0idG9vbGJhciI+CiAgICA8aW5wdXQgY2xhc3M9InNyY2giIHR5cGU9InRleHQiIGlkPSJzcmNoTGlzdGEiIHBsYWNlaG9sZGVyPSJDZXJjYSB0aXRvbG8sIGF1dG9yZSwgSUQuLi4iPgogICAgPHNlbGVjdCBpZD0iZkVkIj48L3NlbGVjdD4KICAgIDxzZWxlY3QgaWQ9ImZTdCI+PG9wdGlvbiB2YWx1ZT0iIj5UdXR0aSBnbGkgc3RlcDwvb3B0aW9uPjwvc2VsZWN0PgogICAgPHNlbGVjdCBpZD0iZlNlYyI+PG9wdGlvbiB2YWx1ZT0iIj5UdXR0ZSBsZSBzZXppb25pPC9vcHRpb24+PG9wdGlvbj5Gb2N1czwvb3B0aW9uPjxvcHRpb24+TFVNRTwvb3B0aW9uPjxvcHRpb24+U0k8L29wdGlvbj48L3NlbGVjdD4KICAgIDxzZWxlY3QgaWQ9ImZJbnRsIj48b3B0aW9uIHZhbHVlPSIiPlR1dHRpPC9vcHRpb24+PG9wdGlvbiB2YWx1ZT0ic2kiPkludGVybmF6aW9uYWxpPC9vcHRpb24+PG9wdGlvbiB2YWx1ZT0ibm8iPk5hemlvbmFsaTwvb3B0aW9uPjwvc2VsZWN0PgogICAgPHNlbGVjdCBpZD0iZklzcyI+PC9zZWxlY3Q+CiAgPC9kaXY+CiAgPGRpdiBpZD0ibGlzdGFFbCI+PC9kaXY+CjwvZGl2Pgo8ZGl2IGNsYXNzPSJzZWMiIGlkPSJzZWMtZWRpdG9yaSI+PGRpdiBpZD0idGVhbUVsIj48L2Rpdj48L2Rpdj4KPGRpdiBjbGFzcz0ic2VjIiBpZD0ic2VjLW51bWVyaSI+CiAgPGRpdiBzdHlsZT0iZGlzcGxheTpmbGV4O2FsaWduLWl0ZW1zOmNlbnRlcjtqdXN0aWZ5LWNvbnRlbnQ6c3BhY2UtYmV0d2VlbjttYXJnaW4tYm90dG9tOjFyZW0iPgogICAgPGRpdiBzdHlsZT0iZm9udC1zaXplOjE2cHg7Zm9udC13ZWlnaHQ6NzAwIj5GYXNjaWNvbGk8L2Rpdj4KICAgIDxidXR0b24gY2xhc3M9ImJ0biIgaWQ9ImJ0bk51b3ZvRmFzYyI+KyBOdW92byBmYXNjaWNvbG88L2J1dHRvbj4KICA8L2Rpdj4KICA8ZGl2IGlkPSJudW1lcmlFbCI+PC9kaXY+CjwvZGl2Pgo8ZGl2IGNsYXNzPSJzZWMiIGlkPSJzZWMtdmVyYmFsZSI+CiAgPGRpdiBzdHlsZT0iZGlzcGxheTpmbGV4O2FsaWduLWl0ZW1zOmNlbnRlcjtqdXN0aWZ5LWNvbnRlbnQ6c3BhY2UtYmV0d2VlbjttYXJnaW4tYm90dG9tOjFyZW07ZmxleC13cmFwOndyYXA7Z2FwOjEwcHgiPgogICAgPGRpdiBzdHlsZT0iZm9udC1zaXplOjE2cHg7Zm9udC13ZWlnaHQ6NzAwIj5HZW5lcmF0b3JlIHZlcmJhbGU8L2Rpdj4KICAgIDxkaXYgc3R5bGU9ImRpc3BsYXk6ZmxleDtnYXA6OHB4Ij4KICAgICAgPGJ1dHRvbiBjbGFzcz0iYnRuIiBpZD0iYnRuUmVmcmVzaFZlcmJhbGUiPkFnZ2lvcm5hIGFudGVwcmltYTwvYnV0dG9uPgogICAgICA8YnV0dG9uIGNsYXNzPSJidG4gYnRuLXAiIGlkPSJidG5QcmludFZlcmJhbGUiPlN0YW1wYSAvIFNhbHZhIFBERjwvYnV0dG9uPgogICAgPC9kaXY+CiAgPC9kaXY+CiAgPGRpdiBjbGFzcz0idmZvcm0iPgogICAgPGRpdiBjbGFzcz0iZnNsIGZpcnN0Ij5JbnRlc3RhemlvbmU8L2Rpdj4KICAgIDxkaXYgY2xhc3M9ImczIj4KICAgICAgPGRpdiBjbGFzcz0iZnIiPjxsYWJlbD5OdW1lcm8gdmVyYmFsZTwvbGFiZWw+PGlucHV0IGlkPSJ2TnVtIiBwbGFjZWhvbGRlcj0iZXMuIDgvMjYiPjwvZGl2PgogICAgICA8ZGl2IGNsYXNzPSJmciI+PGxhYmVsPkRhdGEgcml1bmlvbmU8L2xhYmVsPjxpbnB1dCBpZD0idkRhdGUiIHR5cGU9ImRhdGUiPjwvZGl2PgogICAgICA8ZGl2IGNsYXNzPSJmciI+PGxhYmVsPkZhc2NpY29sbyBkaSByaWZlcmltZW50bzwvbGFiZWw+PHNlbGVjdCBpZD0idklzcyI+PC9zZWxlY3Q+PC9kaXY+CiAgICA8L2Rpdj4KICAgIDxkaXYgY2xhc3M9ImZyIj48bGFiZWw+UHJlc2VudGk8L2xhYmVsPjxpbnB1dCBpZD0idlByZXNlbnRpIj48L2Rpdj4KICAgIDxkaXYgY2xhc3M9ImZyIj48bGFiZWw+VGVtaSBhZmZyb250YXRpPC9sYWJlbD48dGV4dGFyZWEgaWQ9InZJbnRybyIgcm93cz0iMyI+PC90ZXh0YXJlYT48L2Rpdj4KICAgIDxkaXYgY2xhc3M9ImZyIj48bGFiZWw+T3JkaW5lIGRlbCBnaW9ybm8gcHJvc3NpbWEgcml1bmlvbmU8L2xhYmVsPjx0ZXh0YXJlYSBpZD0idk91dHJvIiByb3dzPSIyIj48L3RleHRhcmVhPjwvZGl2PgogIDwvZGl2PgogIDxkaXYgaWQ9InZlcmJhbGVQcmV2aWV3Ij48L2Rpdj4KPC9kaXY+CjxkaXYgY2xhc3M9InNlYyIgaWQ9InNlYy1wdWJibGljYXRpIj4KICA8ZGl2IHN0eWxlPSJkaXNwbGF5OmZsZXg7YWxpZ24taXRlbXM6Y2VudGVyO2p1c3RpZnktY29udGVudDpzcGFjZS1iZXR3ZWVuO21hcmdpbi1ib3R0b206MXJlbSI+CiAgICA8ZGl2IHN0eWxlPSJmb250LXNpemU6MTZweDtmb250LXdlaWdodDo3MDAiPkFydGljb2xpIHB1YmJsaWNhdGk8L2Rpdj4KICAgIDxzcGFuIGlkPSJwdWJDb3VudCIgc3R5bGU9ImZvbnQtc2l6ZToyMHB4O2NvbG9yOnZhcigtLXR4Mik7Zm9udC1mYW1pbHk6c2Fucy1zZXJpZiI+PC9zcGFuPgogIDwvZGl2PgogIDxkaXYgY2xhc3M9InRvb2xiYXIiPgogICAgPGlucHV0IGNsYXNzPSJzcmNoIiB0eXBlPSJ0ZXh0IiBpZD0ic3JjaFB1YiIgcGxhY2Vob2xkZXI9IkNlcmNhLi4uIj4KICAgIDxzZWxlY3QgaWQ9ImZJc3NQdWIiPjwvc2VsZWN0PgogIDwvZGl2PgogIDxkaXYgaWQ9InB1YkVsIj48L2Rpdj4KPC9kaXY+CjxkaXYgY2xhc3M9InNlYyIgaWQ9InNlYy1yaWZpdXRhdGkiPgogIDxkaXYgc3R5bGU9ImZvbnQtc2l6ZToxNnB4O2ZvbnQtd2VpZ2h0OjcwMDttYXJnaW4tYm90dG9tOjFyZW0iPlJpZml1dGF0aTwvZGl2PgoKICA8ZGl2IHN0eWxlPSJib3JkZXI6MXB4IHNvbGlkIHZhcigtLWJyZCk7Ym9yZGVyLXJhZGl1czp2YXIoLS1yKTttYXJnaW4tYm90dG9tOjhweDtvdmVyZmxvdzpoaWRkZW4iPgogICAgPGRpdiBvbmNsaWNrPSJ0b2dnbGVBY2NvcmRpb24oJ2FjYy1yZWYnKSIgc3R5bGU9ImRpc3BsYXk6ZmxleDthbGlnbi1pdGVtczpjZW50ZXI7anVzdGlmeS1jb250ZW50OnNwYWNlLWJldHdlZW47cGFkZGluZzoxMHB4IDE0cHg7Y3Vyc29yOnBvaW50ZXI7YmFja2dyb3VuZDp2YXIoLS1zdXIyKTt1c2VyLXNlbGVjdDpub25lIj4KICAgICAgPHNwYW4gc3R5bGU9ImZvbnQtc2l6ZToyMHB4O2ZvbnQtd2VpZ2h0OjcwMDtmb250LWZhbWlseTpzYW5zLXNlcmlmIj5SaWZpdXRhdG8gZGFsIHJlZmVyYWdnaW88L3NwYW4+CiAgICAgIDxkaXYgc3R5bGU9ImRpc3BsYXk6ZmxleDthbGlnbi1pdGVtczpjZW50ZXI7Z2FwOjEwcHgiPgogICAgICAgIDxzcGFuIGlkPSJyaWZSZWZDb3VudCIgc3R5bGU9ImZvbnQtc2l6ZToyMHB4O2NvbG9yOnZhcigtLXR4Mik7Zm9udC1mYW1pbHk6c2Fucy1zZXJpZiI+PC9zcGFuPgogICAgICAgIDxzcGFuIGlkPSJhY2MtcmVmLWljb24iIHN0eWxlPSJmb250LXNpemU6MjBweDtjb2xvcjp2YXIoLS10eDIpIj4mIzk2NjA7PC9zcGFuPgogICAgICA8L2Rpdj4KICAgIDwvZGl2PgogICAgPGRpdiBpZD0iYWNjLXJlZiIgc3R5bGU9InBhZGRpbmc6MTJweDtkaXNwbGF5OmJsb2NrIj4KICAgICAgPGRpdiBjbGFzcz0idG9vbGJhciIgc3R5bGU9Im1hcmdpbi1ib3R0b206MTBweCI+PGlucHV0IGNsYXNzPSJzcmNoIiB0eXBlPSJ0ZXh0IiBpZD0ic3JjaFJpZlJlZiIgcGxhY2Vob2xkZXI9IkNlcmNhLi4uIiBvbmlucHV0PSJyZW5kZXJSaWZSZWYoKSI+PC9kaXY+CiAgICAgIDxkaXYgaWQ9InJpZlJlZkVsIj48L2Rpdj4KICAgIDwvZGl2PgogIDwvZGl2PgoKICA8ZGl2IHN0eWxlPSJib3JkZXI6MXB4IHNvbGlkIHZhcigtLWJyZCk7Ym9yZGVyLXJhZGl1czp2YXIoLS1yKTttYXJnaW4tYm90dG9tOjhweDtvdmVyZmxvdzpoaWRkZW4iPgogICAgPGRpdiBvbmNsaWNrPSJ0b2dnbGVBY2NvcmRpb24oJ2FjYy1naycpIiBzdHlsZT0iZGlzcGxheTpmbGV4O2FsaWduLWl0ZW1zOmNlbnRlcjtqdXN0aWZ5LWNvbnRlbnQ6c3BhY2UtYmV0d2VlbjtwYWRkaW5nOjEwcHggMTRweDtjdXJzb3I6cG9pbnRlcjtiYWNrZ3JvdW5kOnZhcigtLXN1cjIpO3VzZXItc2VsZWN0Om5vbmUiPgogICAgICA8c3BhbiBzdHlsZT0iZm9udC1zaXplOjIwcHg7Zm9udC13ZWlnaHQ6NzAwO2ZvbnQtZmFtaWx5OnNhbnMtc2VyaWYiPlJpZml1dGF0byBkYWwgR2F0ZUtlZXBlcjwvc3Bhbj4KICAgICAgPGRpdiBzdHlsZT0iZGlzcGxheTpmbGV4O2FsaWduLWl0ZW1zOmNlbnRlcjtnYXA6MTBweCI+CiAgICAgICAgPHNwYW4gaWQ9InJpZkdrQ291bnQiIHN0eWxlPSJmb250LXNpemU6MjBweDtjb2xvcjp2YXIoLS10eDIpO2ZvbnQtZmFtaWx5OnNhbnMtc2VyaWYiPjwvc3Bhbj4KICAgICAgICA8c3BhbiBpZD0iYWNjLWdrLWljb24iIHN0eWxlPSJmb250LXNpemU6MjBweDtjb2xvcjp2YXIoLS10eDIpIj4mIzk2NjA7PC9zcGFuPgogICAgICA8L2Rpdj4KICAgIDwvZGl2PgogICAgPGRpdiBpZD0iYWNjLWdrIiBzdHlsZT0icGFkZGluZzoxMnB4O2Rpc3BsYXk6bm9uZSI+CiAgICAgIDxkaXYgY2xhc3M9InRvb2xiYXIiIHN0eWxlPSJtYXJnaW4tYm90dG9tOjEwcHgiPjxpbnB1dCBjbGFzcz0ic3JjaCIgdHlwZT0idGV4dCIgaWQ9InNyY2hSaWZHayIgcGxhY2Vob2xkZXI9IkNlcmNhLi4uIiBvbmlucHV0PSJyZW5kZXJSaWZHaygpIj48L2Rpdj4KICAgICAgPGRpdiBpZD0icmlmR2tFbCI+PC9kaXY+CiAgICA8L2Rpdj4KICA8L2Rpdj4KCiAgPGRpdiBzdHlsZT0iYm9yZGVyOjFweCBzb2xpZCB2YXIoLS1icmQpO2JvcmRlci1yYWRpdXM6dmFyKC0tcik7bWFyZ2luLWJvdHRvbTo4cHg7b3ZlcmZsb3c6aGlkZGVuIj4KICAgIDxkaXYgb25jbGljaz0idG9nZ2xlQWNjb3JkaW9uKCdhY2MtdHVyJykiIHN0eWxlPSJkaXNwbGF5OmZsZXg7YWxpZ24taXRlbXM6Y2VudGVyO2p1c3RpZnktY29udGVudDpzcGFjZS1iZXR3ZWVuO3BhZGRpbmc6MTBweCAxNHB4O2N1cnNvcjpwb2ludGVyO2JhY2tncm91bmQ6dmFyKC0tc3VyMik7dXNlci1zZWxlY3Q6bm9uZSI+CiAgICAgIDxzcGFuIHN0eWxlPSJmb250LXNpemU6MjBweDtmb250LXdlaWdodDo3MDA7Zm9udC1mYW1pbHk6c2Fucy1zZXJpZiI+UmlmaXV0YXRpIGRhbCBjb250cm9sbG8gVHVybml0aW48L3NwYW4+CiAgICAgIDxkaXYgc3R5bGU9ImRpc3BsYXk6ZmxleDthbGlnbi1pdGVtczpjZW50ZXI7Z2FwOjEwcHgiPgogICAgICAgIDxzcGFuIGlkPSJyaWZUdXJDb3VudCIgc3R5bGU9ImZvbnQtc2l6ZToyMHB4O2NvbG9yOnZhcigtLXR4Mik7Zm9udC1mYW1pbHk6c2Fucy1zZXJpZiI+PC9zcGFuPgogICAgICAgIDxzcGFuIGlkPSJhY2MtdHVyLWljb24iIHN0eWxlPSJmb250LXNpemU6MjBweDtjb2xvcjp2YXIoLS10eDIpIj4mIzk2NjA7PC9zcGFuPgogICAgICA8L2Rpdj4KICAgIDwvZGl2PgogICAgPGRpdiBpZD0iYWNjLXR1ciIgc3R5bGU9InBhZGRpbmc6MTJweDtkaXNwbGF5Om5vbmUiPgogICAgICA8ZGl2IGNsYXNzPSJ0b29sYmFyIiBzdHlsZT0ibWFyZ2luLWJvdHRvbToxMHB4Ij48aW5wdXQgY2xhc3M9InNyY2giIHR5cGU9InRleHQiIGlkPSJzcmNoUmlmVHVyIiBwbGFjZWhvbGRlcj0iQ2VyY2EuLi4iIG9uaW5wdXQ9InJlbmRlclJpZlR1cigpIj48L2Rpdj4KICAgICAgPGRpdiBpZD0icmlmVHVyRWwiPjwvZGl2PgogICAgPC9kaXY+CiAgPC9kaXY+CjwvZGl2PgoKPGRpdiBjbGFzcz0ic2VjIiBpZD0ic2VjLXR1dHRpIj4KICA8ZGl2IHN0eWxlPSJkaXNwbGF5OmZsZXg7YWxpZ24taXRlbXM6Y2VudGVyO2p1c3RpZnktY29udGVudDpzcGFjZS1iZXR3ZWVuO21hcmdpbi1ib3R0b206MXJlbSI+CiAgICA8ZGl2IHN0eWxlPSJmb250LXNpemU6MjJweDtmb250LXdlaWdodDo3MDAiPlR1dHRpIGdsaSBhcnRpY29saTwvZGl2PgogICAgPHNwYW4gaWQ9InR1dHRpQ291bnQiIHN0eWxlPSJmb250LXNpemU6MjBweDtjb2xvcjp2YXIoLS10eCkiPjwvc3Bhbj4KICA8L2Rpdj4KICA8ZGl2IGNsYXNzPSJ0b29sYmFyIj4KICAgIDxpbnB1dCBjbGFzcz0ic3JjaCIgdHlwZT0idGV4dCIgaWQ9InNyY2hUdXR0aSIgcGxhY2Vob2xkZXI9IkNlcmNhIHRpdG9sbywgYXV0b3JlLCBJRC4uLiI+CiAgPC9kaXY+CiAgPGRpdiBpZD0idHV0dGlFbCI+PC9kaXY+CjwvZGl2Pgo8L2Rpdj4KCjwhLS0gQVJUSUNMRSBNT0RBTCAtLT4KPGRpdiBjbGFzcz0ibW9kYWwtYmciIGlkPSJhcnRNb2RhbCI+CjxkaXYgY2xhc3M9Im1vZGFsIj4KICA8aDMgaWQ9ImFydE1vZGFsVGl0bGUiPk51b3ZvIGFydGljb2xvPC9oMz4KICA8ZGl2IGNsYXNzPSJmc2wgZmlyc3QiIHN0eWxlPSJkaXNwbGF5OmZsZXg7YWxpZ24taXRlbXM6Y2VudGVyO2p1c3RpZnktY29udGVudDpzcGFjZS1iZXR3ZWVuIj5JZGVudGlmaWNhemlvbmU8L2Rpdj4KICA8ZGl2IGNsYXNzPSJnMiI+CiAgICA8ZGl2IGNsYXNzPSJmciI+PGxhYmVsPklEIE1hbm9zY3JpdHRvICo8L2xhYmVsPjxkaXYgc3R5bGU9ImRpc3BsYXk6ZmxleDthbGlnbi1pdGVtczpjZW50ZXI7Z2FwOjZweCI+PGlucHV0IGlkPSJmSWQiIHN0eWxlPSJmbGV4OjEiIGRpc2FibGVkPjxidXR0b24gdHlwZT0iYnV0dG9uIiBjbGFzcz0iYnRuIiBpZD0iYnRuVW5sb2NrSWQiIHN0eWxlPSJmb250LXNpemU6MjBweDtwYWRkaW5nOjJweCA4cHg7ZmxleC1zaHJpbms6MCI+JiMxMjgyNzQ7PC9idXR0b24+PC9kaXY+PC9kaXY+CiAgICA8ZGl2IGNsYXNzPSJmciI+PGxhYmVsPkRhdGEgZGkgc290dG9taXNzaW9uZTwvbGFiZWw+PGRpdiBzdHlsZT0iZGlzcGxheTpmbGV4O2FsaWduLWl0ZW1zOmNlbnRlcjtnYXA6NnB4Ij48aW5wdXQgdHlwZT0iZGF0ZSIgaWQ9ImZEYXRhU290dG9taXNzaW9uZSIgc3R5bGU9ImZsZXg6MSIgZGlzYWJsZWQ+PGJ1dHRvbiB0eXBlPSJidXR0b24iIGNsYXNzPSJidG4iIGlkPSJidG5VbmxvY2tEYXRhU290dCIgc3R5bGU9ImZvbnQtc2l6ZToxMXB4O3BhZGRpbmc6MnB4IDhweDtmbGV4LXNocmluazowIj4mIzEyODI3NDs8L2J1dHRvbj48L2Rpdj48L2Rpdj4KICAgIDxkaXYgY2xhc3M9ImZyIj4KICAgICAgPGxhYmVsPlN0ZXAgZWRpdG9yaWFsZSA8c3BhbiBjbGFzcz0ic3R0Ij48c3BhbiBzdHlsZT0iZm9udC1zaXplOjEwcHg7YmFja2dyb3VuZDp2YXIoLS1wdXJwbGUtYmcpO2NvbG9yOnZhcigtLXB1cnBsZS10eCk7cGFkZGluZzoxcHggNnB4O2JvcmRlci1yYWRpdXM6MjBweDtjdXJzb3I6aGVscDtmb250LWZhbWlseTpzYW5zLXNlcmlmIj4/PC9zcGFuPjxkaXYgY2xhc3M9InNwb3AiIGlkPSJzdGVwSGludCI+PC9kaXY+PC9zcGFuPjwvbGFiZWw+CiAgICAgIDxzZWxlY3QgaWQ9ImZTdGVwIj4KICAgICAgICA8b3B0aW9uIHZhbHVlPSIiPuKAlDwvb3B0aW9uPgogICAgICAgIDxvcHRpb24gdmFsdWU9IjEiPlN0IDEgJm1pZGRvdDsgUmljZXZpbWVudG88L29wdGlvbj4KICAgICAgICA8b3B0aW9uIHZhbHVlPSIyIj5TdCAyICZtaWRkb3Q7IEFzc2VnbmF6aW9uZSBlZGl0b3I8L29wdGlvbj4KICAgICAgICA8b3B0aW9uIHZhbHVlPSIzIj5TdCAzICZtaWRkb3Q7IEludml0byBpbnRlZ3JhemlvbmU8L29wdGlvbj4KICAgICAgICA8b3B0aW9uIHZhbHVlPSI0Ij5TdCA0ICZtaWRkb3Q7IEluZGl2aWR1YXppb25lIHJldmlzb3JpPC9vcHRpb24+CiAgICAgICAgPG9wdGlvbiB2YWx1ZT0iNSI+U3QgNSAmbWlkZG90OyBJbnZpbyBhaSByZXZpc29yaTwvb3B0aW9uPgogICAgICAgIDxvcHRpb24gdmFsdWU9IjYiPlN0IDYgJm1pZGRvdDsgUmlzcG9zdGEgcG9zaXRpdmEgMSByZXZpc29yZTwvb3B0aW9uPgogICAgICAgIDxvcHRpb24gdmFsdWU9IjciPlN0IDcgJm1pZGRvdDsgUmlzcG9zdGEgcG9zaXRpdmEgZW50cmFtYmk8L29wdGlvbj4KICAgICAgICA8b3B0aW9uIHZhbHVlPSI3YiI+U3QgN2JpcyAmbWlkZG90OyBSaXNwb3N0YSBuZWdhdGl2YTwvb3B0aW9uPgogICAgICAgIDxvcHRpb24gdmFsdWU9IjgiPlN0IDggJm1pZGRvdDsgSW52aW8gcGVyIG1vZGlmaWNoZTwvb3B0aW9uPgogICAgICAgIDxvcHRpb24gdmFsdWU9IjhiIj5TdCA4YmlzICZtaWRkb3Q7IFJpZml1dG8gYXJ0aWNvbG88L29wdGlvbj4KICAgICAgICA8b3B0aW9uIHZhbHVlPSI5Ij5TdCA5ICZtaWRkb3Q7IFJpY2V6aW9uZSBhcnRpY29sbyByaXZpc3RvPC9vcHRpb24+CiAgICAgICAgPG9wdGlvbiB2YWx1ZT0iMTAiPlN0IDEwICZtaWRkb3Q7IFJpYXNzZWduYXppb25lIHJldmlzb3JpPC9vcHRpb24+CiAgICAgICAgPG9wdGlvbiB2YWx1ZT0iMTEiPlN0IDExICZtaWRkb3Q7IFZlcmlmaWNhIG1ldGFkYXRpIGUgY2l0YXppb25pPC9vcHRpb24+CiAgICAgICAgPG9wdGlvbiB2YWx1ZT0iMTIiPlN0IDEyICZtaWRkb3Q7IEltcGFnaW5hemlvbmU8L29wdGlvbj4KICAgICAgICA8b3B0aW9uIHZhbHVlPSIxMyI+U3QgMTMgJm1pZGRvdDsgVHJhZHV6aW9uZSBhYnN0cmFjdCBjaW5lc2U8L29wdGlvbj4KICAgICAgICA8b3B0aW9uIHZhbHVlPSIxNCI+U3QgMTQgJm1pZGRvdDsgQ29tcG9zaXppb25lIFBERjwvb3B0aW9uPgogICAgICAgIDxvcHRpb24gdmFsdWU9IjE1Ij5TdCAxNSAmbWlkZG90OyBDb3BlcnRpbmEsIHByZWZhemlvbmUsIHNvbW1hcmlvPC9vcHRpb24+CiAgICAgICAgPG9wdGlvbiB2YWx1ZT0iMTYiPlN0IDE2ICZtaWRkb3Q7IE51bWVybyBjb21wbGV0byBQREY8L29wdGlvbj4KICAgICAgICA8b3B0aW9uIHZhbHVlPSIxNyI+U3QgMTcgJm1pZGRvdDsgRm9ybWF0byBkaWdpdGFsZTwvb3B0aW9uPgogICAgICAgIDxvcHRpb24gdmFsdWU9IjE4Ij5TdCAxOCAmbWlkZG90OyBQdWJibGljYXppb25lPC9vcHRpb24+CiAgICAgIDwvc2VsZWN0PgogICAgPC9kaXY+CiAgPC9kaXY+CiAgPGRpdiBjbGFzcz0iZnIiPjxsYWJlbD5UaXRvbG8gKjwvbGFiZWw+PHRleHRhcmVhIGlkPSJmVGl0bGUiIHJvd3M9IjIiPjwvdGV4dGFyZWE+PC9kaXY+CiAgPGRpdiBjbGFzcz0iZnNsIj5BdXRvcmk8L2Rpdj4KICA8ZGl2IGNsYXNzPSJmciI+PGxhYmVsPkF1dG9yaTwvbGFiZWw+PGlucHV0IGlkPSJmQXV0aG9ycyI+PC9kaXY+CiAgPGRpdiBjbGFzcz0iZnIiPjxsYWJlbD5BZmZpbGlhemlvbmU8L2xhYmVsPjxpbnB1dCBpZD0iZkFmZmlsIj48L2Rpdj4KICA8ZGl2IGNsYXNzPSJnMiI+CiAgICA8ZGl2IGNsYXNzPSJmciI+PGxhYmVsPk5hemlvbmFsaXQmYWdyYXZlOzwvbGFiZWw+PGlucHV0IGlkPSJmTmF0Ij48L2Rpdj4KICAgIDxkaXYgY2xhc3M9ImZyIj48bGFiZWw+SW50ZXJuYXppb25hbGU8L2xhYmVsPjxzZWxlY3QgaWQ9ImZJbnRsQXJ0Ij48b3B0aW9uIHZhbHVlPSIiPuKAlDwvb3B0aW9uPjxvcHRpb24gdmFsdWU9InNpIj5TJmlncmF2ZTs8L29wdGlvbj48b3B0aW9uIHZhbHVlPSJubyI+Tm88L29wdGlvbj48L3NlbGVjdD48L2Rpdj4KICA8L2Rpdj4KICA8ZGl2IGNsYXNzPSJmc2wiPkNvbnRlbnV0bzwvZGl2PgogIDxkaXYgY2xhc3M9ImZyIj48bGFiZWw+QWJzdHJhY3Q8L2xhYmVsPjx0ZXh0YXJlYSBpZD0iZkFic3RyYWN0IiByb3dzPSIzIj48L3RleHRhcmVhPjwvZGl2PgogIDxkaXYgY2xhc3M9ImcyIj4KICAgIDxkaXYgY2xhc3M9ImZyIj48bGFiZWw+THVuZ2hlenphIChwYXJvbGUpPC9sYWJlbD48aW5wdXQgaWQ9ImZMZW4iIHR5cGU9Im51bWJlciI+PC9kaXY+CiAgICA8ZGl2IGNsYXNzPSJmciIgc3R5bGU9ImRpc3BsYXk6ZmxleDthbGlnbi1pdGVtczpjZW50ZXI7cGFkZGluZy10b3A6MjJweCI+CiAgICAgIDxsYWJlbCBzdHlsZT0iZGlzcGxheTpmbGV4O2FsaWduLWl0ZW1zOmNlbnRlcjtnYXA6OHB4O2N1cnNvcjpwb2ludGVyO2ZvbnQtc2l6ZToyMHB4O2ZvbnQtd2VpZ2h0OjYwMDtjb2xvcjp2YXIoLS1ncmVlbi10eCkiPgogICAgICAgIDxpbnB1dCB0eXBlPSJjaGVja2JveCIgaWQ9ImZJbXBhZ2luYXRvIiBzdHlsZT0id2lkdGg6YXV0bzthY2NlbnQtY29sb3I6dmFyKC0tZ3JlZW4pO3dpZHRoOjE2cHg7aGVpZ2h0OjE2cHgiPgogICAgICAgIEFydGljb2xvIGltcGFnaW5hdG8KICAgICAgPC9sYWJlbD4KICAgIDwvZGl2PgogIDwvZGl2PgogIDxkaXYgY2xhc3M9ImZzbCIgc3R5bGU9ImRpc3BsYXk6ZmxleDthbGlnbi1pdGVtczpjZW50ZXI7anVzdGlmeS1jb250ZW50OnNwYWNlLWJldHdlZW4iPkFudGlwbGFnaW8gZSBBSTxidXR0b24gdHlwZT0iYnV0dG9uIiBjbGFzcz0iYnRuIiBpZD0iYnRuVW5sb2NrQW50aSIgc3R5bGU9ImZvbnQtc2l6ZToyMHB4O3BhZGRpbmc6MnB4IDhweCI+JiMxMjgyNzQ7IFNibG9jY2E8L2J1dHRvbj48L2Rpdj4KICA8ZGl2IGNsYXNzPSJmaWVsZC1sb2NrZWQiIGlkPSJhbnRpR3JvdXAiPgogIDxkaXYgY2xhc3M9ImcyIj4KICAgIDxkaXYgY2xhc3M9ImZyIj48bGFiZWw+JSBTaW1pbGFyaXQmYWdyYXZlOyAoVHVybml0aW4pPC9sYWJlbD48aW5wdXQgaWQ9ImZTaW0iIHR5cGU9Im51bWJlciIgbWluPSIwIiBtYXg9IjEwMCIgc3RlcD0iMC4xIiBvbmlucHV0PSJjaGVja0FudGlwbGFnaW8oKSI+PC9kaXY+CiAgICA8ZGl2IGNsYXNzPSJmciI+PGxhYmVsPiUgQ29udGVudXRvIEFJIChUdXJuaXRpbik8L2xhYmVsPjxpbnB1dCBpZD0iZkFpIiB0eXBlPSJudW1iZXIiIG1pbj0iMCIgbWF4PSIxMDAiIHN0ZXA9IjAuMSIgb25pbnB1dD0iY2hlY2tBbnRpcGxhZ2lvKCkiPjwvZGl2PgogIDwvZGl2PgogIDxkaXYgaWQ9ImFudGlwbGFnaW9BbGVydCIgc3R5bGU9ImRpc3BsYXk6bm9uZTtiYWNrZ3JvdW5kOiNmZmY1ZjU7Ym9yZGVyOjFweCBzb2xpZCAjZjViN2IxO2JvcmRlci1yYWRpdXM6dmFyKC0tcik7cGFkZGluZzoxMnB4IDE0cHg7bWFyZ2luLXRvcDo4cHgiPgogICAgPGRpdiBzdHlsZT0iZm9udC1zaXplOjIwcHg7Zm9udC13ZWlnaHQ6NzAwO2NvbG9yOnZhcigtLXJlZCk7bWFyZ2luLWJvdHRvbToxMHB4O2ZvbnQtZmFtaWx5OnNhbnMtc2VyaWYiPiYjOTg4ODsgVmFsb3JpIHN1cGVyaW9yaSBhbCAzMCUg4oCUIGdlc3Rpb25lIGNvbXVuaWNhemlvbmUgYXV0b3JpPC9kaXY+CiAgICA8ZGl2IGNsYXNzPSJnMiI+CiAgICAgIDxkaXYgY2xhc3M9ImZyIj4KICAgICAgICA8bGFiZWwgc3R5bGU9ImRpc3BsYXk6ZmxleDthbGlnbi1pdGVtczpjZW50ZXI7Z2FwOjhweDtjdXJzb3I6cG9pbnRlcjttYXJnaW4tYm90dG9tOjZweCI+CiAgICAgICAgICA8aW5wdXQgdHlwZT0iY2hlY2tib3giIGlkPSJmQ29tdW5pY2F6aW9uZUludmlhdGEiIHN0eWxlPSJ3aWR0aDphdXRvO2FjY2VudC1jb2xvcjp2YXIoLS1yZWQpIj4KICAgICAgICAgIDxzcGFuPkNvbXVuaWNhemlvbmUgaW52aWF0YSBhZ2xpIGF1dG9yaTwvc3Bhbj4KICAgICAgICA8L2xhYmVsPgogICAgICAgIDxsYWJlbCBzdHlsZT0iZm9udC1zaXplOjIwcHg7Y29sb3I6dmFyKC0tdHgyKTtmb250LWZhbWlseTpzYW5zLXNlcmlmIj5EYXRhIGludmlvIGNvbXVuaWNhemlvbmU8L2xhYmVsPgogICAgICAgIDxpbnB1dCB0eXBlPSJkYXRlIiBpZD0iZkRhdGFDb211bmljYXppb25lIj4KICAgICAgPC9kaXY+CiAgICAgIDxkaXYgY2xhc3M9ImZyIj48bGFiZWw+UmlzcG9zdGEgZGVnbGkgYXV0b3JpPC9sYWJlbD4KICAgICAgICA8c2VsZWN0IGlkPSJmUmlzcG9zdGFBdXRvcmkiPgogICAgICAgICAgPG9wdGlvbiB2YWx1ZT0iIj4mIzgyMTI7IEluIGF0dGVzYSAmIzgyMTI7PC9vcHRpb24+CiAgICAgICAgICA8b3B0aW9uIHZhbHVlPSJyaXNwb3N0byI+SGFubm8gcmlzcG9zdG88L29wdGlvbj4KICAgICAgICAgIDxvcHRpb24gdmFsdWU9Im5vbl9yaXNwb3N0byI+Tm9uIGhhbm5vIHJpc3Bvc3RvPC9vcHRpb24+CiAgICAgICAgICA8b3B0aW9uIHZhbHVlPSJyaXRpcmF0byI+SGFubm8gcml0aXJhdG8gbCdhcnRpY29sbzwvb3B0aW9uPgogICAgICAgIDwvc2VsZWN0PgogICAgICA8L2Rpdj4KICAgIDwvZGl2PgogIDwvZGl2PgogIDwvZGl2PgogIDxkaXYgY2xhc3M9ImZzbCIgc3R5bGU9ImRpc3BsYXk6ZmxleDthbGlnbi1pdGVtczpjZW50ZXI7anVzdGlmeS1jb250ZW50OnNwYWNlLWJldHdlZW4iPlByb2Nlc3NvIGVkaXRvcmlhbGU8YnV0dG9uIHR5cGU9ImJ1dHRvbiIgY2xhc3M9ImJ0biIgaWQ9ImJ0blVubG9ja1Byb2MiIHN0eWxlPSJmb250LXNpemU6MjBweDtwYWRkaW5nOjJweCA4cHgiPiYjMTI4Mjc0OyBTYmxvY2NhPC9idXR0b24+PC9kaXY+CiAgPGlucHV0IHR5cGU9ImhpZGRlbiIgaWQ9ImZTdGF0dXMiIHZhbHVlPSJTb3R0b21lc3NvIj4KICA8aW5wdXQgdHlwZT0iaGlkZGVuIiBpZD0iZkRlYWQiIHZhbHVlPSIiPgogIDxkaXYgY2xhc3M9ImczIGZpZWxkLWxvY2tlZCIgaWQ9InByb2NHcm91cCI+CiAgICA8ZGl2IGNsYXNzPSJmciIgaWQ9ImdrUm93Ij48bGFiZWw+R2F0ZUtlZXBlcjwvbGFiZWw+CiAgICAgIDxzZWxlY3QgaWQ9ImZHayI+PG9wdGlvbiB2YWx1ZT0iIj7igJQgU2VsZXppb25hIOKAlDwvb3B0aW9uPjxvcHRpb24+TGlsbGkgR2FyZ2l1bG88L29wdGlvbj48L3NlbGVjdD4KICAgIDwvZGl2PgogICAgPGRpdiBjbGFzcz0iZnIiPjxsYWJlbD5FZGl0b3I8L2xhYmVsPgogICAgICA8c2VsZWN0IGlkPSJmRWQyIj4KICAgICAgICA8b3B0aW9uIHZhbHVlPSIiPuKAlCBTZWxlemlvbmEg4oCUPC9vcHRpb24+CiAgICAgICAgPG9wdGlvbj5DYXJtZW4gR3VpZGE8L29wdGlvbj48b3B0aW9uPkZsb3JpYW5hIFp1Y2Fybzwvb3B0aW9uPjxvcHRpb24+R2VyYXJkbyBDYXJwZW50aWVyaTwvb3B0aW9uPgogICAgICAgIDxvcHRpb24+UGVwcGUgTWF6emVvPC9vcHRpb24+PG9wdGlvbj5Sb21hbm8gRmlzdG9sYTwvb3B0aW9uPjxvcHRpb24+Um9zYSBBbm5hIExhIFJvY2NhPC9vcHRpb24+CiAgICAgICAgPG9wdGlvbj5Sb3NhcmlhIEJhdHRhcnJhPC9vcHRpb24+PG9wdGlvbj5TdGVmYW5vIEZyYW5jbzwvb3B0aW9uPgogICAgICA8L3NlbGVjdD4KICAgIDwvZGl2PgogICAgPGRpdiBjbGFzcz0iZnIiPjxsYWJlbD5Db3B5ZWRpdG9yPC9sYWJlbD4KICAgICAgPHNlbGVjdCBpZD0iZkNvcHkiPgogICAgICAgIDxvcHRpb24gdmFsdWU9IiI+4oCUIFNlbGV6aW9uYSDigJQ8L29wdGlvbj4KICAgICAgICA8b3B0aW9uPkdlcmFyZG8gQ2FycGVudGllcmk8L29wdGlvbj48b3B0aW9uPkxhdXJhIEFzY2lvbmU8L29wdGlvbj48b3B0aW9uPk51bnppYSBEJ0FtaWNvPC9vcHRpb24+CiAgICAgICAgPG9wdGlvbj5TdGVsbGEgUGVubmlubzwvb3B0aW9uPjxvcHRpb24+VG9uaWEgU3RpdXNvPC9vcHRpb24+PG9wdGlvbj5WYWxlcmlvIE1hcnRpbmVsbGk8L29wdGlvbj4KICAgICAgPC9zZWxlY3Q+CiAgICA8L2Rpdj4KICA8L2Rpdj4KICA8ZGl2IGNsYXNzPSJmc2wiPk1ldHJpY2hlIGNpdGF6aW9uYWxpPC9kaXY+CiAgPGRpdiBzdHlsZT0ibWFyZ2luLWJvdHRvbToxMHB4Ij48YSBocmVmPSJodHRwczovL2NsYXVkZS5haS9wdWJsaWMvYXJ0aWZhY3RzLzEzYjEwZDgyLTA5NDQtNDRkZS05MDU5LTk0ZTQ2YzM2NmU3ZCIgdGFyZ2V0PSJfYmxhbmsiIHJlbD0ibm9vcGVuZXIiIGNsYXNzPSJidG4iIHN0eWxlPSJmb250LXNpemU6MjBweDtkaXNwbGF5OmlubGluZS1mbGV4O2FsaWduLWl0ZW1zOmNlbnRlcjtnYXA6NnB4Ij4mIzEyODIwMDsgQ2FsY29sYSBpbmRpY2F0b3JpIGNpdGF6aW9uYWxpPC9hPjwvZGl2PgogIDxkaXYgY2xhc3M9ImczIj4KICAgIDxkaXYgY2xhc3M9ImZyIj48bGFiZWw+UmVmZXJlbmNlcyB0b3RhbGk8L2xhYmVsPjxpbnB1dCBpZD0iZlJlZnMiIHR5cGU9Im51bWJlciIgbWluPSIwIj48L2Rpdj4KICAgIDxkaXYgY2xhc3M9ImZyIj48bGFiZWw+Q2l0YXppb25pIFRlTUE8L2xhYmVsPjxpbnB1dCBpZD0iZkNUZU1BIiB0eXBlPSJudW1iZXIiIG1pbj0iMCI+PC9kaXY+CiAgICA8ZGl2IGNsYXNzPSJmciI+PGxhYmVsPkNpdGF6aW9uaSBUZU1BIDIwMjImbmRhc2g7MjAyNjwvbGFiZWw+PGlucHV0IGlkPSJmQ1RlTUEyMjI2IiB0eXBlPSJudW1iZXIiIG1pbj0iMCI+PC9kaXY+CiAgPC9kaXY+CiAgPGRpdiBjbGFzcz0iZzIiPgogICAgPGRpdiBjbGFzcz0iZnIiPjxsYWJlbD5DaXRhemlvbmkgSkNSIHRvdGFsZTwvbGFiZWw+PGlucHV0IGlkPSJmQ0pDUiIgdHlwZT0ibnVtYmVyIiBtaW49IjAiPjwvZGl2PgogICAgPGRpdiBjbGFzcz0iZnIiPjxsYWJlbD5DaXRhemlvbmkgSkNSIGxhc3QgMiB5ZWFyczwvbGFiZWw+PGlucHV0IGlkPSJmQ0pDUjJ5IiB0eXBlPSJudW1iZXIiIG1pbj0iMCI+PC9kaXY+CiAgPC9kaXY+CiAgPGRpdiBjbGFzcz0iZnNsIj5Qcm9jZXNzbyBkaSByZXZpc2lvbmU8L2Rpdj4KICA8ZGl2IGlkPSJyZXZMaXN0Ij48L2Rpdj4KICA8YnV0dG9uIGNsYXNzPSJidG4iIGlkPSJidG5BZGRSZXYiIHN0eWxlPSJtYXJnaW4tYm90dG9tOjEwcHg7Zm9udC1zaXplOjIwcHgiPisgQWdnaXVuZ2kgcmV2aXNvcmU8L2J1dHRvbj4KICA8ZGl2IGNsYXNzPSJnMiIgc3R5bGU9Im1hcmdpbi10b3A6NnB4O21hcmdpbi1ib3R0b206MTJweDthbGlnbi1pdGVtczplbmQiPgogICAgPGRpdiBjbGFzcz0iZnIiIHN0eWxlPSJtYXJnaW4tYm90dG9tOjAiPjxsYWJlbD5EZWNpc2lvbmUgZGVsbCdlZGl0b3I8L2xhYmVsPjxzZWxlY3QgaWQ9ImZEZWNpc2lvbmVFZGl0b3IiIG9uY2hhbmdlPSJjaGVja0RlY2lzaW9uZUVkaXRvcigpIj48b3B0aW9uIHZhbHVlPSIiPiYjODIxMjs8L29wdGlvbj48b3B0aW9uIHZhbHVlPSJBY2NlcHQgc3VibWlzc2lvbiI+QWNjZXB0IHN1Ym1pc3Npb248L29wdGlvbj48b3B0aW9uIHZhbHVlPSJSZXZpc2lvbnMgcmVxdWlyZWQiPlJldmlzaW9ucyByZXF1aXJlZDwvb3B0aW9uPjxvcHRpb24gdmFsdWU9IlJlc3VibWl0IGZvciBSZXZpZXciPlJlc3VibWl0IGZvciBSZXZpZXc8L29wdGlvbj48b3B0aW9uIHZhbHVlPSJSZXN1Ym1pdCBFbHNld2hlcmUiPlJlc3VibWl0IEVsc2V3aGVyZTwvb3B0aW9uPjxvcHRpb24gdmFsdWU9IkRlY2xpbmUgc3VibWlzc2lvbiI+RGVjbGluZSBzdWJtaXNzaW9uPC9vcHRpb24+PC9zZWxlY3Q+PC9kaXY+CiAgICA8ZGl2IGNsYXNzPSJmciIgaWQ9ImZEYXRhUmV2aXNpb25lV3JhcCIgc3R5bGU9Im1hcmdpbi1ib3R0b206MDtkaXNwbGF5Om5vbmUiPjxsYWJlbD5EYXRhIGNvbnNlZ25hIHZlcnNpb25lIHJldmlzaW9uYXRhPC9sYWJlbD48aW5wdXQgdHlwZT0iZGF0ZSIgaWQ9ImZEYXRhUmV2aXNpb25lIj48L2Rpdj4KICA8L2Rpdj4KICA8IS0tIFNlY29uZG8gcHJvY2Vzc28gZGkgcmV2aXNpb25lICh2aXNpYmlsZSBzb2xvIGNvbiBSZXN1Ym1pdCBmb3IgUmV2aWV3KSAtLT4KICA8ZGl2IGlkPSJyZXYyU2VjdGlvbiIgc3R5bGU9ImRpc3BsYXk6bm9uZTtib3JkZXItdG9wOjEuNXB4IGRhc2hlZCB2YXIoLS1icmQpO3BhZGRpbmctdG9wOjFyZW07bWFyZ2luLXRvcDouNXJlbSI+CiAgICA8ZGl2IGNsYXNzPSJmc2wiIHN0eWxlPSJtYXJnaW4tdG9wOjA7Ym9yZGVyLXRvcDpub25lO3BhZGRpbmctdG9wOjAiPlByb2Nlc3NvIGRpIHJldmlzaW9uZSAyPC9kaXY+CiAgICA8ZGl2IGlkPSJyZXZMaXN0MiI+PC9kaXY+CiAgICA8YnV0dG9uIGNsYXNzPSJidG4iIGlkPSJidG5BZGRSZXYyIiBzdHlsZT0ibWFyZ2luLWJvdHRvbToxMHB4O2ZvbnQtc2l6ZToyMHB4Ij4rIEFnZ2l1bmdpIHJldmlzb3JlICgywrAgcm91bmQpPC9idXR0b24+CiAgICA8ZGl2IGNsYXNzPSJnMiIgc3R5bGU9Im1hcmdpbi10b3A6NnB4O2FsaWduLWl0ZW1zOmVuZCI+CiAgICAgIDxkaXYgY2xhc3M9ImZyIiBzdHlsZT0ibWFyZ2luLWJvdHRvbTowIj48bGFiZWw+RGVjaXNpb25lIGRlbGwnZWRpdG9yICgywrAgcm91bmQpPC9sYWJlbD48c2VsZWN0IGlkPSJmRGVjaXNpb25lRWRpdG9yMiIgb25jaGFuZ2U9ImNoZWNrRGVjaXNpb25lRWRpdG9yMigpIj48b3B0aW9uIHZhbHVlPSIiPiYjODIxMjs8L29wdGlvbj48b3B0aW9uIHZhbHVlPSJBY2NlcHQgc3VibWlzc2lvbiI+QWNjZXB0IHN1Ym1pc3Npb248L29wdGlvbj48b3B0aW9uIHZhbHVlPSJSZXZpc2lvbnMgcmVxdWlyZWQiPlJldmlzaW9ucyByZXF1aXJlZDwvb3B0aW9uPjxvcHRpb24gdmFsdWU9IlJlc3VibWl0IGZvciBSZXZpZXciPlJlc3VibWl0IGZvciBSZXZpZXc8L29wdGlvbj48b3B0aW9uIHZhbHVlPSJSZXN1Ym1pdCBFbHNld2hlcmUiPlJlc3VibWl0IEVsc2V3aGVyZTwvb3B0aW9uPjxvcHRpb24gdmFsdWU9IkRlY2xpbmUgc3VibWlzc2lvbiI+RGVjbGluZSBzdWJtaXNzaW9uPC9vcHRpb24+PC9zZWxlY3Q+PC9kaXY+CiAgICAgIDxkaXYgY2xhc3M9ImZyIiBpZD0iZkRhdGFSZXZpc2lvbmUyV3JhcCIgc3R5bGU9Im1hcmdpbi1ib3R0b206MDtkaXNwbGF5Om5vbmUiPjxsYWJlbD5EYXRhIGNvbnNlZ25hIHZlcnNpb25lIHJldmlzaW9uYXRhICgywrApPC9sYWJlbD48aW5wdXQgdHlwZT0iZGF0ZSIgaWQ9ImZEYXRhUmV2aXNpb25lMiI+PC9kaXY+CiAgICA8L2Rpdj4KICA8L2Rpdj4KICA8ZGl2IGNsYXNzPSJmc2wiPk5vdGU8L2Rpdj4KICA8ZGl2IGNsYXNzPSJmciI+PHRleHRhcmVhIGlkPSJmTm90ZXMiIHJvd3M9IjMiPjwvdGV4dGFyZWE+PC9kaXY+CiAgPGRpdiBjbGFzcz0iZnNsIiBzdHlsZT0iZGlzcGxheTpmbGV4O2FsaWduLWl0ZW1zOmNlbnRlcjtqdXN0aWZ5LWNvbnRlbnQ6c3BhY2UtYmV0d2VlbiI+UHViYmxpY2F6aW9uZTxidXR0b24gdHlwZT0iYnV0dG9uIiBjbGFzcz0iYnRuIiBpZD0iYnRuVW5sb2NrUHViIiBzdHlsZT0iZm9udC1zaXplOjIwcHg7cGFkZGluZzoycHggOHB4Ij4mIzEyODI3NDsgU2Jsb2NjYTwvYnV0dG9uPjwvZGl2PgogIDxkaXYgY2xhc3M9ImZpZWxkLWxvY2tlZCIgaWQ9InB1Ykdyb3VwIj4KICA8ZGl2IGNsYXNzPSJnMyI+CiAgICA8ZGl2IGNsYXNzPSJmciI+PGxhYmVsPkZhc2NpY29sbzwvbGFiZWw+PHNlbGVjdCBpZD0iZklzc0FydCI+PC9zZWxlY3Q+PC9kaXY+CiAgICA8ZGl2IGNsYXNzPSJmciI+PGxhYmVsPlNlemlvbmU8L2xhYmVsPjxzZWxlY3QgaWQ9ImZTZWNBcnQiPjxvcHRpb24+Rm9jdXM8L29wdGlvbj48b3B0aW9uPkxVTUU8L29wdGlvbj48b3B0aW9uPlNJPC9vcHRpb24+PG9wdGlvbj7igJQ8L29wdGlvbj48L3NlbGVjdD48L2Rpdj4KICAgIDxkaXYgY2xhc3M9ImZyIj48bGFiZWw+TiZkZWc7IG5lbCBmYXNjaWNvbG88L2xhYmVsPjxpbnB1dCBpZD0iZkFydE51bSIgdHlwZT0ibnVtYmVyIiBtaW49IjEiPjwvZGl2PgogIDwvZGl2PgogIDwvZGl2PgogIDxkaXYgY2xhc3M9Im1mb290Ij4KICAgIDxidXR0b24gY2xhc3M9ImJ0biBidG4tZCIgaWQ9ImJ0bkRlbCIgc3R5bGU9Im1hcmdpbi1yaWdodDphdXRvO2Rpc3BsYXk6bm9uZSI+RWxpbWluYTwvYnV0dG9uPgogICAgPGJ1dHRvbiBjbGFzcz0iYnRuIiBpZD0iYnRuUmlmaXV0b0dLIiBzdHlsZT0iZGlzcGxheTpub25lO2JhY2tncm91bmQ6dmFyKC0tb3JhbmdlLWJnKTtjb2xvcjp2YXIoLS1vcmFuZ2UtdHgpO2JvcmRlci1jb2xvcjojZjViN2EwIj5SaWZpdXRvIEdhdGVLZWVwZXI8L2J1dHRvbj4KICAgIDxidXR0b24gY2xhc3M9ImJ0biIgaWQ9ImJ0blJpZml1dG9UdXIiIHN0eWxlPSJkaXNwbGF5Om5vbmU7YmFja2dyb3VuZDp2YXIoLS1hbWJlci1iZyk7Y29sb3I6dmFyKC0tYW1iZXItdHgpO2JvcmRlci1jb2xvcjojZjVkNWEwIj5SaWZpdXRvIFR1cm5pdGluPC9idXR0b24+CiAgICA8YnV0dG9uIGNsYXNzPSJidG4iIGlkPSJidG5BcnRDYW5jZWwiPkFubnVsbGE8L2J1dHRvbj4KICAgIDxidXR0b24gY2xhc3M9ImJ0biBidG4tcCIgaWQ9ImJ0bkFydFNhdmUiPlNhbHZhPC9idXR0b24+CiAgPC9kaXY+CjwvZGl2Pgo8L2Rpdj4KCjwhLS0gSVNTVUUgTU9EQUwgLS0+CjxkaXYgY2xhc3M9Im1vZGFsLWJnIiBpZD0iaXNzTW9kYWwiPgo8ZGl2IGNsYXNzPSJtb2RhbCIgc3R5bGU9Im1heC13aWR0aDo0MjBweCI+CiAgPGgzIGlkPSJpc3NNb2RhbFRpdGxlIj5OdW92byBmYXNjaWNvbG88L2gzPgogIDxkaXYgY2xhc3M9ImZyIj48bGFiZWw+VGlwbzwvbGFiZWw+CiAgICA8c2VsZWN0IGlkPSJpVHlwZSI+PG9wdGlvbiB2YWx1ZT0ib3JkaW5hcmlvIj5OdW1lcm8gb3JkaW5hcmlvPC9vcHRpb24+PG9wdGlvbiB2YWx1ZT0ic2kiPk51bWVybyBTcGVjaWFsZSAoU0kpPC9vcHRpb24+PC9zZWxlY3Q+CiAgPC9kaXY+CiAgPGRpdiBjbGFzcz0iZnIiIGlkPSJpWWVhclJvdyI+PGxhYmVsPkFubm88L2xhYmVsPjxpbnB1dCBpZD0iaVllYXIiIHR5cGU9Im51bWJlciIgdmFsdWU9IjIwMjYiIG1pbj0iMjAyMCIgbWF4PSIyMDQwIj48L2Rpdj4KICA8ZGl2IGNsYXNzPSJmciIgaWQ9ImlOdW1Sb3ciPjxsYWJlbD5OdW1lcm8gKDEmbmRhc2g7Myk8L2xhYmVsPgogICAgPHNlbGVjdCBpZD0iaU51bSI+PG9wdGlvbiB2YWx1ZT0iMSI+MDE8L29wdGlvbj48b3B0aW9uIHZhbHVlPSIyIj4wMjwvb3B0aW9uPjxvcHRpb24gdmFsdWU9IjMiPjAzPC9vcHRpb24+PC9zZWxlY3Q+CiAgPC9kaXY+CiAgPGRpdiBjbGFzcz0iZnIiPjxsYWJlbD5UZW1hIC8gVGl0b2xvPC9sYWJlbD48aW5wdXQgaWQ9ImlUaGVtZSI+PC9kaXY+CiAgPGRpdiBjbGFzcz0iZnIiPjxsYWJlbD5EYXRhIHByZXZpc3RhIHB1YmJsaWNhemlvbmU8L2xhYmVsPjxpbnB1dCBpZD0iaURlYWRsaW5lIiB0eXBlPSJkYXRlIj48L2Rpdj4KICA8ZGl2IGNsYXNzPSJmciI+PGxhYmVsPk5vdGU8L2xhYmVsPjx0ZXh0YXJlYSBpZD0iaU5vdGVzIiByb3dzPSIyIj48L3RleHRhcmVhPjwvZGl2PgogIDxkaXYgY2xhc3M9ImZyIiBzdHlsZT0iZGlzcGxheTpmbGV4O2FsaWduLWl0ZW1zOmNlbnRlcjtnYXA6MTBweDtwYWRkaW5nOjhweCAwO2JvcmRlci10b3A6MXB4IHNvbGlkIHZhcigtLWJyZCk7bWFyZ2luLXRvcDo0cHgiPgogICAgPGlucHV0IHR5cGU9ImNoZWNrYm94IiBpZD0iaVB1YiIgc3R5bGU9IndpZHRoOmF1dG87YWNjZW50LWNvbG9yOnZhcigtLWdyZWVuKSI+CiAgICA8bGFiZWwgZm9yPSJpUHViIiBzdHlsZT0iZm9udC1zaXplOjIwcHg7Zm9udC13ZWlnaHQ6NjAwO2NvbG9yOnZhcigtLWdyZWVuLXR4KTtjdXJzb3I6cG9pbnRlcjttYXJnaW46MDtmb250LWZhbWlseTpzYW5zLXNlcmlmIj5GYXNjaWNvbG8gcHViYmxpY2F0byAmbWRhc2g7IHNwb3N0YSB0dXR0aSBnbGkgYXJ0aWNvbGkgaW4gUHViYmxpY2F0aTwvbGFiZWw+CiAgPC9kaXY+CiAgPGRpdiBjbGFzcz0ibWZvb3QiPgogICAgPGJ1dHRvbiBjbGFzcz0iYnRuIGJ0bi1kIiBpZD0iYnRuRGVsSXNzIiBzdHlsZT0ibWFyZ2luLXJpZ2h0OmF1dG87ZGlzcGxheTpub25lIj5FbGltaW5hIGZhc2NpY29sbzwvYnV0dG9uPgogICAgPGJ1dHRvbiBjbGFzcz0iYnRuIiBpZD0iYnRuSXNzQ2FuY2VsIj5Bbm51bGxhPC9idXR0b24+CiAgICA8YnV0dG9uIGNsYXNzPSJidG4gYnRuLXAiIGlkPSJidG5Jc3NTYXZlIj5TYWx2YTwvYnV0dG9uPgogIDwvZGl2Pgo8L2Rpdj4KPC9kaXY+Cgo8IS0tIFBBU1NXT1JEIE1PREFMIC0tPgo8ZGl2IGNsYXNzPSJtb2RhbC1iZyIgaWQ9InB3ZE1vZGFsIiBzdHlsZT0iei1pbmRleDoyMDAiPgo8ZGl2IGNsYXNzPSJtb2RhbCIgc3R5bGU9Im1heC13aWR0aDozNDBweDt0ZXh0LWFsaWduOmNlbnRlciI+CiAgPGRpdiBzdHlsZT0iZm9udC1zaXplOjI4cHg7bWFyZ2luLWJvdHRvbTouNXJlbSI+JiMxMjgyNzQ7PC9kaXY+CiAgPGgzIHN0eWxlPSJtYXJnaW4tYm90dG9tOi41cmVtIj5BY2Nlc3NvIHJpc2VydmF0bzwvaDM+CiAgPHAgc3R5bGU9ImZvbnQtc2l6ZToyMHB4O2NvbG9yOnZhcigtLXR4Mik7bWFyZ2luLWJvdHRvbToxcmVtO2ZvbnQtZmFtaWx5OnNhbnMtc2VyaWYiPkluc2VyaXNjaSBsYSBwYXNzd29yZCBwZXIgcHJvY2VkZXJlLjwvcD4KICA8ZGl2IGNsYXNzPSJmciIgc3R5bGU9InRleHQtYWxpZ246bGVmdCI+PGxhYmVsPlBhc3N3b3JkPC9sYWJlbD48aW5wdXQgdHlwZT0icGFzc3dvcmQiIGlkPSJwd2RJbnB1dCI+PC9kaXY+CiAgPGRpdiBpZD0icHdkRXJyIiBzdHlsZT0iZm9udC1zaXplOjIwcHg7Y29sb3I6dmFyKC0tcmVkKTttYXJnaW4tdG9wOjRweDtkaXNwbGF5Om5vbmU7Zm9udC1mYW1pbHk6c2Fucy1zZXJpZiI+UGFzc3dvcmQgZXJyYXRhLjwvZGl2PgogIDxkaXYgc3R5bGU9ImRpc3BsYXk6ZmxleDtnYXA6OHB4O2p1c3RpZnktY29udGVudDpjZW50ZXI7bWFyZ2luLXRvcDoxcmVtO3BhZGRpbmctdG9wOjFyZW07Ym9yZGVyLXRvcDoxcHggc29saWQgdmFyKC0tYnJkKSI+CiAgICA8YnV0dG9uIGNsYXNzPSJidG4iIGlkPSJidG5Qd2RDYW5jZWwiPkFubnVsbGE8L2J1dHRvbj4KICAgIDxidXR0b24gY2xhc3M9ImJ0biBidG4tcCIgaWQ9ImJ0blB3ZE9rIj5BY2NlZGk8L2J1dHRvbj4KICA8L2Rpdj4KPC9kaXY+CjwvZGl2Pg==";
+
+function doLogin() {
+  var u = document.getElementById('loginUser').value;
+  var p = document.getElementById('loginPass').value;
+  if (u === 'RedazioneTeMA' && p === '#218009@') {
+    sessionStorage.setItem('tema_auth','1');
+    bootApp();
+  } else {
+    document.getElementById('loginErr').style.display = 'block';
+    document.getElementById('loginPass').value = '';
+    document.getElementById('loginPass').focus();
+  }
+}
+
+function bootApp() {
+  document.getElementById('loginScreen').style.display = 'none';
+  var html = decodeURIComponent(escape(atob(_h)));
+  document.getElementById('appRoot').innerHTML = html;
+  // Run app JS
+  (function(){
 const DEF_ISSUES=[{"key":"01/2026","label":"TeMA 01/2026","type":"ordinario","year":2026,"num":1,"theme":"The city challenges and external agents","deadline":"2026-04-30","note":"Pubblicazione prevista 30/04/2026"},{"key":"SI-LWC","label":"SI Convegno Brescia (LWC)","type":"si","theme":"Living With Climate","deadline":"2026-03-30","note":"10 contributi completi. Editoriale e sommario pronti."},{"key":"SI-AI","label":"SI Intelligenza Artificiale","type":"si","theme":"Romano Fistola & Rosa Anna La Rocca","deadline":"","note":"Call messa a punto. 11 esperti individuati. Volume Springer."}];
 const DEF_ARTICLES=[{"id":"12621","title":"The Impact of Land Use and Land Cover (LULC) Changes on Coastal Dynamics Through Landscape Structure","authors":"Makbulenur Onur","affiliation":"Karadeniz Technical University, Turchia","nationality":"Turchia","intl":"si","abstract":"","length":0,"section":"Focus","status":"Revisione autore","step":"8","issue":"01/2026","articleNum":1,"deadline":"2026-03-25","editor":"Floriana Zucaro","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"Revisione richiesta da entrambi i revisori. Versione revisionata attesa per il 25 marzo."},{"id":"12656","title":"Spatial and temporal evolution of urban reserve available land resources in the karst region of North China from 1990 to 2020","authors":"Shujin Wang, Shanzhong Qi","affiliation":"Shandong Normal University, China","nationality":"Cina","intl":"si","abstract":"","length":0,"section":"Focus","status":"In referaggio","step":"6","issue":"01/2026","articleNum":2,"deadline":"2026-03-29","editor":"Floriana Zucaro","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"Arezoo Salamatnia (Tehran) ha richiesto modifiche. Zijuan Zhu (Beijing) scadenza 29 marzo."},{"id":"12394","title":"Assessing Urban Growth and Pollution through Nightlight Data: A Case Study in Thailand","authors":"Chaichana Kulworatit, Phuvis Kerdpramote, Saranya Saetang","affiliation":"KMITL Bangkok","nationality":"Tailandia","intl":"si","abstract":"","length":0,"section":"LUME","status":"Concluso","step":"8b","issue":"01/2026","articleNum":3,"deadline":"","editor":"","copyeditor":"","gatekeeper":"","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[]},{"id":"12458","title":"Exploring Governance Challenges in Coastal and Marine Tourism","authors":"Barbara Gasparini, Emanuel Giannotti, Vittore Negretto, Denis Maragno","affiliation":"IUAV","nationality":"Italia","intl":"no","abstract":"","length":0,"section":"LUME","status":"Concluso","step":"8b","issue":"01/2026","articleNum":4,"deadline":"","editor":"","copyeditor":"","gatekeeper":"","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[]},{"id":"12634","title":"Beyond the Map Decision Support Systems for Spatial and Mobility Planning","authors":"Mara Ladu, Ginevra Balletto, Tanja Congiu, Gianfranco Fancello, Ernesto Fontes Pupo","affiliation":"Università di Cagliari","nationality":"Italia","intl":"no","abstract":"","length":0,"section":"LUME","status":"Concluso","step":"8b","issue":"01/2026","articleNum":5,"deadline":"","editor":"","copyeditor":"","gatekeeper":"","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[]},{"id":"11322","title":"Biodiversity and Ecological Network: GeoAI for Modica Green city","authors":"Chiara Spadaro, Celestina Fazia","affiliation":"Università Kore","nationality":"Italia","intl":"no","abstract":"","length":0,"section":"LUME","status":"Concluso","step":"12","issue":"01/2026","articleNum":6,"deadline":"","editor":"Romano Fistola","copyeditor":"Valerio Martinelli","gatekeeper":"","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[]},{"id":"12696","title":"Impact of Renewable Energy Systems on Water Ecosystem Services","authors":"Maria Cristina Marino, Beniamino Murgante","affiliation":"Università della Basilicata","nationality":"Italia","intl":"no","abstract":"","length":0,"section":"LUME","status":"Revisione autore","step":"8","issue":"01/2026","articleNum":7,"deadline":"2026-03-21","editor":"Gerardo Carpentieri","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"Versione revisionata attesa per il 21 marzo."},{"id":"12803","title":"Examining the temporal and spatial change of current land cover types in Demre District using machine learning","authors":"Sibel Akten, Hüseyin Batuhan Dündar, Atila Gül","affiliation":"Suleyman University, Turchia","nationality":"Turchia","intl":"si","abstract":"","length":0,"section":"LUME","status":"In referaggio","step":"5","issue":"01/2026","articleNum":8,"deadline":"2026-03-09","editor":"Carmen Guida","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"Paulo Batista (Aveiro) ha accettato. In attesa di Ahmet Benliay."},{"id":"11344","title":"Evaluating Urban Fabric Transformations Using GeoAI","authors":"Alessandro Vitale","affiliation":"Università della Calabria","nationality":"Italia","intl":"no","abstract":"","length":0,"section":"LUME","status":"Concluso","step":"12","issue":"01/2026","articleNum":9,"deadline":"","editor":"Rosa Anna La Rocca","copyeditor":"Nunzia D'Amico","gatekeeper":"","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[]},{"id":"11551","title":"CITISENSE. Enhancing Urban Well-being through Smart Design, Data and AI","authors":"Pierfrancesco Celani, Daniel Enrique Sardo, Massimo Zupi, Margherita Tufarelli, Adriano Bisello","affiliation":"Università della Calabria; Università di Firenze; ITESO Guadalajara","nationality":"Italia / Messico","intl":"si","abstract":"","length":0,"section":"LUME","status":"Concluso","step":"12","issue":"01/2026","articleNum":10,"deadline":"","editor":"Gerardo Carpentieri","copyeditor":"Gerardo Carpentieri","gatekeeper":"","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[]},{"id":"11378","title":"AI as a Tool for Urban Regeneration Processes","authors":"Carlo Adornetto","affiliation":"Università della Calabria","nationality":"Italia","intl":"no","abstract":"","length":0,"section":"LUME","status":"Copyediting","step":"12","issue":"","articleNum":null,"deadline":"","editor":"Romano Fistola","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"SI Francini. In attesa di secondo referee."},{"id":"12735","title":"Planning for Sustainable Tourism in Protected Areas","authors":"Rachele Gatto, Francesco Scorza","affiliation":"Università della Basilicata","nationality":"Italia","intl":"no","abstract":"","length":0,"section":"—","status":"Revisione autore","step":"7","issue":"","articleNum":null,"deadline":"2026-03-16","editor":"Rosa Anna La Rocca","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"Autori invieranno versione revisionata entro il 16 marzo."},{"id":"12609","title":"Liberal and deliberative democracy in planning paradigms: reflections on upper-scale planning in Türkiye","authors":"Büşra Durmaz, Cihan Ercetin","affiliation":"KU Leuven, Belgio","nationality":"Belgio / Turchia","intl":"si","abstract":"","length":0,"section":"LUME","status":"In referaggio","step":"6","issue":"","articleNum":null,"deadline":"2026-02-28","editor":"Romano Fistola","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"Elisabetta Venco (Pavia) ha completato. Patrizia Battilani (Bologna) scadenza 28 feb."},{"id":"13110","title":"Identification and mapping of traffic congestion hotspots in urban areas","authors":"Frederic Laurent esse esse","affiliation":"University of Douala, Cameroon","nationality":"Camerun","intl":"si","abstract":"","length":0,"section":"Focus","status":"GateKeeper evaluation","step":"8b","issue":"","articleNum":null,"deadline":"","editor":"","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"L'articolo è stato rifiutato il 16 marzo 2026 percè l'autore non ha inviato la lista dei possibili revisori e non ha risposto alle mail","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[]},{"id":"13143","title":"Evaluating the efficacy of smart technologies in disseminating transportation systems information during earthquake scenarios","authors":"Izza Anwer, Irfan Yousuf","affiliation":"Susan University of Engineering and Technology, Lahore","nationality":"Pakistan","intl":"si","abstract":"","length":0,"section":"Focus","status":"Sottomesso","step":"2","issue":"","articleNum":null,"deadline":"","editor":"Peppe Mazzeo","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":""},{"id":"13165","title":"Methodological Approaches for Food Security Mapping","authors":"Silvia Zannin, Denis Maragno","affiliation":"IUAV","nationality":"Italia","intl":"no","abstract":"","length":0,"section":"LUME","status":"Sottomesso","step":"2","issue":"","articleNum":null,"deadline":"","editor":"Rosaria Battarra","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":""},{"id":"13052","title":"Climate Adaptation and Mitigation. A Multicriteria Decision-Support System for the Basilicata Region","authors":"Alfonso Annunziata, Francesco Scorza","affiliation":"Università della Basilicata","nationality":"Italia","intl":"no","abstract":"","length":0,"section":"Focus","status":"Sottomesso","step":"2","issue":"","articleNum":null,"deadline":"","editor":"Rosaria Battarra","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":""},{"id":"13329","title":"Tactical Urbanism in Rome. Toward an Alliance for Bottom-Up Interventions on Public Spaces","authors":"Francesca Paola Mondelli, Chiara Amato","affiliation":"Università Roma Tre","nationality":"Italia","intl":"no","abstract":"","length":0,"section":"—","status":"GateKeeper evaluation","step":"8","issue":"","articleNum":null,"deadline":"","editor":"Carmen Guida","copyeditor":"","gatekeeper":"","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"Please submit the revised version of the paper within one month of receiving this email. If the revised manuscript is not received within this timeframe, we will need to cancel the current submission. You will still be welcome to submit the updated version as a new submission at a later stage. in data 6 marzo 2023","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[]},{"id":"13275","title":"AI-Driven Public Transport Corridor Design for Sustainable Urban Mobility","authors":"Agus Mansur, Rizal Syarifuddin, Hari Purnomo, Winda Nur Cahyo","affiliation":"Universitas Islam, Indonesia","nationality":"Indonesia","intl":"si","abstract":"","length":0,"section":"—","status":"In referaggio","step":"5","issue":"","articleNum":null,"deadline":"2026-03-28","editor":"Gerardo Carpentieri","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"Ivan Gunawan (Surabaya) ha completato. Rangga Primadasa scadenza 28 marzo."},{"id":"13276","title":"Role of tourism in environment sustainability: evidence from most carbon emitting countries","authors":"Rafaqet Ali, Khuda Bakhsh, Muhammad Asim Yasin","affiliation":"Comsats University Islamabad","nationality":"Pakistan","intl":"si","abstract":"","length":0,"section":"—","status":"Sottomesso","step":"2","issue":"","articleNum":null,"deadline":"","editor":"Rosa Anna La Rocca","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":""},{"id":"13357","title":"Geospatial analysis on metro-induced land use change for inclusive transit-oriented development in Chennai","authors":"Kaviya Asokan, Sudhan Srinivas","affiliation":"Hindustan Institute of Technology and Science, India","nationality":"India","intl":"si","abstract":"","length":0,"section":"—","status":"GateKeeper evaluation","step":"6","issue":"","articleNum":null,"deadline":"","editor":"Carmen Guida","copyeditor":"","gatekeeper":"","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[{"nome":"Caterina Pietra","affiliazione":"University of pavia","dataConsegna":"2026-03-13","accettazione":"accettato","dataProroga":"","giudizio":""},{"nome":"Geoff Boeing","affiliazione":"","dataConsegna":"2026-03-13","accettazione":"in attesa","dataProroga":"","giudizio":""},{"nome":"Massimo Palme","affiliazione":"","dataConsegna":"2026-03-13","accettazione":"in attesa","dataProroga":"","giudizio":""}]},{"id":"13371","title":"Spatial analysis and urban development through the integration of ChatGPT-like large language models and QGIS","authors":"Valerio della Sala","affiliation":"Autonomous University of Barcelona","nationality":"Spagna","intl":"si","abstract":"The rapid convergence of artificial intelligence (AI), geographic information systems (GIS) and urban planning is reshaping how cities are analysed, designed and governed. Advances in large language models (LLMs) such as ChatGPT, together with the maturity of open‑source GIS platforms like QGIS, open new possibilities for natural language interaction with spatial data, automated geoprocessing, and human–AI co-production of planning knowledge. This article examines the conceptual, technical and governance implications of integrating ChatGPT-like models with QGIS for spatial analysis and urban development.\nDrawing on a systematic review of literature on generative AI in urban planning, AI-driven design, LLM-powered spatial intelligence, and planning support systems, the paper outlines the state of the art in AI-based planning support and GeoAI. It then proposes a framework for coupling LLM agents with QGIS via plugins and natural language interfaces, highlighting workflows for data interpretation, modelling, scenario analysis, and decision support.\nFour case study groups are discussed: LLM-enabled GIS processing; ChatGPT-assisted planning support systems; urban digital twins in cities such as Barcelona, Sofia, Dresden, Riyadh and Sedra; and AI-driven land‑use modelling. The article argues that coupling ChatGPT-like models and QGIS can lower cognitive barriers, support participatory planning, and enhance inclusive, transparent, and accountable urban development.","length":57892,"section":"Focus","status":"Sottomesso","step":"1","issue":"","articleNum":null,"deadline":"","editor":"","copyeditor":"","gatekeeper":"","similarity":1,"aiPercent":89,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"","comunicazioneInviata":true,"dataComunicazione":"2026-03-10","rispostaAutori":"","revisori":[]},{"id":"13419","title":"ROLE OF TOURISM IN ENVIRONMENT SUSTAINABILITY: EVIDENCE FROM MOST CARBON EMITTING COUNTRIES","authors":"Rafaqet Ali, Khuda Bakhsh, Muhammad Asim Yasin","affiliation":"COMSATS University Islamabad","nationality":"Pakistan","intl":"si","abstract":"Tourism has expanded during recent decades all over the world due to growth in global economy, emergence of middle class along with expansion in cross border modern transport facilities. It is evident from the literature that the impact of tourism on carbon emission is inconclusive. This study examines the impact of tourism on carbon emission in top ten carbon emitting countries. For this purpose, annual date for the period 1995-2019 is used and latest panel econometric techniques are applied. All the variables are found non-stationary at level, however, integrated at order one I(1) and cointegration prevails among the variables. The results of panel FMOLS and DOLS confirms that tourism is beneficial for environment quality in the long run. However, no short run causality prevails between tourism and carbon emission. These findings imply that incentives for development tourism industry need to be given for the sake of environment quality.","length":45017,"section":"Focus","status":"Sottomesso","step":"1","issue":"","articleNum":null,"deadline":"","editor":"","copyeditor":"","gatekeeper":"","similarity":16,"aiPercent":0,"refsTotal":46,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":8,"citeJCR2y":0,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[]},{"id":"13416","title":"Detection of Floating Debris Zones in the Chao Phraya River in Thailand Using Sentinel-2 Imagery. Floating Debris Detection in the Chao Phraya River","authors":"Chaichana Kulworatit, Niphat Craypo","affiliation":"King Mongkut's Institute of Technology Ladkrabang","nationality":"Thailandia","intl":"si","abstract":"Floating debris in urban rivers is an increasing environmental concern due to its impacts on water quality, aquatic ecosystems, and river management. This study aimed to detect suspected floating debris accumulation zones in a section of the Chao Phraya River, Bangkok, Thailand, using Sentinel-2 imagery and Google Earth Engine (GEE). A rule-based workflow was developed, including cloud and shadow masking, water surface extraction using the Normalized Difference Water Index (NDWI), and debris detection using the Floating Debris Index (FDI) with additional spectral thresholds for refinement. Based on 34 Sentinel-2 images, the final result identified 93 suspected debris patches covering a total area of 85,029.13 m² (8.50 ha). The detected patches appeared as discrete accumulation zones rather than continuous coverage. Although the method does not directly confirm plastic waste, the results demonstrate that the proposed approach can serve as a practical first-stage screening tool for river monitoring, hotspot identification, and future environmental management.","length":49366,"section":"Focus","status":"Sottomesso","step":"1","issue":"","articleNum":null,"deadline":"","editor":"","copyeditor":"","gatekeeper":"","similarity":8,"aiPercent":77,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[]}];
 
@@ -1860,8 +1548,14 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 });
+  })();
+}
 
+['loginUser','loginPass'].forEach(function(id){
+  document.getElementById(id).addEventListener('keydown',function(e){ if(e.key==='Enter') doLogin(); });
+});
+
+if (sessionStorage.getItem('tema_auth')==='1') { bootApp(); }
 </script>
-</div><!-- #mainApp -->
 </body>
 </html>
