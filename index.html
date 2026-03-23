@@ -2,13 +2,16 @@
 <html lang="it">
 <head>
 <meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap" rel="stylesheet">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>TeMA Journal — Gestione Editoriale</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
   --bg:#f8f7f4;--sur:#fff;--sur2:#f2f0ec;--brd:#e0ddd8;--brd2:#ccc9c2;
-  --tx:#1a1917;--tx2:#6b6760;--tx3:#9c9890;
+  --tx:#1a1917;--tx2:#1a1917;--tx3:#1a1917;
   --blue:#1a56db;--blue-bg:#eef3fd;--blue-tx:#1a3a6b;
   --green:#2d7a3a;--green-bg:#e8f5eb;--green-tx:#1a4a21;
   --amber:#b45309;--amber-bg:#fef3e2;--amber-tx:#7c3a00;
@@ -20,30 +23,30 @@
   --coral:#b03a1e;--coral-bg:#fce8e3;--coral-tx:#6b2010;
   --r:8px;--rl:12px;--sh:0 1px 3px rgba(0,0,0,.08);
 }
-body{font-family:Georgia,serif;background:var(--bg);color:var(--tx);font-size:14px;min-height:100vh;max-width:1200px;margin:0 auto;box-shadow:0 0 0 100vw var(--bg)}
-.app{padding:1.5rem 2rem}
+body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-size:20px;min-height:100vh}
+.app{width:80%;margin:0 auto;padding:1.5rem 0}
 .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;gap:12px;flex-wrap:wrap;border-bottom:1.5px solid var(--brd);padding-bottom:1rem}
-.brand-name{font-size:20px;font-weight:700}
-.brand-sub{font-size:12px;color:var(--tx2);font-family:sans-serif}
+.brand-name{font-size:24px;font-weight:700}
+.brand-sub{font-size:20px;color:var(--tx)}
 .save-dot{width:8px;height:8px;border-radius:50%;background:#2d7a3a;display:inline-block;transition:background .3s}
 .save-dot.saving{background:#b45309;animation:pulse 1s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-.save-lbl{font-size:11px;color:var(--tx2);font-family:sans-serif}
+.save-lbl{font-size:20px;color:var(--tx)}
 .stats-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:1.5rem}
 .stat{background:var(--sur);border:1px solid var(--brd);border-radius:var(--rl);padding:1rem;text-align:center;box-shadow:var(--sh)}
-.stat-edit{outline:none;font-size:22px;font-weight:700;width:80px;text-align:center;border:none;border-bottom:1.5px dashed var(--brd2);background:transparent;color:var(--blue);font-family:Georgia,serif;cursor:text}
+.stat-edit{outline:none;font-size:26px;font-weight:700;width:80px;text-align:center;border:none;border-bottom:1.5px dashed var(--brd2);background:transparent;color:var(--blue);cursor:text}
 .field-locked{pointer-events:none;opacity:.55;cursor:not-allowed}
 .field-locked select{background:var(--sur2)}
-.stat-lbl{font-size:11px;color:var(--tx2);margin-bottom:4px;line-height:1.3;font-family:sans-serif}
-.stat-val{font-size:22px;font-weight:700}
-.stat-sub{font-size:11px;color:var(--tx3);margin-top:2px;font-family:sans-serif}
+.stat-lbl{font-size:20px;color:var(--tx2);margin-bottom:4px;line-height:1.3}
+.stat-val{font-size:28px;font-weight:700}
+.stat-sub{font-size:20px;color:var(--tx3);margin-top:2px}
 .tabs{display:flex;gap:2px;margin-bottom:1.5rem;border-bottom:1.5px solid var(--brd);flex-wrap:wrap}
-.tab{padding:8px 14px;cursor:pointer;border:none;background:none;font-size:13px;color:var(--tx2);border-bottom:2.5px solid transparent;margin-bottom:-1.5px;font-family:sans-serif;white-space:nowrap}
+.tab{padding:8px 14px;cursor:pointer;border:none;background:none;font-size:20px;color:var(--tx2);border-bottom:2.5px solid transparent;margin-bottom:-1.5px;white-space:nowrap}
 .tab.active{color:var(--tx);border-bottom-color:var(--tx);font-weight:600}
 .tab:hover:not(.active){color:var(--tx);background:var(--sur2);border-radius:6px 6px 0 0}
 .sec{display:none}.sec.active{display:block}
 .card{background:var(--sur);border:1px solid var(--brd);border-radius:var(--rl);padding:1rem 1.25rem;margin-bottom:12px;box-shadow:var(--sh)}
-.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;font-family:sans-serif}
+.badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:20px;font-weight:600}
 .b-gk{background:var(--orange-bg);color:var(--orange-tx)}
 .b-sub{background:var(--sur2);color:var(--tx2)}
 .b-ref{background:var(--blue-bg);color:var(--blue-tx)}
@@ -58,48 +61,48 @@ body{font-family:Georgia,serif;background:var(--bg);color:var(--tx);font-size:14
 .b-purple{background:var(--purple-bg);color:var(--purple-tx)}
 .b-pink{background:var(--pink-bg);color:var(--pink-tx)}
 .b-coral{background:var(--coral-bg);color:var(--coral-tx)}
-.btn{padding:6px 14px;border:1px solid var(--brd2);border-radius:var(--r);background:var(--sur);color:var(--tx);font-size:12px;cursor:pointer;font-family:sans-serif}
+.btn{padding:7px 14px;border:1px solid var(--brd2);border-radius:var(--r);background:var(--sur);color:var(--tx);font-size:20px;cursor:pointer}
 .btn:hover{background:var(--sur2)}
 .btn-p{background:var(--tx);color:var(--sur);border-color:var(--tx)}
 .btn-p:hover{opacity:.85}
 .btn-d{background:var(--red-bg);color:var(--red-tx);border-color:#f5b7b1}
 .toolbar{display:flex;gap:8px;margin-bottom:1rem;align-items:center;flex-wrap:wrap}
-.toolbar select,.toolbar input{font-size:13px;padding:6px 10px;border:1px solid var(--brd);border-radius:var(--r);background:var(--sur);color:var(--tx);font-family:sans-serif}
+.toolbar select,.toolbar input{font-size:20px;padding:6px 10px;border:1px solid var(--brd);border-radius:var(--r);background:var(--sur);color:var(--tx)}
 .srch{flex:1;min-width:160px}
-.note-box{background:var(--sur2);border-radius:var(--r);padding:10px 12px;font-size:12px;color:var(--tx2);margin-top:8px;line-height:1.6;font-family:sans-serif}
+.note-box{background:var(--sur2);border-radius:var(--r);padding:10px 12px;font-size:20px;color:var(--tx);margin-top:8px;line-height:1.6}
 .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:center;justify-content:center}
 .modal-bg.open{display:flex}
-.modal{background:var(--sur);border-radius:var(--rl);border:1px solid var(--brd);padding:1.5rem;width:min(660px,95vw);max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2)}
-.modal h3{font-size:15px;font-weight:700;margin-bottom:1rem}
-.fsl{font-size:10px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.8px;margin:1rem 0 8px;padding-top:1rem;border-top:1px solid var(--brd);font-family:sans-serif}
+.modal{background:var(--sur);border-radius:var(--rl);border:1px solid var(--brd);padding:1.5rem;width:80vw;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.modal h3{font-size:20px;font-weight:700;margin-bottom:1rem}
+.fsl{font-size:20px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.8px;margin:1rem 0 8px;padding-top:1rem;border-top:1px solid var(--brd)}
 .fsl.first{margin-top:0;border-top:none;padding-top:0}
 .fr{margin-bottom:10px}
-.fr label{display:block;font-size:12px;color:var(--tx2);margin-bottom:3px;font-family:sans-serif}
-.fr input,.fr select,.fr textarea{width:100%;padding:7px 10px;border:1px solid var(--brd);border-radius:var(--r);font-size:13px;background:var(--sur);color:var(--tx);font-family:sans-serif}
+.fr label{display:block;font-size:20px;color:var(--tx);margin-bottom:3px}
+.fr input,.fr select,.fr textarea{width:100%;padding:8px 10px;border:1px solid var(--brd);border-radius:var(--r);font-size:20px;background:var(--sur);color:var(--tx)}
 .fr textarea{resize:vertical}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
 .g4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px}
 .mfoot{display:flex;gap:8px;justify-content:flex-end;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--brd)}
 .stt{position:relative;display:inline-block}
-.stag{display:inline-flex;align-items:center;background:var(--purple-bg);color:var(--purple-tx);font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;cursor:help;font-family:sans-serif}
-.spop{display:none;position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--sur);border:1px solid var(--brd);border-radius:var(--r);padding:8px 12px;font-size:12px;white-space:nowrap;z-index:200;min-width:240px;color:var(--tx);line-height:1.5;box-shadow:var(--sh);font-family:sans-serif}
+.stag{display:inline-flex;align-items:center;background:var(--purple-bg);color:var(--purple-tx);font-size:20px;font-weight:600;padding:2px 8px;border-radius:20px;cursor:help}
+.spop{display:none;position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--sur);border:1px solid var(--brd);border-radius:var(--r);padding:8px 12px;font-size:20px;white-space:nowrap;z-index:200;min-width:240px;color:var(--tx);line-height:1.5;box-shadow:var(--sh)}
 .stt:hover .spop{display:block}
-.mm{font-size:11px;padding:2px 7px;border-radius:20px;background:var(--sur2);color:var(--tx2);font-family:sans-serif}
-.issh{font-size:11px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.6px;margin:12px 0 6px;padding-bottom:4px;border-bottom:1px solid var(--brd);font-family:sans-serif}
+.mm{font-size:20px;padding:3px 8px;border-radius:20px;background:var(--sur2);color:var(--tx)}
+.issh{font-size:20px;font-weight:700;color:var(--tx);text-transform:uppercase;letter-spacing:.6px;margin:12px 0 6px;padding-bottom:4px;border-bottom:1px solid var(--brd)}
 .arow{display:grid;grid-template-columns:32px 1fr auto;gap:8px;align-items:start;padding:7px 0;border-bottom:1px solid var(--brd)}
 .arow:last-child{border-bottom:none}
-.anum{font-size:12px;font-weight:700;color:var(--tx3);text-align:right;font-family:monospace}
+.anum{font-size:20px;font-weight:700;color:var(--tx2);text-align:right;font-family:monospace}
 .vform{background:var(--sur);border:1px solid var(--brd);border-radius:var(--rl);padding:1rem 1.25rem;margin-bottom:1rem;box-shadow:var(--sh)}
-.vprev{font-family:Georgia,serif;font-size:13px;line-height:1.9;color:#111;background:#fff;padding:2rem;border:1px solid var(--brd);border-radius:var(--rl)}
-.vprev h1{font-size:15px;font-weight:700;text-align:center;border-bottom:1.5px solid #333;padding-bottom:.5rem;margin-bottom:1rem}
-.vprev h2{font-size:13px;font-weight:700;margin:1.2rem 0 .4rem;border-bottom:.5px solid #aaa;padding-bottom:.2rem}
+.vprev{font-size:20px;line-height:1.9;color:#111;background:#fff;padding:2rem;border:1px solid var(--brd);border-radius:var(--rl)}
+.vprev h1{font-size:20px;font-weight:700;text-align:center;border-bottom:1.5px solid #333;padding-bottom:.5rem;margin-bottom:1rem}
+.vprev h2{font-size:20px;font-weight:700;margin:1.2rem 0 .4rem;border-bottom:.5px solid #aaa;padding-bottom:.2rem}
 .vprev p{margin:.3rem 0;font-size:12.5px}
 .vprev .ae{margin:.6rem 0 .8rem 1rem;border-left:2px solid #ccc;padding-left:.8rem}
 .sim-ok{background:var(--green-bg);color:var(--green-tx)}
 .sim-warn{background:var(--amber-bg);color:var(--amber-tx)}
 .sim-danger{background:var(--red-bg);color:var(--red-tx)}
-.banner{background:#eef3fd;border:1px solid #c3d4f7;border-radius:var(--r);padding:8px 14px;font-size:12px;color:#1a3a6b;margin-bottom:1.25rem;display:flex;align-items:center;gap:8px;font-family:sans-serif}
+.banner{background:#eef3fd;border:1px solid #c3d4f7;border-radius:var(--r);padding:8px 14px;font-size:20px;color:#1a3a6b;margin-bottom:1.25rem;display:flex;align-items:center;gap:8px}
 .rev-card{background:var(--sur2);border:1px solid var(--brd);border-radius:var(--r);padding:10px 12px;margin-bottom:8px}
 @media(max-width:900px){.stats-grid{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:600px){.stats-grid{grid-template-columns:repeat(2,1fr)};.g3,.g4{grid-template-columns:1fr 1fr}}
@@ -133,7 +136,7 @@ body{font-family:Georgia,serif;background:var(--bg);color:var(--tx);font-size:14
 <div class="sec active" id="sec-gatekeeper">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
     <div style="font-size:16px;font-weight:700">GateKeeper evaluation</div>
-    <span id="gkCount" style="font-size:13px;color:var(--tx2);font-family:sans-serif"></span>
+    <span id="gkCount" style="font-size:20px;color:var(--tx2);font-family:sans-serif"></span>
   </div>
   <div class="toolbar"><input class="srch" type="text" id="srchGk" placeholder="Cerca..."></div>
   <div id="gkEl"></div>
@@ -181,7 +184,7 @@ body{font-family:Georgia,serif;background:var(--bg);color:var(--tx);font-size:14
 <div class="sec" id="sec-pubblicati">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
     <div style="font-size:16px;font-weight:700">Articoli pubblicati</div>
-    <span id="pubCount" style="font-size:13px;color:var(--tx2);font-family:sans-serif"></span>
+    <span id="pubCount" style="font-size:20px;color:var(--tx2);font-family:sans-serif"></span>
   </div>
   <div class="toolbar">
     <input class="srch" type="text" id="srchPub" placeholder="Cerca...">
@@ -194,10 +197,10 @@ body{font-family:Georgia,serif;background:var(--bg);color:var(--tx);font-size:14
 
   <div style="border:1px solid var(--brd);border-radius:var(--r);margin-bottom:8px;overflow:hidden">
     <div onclick="toggleAccordion('acc-ref')" style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;cursor:pointer;background:var(--sur2);user-select:none">
-      <span style="font-size:13px;font-weight:700;font-family:sans-serif">Rifiutato dal referaggio</span>
+      <span style="font-size:20px;font-weight:700;font-family:sans-serif">Rifiutato dal referaggio</span>
       <div style="display:flex;align-items:center;gap:10px">
-        <span id="rifRefCount" style="font-size:12px;color:var(--tx2);font-family:sans-serif"></span>
-        <span id="acc-ref-icon" style="font-size:12px;color:var(--tx2)">&#9660;</span>
+        <span id="rifRefCount" style="font-size:20px;color:var(--tx2);font-family:sans-serif"></span>
+        <span id="acc-ref-icon" style="font-size:20px;color:var(--tx2)">&#9660;</span>
       </div>
     </div>
     <div id="acc-ref" style="padding:12px;display:block">
@@ -208,10 +211,10 @@ body{font-family:Georgia,serif;background:var(--bg);color:var(--tx);font-size:14
 
   <div style="border:1px solid var(--brd);border-radius:var(--r);margin-bottom:8px;overflow:hidden">
     <div onclick="toggleAccordion('acc-gk')" style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;cursor:pointer;background:var(--sur2);user-select:none">
-      <span style="font-size:13px;font-weight:700;font-family:sans-serif">Rifiutato dal GateKeeper</span>
+      <span style="font-size:20px;font-weight:700;font-family:sans-serif">Rifiutato dal GateKeeper</span>
       <div style="display:flex;align-items:center;gap:10px">
-        <span id="rifGkCount" style="font-size:12px;color:var(--tx2);font-family:sans-serif"></span>
-        <span id="acc-gk-icon" style="font-size:12px;color:var(--tx2)">&#9660;</span>
+        <span id="rifGkCount" style="font-size:20px;color:var(--tx2);font-family:sans-serif"></span>
+        <span id="acc-gk-icon" style="font-size:20px;color:var(--tx2)">&#9660;</span>
       </div>
     </div>
     <div id="acc-gk" style="padding:12px;display:none">
@@ -222,10 +225,10 @@ body{font-family:Georgia,serif;background:var(--bg);color:var(--tx);font-size:14
 
   <div style="border:1px solid var(--brd);border-radius:var(--r);margin-bottom:8px;overflow:hidden">
     <div onclick="toggleAccordion('acc-tur')" style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;cursor:pointer;background:var(--sur2);user-select:none">
-      <span style="font-size:13px;font-weight:700;font-family:sans-serif">Rifiutati dal controllo Turnitin</span>
+      <span style="font-size:20px;font-weight:700;font-family:sans-serif">Rifiutati dal controllo Turnitin</span>
       <div style="display:flex;align-items:center;gap:10px">
-        <span id="rifTurCount" style="font-size:12px;color:var(--tx2);font-family:sans-serif"></span>
-        <span id="acc-tur-icon" style="font-size:12px;color:var(--tx2)">&#9660;</span>
+        <span id="rifTurCount" style="font-size:20px;color:var(--tx2);font-family:sans-serif"></span>
+        <span id="acc-tur-icon" style="font-size:20px;color:var(--tx2)">&#9660;</span>
       </div>
     </div>
     <div id="acc-tur" style="padding:12px;display:none">
@@ -242,7 +245,8 @@ body{font-family:Georgia,serif;background:var(--bg);color:var(--tx);font-size:14
   <h3 id="artModalTitle">Nuovo articolo</h3>
   <div class="fsl first" style="display:flex;align-items:center;justify-content:space-between">Identificazione</div>
   <div class="g2">
-    <div class="fr"><label>ID Manoscritto *</label><div style="display:flex;align-items:center;gap:6px"><input id="fId" style="flex:1" disabled><button type="button" class="btn" id="btnUnlockId" style="font-size:11px;padding:2px 8px;flex-shrink:0">&#128274;</button></div></div>
+    <div class="fr"><label>ID Manoscritto *</label><div style="display:flex;align-items:center;gap:6px"><input id="fId" style="flex:1" disabled><button type="button" class="btn" id="btnUnlockId" style="font-size:20px;padding:2px 8px;flex-shrink:0">&#128274;</button></div></div>
+    <div class="fr"><label>Data di sottomissione</label><div style="display:flex;align-items:center;gap:6px"><input type="date" id="fDataSottomissione" style="flex:1" disabled><button type="button" class="btn" id="btnUnlockDataSott" style="font-size:11px;padding:2px 8px;flex-shrink:0">&#128274;</button></div></div>
     <div class="fr">
       <label>Step editoriale <span class="stt"><span style="font-size:10px;background:var(--purple-bg);color:var(--purple-tx);padding:1px 6px;border-radius:20px;cursor:help;font-family:sans-serif">?</span><div class="spop" id="stepHint"></div></span></label>
       <select id="fStep">
@@ -283,27 +287,27 @@ body{font-family:Georgia,serif;background:var(--bg);color:var(--tx);font-size:14
   <div class="g2">
     <div class="fr"><label>Lunghezza (parole)</label><input id="fLen" type="number"></div>
     <div class="fr" style="display:flex;align-items:center;padding-top:22px">
-      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;font-family:sans-serif;font-weight:600;color:var(--green-tx)">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:20px;font-weight:600;color:var(--green-tx)">
         <input type="checkbox" id="fImpaginato" style="width:auto;accent-color:var(--green);width:16px;height:16px">
         Articolo impaginato
       </label>
     </div>
   </div>
-  <div class="fsl" style="display:flex;align-items:center;justify-content:space-between">Antiplagio e AI<button type="button" class="btn" id="btnUnlockAnti" style="font-size:11px;padding:2px 8px">&#128274; Sblocca</button></div>
+  <div class="fsl" style="display:flex;align-items:center;justify-content:space-between">Antiplagio e AI<button type="button" class="btn" id="btnUnlockAnti" style="font-size:20px;padding:2px 8px">&#128274; Sblocca</button></div>
   <div class="field-locked" id="antiGroup">
   <div class="g2">
     <div class="fr"><label>% Similarit&agrave; (Turnitin)</label><input id="fSim" type="number" min="0" max="100" step="0.1" oninput="checkAntiplagio()"></div>
     <div class="fr"><label>% Contenuto AI (Turnitin)</label><input id="fAi" type="number" min="0" max="100" step="0.1" oninput="checkAntiplagio()"></div>
   </div>
   <div id="antiplagioAlert" style="display:none;background:#fff5f5;border:1px solid #f5b7b1;border-radius:var(--r);padding:12px 14px;margin-top:8px">
-    <div style="font-size:12px;font-weight:700;color:var(--red);margin-bottom:10px;font-family:sans-serif">&#9888; Valori superiori al 30% — gestione comunicazione autori</div>
+    <div style="font-size:20px;font-weight:700;color:var(--red);margin-bottom:10px;font-family:sans-serif">&#9888; Valori superiori al 30% — gestione comunicazione autori</div>
     <div class="g2">
       <div class="fr">
         <label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-bottom:6px">
           <input type="checkbox" id="fComunicazioneInviata" style="width:auto;accent-color:var(--red)">
           <span>Comunicazione inviata agli autori</span>
         </label>
-        <label style="font-size:12px;color:var(--tx2);font-family:sans-serif">Data invio comunicazione</label>
+        <label style="font-size:20px;color:var(--tx2);font-family:sans-serif">Data invio comunicazione</label>
         <input type="date" id="fDataComunicazione">
       </div>
       <div class="fr"><label>Risposta degli autori</label>
@@ -317,7 +321,7 @@ body{font-family:Georgia,serif;background:var(--bg);color:var(--tx);font-size:14
     </div>
   </div>
   </div>
-  <div class="fsl" style="display:flex;align-items:center;justify-content:space-between">Processo editoriale<button type="button" class="btn" id="btnUnlockProc" style="font-size:11px;padding:2px 8px">&#128274; Sblocca</button></div>
+  <div class="fsl" style="display:flex;align-items:center;justify-content:space-between">Processo editoriale<button type="button" class="btn" id="btnUnlockProc" style="font-size:20px;padding:2px 8px">&#128274; Sblocca</button></div>
   <input type="hidden" id="fStatus" value="Sottomesso">
   <input type="hidden" id="fDead" value="">
   <div class="g3 field-locked" id="procGroup">
@@ -341,7 +345,7 @@ body{font-family:Georgia,serif;background:var(--bg);color:var(--tx);font-size:14
     </div>
   </div>
   <div class="fsl">Metriche citazionali</div>
-  <div style="margin-bottom:10px"><a href="https://claude.ai/public/artifacts/13b10d82-0944-44de-9059-94e46c366e7d" target="_blank" rel="noopener" class="btn" style="font-size:12px;display:inline-flex;align-items:center;gap:6px">&#128200; Calcola indicatori citazionali</a></div>
+  <div style="margin-bottom:10px"><a href="https://claude.ai/public/artifacts/13b10d82-0944-44de-9059-94e46c366e7d" target="_blank" rel="noopener" class="btn" style="font-size:20px;display:inline-flex;align-items:center;gap:6px">&#128200; Calcola indicatori citazionali</a></div>
   <div class="g3">
     <div class="fr"><label>References totali</label><input id="fRefs" type="number" min="0"></div>
     <div class="fr"><label>Citazioni TeMA</label><input id="fCTeMA" type="number" min="0"></div>
@@ -353,7 +357,7 @@ body{font-family:Georgia,serif;background:var(--bg);color:var(--tx);font-size:14
   </div>
   <div class="fsl">Processo di revisione</div>
   <div id="revList"></div>
-  <button class="btn" id="btnAddRev" style="margin-bottom:10px;font-size:12px">+ Aggiungi revisore</button>
+  <button class="btn" id="btnAddRev" style="margin-bottom:10px;font-size:20px">+ Aggiungi revisore</button>
   <div class="g2" style="margin-top:6px;margin-bottom:12px;align-items:end">
     <div class="fr" style="margin-bottom:0"><label>Decisione dell'editor</label><select id="fDecisioneEditor" onchange="checkDecisioneEditor()"><option value="">&#8212;</option><option value="Accept submission">Accept submission</option><option value="Revisions required">Revisions required</option><option value="Resubmit for Review">Resubmit for Review</option><option value="Resubmit Elsewhere">Resubmit Elsewhere</option><option value="Decline submission">Decline submission</option></select></div>
     <div class="fr" id="fDataRevisioneWrap" style="margin-bottom:0;display:none"><label>Data consegna versione revisionata</label><input type="date" id="fDataRevisione"></div>
@@ -362,7 +366,7 @@ body{font-family:Georgia,serif;background:var(--bg);color:var(--tx);font-size:14
   <div id="rev2Section" style="display:none;border-top:1.5px dashed var(--brd);padding-top:1rem;margin-top:.5rem">
     <div class="fsl" style="margin-top:0;border-top:none;padding-top:0">Processo di revisione 2</div>
     <div id="revList2"></div>
-    <button class="btn" id="btnAddRev2" style="margin-bottom:10px;font-size:12px">+ Aggiungi revisore (2° round)</button>
+    <button class="btn" id="btnAddRev2" style="margin-bottom:10px;font-size:20px">+ Aggiungi revisore (2° round)</button>
     <div class="g2" style="margin-top:6px;align-items:end">
       <div class="fr" style="margin-bottom:0"><label>Decisione dell'editor (2° round)</label><select id="fDecisioneEditor2" onchange="checkDecisioneEditor2()"><option value="">&#8212;</option><option value="Accept submission">Accept submission</option><option value="Revisions required">Revisions required</option><option value="Resubmit for Review">Resubmit for Review</option><option value="Resubmit Elsewhere">Resubmit Elsewhere</option><option value="Decline submission">Decline submission</option></select></div>
       <div class="fr" id="fDataRevisione2Wrap" style="margin-bottom:0;display:none"><label>Data consegna versione revisionata (2°)</label><input type="date" id="fDataRevisione2"></div>
@@ -370,7 +374,7 @@ body{font-family:Georgia,serif;background:var(--bg);color:var(--tx);font-size:14
   </div>
   <div class="fsl">Note</div>
   <div class="fr"><textarea id="fNotes" rows="3"></textarea></div>
-  <div class="fsl" style="display:flex;align-items:center;justify-content:space-between">Pubblicazione<button type="button" class="btn" id="btnUnlockPub" style="font-size:11px;padding:2px 8px">&#128274; Sblocca</button></div>
+  <div class="fsl" style="display:flex;align-items:center;justify-content:space-between">Pubblicazione<button type="button" class="btn" id="btnUnlockPub" style="font-size:20px;padding:2px 8px">&#128274; Sblocca</button></div>
   <div class="field-locked" id="pubGroup">
   <div class="g3">
     <div class="fr"><label>Fascicolo</label><select id="fIssArt"></select></div>
@@ -404,7 +408,7 @@ body{font-family:Georgia,serif;background:var(--bg);color:var(--tx);font-size:14
   <div class="fr"><label>Note</label><textarea id="iNotes" rows="2"></textarea></div>
   <div class="fr" style="display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--brd);margin-top:4px">
     <input type="checkbox" id="iPub" style="width:auto;accent-color:var(--green)">
-    <label for="iPub" style="font-size:13px;font-weight:600;color:var(--green-tx);cursor:pointer;margin:0;font-family:sans-serif">Fascicolo pubblicato &mdash; sposta tutti gli articoli in Pubblicati</label>
+    <label for="iPub" style="font-size:20px;font-weight:600;color:var(--green-tx);cursor:pointer;margin:0;font-family:sans-serif">Fascicolo pubblicato &mdash; sposta tutti gli articoli in Pubblicati</label>
   </div>
   <div class="mfoot">
     <button class="btn btn-d" id="btnDelIss" style="margin-right:auto;display:none">Elimina fascicolo</button>
@@ -419,9 +423,9 @@ body{font-family:Georgia,serif;background:var(--bg);color:var(--tx);font-size:14
 <div class="modal" style="max-width:340px;text-align:center">
   <div style="font-size:28px;margin-bottom:.5rem">&#128274;</div>
   <h3 style="margin-bottom:.5rem">Accesso riservato</h3>
-  <p style="font-size:13px;color:var(--tx2);margin-bottom:1rem;font-family:sans-serif">Inserisci la password per procedere.</p>
+  <p style="font-size:20px;color:var(--tx2);margin-bottom:1rem;font-family:sans-serif">Inserisci la password per procedere.</p>
   <div class="fr" style="text-align:left"><label>Password</label><input type="password" id="pwdInput"></div>
-  <div id="pwdErr" style="font-size:12px;color:var(--red);margin-top:4px;display:none;font-family:sans-serif">Password errata.</div>
+  <div id="pwdErr" style="font-size:20px;color:var(--red);margin-top:4px;display:none;font-family:sans-serif">Password errata.</div>
   <div style="display:flex;gap:8px;justify-content:center;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--brd)">
     <button class="btn" id="btnPwdCancel">Annulla</button>
     <button class="btn btn-p" id="btnPwdOk">Accedi</button>
@@ -542,6 +546,12 @@ function setSaving(s) {
   if (s) { dot.classList.add('saving'); lbl.textContent = 'Salvataggio...'; }
   else   { dot.classList.remove('saving'); lbl.textContent = 'Dati salvati'; }
 }
+function sendNotification(action, artId, artTitle) {
+  var params = new URLSearchParams({action: action, artId: artId, artTitle: artTitle});
+  fetch(GS_URL + '?' + params.toString(), { method: 'POST', body: '' })
+    .catch(function() {});
+}
+
 function persist() {
   setSaving(true);
   var payload = JSON.stringify({issues:issues, articles:articles});
@@ -660,7 +670,7 @@ function artCard(a, showEdit) {
     metaHtml += '</div>';
   }
 
-  var editBtn = showEdit ? '<button class="btn" style="flex-shrink:0;font-size:11px" onclick="openEditArt(this.dataset.id)" data-id="'+esc(a.id)+'">' + 'Modifica</button>' : '';
+  var editBtn = showEdit ? '<button class="btn" style="flex-shrink:0;font-size:20px" onclick="openEditArt(this.dataset.id)" data-id="'+esc(a.id)+'">' + 'Modifica</button>' : '';
 
   // Step badge color based on status
   var stepBadgeCls = a.status ? (SC[a.status] || 'b-gray') : 'b-gray';
@@ -670,15 +680,15 @@ function artCard(a, showEdit) {
       '<div style="flex:1">' +
         // Line 1: ID + Step per esteso (sigla + testo) + Editor + GateKeeper
         '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px">' +
-          '<span style="font-size:11px;font-weight:700;color:var(--tx3);font-family:monospace">#'+esc(a.id)+'</span>' +
-          (a.step ? '<span style="font-size:11px;color:var(--purple-tx);font-weight:600;font-family:sans-serif">'+stepFull(a.step)+'</span>' : '') +
+          '<span style="font-size:20px;font-weight:700;color:var(--tx3);font-family:monospace">#'+esc(a.id)+'</span>' +
+          (a.step ? '<span style="font-size:20px;color:var(--purple-tx);font-weight:600">'+stepFull(a.step)+'</span>' : '') +
           (a.editor ? '<span class="badge b-blue">'+esc(a.editor)+'</span>' : '') +
           (a.gatekeeper && (!a.editor || a.editor === '') ? '<span class="badge b-pink">'+esc(a.gatekeeper)+'</span>' : '') +
         '</div>' +
         // Title + authors
-        '<div style="font-size:13px;font-weight:600;line-height:1.4">'+esc(a.title)+'</div>' +
-        '<div style="font-size:12px;color:var(--tx2);margin-top:2px;font-family:sans-serif">'+esc(a.authors)+(a.affiliation?' &middot; '+esc(a.affiliation):'')+'</div>' +
-        (a.nationality ? '<div style="font-size:11px;color:var(--tx3);font-family:sans-serif">Nazionalit&agrave;: '+esc(a.nationality)+'</div>' : '') +
+        '<div style="font-size:20px;font-weight:600;line-height:1.4">'+esc(a.title)+'</div>' +
+        '<div style="font-size:20px;color:var(--tx2);margin-top:2px">'+esc(a.authors)+(a.affiliation?' &middot; '+esc(a.affiliation):'')+'</div>' +
+        (a.nationality ? '<div style="font-size:20px;color:var(--tx3)">Nazionalit&agrave;: '+esc(a.nationality)+'</div>' : '') +
         // Line 2: Fascicolo + Sezione + Internazionale
         '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:5px">' +
           (isslbl ? '<span class="badge b-amber">'+esc(isslbl.label)+(a.articleNum?' &middot; n.'+a.articleNum:'')+'</span>' : '') +
@@ -698,7 +708,7 @@ function artCard(a, showEdit) {
       if (dr1) txt += 'Consegna rev.: ' + dr1;
       if (dr1 && dr2) txt += ' &middot; ';
       if (dr2) txt += '2&#176; round: ' + dr2;
-      return '<div style="font-size:12px;color:var(--amber-tx);font-weight:600;margin-top:6px;font-family:sans-serif">'+txt+'</div>';
+      return '<div style="font-size:20px;color:var(--amber-tx);font-weight:600;margin-top:6px">'+txt+'</div>';
     })() +
     // Footer: step badge (color by status) + copyeditor + deadline
         (a.copyeditor ? '<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--brd)"><span class="badge b-purple">'+esc(a.copyeditor)+'</span></div>' : '') +
@@ -781,13 +791,13 @@ function gkCard(a) {
     '<span class="mm">JCR 2y: '+(a.citeJCR2y||0)+'</span>' +
     '</div>' +
     ((simHigh || aiHigh) && a.comunicazioneInviata && a.dataComunicazione ?
-      '<div style="margin-top:5px;font-size:11px;color:var(--red);font-family:sans-serif">'
+      '<div style="margin-top:5px;font-size:20px;color:var(--red)">'
       + '&#9993; Comunicazione inviata il '
       + new Date(a.dataComunicazione).toLocaleDateString('it-IT')
       + (a.rispostaAutori && a.rispostaAutori !== '' ? ' &middot; Risposta: ' + esc(a.rispostaAutori) : '')
       + '</div>' : '') +
     ((simHigh || aiHigh) && a.comunicazioneInviata && !a.dataComunicazione ?
-      '<div style="margin-top:5px;font-size:11px;color:var(--red);font-family:sans-serif">'
+      '<div style="margin-top:5px;font-size:20px;color:var(--red)">'
       + '&#9993; Comunicazione inviata</div>' : '');
   // Remove any existing metaHtml row (sim/AI badges already generated by artCard)
   // and replace with our unified row
@@ -816,7 +826,7 @@ function renderGk() {
   });
   document.getElementById('gkCount').textContent = f.length+' articol'+(f.length===1?'o':'i');
   document.getElementById('gkEl').innerHTML = f.length ? f.map(function(a){ return gkCard(a); }).join('') :
-    '<div style="text-align:center;padding:3rem;color:var(--tx2);font-family:sans-serif">Nessun articolo in valutazione.</div>';
+    '<div style="text-align:center;padding:3rem;color:var(--tx2)">Nessun articolo in valutazione.</div>';
 }
 
 function renderLista() {
@@ -839,7 +849,7 @@ function renderLista() {
     return true;
   });
   document.getElementById('listaEl').innerHTML = f.length ? f.map(function(a){ return artCard(a,true); }).join('') :
-    '<div style="text-align:center;padding:3rem;color:var(--tx2);font-family:sans-serif">Nessun articolo trovato.</div>';
+    '<div style="text-align:center;padding:3rem;color:var(--tx2)">Nessun articolo trovato.</div>';
 }
 
 function renderPub() {
@@ -853,7 +863,7 @@ function renderPub() {
   });
   document.getElementById('pubCount').textContent = f.length+' articol'+(f.length===1?'o':'i');
   document.getElementById('pubEl').innerHTML = f.length ? f.map(function(a){ return artCard(a,true); }).join('') :
-    '<div style="text-align:center;padding:3rem;color:var(--tx2);font-family:sans-serif">Nessun articolo pubblicato.</div>';
+    '<div style="text-align:center;padding:3rem;color:var(--tx2)">Nessun articolo pubblicato.</div>';
 }
 
 function renderRifRef() {
@@ -865,7 +875,7 @@ function renderRifRef() {
   });
   document.getElementById('rifRefCount').textContent = f.length+' articol'+(f.length===1?'o':'i');
   document.getElementById('rifRefEl').innerHTML = f.length ? f.map(function(a){ return artCard(a,true); }).join('') :
-    '<div style="text-align:center;padding:3rem;color:var(--tx2);font-family:sans-serif">Nessun articolo.</div>';
+    '<div style="text-align:center;padding:3rem;color:var(--tx2)">Nessun articolo.</div>';
 }
 
 function renderRifGk() {
@@ -877,19 +887,19 @@ function renderRifGk() {
   });
   document.getElementById('rifGkCount').textContent = f.length+' articol'+(f.length===1?'o':'i');
   document.getElementById('rifGkEl').innerHTML = f.length ? f.map(function(a){ return artCard(a,true); }).join('') :
-    '<div style="text-align:center;padding:3rem;color:var(--tx2);font-family:sans-serif">Nessun articolo.</div>';
+    '<div style="text-align:center;padding:3rem;color:var(--tx2)">Nessun articolo.</div>';
 }
 
 function renderTeam() {
   var h = '<div style="font-size:16px;font-weight:700;margin-bottom:1rem">GateKeeper</div>';
   var gk = articles.filter(function(a){ return a.gatekeeper==='Lilli Gargiulo' && (!a.editor||a.editor==='') && (a.step==='1'||a.status==='GateKeeper evaluation') && a.step !== '8b' && a.step !== '7b' && a.status !== 'Rifiutato'; });
   h += '<div class="card"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:'+(gk.length?'10px':'0')+'">' +
-    '<div style="font-size:14px;font-weight:700">Lilli Gargiulo</div>' +
-    '<span style="font-size:12px;font-weight:600;color:var(--orange);font-family:sans-serif">'+gk.length+' articoli in valutazione</span>' +
+    '<div style="font-size:20px;font-weight:700">Lilli Gargiulo</div>' +
+    '<span style="font-size:20px;font-weight:600;color:var(--orange)">'+gk.length+' articoli in valutazione</span>' +
     '</div>' +
     (gk.length ? '<div>'+gk.map(function(a){
-      return '<div style="font-size:12px;padding:4px 0;border-bottom:1px solid var(--brd);display:flex;gap:8px;align-items:center">' +
-        '<span style="font-family:monospace;color:var(--tx3);font-size:10px;flex-shrink:0">#'+esc(a.id)+'</span>' +
+      return '<div style="font-size:20px;padding:4px 0;border-bottom:1px solid var(--brd);display:flex;gap:8px;align-items:center">' +
+        '<span style="font-family:monospace;color:var(--tx3);font-size:16px;flex-shrink:0">#'+esc(a.id)+'</span>' +
         '<span style="flex:1;line-height:1.4">'+(a.title.length>70?a.title.slice(0,70)+'...':a.title)+'</span>' +
         '<span class="badge b-gk" style="white-space:nowrap">'+sl(a.step||'1')+'</span>' +
         '</div>';
@@ -899,14 +909,14 @@ function renderTeam() {
   EDITORS.forEach(function(ed) {
     var mine = articles.filter(function(a){ return a.editor===ed && a.status !== 'Pubblicato' && a.step !== '18' && a.step !== '8b' && a.step !== '7b' && a.status !== 'Rifiutato'; });
     h += '<div class="card"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:'+(mine.length?'10px':'0')+'">' +
-      '<div style="font-size:14px;font-weight:700">'+esc(ed)+'</div>' +
-      '<span style="font-size:12px;font-weight:600;color:var(--blue);font-family:sans-serif">'+mine.length+' in lavorazione</span>' +
+      '<div style="font-size:20px;font-weight:700">'+esc(ed)+'</div>' +
+      '<span style="font-size:20px;font-weight:600;color:var(--blue)">'+mine.length+' in lavorazione</span>' +
       '</div>' +
       (mine.length ? '<div>'+mine.map(function(a){
-        return '<div style="font-size:12px;padding:4px 0;border-bottom:1px solid var(--brd);display:flex;gap:8px">' +
-          '<span style="font-family:monospace;color:var(--tx3);font-size:10px">#'+esc(a.id)+'</span>' +
+        return '<div style="font-size:20px;padding:4px 0;border-bottom:1px solid var(--brd);display:flex;gap:8px">' +
+          '<span style="font-family:monospace;color:var(--tx3);font-size:16px">#'+esc(a.id)+'</span>' +
           '<span style="flex:1">'+(a.title.length>65?a.title.slice(0,65)+'...':a.title)+'</span>' +
-          '<span style="font-size:11px;color:var(--purple-tx);font-weight:600;font-family:sans-serif">'+stepFull(a.step||'')+'</span>' +
+          '<span style="font-size:20px;color:var(--purple-tx);font-weight:600">'+stepFull(a.step||'')+'</span>' +
           '</div>';
       }).join('')+'</div>' : '') + '</div>';
   });
@@ -915,16 +925,16 @@ function renderTeam() {
   COPYEDITORS.forEach(function(ce) {
     var mine = articles.filter(function(a){ return a.copyeditor===ce && a.step !== '8b' && a.step !== '7b' && a.status !== 'Rifiutato'; });
     var artList = mine.map(function(a){
-      return '<div style="font-size:12px;padding:4px 0;border-bottom:1px solid var(--brd);display:flex;gap:8px;align-items:start">'
-        + '<span style="font-family:monospace;color:var(--tx3);font-size:10px;flex-shrink:0">#'+esc(a.id)+'</span>'
+      return '<div style="font-size:20px;padding:4px 0;border-bottom:1px solid var(--brd);display:flex;gap:8px;align-items:start">'
+        + '<span style="font-family:monospace;color:var(--tx3);font-size:16px;flex-shrink:0">#'+esc(a.id)+'</span>'
         + '<div style="flex:1">'
         + '<div style="line-height:1.4">'+(a.title.length>65?a.title.slice(0,65)+'...':a.title)+'</div>'
-        + (a.editor?'<div style="font-size:11px;color:var(--tx2);font-family:sans-serif;margin-top:1px">Editor: '+esc(a.editor)+'</div>':'')
+        + (a.editor?'<div style="font-size:20px;color:var(--tx2);margin-top:1px">Editor: '+esc(a.editor)+'</div>':'')
         + '</div></div>';
     }).join('');
     h += '<div class="card"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:'+(mine.length?'10px':'0')+'">'
-      + '<div style="font-size:14px;font-weight:700">'+esc(ce)+'</div>'
-      + '<span style="font-size:12px;font-weight:600;color:var(--purple-tx);font-family:sans-serif">'+mine.length+' assegnati</span>'
+      + '<div style="font-size:20px;font-weight:700">'+esc(ce)+'</div>'
+      + '<span style="font-size:20px;font-weight:600;color:var(--purple-tx)">'+mine.length+' assegnati</span>'
       + '</div>'
       + (mine.length ? '<div>'+artList+'</div>' : '')
       + '</div>';
@@ -942,14 +952,14 @@ function renderNumeri() {
         '<div class="anum" style="padding-top:2px">'+(a.articleNum||'&#8212;')+'</div>' +
         '<div>' +
           '<div style="display:flex;align-items:baseline;gap:6px;margin-bottom:2px">' +
-            '<span style="font-size:10px;font-weight:700;color:var(--tx3);font-family:monospace;flex-shrink:0">#'+esc(a.id)+'</span>' +
-            '<span style="font-size:12px;font-weight:600;line-height:1.4">'+(a.title.length>80?a.title.slice(0,80)+'...':a.title)+'</span>' +
+            '<span style="font-size:16px;font-weight:700;color:var(--tx3);font-family:monospace;flex-shrink:0">#'+esc(a.id)+'</span>' +
+            '<span style="font-size:20px;font-weight:600;line-height:1.4">'+(a.title.length>80?a.title.slice(0,80)+'...':a.title)+'</span>' +
           '</div>' +
-          '<div style="font-size:11px;color:var(--tx2);margin-top:2px;font-family:sans-serif">'+esc(a.authors)+(a.affiliation?' &middot; '+esc(a.affiliation):'')+'</div>' +
-          (a.editor ? '<div style="font-size:11px;color:var(--blue-tx);font-weight:600;font-family:sans-serif;margin-top:2px">'+esc(a.editor)+'</div>' : '') +
+          '<div style="font-size:20px;color:var(--tx2);margin-top:2px">'+esc(a.authors)+(a.affiliation?' &middot; '+esc(a.affiliation):'')+'</div>' +
+          (a.editor ? '<div style="font-size:20px;color:var(--blue-tx);font-weight:600;margin-top:2px">'+esc(a.editor)+'</div>' : '') +
         '</div>' +
         '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;padding-top:2px">' +
-          (a.step ? '<span style="font-size:11px;color:var(--purple-tx);font-weight:600;font-family:sans-serif;white-space:nowrap;text-align:right">'+stepFull(a.step)+'</span>' : '') +
+          (a.step ? '<span style="font-size:20px;color:var(--purple-tx);font-weight:600;white-space:nowrap;text-align:right">'+stepFull(a.step)+'</span>' : '') +
           (a.intl==='si'?'<span class="badge b-teal" style="white-space:nowrap">Intl.</span>':'') +
         '</div>' +
       '</div>';
@@ -961,34 +971,34 @@ function renderNumeri() {
     var dl = iss.deadline ? new Date(iss.deadline).toLocaleDateString('it-IT',{day:'2-digit',month:'short',year:'numeric'}) : 'TBD';
     return '<div class="card">' +
       '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:8px">' +
-        '<div><div style="font-size:14px;font-weight:700">'+esc(iss.label)+(iss.pubblicato?'&nbsp;<span class="badge b-ok">Pubblicato</span>':'')+'</div>' +
-        (iss.theme?'<div style="font-size:12px;color:var(--tx2);margin-top:2px;font-family:sans-serif">'+esc(iss.theme)+'</div>':'')+'</div>' +
+        '<div><div style="font-size:20px;font-weight:700">'+esc(iss.label)+(iss.pubblicato?'&nbsp;<span class="badge b-ok">Pubblicato</span>':'')+'</div>' +
+        (iss.theme?'<div style="font-size:20px;color:var(--tx2);margin-top:2px">'+esc(iss.theme)+'</div>':'')+'</div>' +
         '<div style="display:flex;gap:6px;align-items:center;flex-shrink:0">' +
           '<span class="badge '+(iss.type==='si'?'b-coral':'b-amber')+'" style="white-space:nowrap">'+(iss.type==='si'?'SI &middot; ':'')+esc(dl)+'</span>' +
-          '<button class="btn" style="font-size:11px" onclick="openEditIss(this.dataset.key)" data-key="'+esc(iss.key)+'">' + 'Modifica</button>' +
+          '<button class="btn" style="font-size:20px" onclick="openEditIss(this.dataset.key)" data-key="'+esc(iss.key)+'">' + 'Modifica</button>' +
         '</div>' +
       '</div>' +
       (iss.note?'<div class="note-box">'+esc(iss.note)+'</div>':'') +
       (focus.length?'<div class="issh">Focus</div>'+focus.map(artRow).join(''):'') +
       (lume.length ?'<div class="issh">LUME</div>' +lume.map(artRow).join('') :'') +
       (other.length?'<div class="issh">Altro</div>'+other.map(artRow).join(''):'') +
-      (!ia.length?'<div style="font-size:12px;color:var(--tx2);padding:8px 0;font-family:sans-serif">Nessun articolo assegnato.</div>':'') +
+      (!ia.length?'<div style="font-size:20px;color:var(--tx2);padding:8px 0">Nessun articolo assegnato.</div>':'') +
     '</div>';
 
   }
 
   var activeHtml = activeIssues.length
     ? activeIssues.map(issCard).join('')
-    : '<div style="font-size:13px;color:var(--tx2);padding:1rem;font-family:sans-serif">Nessun fascicolo attivo.</div>';
+    : '<div style="font-size:20px;color:var(--tx2);padding:1rem">Nessun fascicolo attivo.</div>';
 
   var pubHtml = '';
   if (pubIssues.length) {
     pubHtml = '<div style="border:1px solid var(--brd);border-radius:var(--r);margin-top:1.5rem;overflow:hidden">' +
       '<div onclick="toggleAccordion(\'acc-pub-issues\')" style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;cursor:pointer;background:var(--sur2);user-select:none">' +
-        '<span style="font-size:13px;font-weight:700;font-family:sans-serif">Fascicoli pubblicati</span>' +
+        '<span style="font-size:20px;font-weight:700">Fascicoli pubblicati</span>' +
         '<div style="display:flex;align-items:center;gap:10px">' +
-          '<span style="font-size:12px;color:var(--tx2);font-family:sans-serif">'+pubIssues.length+' fascicol'+(pubIssues.length===1?'o':'i')+'</span>' +
-          '<span id="acc-pub-issues-icon" style="font-size:12px;color:var(--tx2)">&#9658;</span>' +
+          '<span style="font-size:20px;color:var(--tx2)">'+pubIssues.length+' fascicol'+(pubIssues.length===1?'o':'i')+'</span>' +
+          '<span id="acc-pub-issues-icon" style="font-size:20px;color:var(--tx2)">&#9658;</span>' +
         '</div>' +
       '</div>' +
       '<div id="acc-pub-issues" style="padding:12px;display:none">' +
@@ -1033,8 +1043,8 @@ function renderVerbale() {
           if (r.accettazione) details.push('Stato revisione: <em>'+esc(r.accettazione)+'</em>');
           if (r.dataConsegna) details.push('Data consegna: '+new Date(r.dataConsegna).toLocaleDateString('it-IT'));
           if (r.dataProroga)  details.push('Data proroga: '+new Date(r.dataProroga).toLocaleDateString('it-IT'));
-          if (details.length) lines.push('<p style="margin-left:2rem;font-size:10.5pt">'+details.join(' &middot; ')+'</p>');
-          if (r.giudizio) lines.push('<p style="margin-left:2rem;font-size:10.5pt"><em>Giudizio: '+esc(r.giudizio)+'</em></p>');
+          if (details.length) lines.push('<p style="margin-left:2rem;font-size:15pt">'+details.join(' &middot; ')+'</p>');
+          if (r.giudizio) lines.push('<p style="margin-left:2rem;font-size:15pt"><em>Giudizio: '+esc(r.giudizio)+'</em></p>');
           return lines.join('');
         }).join('') : '') +
       '</div>';
@@ -1054,7 +1064,7 @@ function renderVerbale() {
     var dl = iss.deadline ? new Date(iss.deadline).toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'}) : 'TBD';
     var artRow = function(a) {
       return '<tr>' +
-        '<td style="width:28px;text-align:right;padding:4px 6px;color:#666;font-size:9pt;vertical-align:top;font-family:monospace">'+(a.articleNum||'&#8212;')+'</td>' +
+        '<td style="width:28px;text-align:right;padding:4px 6px;color:#666;font-size:15pt;vertical-align:top;font-family:monospace">'+(a.articleNum||'&#8212;')+'</td>' +
         '<td style="padding:4px 8px;border-bottom:1px solid #eee">' +
           '<div style="font-size:9.5pt;font-weight:bold">'+esc(a.title)+'</div>' +
           '<div style="font-size:8.5pt;color:#555;margin-top:1px">'+esc(a.authors)+(a.affiliation?' &#8212; '+esc(a.affiliation):'')+'</div>' +
@@ -1064,11 +1074,11 @@ function renderVerbale() {
     var sHdr = function(lbl){ return '<tr><td colspan="2" style="padding:7px 8px 3px;font-size:8.5pt;font-weight:bold;text-transform:uppercase;letter-spacing:.5px;color:#444;border-bottom:1px solid #bbb">'+lbl+'</td></tr>'; };
     fascicoliHtml += '<div style="margin-bottom:1.2rem;border:1px solid #ccc;padding:1rem;page-break-inside:avoid">' +
       '<div style="display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid #333;padding-bottom:.3rem;margin-bottom:.4rem">' +
-        '<strong style="font-size:11pt">'+esc(iss.label)+(iss.pubblicato?' [Pubblicato]':'')+'</strong>' +
+        '<strong style="font-size:15pt">'+esc(iss.label)+(iss.pubblicato?' [Pubblicato]':'')+'</strong>' +
         '<span style="font-size:8.5pt;color:#555">'+dl+'</span>' +
       '</div>' +
-      (iss.theme?'<div style="font-size:9pt;color:#555;font-style:italic;margin-bottom:.4rem">'+esc(iss.theme)+'</div>':'') +
-      (!ia.length ? '<p style="font-size:9pt;color:#888">Nessun articolo assegnato.</p>' :
+      (iss.theme?'<div style="font-size:15pt;color:#555;font-style:italic;margin-bottom:.4rem">'+esc(iss.theme)+'</div>':'') +
+      (!ia.length ? '<p style="font-size:15pt;color:#888">Nessun articolo assegnato.</p>' :
         '<table style="width:100%;border-collapse:collapse">' +
         (focus.length?sHdr('Focus')+focus.map(artRow).join(''):'') +
         (lume.length ?sHdr('LUME') +lume.map(artRow).join('') :'') +
@@ -1083,7 +1093,7 @@ function renderVerbale() {
 
   document.getElementById('verbalePreview').innerHTML =
     '<div class="vprev" id="verbaleContent">' +
-    '<h1>Verbale n. '+esc(num)+' della riunione della Redazione di TeMA<br><span style="font-size:12px;font-weight:400">'+esc(dateStr)+'</span></h1>' +
+    '<h1>Verbale n. '+esc(num)+' della riunione della Redazione di TeMA<br><span style="font-size:20px;font-weight:400">'+esc(dateStr)+'</span></h1>' +
     '<p><strong>Presenti:</strong> '+esc(presenti)+'</p>' +
     (intro?'<h2>TEMI AFFRONTATI</h2><p>'+esc(intro).replace(/n/g,'<br>')+'</p>':'') +
     '<h2>FASCICOLI</h2>' +
@@ -1102,10 +1112,10 @@ function printVerbale() {
   var c = document.getElementById('verbaleContent');
   if (!c) { alert("Genera prima l'anteprima."); return; }
   var bodyHtml = c.innerHTML;
-  var css = 'body{font-family:Georgia,serif;font-size:11pt;line-height:1.8;margin:2cm 2.5cm;color:#111}' +
+  var css = 'body{font-family:Roboto,sans-serif;font-size:15pt;line-height:1.8;margin:2cm 2.5cm;color:#111}' +
     'h1{font-size:14pt;font-weight:bold;text-align:center;border-bottom:1.5px solid #333;padding-bottom:.5rem;margin-bottom:1rem}' +
-    'h2{font-size:11pt;font-weight:bold;margin:1.4rem 0 .4rem;border-bottom:.5px solid #aaa;padding-bottom:.2rem;page-break-after:avoid}' +
-    'p{margin:.3rem 0;font-size:10.5pt}' +
+    'h2{font-size:15pt;font-weight:bold;margin:1.4rem 0 .4rem;border-bottom:.5px solid #aaa;padding-bottom:.2rem;page-break-after:avoid}' +
+    'p{margin:.3rem 0;font-size:15pt}' +
     '.ae{margin:.6rem 0 .8rem 1rem;border-left:2px solid #bbb;padding-left:.8rem;page-break-inside:avoid}' +
     'table{width:100%;border-collapse:collapse}' +
     '@media print{@page{margin:2cm 2.5cm}body{margin:0}}';
@@ -1138,15 +1148,15 @@ function renderRevList2() {
   var c = document.getElementById('revList2');
   if (!c) return;
   if (!currentRevisori2.length) {
-    c.innerHTML = '<div style="font-size:12px;color:var(--tx3);padding:4px 0;font-family:sans-serif">Nessun revisore inserito.</div>';
+    c.innerHTML = '<div style="font-size:20px;color:var(--tx3);padding:4px 0">Nessun revisore inserito.</div>';
     return;
   }
   var h = '';
   currentRevisori2.forEach(function(r, i) {
     h += '<div class="rev-card">' +
       '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">' +
-        '<span style="font-size:12px;font-weight:700;font-family:sans-serif">Revisore '+(i+1)+'</span>' +
-        '<button class="btn" style="font-size:11px;padding:2px 8px;color:var(--red)" onclick="removeRev2('+i+')">Rimuovi</button>' +
+        '<span style="font-size:20px;font-weight:700">Revisore '+(i+1)+'</span>' +
+        '<button class="btn" style="font-size:20px;padding:2px 8px;color:var(--red)" onclick="removeRev2('+i+')">Rimuovi</button>' +
       '</div>' +
       '<div class="g2" style="gap:8px">' +
         '<div class="fr" style="margin-bottom:6px"><label>Nome e Cognome</label>' +
@@ -1184,15 +1194,15 @@ function removeRev2(i) { currentRevisori2.splice(i,1); renderRevList2(); }
 function renderRevList() {
   var c = document.getElementById('revList');
   if (!currentRevisori.length) {
-    c.innerHTML = '<div style="font-size:12px;color:var(--tx3);padding:4px 0;font-family:sans-serif">Nessun revisore inserito.</div>';
+    c.innerHTML = '<div style="font-size:20px;color:var(--tx3);padding:4px 0">Nessun revisore inserito.</div>';
     return;
   }
   var h = '';
   currentRevisori.forEach(function(r, i) {
     h += '<div class="rev-card">' +
       '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">' +
-        '<span style="font-size:12px;font-weight:700;font-family:sans-serif">Revisore '+(i+1)+'</span>' +
-        '<button class="btn" style="font-size:11px;padding:2px 8px;color:var(--red)" onclick="removeRev('+i+')">Rimuovi</button>' +
+        '<span style="font-size:20px;font-weight:700">Revisore '+(i+1)+'</span>' +
+        '<button class="btn" style="font-size:20px;padding:2px 8px;color:var(--red)" onclick="removeRev('+i+')">Rimuovi</button>' +
       '</div>' +
       '<div class="g2" style="gap:8px">' +
         '<div class="fr" style="margin-bottom:6px"><label>Nome e Cognome</label>' +
@@ -1244,6 +1254,14 @@ function lockAllGroups() {
   var btnId = document.getElementById('btnUnlockId');
   if (fId) fId.disabled = true;
   if (btnId) { btnId.textContent = '\u{1F512}'; btnId.disabled = false; }
+  var fDs = document.getElementById('fDataSottomissione');
+  var btnDs = document.getElementById('btnUnlockDataSott');
+  if (fDs) fDs.disabled = true;
+  if (btnDs) { btnDs.textContent = '\u{1F512}'; btnDs.disabled = false; }
+  var fDs = document.getElementById('fDataSottomissione');
+  var btnDs = document.getElementById('btnUnlockDataSott');
+  if (fDs) fDs.disabled = true;
+  if (btnDs) { btnDs.textContent = '\u{1F512}'; btnDs.disabled = false; }
   // Lock groups
   ['antiGroup','pubGroup','procGroup'].forEach(function(id) {
     var grp = document.getElementById(id);
@@ -1283,6 +1301,7 @@ function openNewArt() {
   document.getElementById('artModalTitle').textContent = 'Nuovo articolo';
   ['fId','fTitle','fAuthors','fAffil','fNat','fAbstract','fNotes'].forEach(function(id){ document.getElementById(id).value=''; });
   ['fLen','fArtNum','fRefs','fCTeMA','fCTeMA2226','fCJCR','fCJCR2y','fSim','fAi'].forEach(function(id){ document.getElementById(id).value=''; });
+  document.getElementById('fDataSottomissione').value='';
   document.getElementById('fImpaginato').checked=false;
   document.getElementById('fEd2').value=''; document.getElementById('fCopy').value='';
   document.getElementById('fGk').value=''; document.getElementById('fIntlArt').value='';
@@ -1314,6 +1333,7 @@ function openEditArt(id) {
   editingArtId = id;
   document.getElementById('artModalTitle').textContent = 'Modifica articolo #'+id;
   document.getElementById('fId').value=a.id;
+  document.getElementById('fDataSottomissione').value=a.dataSottomissione||'';
   document.getElementById('fTitle').value=a.title;
   document.getElementById('fAuthors').value=a.authors||'';
   document.getElementById('fAffil').value=a.affiliation||'';
@@ -1362,6 +1382,7 @@ function saveArt() {
   var sim=document.getElementById('fSim').value, ai=document.getElementById('fAi').value;
   var data={
     id:document.getElementById('fId').value.trim(),
+    dataSottomissione:document.getElementById('fDataSottomissione').value,
     title:document.getElementById('fTitle').value.trim(),
     authors:document.getElementById('fAuthors').value.trim(),
     affiliation:document.getElementById('fAffil').value.trim(),
@@ -1405,6 +1426,7 @@ function saveArt() {
   } else {
     if (articles.find(function(a){ return a.id===data.id; })){ alert('ID gi\u00e0 esistente.'); return; }
     articles.push(data);
+    sendNotification('insert', data.id, data.title);
   }
   // Gestione automatica Decline submission
   var aidx2 = articles.findIndex(function(a){ return a.id === data.id; });
@@ -1467,7 +1489,9 @@ function deleteArt() {
   if (!editingArtId) return;
   var capturedId = editingArtId;
   requirePwd(function() {
+    var delArt = articles.find(function(a){ return a.id === capturedId; });
     articles = articles.filter(function(a){ return a.id !== capturedId; });
+    if (delArt) sendNotification('delete', delArt.id, delArt.title);
     document.getElementById('artModal').classList.remove('open');
     editingArtId = null;
     schedSave();
@@ -1596,7 +1620,7 @@ function renderRifTur() {
   });
   document.getElementById('rifTurCount').textContent = f.length+' articol'+(f.length===1?'o':'i');
   document.getElementById('rifTurEl').innerHTML = f.length ? f.map(function(a){ return artCard(a,true); }).join('') :
-    '<div style="text-align:center;padding:3rem;color:var(--tx2);font-family:sans-serif">Nessun articolo.</div>';
+    '<div style="text-align:center;padding:3rem;color:var(--tx2)">Nessun articolo.</div>';
 }
 
 function updateTabCounts() {
@@ -1670,6 +1694,20 @@ document.addEventListener('DOMContentLoaded', function() {
   document.getElementById('btnUnlockId').addEventListener('click',function(){
     requirePwd(function(){
       var f=document.getElementById('fId'), b=document.getElementById('btnUnlockId');
+      if(f){f.disabled=false; f.focus();}
+      if(b){b.textContent='\u{1F513}'; b.disabled=true;}
+    });
+  });
+  document.getElementById('btnUnlockDataSott').addEventListener('click',function(){
+    requirePwd(function(){
+      var f=document.getElementById('fDataSottomissione'), b=document.getElementById('btnUnlockDataSott');
+      if(f){f.disabled=false; f.focus();}
+      if(b){b.textContent='\u{1F513}'; b.disabled=true;}
+    });
+  });
+  document.getElementById('btnUnlockDataSott').addEventListener('click',function(){
+    requirePwd(function(){
+      var f=document.getElementById('fDataSottomissione'), b=document.getElementById('btnUnlockDataSott');
       if(f){f.disabled=false; f.focus();}
       if(b){b.textContent='\u{1F513}'; b.disabled=true;}
     });
