@@ -106,10 +106,31 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
 .rev-card{background:var(--sur2);border:1px solid var(--brd);border-radius:var(--r);padding:10px 12px;margin-bottom:8px}
 @media(max-width:900px){.stats-grid{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:600px){.stats-grid{grid-template-columns:repeat(2,1fr)};.g3,.g4{grid-template-columns:1fr 1fr}}
+
+#loginScreen{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center}
+#loginBox{background:var(--sur);border:1px solid var(--brd);border-radius:var(--rl);padding:2.5rem 2rem;width:min(380px,90vw);box-shadow:0 20px 60px rgba(0,0,0,.12)}
 </style>
 </head>
 <body>
-<div class="app">
+
+<div id="loginScreen">
+  <div id="loginBox">
+    <div style="font-size:22px;font-weight:700;margin-bottom:.25rem">TeMA Journal</div>
+    <div style="font-size:16px;color:var(--tx);margin-bottom:1.75rem">Gestione editoriale &mdash; Accesso riservato</div>
+    <div class="fr">
+      <label>Username</label>
+      <input type="text" id="loginUser" placeholder="Username" autocomplete="username">
+    </div>
+    <div class="fr">
+      <label>Password</label>
+      <input type="password" id="loginPass" placeholder="Password" autocomplete="current-password">
+    </div>
+    <div id="loginErr" style="font-size:16px;color:var(--red);margin-bottom:12px;display:none">Username o password errati.</div>
+    <button class="btn btn-p" onclick="doLogin()" style="width:100%;padding:10px;font-size:16px">Accedi</button>
+  </div>
+</div>
+
+<div class="app" id="mainApp" style="display:none">
 <div class="topbar">
   <div>
       <div class="brand-name">TeMA Journal</div>
@@ -1725,7 +1746,30 @@ function initFilters() {
   rebuildIssFilters();
 }
 
-document.addEventListener('DOMContentLoaded', function() {
+
+function doLogin() {
+  var u = document.getElementById('loginUser').value.trim();
+  var p = document.getElementById('loginPass').value;
+  if (u === 'EditorTeMA' && p === 'tEMA8009') {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'block';
+    bootApp();
+  } else {
+    document.getElementById('loginErr').style.display = 'block';
+    document.getElementById('loginPass').value = '';
+    document.getElementById('loginPass').focus();
+  }
+}
+
+function bootApp() {
+
+  document.getElementById('loginPass').addEventListener('keydown', function(e){
+    if (e.key === 'Enter') doLogin();
+  });
+  document.getElementById('loginUser').addEventListener('keydown', function(e){
+    if (e.key === 'Enter') document.getElementById('loginPass').focus();
+  });
+
   loadCiteScores(); initFilters(); renderStats(); updateTabCounts(); renderGk(); loadData();
   document.getElementById('vDate').value=new Date().toISOString().slice(0,10);
 
@@ -1807,7 +1851,8 @@ document.addEventListener('DOMContentLoaded', function() {
       pendingAction = null;
     }
   });
-});
+}
+
 
 </script>
 </body>
