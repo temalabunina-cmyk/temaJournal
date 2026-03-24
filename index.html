@@ -1320,6 +1320,30 @@ function makeUnlocker(groupId, btnId) {
   };
 }
 
+function unlockAllAdmin() {
+  // Unlock fId
+  var fId = document.getElementById('fId');
+  var btnId = document.getElementById('btnUnlockId');
+  if (fId) fId.disabled = false;
+  if (btnId) { btnId.textContent = '\u{1F513}'; btnId.disabled = true; }
+  // Unlock fDataSottomissione
+  var fDs = document.getElementById('fDataSottomissione');
+  var btnDs = document.getElementById('btnUnlockDataSott');
+  if (fDs) fDs.disabled = false;
+  if (btnDs) { btnDs.textContent = '\u{1F513}'; btnDs.disabled = true; }
+  // Unlock groups
+  ['antiGroup','pubGroup','procGroup'].forEach(function(id) {
+    var grp = document.getElementById(id);
+    if (grp) grp.classList.remove('field-locked');
+  });
+  ['btnUnlockAnti','btnUnlockPub','btnUnlockProc'].forEach(function(id) {
+    var btn = document.getElementById(id);
+    if (btn) { btn.textContent = '\u{1F513} Sbloccato'; btn.disabled = true; }
+  });
+  // Mark session as unlocked so requirePwd is bypassed
+  sessionUnlocked = true;
+}
+
 function lockAllGroups() {
   // Lock fId individually
   var fId = document.getElementById('fId');
@@ -1396,7 +1420,7 @@ function openNewArt() {
   document.getElementById('fDataRevisione2').value='';
   checkDecisioneEditor(); checkDecisioneEditor2();
   buildIssOpts('fIssArt','');
-  lockAllGroups();
+  if (!adminMode)   if (!adminMode) lockAllGroups();
   document.getElementById('artModal').classList.add('open');
 }
 function openEditArt(id) {
@@ -1447,7 +1471,7 @@ function openEditArt(id) {
   document.getElementById('fDataRevisione2').value=a.dataRevisione2||'';
   checkDecisioneEditor(); checkDecisioneEditor2();
   buildIssOpts('fIssArt',a.issue||'');
-  lockAllGroups();
+  if (!adminMode)   if (!adminMode) lockAllGroups();
   document.getElementById('artModal').classList.add('open');
 }
 function saveArt() {
@@ -1747,10 +1771,18 @@ function initFilters() {
 }
 
 
+var adminMode = false;
+
 function doLogin() {
   var u = document.getElementById('loginUser').value.trim();
   var p = document.getElementById('loginPass').value;
-  if (u === 'EditorTeMA' && p === 'tEMA8009') {
+  if (u === 'RedazioneTeMA' && p === '#ViaSanRocco37@') {
+    adminMode = true;
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'block';
+    bootApp();
+  } else if (u === 'EditorTeMA' && p === 'tEMA8009') {
+    adminMode = false;
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('mainApp').style.display = 'block';
     bootApp();
@@ -1770,7 +1802,8 @@ function bootApp() {
     if (e.key === 'Enter') document.getElementById('loginPass').focus();
   });
 
-  loadCiteScores(); initFilters(); renderStats(); updateTabCounts(); renderGk(); loadData();
+  loadCiteScores(); initFilters(); renderStats(); updateTabCounts(); renderGk();
+  if (adminMode) { setTimeout(unlockAllAdmin, 500); } loadData();
   document.getElementById('vDate').value=new Date().toISOString().slice(0,10);
 
   document.querySelectorAll('.tab').forEach(function(btn){
