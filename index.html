@@ -675,28 +675,7 @@ function rebuildIssFilters() {
 
 // ── artCard: unified card for all sections ────────────────────────────────────
 function antiplagiCountdown(a) {
-  if (!a.comunicazioneInviata || !a.dataComunicazione) return '';
-  var sim = parseFloat(a.similarity), ai = parseFloat(a.aiPercent);
-  if (!(sim > 30 || ai > 30)) return '';
-  var sent = new Date(a.dataComunicazione);
-  var deadline = new Date(sent.getTime() + 30 * 24 * 60 * 60 * 1000);
-  var today = new Date();
-  var daysLeft = Math.ceil((deadline - today) / (24 * 60 * 60 * 1000));
-  var sentStr = sent.toLocaleDateString('it-IT');
-  var deadStr = deadline.toLocaleDateString('it-IT');
-  if (daysLeft > 0) {
-    var color = daysLeft <= 5 ? 'var(--red)' : (daysLeft <= 10 ? 'var(--amber)' : 'var(--green)');
-    return '<div style="margin-top:6px;padding:8px 12px;border-radius:var(--r);border:1.5px solid '+color+';background:#fff">'
-      + '<div style="font-weight:700;color:'+color+';font-family:sans-serif">&#9203; Countdown risposta autori: '+daysLeft+' giorn'+(daysLeft===1?'o':'i')+' rimanent'+(daysLeft===1?'e':'i')+'</div>'
-      + '<div style="font-size:20px;color:var(--tx);font-family:sans-serif;margin-top:2px">Scade il '+deadStr+'</div>'
-      + '</div>';
-  } else {
-    var daysOver = Math.abs(daysLeft);
-    return '<div style="margin-top:6px;padding:8px 12px;border-radius:var(--r);border:1.5px solid var(--red);background:#fff5f5">'
-      + '<div style="font-weight:700;color:var(--red);font-family:sans-serif">&#9888; Countdown scaduto da '+daysOver+' giorn'+(daysOver===1?'o':'i')+'</div>'
-      + '<div style="font-size:20px;color:var(--tx);font-family:sans-serif;margin-top:2px">Scaduta il '+deadStr+'</div>'
-      + '</div>';
-  }
+    return "";
 }
 
 function artCard(a, showEdit) {
@@ -887,28 +866,61 @@ function renderTutti() {
 }
 
 function renderGk() {
-  var q = (document.getElementById('srchGk').value||'').toLowerCase();
-  var f = articles.filter(function(a) {
-    if (a.status === 'Pubblicato' || a.step === '18') return false;
-    var _sim=parseFloat(a.similarity),_ai=parseFloat(a.aiPercent);
-    if (a.rispostaAutori && a.rispostaAutori!=='' && (_sim>30||_ai>30)) return false;
-    if (a.step === '8b' || a.step === '7b') return false;
-    if (a.editor && a.editor !== '') return false;
-    if (q && (a.id+' '+a.title+' '+a.authors).toLowerCase().indexOf(q) < 0) return false;
-    return true;
-  }).sort(function(a, b) {
-    var simA = parseFloat(a.similarity), aiA = parseFloat(a.aiPercent);
-    var simB = parseFloat(b.similarity), aiB = parseFloat(b.aiPercent);
-    var aOk = !isNaN(simA) && simA <= 30 && !isNaN(aiA) && aiA <= 30;
-    var bOk = !isNaN(simB) && simB <= 30 && !isNaN(aiB) && aiB <= 30;
-    if (aOk && !bOk) return -1;
-    if (!aOk && bOk) return 1;
-    return parseInt(a.id) - parseInt(b.id);
-  });
-  document.getElementById('gkCount').textContent = f.length+' articol'+(f.length===1?'o':'i');
-  document.getElementById('gkEl').innerHTML = f.length ? f.map(function(a){ return gkCard(a); }).join('') :
-    '<div style="text-align:center;padding:3rem;color:var(--tx2)">Nessun articolo in valutazione.</div>';
+
+    var q = (document.getElementById('srchGk').value || '').toLowerCase();
+
+    // ✅ FILTRO CORRETTO PER GK:
+    var f = articles.filter(function(a) {
+
+        // Escludi pubblicati
+        if (a.status === 'Pubblicato' || a.step === '18') return false;
+
+        // Escludi rifiutati
+        if (a.step === '8b' || a.step === '7b') return false;
+
+        // ✅ GK = articoli SENZA EDITOR
+        if (a.editor && a.editor.trim() !== '') return false;
+
+        // Ricerca
+        if (q && (a.id + ' ' + a.title + ' ' + a.authors).toLowerCase().indexOf(q) < 0)
+            return false;
+
+        return true;
+    });
+
+    // ✅ ORDINAMENTO DEFINITIVO:
+    // 1. Prima similarity > 30
+    // 2. Poi gli altri
+    // 3. Dentro ogni gruppo: ID decrescente
+    f = f.sort(function (a, b) {
+
+        function highSim(x) {
+            var s = parseFloat(x.similarity);
+            return !isNaN(s) && s > 30;
+        }
+
+        var aHigh = highSim(a);
+        var bHigh = highSim(b);
+
+        // Prima >30%
+        if (aHigh && !bHigh) return -1;
+        if (!aHigh && bHigh) return 1;
+
+        // Poi ID DECRESCENTE
+        return parseInt(b.id) - parseInt(a.id);
+    });
+
+    // ✅ RENDER LISTA
+    document.getElementById('gkCount').textContent =
+        f.length + ' articol' + (f.length === 1 ? 'o' : 'i');
+
+    document.getElementById('gkEl').innerHTML =
+        f.length
+            ? f.map(function (a) { return gkCard(a); }).join('')
+            : '<div style="text-align:center;padding:3rem;color:var(--tx2)">Nessun articolo in valutazione.</div>';
 }
+
+
 
 function renderLista() {
   var q  = (document.getElementById('srchLista').value||'').toLowerCase();
@@ -1730,25 +1742,24 @@ function renderRifTur() {
 }
 
 function updateTabCounts() {
-  var gkCount = articles.filter(function(a) {
-    return (a.step === '1' || a.status === 'GateKeeper evaluation') && (!a.editor || a.editor === '');
-  }).length;
-  var listaCount = articles.filter(function(a) {
-    var sim = parseFloat(a.similarity), ai = parseFloat(a.aiPercent);
-    if (a.status === 'Pubblicato' || a.step === '18') return false;
-    if (a.step === '8b' || a.step === '7b') return false;
-    if ((a.step === '1' || a.status === 'GateKeeper evaluation') && (!a.editor || a.editor === '')) return false;
-    if (a.rispostaAutori && a.rispostaAutori !== '' && (sim > 30 || ai > 30)) return false;
-    if (!a.editor || a.editor === '') return false;
-    return true;
-  }).length;
-  document.querySelectorAll('.tab').forEach(function(btn) {
-    var tab = btn.dataset.tab;
-    if (tab === 'gatekeeper') btn.textContent = 'GateKeeper evaluation (' + gkCount + ')';
-    if (tab === 'lista') btn.textContent = 'Articoli in lavorazione (' + listaCount + ')';
-  });
+    var gkCount = articles.filter(function(a){
+        if(a.status==='Pubblicato' || a.step==='18') return false;
+        if(a.step==='8b' || a.step==='7b') return false;
+        if(a.editor && a.editor.trim()!=='') return false;
+        return true;
+    }).length;
+    var listaCount = articles.filter(function(a){
+        if(a.status==='Pubblicato' || a.step==='18') return false;
+        if(a.step==='8b' || a.step==='7b') return false;
+        if(!a.editor || a.editor.trim()==='') return false;
+        return true;
+    }).length;
+    document.querySelectorAll('.tab').forEach(function(btn){
+        var tab=btn.dataset.tab;
+        if(tab==='gatekeeper') btn.textContent='GateKeeper evaluation ('+gkCount+')';
+        if(tab==='lista') btn.textContent='Articoli in lavorazione ('+listaCount+')';
+    });
 }
-
 function switchTab(name) {
   document.querySelectorAll('.tab').forEach(function(t){ t.classList.toggle('active',t.dataset.tab===name); });
   document.querySelectorAll('.sec').forEach(function(s){ s.classList.toggle('active',s.id==='sec-'+name); });
