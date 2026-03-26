@@ -767,18 +767,22 @@ function artCard(a, showEdit) {
 
 // ── Section renderers ─────────────────────────────────────────────────────────
 function renderStats() {
-  var t = articles.length;
-  var intl = articles.filter(function(a){ return a.intl === 'si'; }).length;
+  var activeArts = articles.filter(function(a) {
+    if (a.status === 'Pubblicato' || a.step === '18') return false;
+    if (a.step === '8b' || a.step === '7b') return false;
+    var sim = parseFloat(a.similarity), ai = parseFloat(a.aiPercent);
+    if (a.rispostaAutori && a.rispostaAutori !== '' && (sim > 30 || ai > 30)) return false;
+    return true;
+  });
+  var t = activeArts.length;
+  var intl = activeArts.filter(function(a){ return a.intl === 'si'; }).length;
+  var allArts = articles.length;
 
-  // Find the next issue to be published (earliest deadline, not yet published)
   var nextIss = null;
   var sortedIss = issues.filter(function(i){ return !i.pubblicato && i.deadline; })
     .sort(function(a,b){ return new Date(a.deadline) - new Date(b.deadline); });
   if (sortedIss.length) nextIss = sortedIss[0];
-  if (!nextIss) {
-    // fallback: first issue with articles
-    nextIss = issues.find(function(i){ return articles.some(function(a){ return a.issue===i.key; }); });
-  }
+  if (!nextIss) nextIss = issues.find(function(i){ return articles.some(function(a){ return a.issue===i.key; }); });
 
   var t2226 = 0, t2226Count = 0;
   if (nextIss) {
@@ -925,6 +929,7 @@ function renderLista() {
     if (fIs && a.issue   !== fIs) return false;
     return true;
   });
+  f.sort(function(a,b){ return parseInt(b.id) - parseInt(a.id); });
   document.getElementById('listaEl').innerHTML = f.length ? f.map(function(a){ return artCard(a,true); }).join('') :
     '<div style="text-align:center;padding:3rem;color:var(--tx2)">Nessun articolo trovato.</div>';
 }
