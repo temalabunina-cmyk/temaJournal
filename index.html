@@ -865,6 +865,15 @@ function renderTutti() {
     '<div style="text-align:center;padding:3rem;color:var(--tx)">Nessun articolo trovato.</div>';
 }
 
+function toggleAccordion(id) {
+  var el = document.getElementById(id);
+  var icon = document.getElementById(id+'-icon');
+  if (!el) return;
+  var open = el.style.display !== 'none';
+  el.style.display = open ? 'none' : 'block';
+  if (icon) icon.innerHTML = open ? '&#9658;' : '&#9660;';
+}
+
 function renderGk() {
 
     var q = (document.getElementById('srchGk').value || '').toLowerCase();
@@ -1688,7 +1697,7 @@ function doSaveIss(type,year,num,theme,deadline,note,pub,unpublishing) {
     });
   }
   document.getElementById('issModal').classList.remove('open');
-  schedSave(); rebuildIssFilters(); renderNumeri();
+  schedSave(); rebuildIssFilters(); renderNumeri(); refresh();
 }
 function deleteIss() {
   if (!editingIssKey) return;
