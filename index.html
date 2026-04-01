@@ -865,15 +865,6 @@ function renderTutti() {
     '<div style="text-align:center;padding:3rem;color:var(--tx)">Nessun articolo trovato.</div>';
 }
 
-function toggleAccordion(id) {
-  var el = document.getElementById(id);
-  var icon = document.getElementById(id+'-icon');
-  if (!el) return;
-  var open = el.style.display !== 'none';
-  el.style.display = open ? 'none' : 'block';
-  if (icon) icon.innerHTML = open ? '&#9658;' : '&#9660;';
-}
-
 function renderGk() {
 
     var q = (document.getElementById('srchGk').value || '').toLowerCase();
@@ -963,6 +954,15 @@ function renderPub() {
     if (q && (a.id+' '+a.title+' '+a.authors).toLowerCase().indexOf(q) < 0) return false;
     if (fIs && a.issue !== fIs) return false;
     return true;
+  });
+  f = f.sort(function(a, b) {
+    var simA = parseFloat(a.similarity), aiA = parseFloat(a.aiPercent);
+    var simB = parseFloat(b.similarity), aiB = parseFloat(b.aiPercent);
+    var aOk = !isNaN(simA) && simA < 30 && !isNaN(aiA) && aiA < 30;
+    var bOk = !isNaN(simB) && simB < 30 && !isNaN(aiB) && aiB < 30;
+    if (aOk && !bOk) return -1;
+    if (!aOk && bOk) return 1;
+    return parseInt(a.id) - parseInt(b.id);
   });
   document.getElementById('pubCount').textContent = f.length+' articol'+(f.length===1?'o':'i');
   document.getElementById('pubEl').innerHTML = f.length ? f.map(function(a){ return artCard(a,true); }).join('') :
@@ -1697,7 +1697,7 @@ function doSaveIss(type,year,num,theme,deadline,note,pub,unpublishing) {
     });
   }
   document.getElementById('issModal').classList.remove('open');
-  schedSave(); rebuildIssFilters(); renderNumeri(); refresh();
+  schedSave(); rebuildIssFilters(); renderNumeri();
 }
 function deleteIss() {
   if (!editingIssKey) return;
