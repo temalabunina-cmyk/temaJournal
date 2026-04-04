@@ -166,8 +166,19 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
     <div style="font-size:16px;font-weight:700">GateKeeper evaluation</div>
     <span id="gkCount" style="font-size:20px;color:var(--tx2);font-family:sans-serif"></span>
   </div>
-  <div style="display:flex;align-items:center;justify-content:flex-end;margin-bottom:10px">
-    <button class="btn" onclick="printGkPDF()" style="display:flex;align-items:center;gap:6px">&#128438; Scarica PDF GateKeeper</button>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+    <div style="border:1px solid var(--brd);border-radius:var(--r);overflow:hidden;width:100%">
+      <div onclick="toggleAccordion('acc-turnitin')" style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;cursor:pointer;background:var(--sur2);user-select:none">
+        <span style="font-weight:700">&#128438; Report per GateKeeper</span>
+        <div style="display:flex;align-items:center;gap:10px">
+          <button class="btn btn-p" onclick="event.stopPropagation();printTurnitin()" style="font-size:13px;padding:4px 10px">Stampa / Salva PDF</button>
+          <span id="acc-turnitin-icon">&#9658;</span>
+        </div>
+      </div>
+      <div id="acc-turnitin" style="display:none;padding:1rem">
+        <div id="turnitinPreview" style="font-family:Arial,sans-serif;font-size:13px;line-height:1.6;color:#111"></div>
+      </div>
+    </div>
   </div>
   <div class="toolbar"><input class="srch" type="text" id="srchGk" placeholder="Cerca..."></div>
   <div id="gkEl"></div>
@@ -908,6 +919,8 @@ function toggleAccordion(id) {
   var open = el.style.display !== 'none';
   el.style.display = open ? 'none' : 'block';
   if (icon) icon.innerHTML = open ? '&#9658;' : '&#9660;';
+  // Auto-render turnitin report when accordion opens
+  if (!open && id === 'acc-turnitin') renderTurnitin();
 }
 
 async function printGkPDF() {
@@ -917,6 +930,13 @@ async function printGkPDF() {
     if (a.rispostaAutori && a.rispostaAutori!=='' && (_sim>30||_ai>30)) return false;
     if (a.step === '8b' || a.step === '7b') return false;
     if (a.editor && a.editor !== '') return false;
+    // Solo articoli con sim>30 O ai>30, oppure senza valori ancora inseriti
+    var simMissing = isNaN(_sim) || a.similarity === null || a.similarity === '';
+    var aiMissing  = isNaN(_ai)  || a.aiPercent  === null || a.aiPercent  === '';
+    var simHigh = !simMissing && _sim > 30;
+    var aiHigh  = !aiMissing  && _ai  > 30;
+    // Escludi solo se ENTRAMBI i valori sono presenti e ENTRAMBI sotto 30
+    if (!simMissing && !aiMissing && !simHigh && !aiHigh) return false;
     return true;
   }).sort(function(a,b){
     var simA=parseFloat(a.similarity),aiA=parseFloat(a.aiPercent);
@@ -1030,6 +1050,199 @@ async function printGkPDF() {
   document.body.appendChild(link);
   link.click();
   setTimeout(function(){ URL.revokeObjectURL(url); link.remove(); }, 500);
+}
+
+
+function renderTurnitin() {
+  var gkArts = articles.filter(function(a) {
+    if (a.status === 'Pubblicato' || a.step === '18') return false;
+    var _sim=parseFloat(a.similarity),_ai=parseFloat(a.aiPercent);
+    if (a.rispostaAutori && a.rispostaAutori!=='' && (_sim>30||_ai>30)) return false;
+    if (a.step === '8b' || a.step === '7b') return false;
+    if (a.editor && a.editor !== '') return false;
+    var simMissing = isNaN(_sim) || a.similarity===null || a.similarity==='';
+    var aiMissing  = isNaN(_ai)  || a.aiPercent===null  || a.aiPercent==='';
+    if (!simMissing && !aiMissing && _sim<=30 && _ai<=30) return false;
+    return true;
+  }).sort(function(a,b){ return parseInt(b.id)-parseInt(a.id); });
+
+  var today = new Date().toLocaleDateString('it-IT');
+
+  var html = '<div style="border-bottom:2px solid #222;padding-bottom:10px;margin-bottom:20px">' +
+    '<div style="font-size:16px;font-weight:700;margin-bottom:2px">TeMA Journal &mdash; Report per GateKeeper</div>' +
+    '<div style="font-size:11px;color:#666">Generato il '+today+' &middot; '+gkArts.length+' articol'+(gkArts.length===1?'o':'i')+' da valutare</div>' +
+    '</div>';
+
+  if (!gkArts.length) {
+    html += '<div style="text-align:center;padding:2rem;color:#666">Nessun articolo da segnalare.</div>';
+  } else {
+    html += gkArts.map(function(a) {
+      var sim = (a.similarity!==null&&a.similarity!=='')?a.similarity+'%':'—';
+      var ai  = (a.aiPercent!==null&&a.aiPercent!=='')?a.aiPercent+'%':'—';
+      var simRed = parseFloat(a.similarity)>30;
+      var aiRed  = parseFloat(a.aiPercent)>30;
+      var metricStyle = 'display:inline-block;margin-right:10px;font-size:11px;font-weight:bold';
+      var commHtml = '';
+      if (a.comunicazioneInviata && a.dataComunicazione) {
+        var dataInvio = new Date(a.dataComunicazione);
+        var scad = new Date(dataInvio); scad.setDate(scad.getDate()+30);
+        var giorni = Math.ceil((scad-new Date())/86400000);
+        commHtml = '<div style="font-size:11px;color:#b71c1c;margin-top:5px">&#9993; Comunicazione inviata il '+dataInvio.toLocaleDateString('it-IT')+
+          (giorni>0?' &middot; Countdown: '+giorni+' giorni rimanenti':' &middot; Scaduto')+'</div>';
+      }
+      var absHtml = '<div style="font-size:11px;margin-top:8px;border-top:1px solid #eee;padding-top:8px;line-height:1.6">';
+      if (a.abstract && a.abstract.trim()) {
+        absHtml += '<b>Abstract:</b><br>'+esc(a.abstract);
+      } else {
+        absHtml += '<b>Abstract:</b> <i style="color:#999">Non disponibile</i>';
+      }
+      absHtml += '</div>';
+      return '<div style="border:1px solid #ccc;padding:12px 14px;margin-bottom:14px;page-break-inside:avoid">' +
+        '<div style="font-size:10px;font-weight:bold;color:#555;font-family:monospace;margin-bottom:4px">#'+esc(a.id)+(a.section?' &middot; '+esc(a.section):'')+(a.nationality?' &middot; '+esc(a.nationality):'')+'</div>' +
+        '<div style="font-size:13px;font-weight:bold;line-height:1.35;margin-bottom:4px">'+esc(a.title)+'</div>' +
+        '<div style="font-size:11px;color:#444;margin-bottom:6px">'+esc(a.authors||'')+(a.affiliation?' &middot; '+esc(a.affiliation):'')+'</div>' +
+        '<div style="margin:5px 0">' +
+          '<span style="'+metricStyle+';color:'+(simRed?'#b71c1c':'#1b5e20')+'">Sim. '+sim+'</span>' +
+          '<span style="'+metricStyle+';color:'+(aiRed?'#b71c1c':'#1b5e20')+'">AI '+ai+'</span>' +
+          '<span style="'+metricStyle+'">Refs: '+(a.refsTotal||0)+'</span>' +
+          '<span style="'+metricStyle+'">TeMA: '+(a.citeTeMA||0)+'</span>' +
+          '<span style="'+metricStyle+'">22-26: '+(a.citeTeMA2226||0)+'</span>' +
+          '<span style="'+metricStyle+'">JCR: '+(a.citeJCR||0)+'</span>' +
+          '<span style="'+metricStyle+'">JCR 2y: '+(a.citeJCR2y||0)+'</span>' +
+        '</div>' +
+        commHtml +
+        absHtml +
+        (a.notes?'<div style="font-size:11px;color:#666;font-style:italic;margin-top:6px">Note: '+esc(a.notes)+'</div>':'') +
+      '</div>';
+    }).join('');
+  }
+
+  document.getElementById('turnitinPreview').innerHTML = html;
+}
+
+async function printTurnitin() {
+  var btn = document.getElementById('btnPrintTurnitin') ||
+            document.querySelector('[onclick*="printTurnitin"]');
+  var origText = btn ? btn.innerHTML : '';
+  if (btn) { btn.innerHTML = '&#8987; Traduzione in corso...'; btn.disabled = true; }
+
+  // Get articles from preview (same filter as renderTurnitin)
+  var gkArts = articles.filter(function(a) {
+    if (a.status === 'Pubblicato' || a.step === '18') return false;
+    var _sim=parseFloat(a.similarity),_ai=parseFloat(a.aiPercent);
+    if (a.rispostaAutori && a.rispostaAutori!=='' && (_sim>30||_ai>30)) return false;
+    if (a.step === '8b' || a.step === '7b') return false;
+    if (a.editor && a.editor !== '') return false;
+    var simMissing = isNaN(_sim)||a.similarity===null||a.similarity==='';
+    var aiMissing  = isNaN(_ai) ||a.aiPercent===null ||a.aiPercent==='';
+    if (!simMissing && !aiMissing && _sim<=30 && _ai<=30) return false;
+    return true;
+  }).sort(function(a,b){ return parseInt(b.id)-parseInt(a.id); });
+
+  // Translate abstracts via Claude API
+  async function translateAbstract(text) {
+    if (!text || !text.trim()) return '';
+    try {
+      var resp = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 1000,
+          messages: [{ role: 'user',
+            content: 'Traduci in italiano questo abstract scientifico. Rispondi solo con la traduzione: ' + text
+          }]
+        })
+      });
+      var data = await resp.json();
+      return (data.content && data.content[0]) ? data.content[0].text : '';
+    } catch(e) { return ''; }
+  }
+
+  // Translate each abstract
+  var translations = {};
+  for (var i = 0; i < gkArts.length; i++) {
+    var a = gkArts[i];
+    if (a.abstract && a.abstract.trim()) {
+      translations[a.id] = await translateAbstract(a.abstract);
+    }
+  }
+
+  if (btn) { btn.innerHTML = origText; btn.disabled = false; }
+
+  var today = new Date().toLocaleDateString('it-IT');
+  var metricStyle = 'display:inline-block;margin-right:10px;font-size:10px;font-weight:bold';
+
+  var cards = gkArts.map(function(a) {
+    var sim = (a.similarity!==null&&a.similarity!=='')?a.similarity+'%':'—';
+    var ai  = (a.aiPercent!==null&&a.aiPercent!=='')?a.aiPercent+'%':'—';
+    var simRed = parseFloat(a.similarity)>30;
+    var aiRed  = parseFloat(a.aiPercent)>30;
+    var commHtml = '';
+    if (a.comunicazioneInviata && a.dataComunicazione) {
+      var dataInvio = new Date(a.dataComunicazione);
+      var scad = new Date(dataInvio); scad.setDate(scad.getDate()+30);
+      var giorni = Math.ceil((scad-new Date())/86400000);
+      commHtml = '<p style="font-size:10px;color:#b71c1c;margin:5px 0">&#9993; Comunicazione inviata il '+
+        dataInvio.toLocaleDateString('it-IT')+
+        (giorni>0?' &middot; Countdown: '+giorni+' giorni rimanenti':' &middot; Scaduto')+'</p>';
+    }
+    // Abstract section: original + Italian translation
+    var absSection = '<div style="font-size:10px;margin-top:8px;border-top:1px solid #ddd;padding-top:8px;line-height:1.6">';
+    if (a.abstract && a.abstract.trim()) {
+      absSection += '<b>Abstract (originale):</b><br>'+esc(a.abstract);
+      if (translations[a.id] && translations[a.id].trim()) {
+        absSection += '<br><br><b>Abstract (italiano):</b><br>'+esc(translations[a.id]);
+      } else {
+        absSection += '<br><br><b>Abstract (italiano):</b> <i style="color:#999">Traduzione non disponibile</i>';
+      }
+    } else {
+      absSection += '<b>Abstract:</b> <i style="color:#999">Non disponibile</i>';
+    }
+    absSection += '</div>';
+
+    return '<div style="border:1px solid #bbb;border-radius:3px;padding:12px 14px;margin-bottom:14px;page-break-inside:avoid">'+
+      '<div style="font-size:9px;font-weight:bold;color:#555;font-family:monospace;margin-bottom:4px">#'+esc(a.id)+
+        (a.section?' &middot; '+esc(a.section):'')+(a.nationality?' &middot; '+esc(a.nationality):'')+'</div>'+
+      '<div style="font-size:13px;font-weight:bold;line-height:1.35;margin-bottom:4px">'+esc(a.title)+'</div>'+
+      '<div style="font-size:10px;color:#444;margin-bottom:6px">'+esc(a.authors||'')+
+        (a.affiliation?' &middot; '+esc(a.affiliation):'')+'</div>'+
+      '<div style="margin:5px 0">'+
+        '<span style="'+metricStyle+';color:'+(simRed?'#b71c1c':'#1b5e20')+'">Sim. '+sim+'</span>'+
+        '<span style="'+metricStyle+';color:'+(aiRed?'#b71c1c':'#1b5e20')+'">AI '+ai+'</span>'+
+        '<span style="'+metricStyle+'">Refs: '+(a.refsTotal||0)+'</span>'+
+        '<span style="'+metricStyle+'">TeMA: '+(a.citeTeMA||0)+'</span>'+
+        '<span style="'+metricStyle+'">22-26: '+(a.citeTeMA2226||0)+'</span>'+
+        '<span style="'+metricStyle+'">JCR: '+(a.citeJCR||0)+'</span>'+
+        '<span style="'+metricStyle+'">JCR 2y: '+(a.citeJCR2y||0)+'</span>'+
+      '</div>'+
+      commHtml+
+      absSection+
+      (a.notes?'<div style="font-size:10px;color:#666;font-style:italic;margin-top:6px">Note: '+esc(a.notes)+'</div>':'')+
+    '</div>';
+  }).join('');
+
+  var html = '<!DOCTYPE html><html lang="it"><head><meta charset="utf-8">'+
+    '<title>Report GateKeeper TeMA '+today+'</title>'+
+    '<style>body{font-family:Arial,sans-serif;font-size:11px;color:#111;margin:0;padding:0}'+
+    '@media print{@page{size:A4 portrait;margin:1.8cm 1.5cm}body{margin:0;padding:0}}'+
+    '@media screen{body{margin:1.5cm}}'+
+    '.header{border-bottom:2px solid #222;padding-bottom:10px;margin-bottom:18px}'+
+    '.header h1{font-size:15px;margin:0 0 3px}'+
+    '.header p{font-size:9px;color:#555;margin:0}'+
+    '</style></head><body>'+
+    '<div class="header">'+
+    '<h1>TeMA Journal &mdash; Report per GateKeeper</h1>'+
+    '<p>Generato il '+today+' &middot; '+gkArts.length+' articol'+(gkArts.length===1?'o':'i')+' da valutare</p>'+
+    '</div>'+
+    (gkArts.length ? cards : '<p style="text-align:center;color:#999">Nessun articolo da segnalare.</p>')+
+    '</body></html>';
+
+  var w = window.open('', '_blank');
+  if (!w) { alert('Consenti i popup per questo sito e riprova.'); return; }
+  w.document.write(html);
+  w.document.close();
+  setTimeout(function(){ w.print(); }, 600);
 }
 
 
