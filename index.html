@@ -1138,14 +1138,35 @@ async function printTurnitin() {
     return true;
   }).sort(function(a,b){ return parseInt(b.id)-parseInt(a.id); });
 
-  // Translate via Google Apps Script LanguageApp
+  // Translate via MyMemory (free, no auth, no CORS issues)
   async function translateAbstract(text) {
     if (!text || !text.trim()) return '';
     try {
-      var url = GS_URL + '?action=translate&text=' + encodeURIComponent(text);
-      var resp = await fetch(url);
-      var data = await resp.json();
-      return data.translation || '';
+      // Split long texts into chunks of 500 chars max
+      var chunks = [];
+      var words = text.split(' ');
+      var chunk = '';
+      for (var w = 0; w < words.length; w++) {
+        if ((chunk + ' ' + words[w]).length > 480) {
+          if (chunk) chunks.push(chunk.trim());
+          chunk = words[w];
+        } else {
+          chunk = chunk ? chunk + ' ' + words[w] : words[w];
+        }
+      }
+      if (chunk) chunks.push(chunk.trim());
+
+      var translated = [];
+      for (var c = 0; c < chunks.length; c++) {
+        var url = 'https://api.mymemory.translated.net/get?q=' +
+          encodeURIComponent(chunks[c]) + '&langpair=en|it';
+        var resp = await fetch(url);
+        var data = await resp.json();
+        translated.push(data.responseData ? data.responseData.translatedText : chunks[c]);
+        // Small delay to avoid rate limiting
+        if (c < chunks.length - 1) await new Promise(function(r){ setTimeout(r, 300); });
+      }
+      return translated.join(' ');
     } catch(e) { return ''; }
   }
 
