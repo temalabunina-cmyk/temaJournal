@@ -267,6 +267,11 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
   </div>
   <div class="toolbar">
     <input class="srch" type="text" id="srchTutti" placeholder="Cerca titolo, autore, ID...">
+    <select id="fEdTutti"></select>
+    <select id="fStTutti"><option value="">Tutti gli step</option></select>
+    <select id="fSecTutti"><option value="">Tutte le sezioni</option><option>Focus</option><option>LUME</option><option>SI</option></select>
+    <select id="fIntlTutti"><option value="">Tutti</option><option value="si">Internazionali</option><option value="no">Nazionali</option></select>
+    <select id="fIssTutti"></select>
   </div>
   <div id="tuttiEl"></div>
 </div>
@@ -378,7 +383,7 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
     </div>
   </div>
   <div class="fsl">Metriche citazionali</div>
-  <div style="margin-bottom:10px"><a href="https://claude.ai/public/artifacts/13b10d82-0944-44de-9059-94e46c366e7d" target="_blank" rel="noopener" class="btn" style="font-size:20px;display:inline-flex;align-items:center;gap:6px">&#128200; Calcola indicatori citazionali</a></div>
+  <div style="margin-bottom:10px"><a href="https://claude.ai/public/artifacts/aa71145a-e704-4214-984f-c7cbbdb5549f" target="_blank" rel="noopener" class="btn" style="font-size:20px;display:inline-flex;align-items:center;gap:6px">&#128200; Calcola indicatori citazionali</a></div>
   <div class="g3">
     <div class="fr"><label>References totali</label><input id="fRefs" type="number" min="0"></div>
     <div class="fr"><label>Citazioni TeMA</label><input id="fCTeMA" type="number" min="0"></div>
@@ -853,13 +858,22 @@ function gkCard(a) {
 }
 
 function renderTutti() {
-  var q = (document.getElementById('srchTutti').value||'').toLowerCase();
+  var q   = (document.getElementById('srchTutti').value||'').toLowerCase();
+  var fE  = document.getElementById('fEdTutti')  ? document.getElementById('fEdTutti').value  : '';
+  var fS  = document.getElementById('fStTutti')  ? document.getElementById('fStTutti').value  : '';
+  var fSc = document.getElementById('fSecTutti') ? document.getElementById('fSecTutti').value : '';
+  var fI2 = document.getElementById('fIntlTutti')? document.getElementById('fIntlTutti').value: '';
+  var fIs = document.getElementById('fIssTutti') ? document.getElementById('fIssTutti').value : '';
   var f = articles.filter(function(a) {
-    if (q && (a.id+' '+a.title+' '+a.authors).toLowerCase().indexOf(q) < 0) return false;
+    if (q && (a.id+' '+a.title+' '+a.authors+' '+a.affiliation).toLowerCase().indexOf(q) < 0) return false;
+    if (fE  && a.editor  !== fE)  return false;
+    if (fS  && a.step    !== fS)  return false;
+    if (fSc && a.section !== fSc) return false;
+    if (fI2 && a.intl    !== fI2) return false;
+    if (fIs && a.issue   !== fIs) return false;
     return true;
-  }).sort(function(a,b) {
-    return parseInt(a.id) - parseInt(b.id);
   });
+  f.sort(function(a,b){ return parseInt(b.id) - parseInt(a.id); });
   document.getElementById('tuttiCount').textContent = f.length+' articol'+(f.length===1?'o':'i');
   document.getElementById('tuttiEl').innerHTML = f.length ? f.map(function(a){ return artCard(a,true); }).join('') :
     '<div style="text-align:center;padding:3rem;color:var(--tx)">Nessun articolo trovato.</div>';
@@ -962,7 +976,9 @@ function renderPub() {
     var bOk = !isNaN(simB) && simB < 30 && !isNaN(aiB) && aiB < 30;
     if (aOk && !bOk) return -1;
     if (!aOk && bOk) return 1;
-    return parseInt(a.id) - parseInt(b.id);
+    // OK group: ascending ID; non-OK group: descending ID
+    if (aOk && bOk) return parseInt(a.id) - parseInt(b.id);
+    return parseInt(b.id) - parseInt(a.id);
   });
   document.getElementById('pubCount').textContent = f.length+' articol'+(f.length===1?'o':'i');
   document.getElementById('pubEl').innerHTML = f.length ? f.map(function(a){ return artCard(a,true); }).join('') :
@@ -1798,6 +1814,25 @@ function initFilters() {
     stSel.appendChild(o);
   });
   rebuildIssFilters();
+
+  // Populate Tutti editor select (same as Lista)
+  var edSelT = document.getElementById('fEdTutti');
+  if (edSelT) {
+    edSelT.innerHTML = '<option value="">Tutti gli editor</option>';
+    ['Carmen Guida','Floriana Zucaro','Gerardo Carpentieri','Peppe Mazzeo',
+     'Romano Fistola','Rosa Anna La Rocca','Rosaria Battarra','Stefano Franco'].forEach(function(e){
+      edSelT.innerHTML += '<option value="'+e+'">'+e+'</option>';
+    });
+  }
+
+  // Populate Tutti step select (same as Lista)
+  var stSelT = document.getElementById('fStTutti');
+  if (stSelT) {
+    stSelT.innerHTML = '<option value="">Tutti gli step</option>';
+    Object.keys(STEPS).forEach(function(k){
+      stSelT.innerHTML += '<option value="'+k+'">'+STEPS[k]+'</option>';
+    });
+  }
 }
 
 
@@ -1889,6 +1924,11 @@ function bootApp() {
   document.getElementById('btnRefreshVerbale').addEventListener('click',renderVerbale);
   document.getElementById('btnPrintVerbale').addEventListener('click',printVerbale);
   document.getElementById('srchTutti').addEventListener('input',renderTutti);
+  document.getElementById('fEdTutti').addEventListener('change',renderTutti);
+  document.getElementById('fStTutti').addEventListener('change',renderTutti);
+  document.getElementById('fSecTutti').addEventListener('change',renderTutti);
+  document.getElementById('fIntlTutti').addEventListener('change',renderTutti);
+  document.getElementById('fIssTutti').addEventListener('change',renderTutti);
   document.getElementById('srchGk').addEventListener('input',renderGk);
   document.getElementById('srchLista').addEventListener('input',renderLista);
   document.getElementById('fEd').addEventListener('change',renderLista);
