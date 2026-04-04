@@ -1060,9 +1060,10 @@ function renderTurnitin() {
     if (a.rispostaAutori && a.rispostaAutori!=='' && (_sim>30||_ai>30)) return false;
     if (a.step === '8b' || a.step === '7b') return false;
     if (a.editor && a.editor !== '') return false;
-    var simMissing = isNaN(_sim) || a.similarity===null || a.similarity==='';
-    var aiMissing  = isNaN(_ai)  || a.aiPercent===null  || a.aiPercent==='';
-    if (!simMissing && !aiMissing && _sim<=30 && _ai<=30) return false;
+    // Solo articoli che hanno superato la verifica Turnitin: entrambi i valori presenti e < 30
+    var simOk = !isNaN(_sim) && a.similarity!==null && a.similarity!=='' && _sim < 30;
+    var aiOk  = !isNaN(_ai)  && a.aiPercent!==null  && a.aiPercent!==''  && _ai  < 30;
+    if (!(simOk && aiOk)) return false;
     return true;
   }).sort(function(a,b){ return parseInt(b.id)-parseInt(a.id); });
 
@@ -1133,9 +1134,10 @@ async function printTurnitin() {
     if (a.rispostaAutori && a.rispostaAutori!=='' && (_sim>30||_ai>30)) return false;
     if (a.step === '8b' || a.step === '7b') return false;
     if (a.editor && a.editor !== '') return false;
-    var simMissing = isNaN(_sim)||a.similarity===null||a.similarity==='';
-    var aiMissing  = isNaN(_ai) ||a.aiPercent===null ||a.aiPercent==='';
-    if (!simMissing && !aiMissing && _sim<=30 && _ai<=30) return false;
+    // Solo articoli che hanno superato la verifica Turnitin: entrambi < 30
+    var simOk = !isNaN(_sim) && a.similarity!==null && a.similarity!=='' && _sim < 30;
+    var aiOk  = !isNaN(_ai)  && a.aiPercent!==null  && a.aiPercent!==''  && _ai  < 30;
+    if (!(simOk && aiOk)) return false;
     return true;
   }).sort(function(a,b){ return parseInt(b.id)-parseInt(a.id); });
 
