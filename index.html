@@ -1122,46 +1122,34 @@ function renderTurnitin() {
 }
 
 async function printTurnitin() {
-  var btn = document.getElementById('btnPrintTurnitin') ||
-            document.querySelector('[onclick*="printTurnitin"]');
+  var btn = document.querySelector('[onclick*="printTurnitin"]');
   var origText = btn ? btn.innerHTML : '';
   if (btn) { btn.innerHTML = '&#8987; Traduzione in corso...'; btn.disabled = true; }
 
-  // Get articles from preview (same filter as renderTurnitin)
   var gkArts = articles.filter(function(a) {
     if (a.status === 'Pubblicato' || a.step === '18') return false;
     var _sim=parseFloat(a.similarity),_ai=parseFloat(a.aiPercent);
     if (a.rispostaAutori && a.rispostaAutori!=='' && (_sim>30||_ai>30)) return false;
     if (a.step === '8b' || a.step === '7b') return false;
     if (a.editor && a.editor !== '') return false;
-    // Solo articoli che hanno superato la verifica Turnitin: entrambi < 30
     var simOk = !isNaN(_sim) && a.similarity!==null && a.similarity!=='' && _sim < 30;
     var aiOk  = !isNaN(_ai)  && a.aiPercent!==null  && a.aiPercent!==''  && _ai  < 30;
     if (!(simOk && aiOk)) return false;
     return true;
   }).sort(function(a,b){ return parseInt(b.id)-parseInt(a.id); });
 
-  // Translate abstracts via Claude API
+  // Translate via Google Apps Script LanguageApp
   async function translateAbstract(text) {
     if (!text || !text.trim()) return '';
     try {
-      var resp = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json', 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true'},
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 1000,
-          messages: [{ role: 'user',
-            content: 'Traduci in italiano questo abstract scientifico. Rispondi solo con la traduzione: ' + text
-          }]
-        })
-      });
+      var url = GS_URL + '?action=translate&text=' + encodeURIComponent(text);
+      var resp = await fetch(url);
       var data = await resp.json();
-      return (data.content && data.content[0]) ? data.content[0].text : '';
+      return data.translation || '';
     } catch(e) { return ''; }
   }
 
-  // Translate each abstract
+  // Translate all abstracts
   var translations = {};
   for (var i = 0; i < gkArts.length; i++) {
     var a = gkArts[i];
@@ -1189,15 +1177,13 @@ async function printTurnitin() {
         dataInvio.toLocaleDateString('it-IT')+
         (giorni>0?' &middot; Countdown: '+giorni+' giorni rimanenti':' &middot; Scaduto')+'</p>';
     }
-    // Abstract section: original + Italian translation
     var absSection = '<div style="font-size:10px;margin-top:8px;border-top:1px solid #ddd;padding-top:8px;line-height:1.6">';
     if (a.abstract && a.abstract.trim()) {
       absSection += '<b>Abstract (originale):</b><br>'+esc(a.abstract);
-      if (translations[a.id] && translations[a.id].trim()) {
-        absSection += '<br><br><b>Abstract (italiano):</b><br>'+esc(translations[a.id]);
-      } else {
-        absSection += '<br><br><b>Abstract (italiano):</b> <i style="color:#999">Traduzione non disponibile</i>';
-      }
+      absSection += '<br><br><b>Abstract (italiano):</b><br>';
+      absSection += (translations[a.id] && translations[a.id].trim())
+        ? esc(translations[a.id])
+        : '<i style="color:#999">Traduzione non disponibile</i>';
     } else {
       absSection += '<b>Abstract:</b> <i style="color:#999">Non disponibile</i>';
     }
@@ -1218,25 +1204,21 @@ async function printTurnitin() {
         '<span style="'+metricStyle+'">JCR: '+(a.citeJCR||0)+'</span>'+
         '<span style="'+metricStyle+'">JCR 2y: '+(a.citeJCR2y||0)+'</span>'+
       '</div>'+
-      commHtml+
-      absSection+
+      commHtml+absSection+
       (a.notes?'<div style="font-size:10px;color:#666;font-style:italic;margin-top:6px">Note: '+esc(a.notes)+'</div>':'')+
     '</div>';
   }).join('');
 
   var html = '<!DOCTYPE html><html lang="it"><head><meta charset="utf-8">'+
-    '<title>Report GateKeeper TeMA '+today+'</title>'+
-    '<style>body{font-family:Arial,sans-serif;font-size:11px;color:#111;margin:0;padding:0}'+
-    '@media print{@page{size:A4 portrait;margin:1.8cm 1.5cm}body{margin:0;padding:0}}'+
+    '<title>Report per GateKeeper TeMA '+today+'</title>'+
+    '<style>body{font-family:Arial,sans-serif;font-size:11px;color:#111}'+
+    '@media print{@page{size:A4 portrait;margin:1.8cm 1.5cm}body{margin:0}}'+
     '@media screen{body{margin:1.5cm}}'+
     '.header{border-bottom:2px solid #222;padding-bottom:10px;margin-bottom:18px}'+
-    '.header h1{font-size:15px;margin:0 0 3px}'+
-    '.header p{font-size:9px;color:#555;margin:0}'+
+    '.header h1{font-size:15px;margin:0 0 3px}.header p{font-size:9px;color:#555;margin:0}'+
     '</style></head><body>'+
-    '<div class="header">'+
-    '<h1>TeMA Journal &mdash; Report per GateKeeper</h1>'+
-    '<p>Generato il '+today+' &middot; '+gkArts.length+' articol'+(gkArts.length===1?'o':'i')+' da valutare</p>'+
-    '</div>'+
+    '<div class="header"><h1>TeMA Journal &mdash; Report per GateKeeper</h1>'+
+    '<p>Generato il '+today+' &middot; '+gkArts.length+' articol'+(gkArts.length===1?'o':'i')+' approvati da Turnitin</p></div>'+
     (gkArts.length ? cards : '<p style="text-align:center;color:#999">Nessun articolo da segnalare.</p>')+
     '</body></html>';
 
