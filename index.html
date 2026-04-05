@@ -147,6 +147,7 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
     <span class="save-dot" id="saveDot"></span>
     <span class="save-lbl" id="saveLbl">Dati salvati</span>
     <button class="btn btn-p" id="btnNuovo">+ Nuovo articolo</button>
+    <button class="btn" onclick="backupData()" title="Scarica backup JSON" style="padding:7px 10px;font-size:13px">&#128229; Backup</button>
   </div>
 </div>
 <input type="file" id="importFile" accept=".json" style="display:none">
@@ -555,93 +556,44 @@ function saveCiteScores() {
 
 function loadData() {
   setSaving(true);
-  document.getElementById('saveLbl').textContent = 'Caricamento...';
+  document.getElementById('saveLbl').textContent = 'Caricamento da Google Sheets...';
 
-  // Load localStorage immediately for instant display
-  var localRaw = localStorage.getItem(LS_KEY);
-  var localData = null;
-  if (localRaw) {
-    try { localData = JSON.parse(localRaw); } catch(e) {}
-  }
-  if (localData && localData.articles && localData.articles.length) {
-    issues   = localData.issues   || JSON.parse(JSON.stringify(DEF_ISSUES));
-    articles = localData.articles;
-    rebuildIssFilters();
-    refresh();
-  }
-
-  // Then fetch GS and merge
   fetch(GS_URL)
     .then(function(r){ return r.text(); })
     .then(function(text) {
-      try {
-        var gsData = JSON.parse(text);
-        if (!gsData.articles || !gsData.articles.length) {
-          // GS empty — push local data to GS
-          setSaving(false);
-          document.getElementById('saveLbl').textContent = 'Dati locali';
-          if (localData && localData.articles && localData.articles.length) schedSave();
-          return;
-        }
+      var gsData = null;
+      try { gsData = JSON.parse(text); } catch(e) {}
 
-        // Merge: build map by ID, GS wins for existing, local adds new ones
-        var merged = {};
-        gsData.articles.forEach(function(a){ merged[a.id] = a; });
-
-        // Add any articles present locally but not in GS
-        if (localData && localData.articles) {
-          localData.articles.forEach(function(a) {
-            if (!merged[a.id]) merged[a.id] = a;
-          });
-        }
-
-        var mergedList = Object.values(merged);
-        // If merge has more articles than GS, push merged back to GS
-        var needsSync = mergedList.length > gsData.articles.length;
-
-        issues   = gsData.issues && gsData.issues.length ? gsData.issues : (localData ? localData.issues : DEF_ISSUES);
-        articles = mergedList;
-
-        localStorage.setItem(LS_KEY, JSON.stringify({issues:issues, articles:articles}));
+      if (gsData && gsData.articles && gsData.articles.length) {
+        issues   = gsData.issues && gsData.issues.length ? gsData.issues : JSON.parse(JSON.stringify(DEF_ISSUES));
+        articles = gsData.articles;
         setSaving(false);
         document.getElementById('saveLbl').textContent = 'Dati sincronizzati';
         rebuildIssFilters();
         refresh();
-
-        // Push merged data back to GS if we added local-only articles
-        if (needsSync) schedSave();
-
-      } catch(e) {
+      } else {
+        // GS vuoto — carica i dati di default e li salva su GS
+        issues   = JSON.parse(JSON.stringify(DEF_ISSUES));
+        articles = JSON.parse(JSON.stringify(DEF_ARTICLES));
         setSaving(false);
-        document.getElementById('saveLbl').textContent = 'Dati locali';
+        document.getElementById('saveLbl').textContent = 'Dati predefiniti caricati';
+        rebuildIssFilters();
+        refresh();
+        schedSave(); // spinge i default su GS
       }
     })
     .catch(function() {
+      // Rete non disponibile — carica i default
+      issues   = JSON.parse(JSON.stringify(DEF_ISSUES));
+      articles = JSON.parse(JSON.stringify(DEF_ARTICLES));
       setSaving(false);
-      document.getElementById('saveLbl').textContent = 'Offline — dati locali';
-      if (!localData || !localData.articles || !localData.articles.length) {
-        issues   = JSON.parse(JSON.stringify(DEF_ISSUES));
-        articles = JSON.parse(JSON.stringify(DEF_ARTICLES));
-        rebuildIssFilters();
-        refresh();
-      }
+      document.getElementById('saveLbl').textContent = 'Rete non disponibile';
+      rebuildIssFilters();
+      refresh();
     });
 }
 
-function loadLocalData() {
-  try {
-    var d = JSON.parse(localStorage.getItem(LS_KEY) || '{}');
-    issues   = (d.issues   && d.issues.length)   ? d.issues   : JSON.parse(JSON.stringify(DEF_ISSUES));
-    articles = (d.articles && d.articles.length) ? d.articles : JSON.parse(JSON.stringify(DEF_ARTICLES));
-  } catch(e) {
-    issues   = JSON.parse(JSON.stringify(DEF_ISSUES));
-    articles = JSON.parse(JSON.stringify(DEF_ARTICLES));
-  }
-  setSaving(false);
-  document.getElementById('saveLbl').textContent = 'Dati locali (Google Sheets non raggiungibile)';
-  rebuildIssFilters();
-  refresh();
-}
+
 function setSaving(s) {
   var dot = document.getElementById('saveDot'), lbl = document.getElementById('saveLbl');
   if (s) { dot.classList.add('saving'); lbl.textContent = 'Salvataggio...'; }
@@ -655,24 +607,54 @@ function sendNotification(action, artId, artTitle) {
 
 function persist() {
   setSaving(true);
-  var payload = JSON.stringify({issues:issues, articles:articles});
-  try { localStorage.setItem(LS_KEY, payload); } catch(e) {}
-  fetch(GS_URL, { method: 'POST', body: payload })
+  document.getElementById('saveLbl').textContent = 'Salvataggio...';
+
+  var payload = JSON.stringify({issues:issues, articles:articles, _ts: Date.now()});
+
+  var attempt = 0;
+  function tryPost() {
+    attempt++;
+    fetch(GS_URL, {
+      method: 'POST',
+      body: payload,
+      headers: {'Content-Type': 'application/json'}
+    })
     .then(function(r){ return r.text(); })
     .then(function(txt) {
-      setSaving(false);
       if (txt && txt.trim() === 'OK') {
+        setSaving(false);
         document.getElementById('saveLbl').textContent = 'Salvato';
         setTimeout(function(){ document.getElementById('saveLbl').textContent = 'Dati salvati'; }, 2000);
+      } else if (attempt < 3) {
+        setTimeout(tryPost, 2000);
       } else {
-        document.getElementById('saveLbl').textContent = 'Salvato in locale';
+        setSaving(false);
+        document.getElementById('saveLbl').textContent = 'Errore salvataggio — riprova';
       }
     })
     .catch(function() {
-      setSaving(false);
-      document.getElementById('saveLbl').textContent = 'Salvato in locale';
+      if (attempt < 3) {
+        setTimeout(tryPost, 2000);
+      } else {
+        setSaving(false);
+        document.getElementById('saveLbl').textContent = 'Errore rete — dati non salvati';
+      }
     });
+  }
+  tryPost();
 }
+function backupData() {
+  var payload = JSON.stringify({issues:issues, articles:articles, _backup: new Date().toISOString()}, null, 2);
+  var blob = new Blob([payload], {type:'application/json;charset=utf-8'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'tema_backup_' + new Date().toISOString().slice(0,10) + '.json';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(function(){ URL.revokeObjectURL(url); a.remove(); }, 500);
+}
+
 function schedSave() { setSaving(true); clearTimeout(saveTimer); saveTimer = setTimeout(persist, 600); }
 
 function requirePwd(action) {
