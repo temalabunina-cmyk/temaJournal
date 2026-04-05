@@ -782,6 +782,15 @@ function artCard(a, showEdit) {
     '</div>' +
     metaHtml + revHtml +
     (a.notes ? '<div class="note-box">'+esc(a.notes)+'</div>' : '') +
+    (function(){
+      var info = [];
+      if (a.decisioneEditor && a.decisioneEditor !== '') info.push('<strong>Decisione:</strong> '+esc(a.decisioneEditor));
+      if (a.decisioneEditor2 && a.decisioneEditor2 !== '') info.push('<strong>Decisione 2°:</strong> '+esc(a.decisioneEditor2));
+      if (a.dataRevisione && a.dataRevisione !== '') info.push('<strong>Consegna rev.:</strong> '+new Date(a.dataRevisione).toLocaleDateString('it-IT'));
+      if (a.dataRevisione2 && a.dataRevisione2 !== '') info.push('<strong>Consegna 2°:</strong> '+new Date(a.dataRevisione2).toLocaleDateString('it-IT'));
+      if (!info.length) return '';
+      return '<div style="font-size:20px;margin-top:6px;padding:5px 10px;background:var(--sur2);border-radius:var(--r);display:flex;flex-wrap:wrap;gap:10px">'+info.join(' &middot; ')+'</div>';
+    })() +
     antiplagiCountdown(a) +
 
     // Footer: step badge (color by status) + copyeditor + deadline
@@ -1400,7 +1409,9 @@ function renderRifGk() {
 
 function renderTeam() {
   var h = '<div style="font-size:16px;font-weight:700;margin-bottom:1rem">GateKeeper</div>';
-  var gk = articles.filter(function(a){ return a.gatekeeper==='Lilli Gargiulo' && (!a.editor||a.editor==='') && (a.step==='1'||a.status==='GateKeeper evaluation') && a.step !== '8b' && a.step !== '7b' && a.status !== 'Rifiutato'; });
+  var gk = articles.filter(function(a){ return a.gatekeeper==='Lilli Gargiulo' && (!a.editor||a.editor==='') && (a.step==='1'||a.status==='GateKeeper evaluation') && a.step !== '8b' && a.step !== '7b' && a.status !== 'Rifiutato' &&
+    !isNaN(parseFloat(a.similarity)) && parseFloat(a.similarity) < 30 &&
+    !isNaN(parseFloat(a.aiPercent)) && parseFloat(a.aiPercent) < 30; });
   h += '<div class="card"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:'+(gk.length?'10px':'0')+'">' +
     '<div style="font-size:20px;font-weight:700">Lilli Gargiulo</div>' +
     '<span style="font-size:20px;font-weight:600;color:var(--orange)">'+gk.length+' articoli in valutazione</span>' +
@@ -1415,7 +1426,10 @@ function renderTeam() {
 
   h += '<div style="font-size:16px;font-weight:700;margin:1.5rem 0 1rem">Editor</div>';
   EDITORS.forEach(function(ed) {
-    var mine = articles.filter(function(a){ return a.editor===ed && a.status !== 'Pubblicato' && a.step !== '18' && a.step !== '8b' && a.step !== '7b' && a.status !== 'Rifiutato'; });
+    var mine = articles.filter(function(a){ return a.editor===ed && a.status !== 'Pubblicato' && a.step !== '18' && a.step !== '8b' && a.step !== '7b' && a.status !== 'Rifiutato'; }).sort(function(a,b){
+      var sa = parseFloat(a.step)||0, sb = parseFloat(b.step)||0;
+      return sb - sa;
+    });
     h += '<div class="card"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:'+(mine.length?'10px':'0')+'">' +
       '<div style="font-size:20px;font-weight:700">'+esc(ed)+'</div>' +
       '<span style="font-size:20px;font-weight:600;color:var(--blue)">'+mine.length+' in lavorazione</span>' +
@@ -1541,20 +1555,15 @@ function renderVerbale() {
       (isslbl?'<p>Fascicolo: '+esc(isslbl.label)+(a.articleNum?' &middot; n.'+a.articleNum:'')+'</p>':'') +
       (a.notes?'<p>'+esc(a.notes)+'</p>':'') +
       (a.revisori && a.revisori.length ?
-        '<p style="margin-top:6px"><strong>Revisori:</strong></p>' +
+        '<p style="margin-top:5px;margin-bottom:0"><strong>Revisori:</strong> ' +
         a.revisori.map(function(r, ri) {
-          var lines = [];
-          var header = '<strong>'+(ri+1)+'. '+esc(r.nome||'Revisore')+'</strong>';
-          if (r.affiliazione) header += ' &mdash; '+esc(r.affiliazione);
-          lines.push('<p style="margin-left:1rem">'+header+'</p>');
-          var details = [];
-          if (r.accettazione) details.push('Stato revisione: <em>'+esc(r.accettazione)+'</em>');
-          if (r.dataConsegna) details.push('Data consegna: '+new Date(r.dataConsegna).toLocaleDateString('it-IT'));
-          if (r.dataProroga)  details.push('Data proroga: '+new Date(r.dataProroga).toLocaleDateString('it-IT'));
-          if (details.length) lines.push('<p style="margin-left:2rem;font-size:15pt">'+details.join(' &middot; ')+'</p>');
-          if (r.giudizio) lines.push('<p style="margin-left:2rem;font-size:15pt"><em>Giudizio: '+esc(r.giudizio)+'</em></p>');
-          return lines.join('');
-        }).join('') : '') +
+          var parts = [(ri+1)+'. '+esc(r.nome||'Revisore')];
+          if (r.affiliazione) parts.push(esc(r.affiliazione));
+          if (r.accettazione) parts.push(esc(r.accettazione));
+          if (r.dataConsegna) parts.push('consegna '+new Date(r.dataConsegna).toLocaleDateString('it-IT'));
+          if (r.giudizio) parts.push('<em>'+esc(r.giudizio)+'</em>');
+          return parts.join(' &middot; ');
+        }).join(' | ') + '</p>' : '') +
       '</div>';
   };
 
@@ -2267,7 +2276,9 @@ function bootApp() {
     setTimeout(unlockAllAdmin, 500);
     renderGk();
   } else {
-    // EditorTeMA: hide GateKeeper evaluation and Verbale PDF tabs + sections
+    // EditorTeMA: hide GateKeeper evaluation, Verbale PDF and Backup button
+    var bkpBtn = document.querySelector('[onclick="backupData()"]');
+    if (bkpBtn) bkpBtn.style.display = 'none';
     var tabsToHide = ['gatekeeper', 'verbale'];
     tabsToHide.forEach(function(tab) {
       var btn = document.querySelector('.tab[data-tab="'+tab+'"]');
