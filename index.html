@@ -565,15 +565,35 @@ function loadData() {
       try {
         var data = JSON.parse(text);
         if (data.issues && data.issues.length && data.articles && data.articles.length) {
-          // Google Sheets has data — use it and update localStorage
-          issues   = data.issues;
-          articles = data.articles;
-          localStorage.setItem(LS_KEY, JSON.stringify({issues:issues, articles:articles}));
-          setSaving(false);
-          document.getElementById('saveLbl').textContent = 'Dati sincronizzati';
-          rebuildIssFilters();
-          refresh();
-          return;
+          // Check localStorage for potentially more complete data
+          var localRaw = localStorage.getItem(LS_KEY);
+          var localCount = 0;
+          if (localRaw) {
+            try { localCount = (JSON.parse(localRaw).articles||[]).length; } catch(e){}
+          }
+          // Use GS data only if it has >= articles than localStorage
+          if (data.articles.length >= localCount) {
+            issues   = data.issues;
+            articles = data.articles;
+            // Restore full abstracts from localStorage if GS has truncated them
+            if (localRaw) {
+              try {
+                var localData = JSON.parse(localRaw);
+                articles.forEach(function(a) {
+                  var local = (localData.articles||[]).find(function(l){ return l.id === a.id; });
+                  if (local && local.abstract && local.abstract.length > (a.abstract||'').length) {
+                    a.abstract = local.abstract;
+                  }
+                });
+              } catch(e){}
+            }
+            localStorage.setItem(LS_KEY, JSON.stringify({issues:issues, articles:articles}));
+            setSaving(false);
+            document.getElementById('saveLbl').textContent = 'Dati sincronizzati';
+            rebuildIssFilters();
+            refresh();
+            return;
+          }
         }
       } catch(e) {}
       // Google Sheets returned empty or invalid — fall back to localStorage then defaults
@@ -613,15 +633,19 @@ function sendNotification(action, artId, artTitle) {
 function persist() {
   setSaving(true);
   var payload = JSON.stringify({issues:issues, articles:articles});
+  // Save full data locally
   try { localStorage.setItem(LS_KEY, payload); } catch(e) {}
-  fetch(GS_URL, {
-    method: 'POST',
-    body: payload
-  })
-  .then(function() {
+  // Save to Google Sheets (now multi-row, no size limit)
+  fetch(GS_URL, { method: 'POST', body: payload })
+  .then(function(r){ return r.text(); })
+  .then(function(txt) {
     setSaving(false);
-    document.getElementById('saveLbl').textContent = 'Salvato';
-    setTimeout(function(){ document.getElementById('saveLbl').textContent = 'Dati salvati'; }, 2000);
+    if (txt && txt.indexOf('ERROR') >= 0) {
+      document.getElementById('saveLbl').textContent = 'Errore GS — salvato in locale';
+    } else {
+      document.getElementById('saveLbl').textContent = 'Salvato';
+      setTimeout(function(){ document.getElementById('saveLbl').textContent = 'Dati salvati'; }, 2000);
+    }
   })
   .catch(function() {
     setSaving(false);
