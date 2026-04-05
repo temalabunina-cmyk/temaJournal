@@ -554,54 +554,77 @@ function saveCiteScores() {
 }
 
 function loadData() {
-  // Show loading indicator immediately
   setSaving(true);
-  document.getElementById('saveLbl').textContent = 'Caricamento da Google Sheets...';
+  document.getElementById('saveLbl').textContent = 'Caricamento...';
 
-  // Try Google Sheets first — it is the single source of truth
+  // Load localStorage immediately for instant display
+  var localRaw = localStorage.getItem(LS_KEY);
+  var localData = null;
+  if (localRaw) {
+    try { localData = JSON.parse(localRaw); } catch(e) {}
+  }
+  if (localData && localData.articles && localData.articles.length) {
+    issues   = localData.issues   || JSON.parse(JSON.stringify(DEF_ISSUES));
+    articles = localData.articles;
+    rebuildIssFilters();
+    refresh();
+  }
+
+  // Then fetch GS and merge
   fetch(GS_URL)
     .then(function(r){ return r.text(); })
     .then(function(text) {
       try {
-        var data = JSON.parse(text);
-        if (data.issues && data.issues.length && data.articles && data.articles.length) {
-          // Check localStorage for potentially more complete data
-          var localRaw = localStorage.getItem(LS_KEY);
-          var localCount = 0;
-          if (localRaw) {
-            try { localCount = (JSON.parse(localRaw).articles||[]).length; } catch(e){}
-          }
-          // Use GS data only if it has >= articles than localStorage
-          if (data.articles.length >= localCount) {
-            issues   = data.issues;
-            articles = data.articles;
-            // Restore full abstracts from localStorage if GS has truncated them
-            if (localRaw) {
-              try {
-                var localData = JSON.parse(localRaw);
-                articles.forEach(function(a) {
-                  var local = (localData.articles||[]).find(function(l){ return l.id === a.id; });
-                  if (local && local.abstract && local.abstract.length > (a.abstract||'').length) {
-                    a.abstract = local.abstract;
-                  }
-                });
-              } catch(e){}
-            }
-            localStorage.setItem(LS_KEY, JSON.stringify({issues:issues, articles:articles}));
-            setSaving(false);
-            document.getElementById('saveLbl').textContent = 'Dati sincronizzati';
-            rebuildIssFilters();
-            refresh();
-            return;
-          }
+        var gsData = JSON.parse(text);
+        if (!gsData.articles || !gsData.articles.length) {
+          // GS empty — push local data to GS
+          setSaving(false);
+          document.getElementById('saveLbl').textContent = 'Dati locali';
+          if (localData && localData.articles && localData.articles.length) schedSave();
+          return;
         }
-      } catch(e) {}
-      // Google Sheets returned empty or invalid — fall back to localStorage then defaults
-      loadLocalData();
+
+        // Merge: build map by ID, GS wins for existing, local adds new ones
+        var merged = {};
+        gsData.articles.forEach(function(a){ merged[a.id] = a; });
+
+        // Add any articles present locally but not in GS
+        if (localData && localData.articles) {
+          localData.articles.forEach(function(a) {
+            if (!merged[a.id]) merged[a.id] = a;
+          });
+        }
+
+        var mergedList = Object.values(merged);
+        // If merge has more articles than GS, push merged back to GS
+        var needsSync = mergedList.length > gsData.articles.length;
+
+        issues   = gsData.issues && gsData.issues.length ? gsData.issues : (localData ? localData.issues : DEF_ISSUES);
+        articles = mergedList;
+
+        localStorage.setItem(LS_KEY, JSON.stringify({issues:issues, articles:articles}));
+        setSaving(false);
+        document.getElementById('saveLbl').textContent = 'Dati sincronizzati';
+        rebuildIssFilters();
+        refresh();
+
+        // Push merged data back to GS if we added local-only articles
+        if (needsSync) schedSave();
+
+      } catch(e) {
+        setSaving(false);
+        document.getElementById('saveLbl').textContent = 'Dati locali';
+      }
     })
     .catch(function() {
-      // Network error — fall back to localStorage then defaults
-      loadLocalData();
+      setSaving(false);
+      document.getElementById('saveLbl').textContent = 'Offline — dati locali';
+      if (!localData || !localData.articles || !localData.articles.length) {
+        issues   = JSON.parse(JSON.stringify(DEF_ISSUES));
+        articles = JSON.parse(JSON.stringify(DEF_ARTICLES));
+        rebuildIssFilters();
+        refresh();
+      }
     });
 }
 
@@ -633,24 +656,22 @@ function sendNotification(action, artId, artTitle) {
 function persist() {
   setSaving(true);
   var payload = JSON.stringify({issues:issues, articles:articles});
-  // Save full data locally
   try { localStorage.setItem(LS_KEY, payload); } catch(e) {}
-  // Save to Google Sheets (now multi-row, no size limit)
   fetch(GS_URL, { method: 'POST', body: payload })
-  .then(function(r){ return r.text(); })
-  .then(function(txt) {
-    setSaving(false);
-    if (txt && txt.indexOf('ERROR') >= 0) {
-      document.getElementById('saveLbl').textContent = 'Errore GS — salvato in locale';
-    } else {
-      document.getElementById('saveLbl').textContent = 'Salvato';
-      setTimeout(function(){ document.getElementById('saveLbl').textContent = 'Dati salvati'; }, 2000);
-    }
-  })
-  .catch(function() {
-    setSaving(false);
-    document.getElementById('saveLbl').textContent = 'Salvato in locale';
-  });
+    .then(function(r){ return r.text(); })
+    .then(function(txt) {
+      setSaving(false);
+      if (txt && txt.trim() === 'OK') {
+        document.getElementById('saveLbl').textContent = 'Salvato';
+        setTimeout(function(){ document.getElementById('saveLbl').textContent = 'Dati salvati'; }, 2000);
+      } else {
+        document.getElementById('saveLbl').textContent = 'Salvato in locale';
+      }
+    })
+    .catch(function() {
+      setSaving(false);
+      document.getElementById('saveLbl').textContent = 'Salvato in locale';
+    });
 }
 function schedSave() { setSaving(true); clearTimeout(saveTimer); saveTimer = setTimeout(persist, 600); }
 
