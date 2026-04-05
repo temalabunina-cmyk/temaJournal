@@ -1200,7 +1200,7 @@ async function printTurnitin() {
   if (btn) { btn.innerHTML = origText; btn.disabled = false; }
 
   var today = new Date().toLocaleDateString('it-IT');
-  var metricStyle = 'display:inline-block;margin-right:10px;font-size:10px;font-weight:bold';
+  var metricStyle = 'display:inline-block;margin-right:10px;font-size:12px;font-weight:bold';
 
   var cards = gkArts.map(function(a) {
     var sim = (a.similarity!==null&&a.similarity!=='')?a.similarity+'%':'—';
@@ -1212,11 +1212,11 @@ async function printTurnitin() {
       var dataInvio = new Date(a.dataComunicazione);
       var scad = new Date(dataInvio); scad.setDate(scad.getDate()+30);
       var giorni = Math.ceil((scad-new Date())/86400000);
-      commHtml = '<p style="font-size:10px;color:#b71c1c;margin:5px 0">&#9993; Comunicazione inviata il '+
+      commHtml = '<p style="font-size:13px;color:#b71c1c;margin:5px 0">&#9993; Comunicazione inviata il '+
         dataInvio.toLocaleDateString('it-IT')+
         (giorni>0?' &middot; Countdown: '+giorni+' giorni rimanenti':' &middot; Scaduto')+'</p>';
     }
-    var absSection = '<div style="font-size:10px;margin-top:8px;border-top:1px solid #ddd;padding-top:8px;line-height:1.6">';
+    var absSection = '<div style="font-size:13px;margin-top:8px;border-top:1px solid #ddd;padding-top:8px;line-height:1.6">';
     if (a.abstract && a.abstract.trim()) {
       absSection += '<b>Abstract (originale):</b><br>'+esc(a.abstract);
       absSection += '<br><br><b>Abstract (italiano):</b><br>';
@@ -1229,10 +1229,10 @@ async function printTurnitin() {
     absSection += '</div>';
 
     return '<div style="border:1px solid #bbb;border-radius:3px;padding:12px 14px;margin-bottom:14px;page-break-inside:avoid">'+
-      '<div style="font-size:9px;font-weight:bold;color:#555;font-family:monospace;margin-bottom:4px">#'+esc(a.id)+
+      '<div style="font-size:12px;font-weight:bold;color:#555;font-family:monospace;margin-bottom:4px">#'+esc(a.id)+
         (a.section?' &middot; '+esc(a.section):'')+(a.nationality?' &middot; '+esc(a.nationality):'')+'</div>'+
       '<div style="font-size:13px;font-weight:bold;line-height:1.35;margin-bottom:4px">'+esc(a.title)+'</div>'+
-      '<div style="font-size:10px;color:#444;margin-bottom:6px">'+esc(a.authors||'')+
+      '<div style="font-size:13px;color:#444;margin-bottom:6px">'+esc(a.authors||'')+
         (a.affiliation?' &middot; '+esc(a.affiliation):'')+'</div>'+
       '<div style="margin:5px 0">'+
         '<span style="'+metricStyle+';color:'+(simRed?'#b71c1c':'#1b5e20')+'">Sim. '+sim+'</span>'+
@@ -1244,17 +1244,17 @@ async function printTurnitin() {
         '<span style="'+metricStyle+'">JCR 2y: '+(a.citeJCR2y||0)+'</span>'+
       '</div>'+
       commHtml+absSection+
-      (a.notes?'<div style="font-size:10px;color:#666;font-style:italic;margin-top:6px">Note: '+esc(a.notes)+'</div>':'')+
+      (a.notes?'<div style="font-size:13px;color:#666;font-style:italic;margin-top:6px">Note: '+esc(a.notes)+'</div>':'')+
     '</div>';
   }).join('');
 
   var html = '<!DOCTYPE html><html lang="it"><head><meta charset="utf-8">'+
     '<title>Report per GateKeeper TeMA '+today+'</title>'+
-    '<style>body{font-family:Arial,sans-serif;font-size:11px;color:#111}'+
+    '<style>body{font-family:Arial,sans-serif;font-size:13px;color:#111}'+
     '@media print{@page{size:A4 portrait;margin:1.8cm 1.5cm}body{margin:0}}'+
     '@media screen{body{margin:1.5cm}}'+
     '.header{border-bottom:2px solid #222;padding-bottom:10px;margin-bottom:18px}'+
-    '.header h1{font-size:15px;margin:0 0 3px}.header p{font-size:9px;color:#555;margin:0}'+
+    '.header h1{font-size:18px;margin:0 0 3px}.header p{font-size:12px;color:#555;margin:0}'+
     '</style></head><body>'+
     '<div class="header"><h1>TeMA Journal &mdash; Report per GateKeeper</h1>'+
     '<p>Generato il '+today+' &middot; '+gkArts.length+' articol'+(gkArts.length===1?'o':'i')+' approvati da Turnitin</p></div>'+
@@ -1574,16 +1574,16 @@ function renderVerbale() {
       return '<tr>' +
         '<td style="width:28px;text-align:right;padding:4px 6px;color:#666;font-size:15pt;vertical-align:top;font-family:monospace">'+(a.articleNum||'&#8212;')+'</td>' +
         '<td style="padding:4px 8px;border-bottom:1px solid #eee">' +
-          '<div style="font-size:9.5pt;font-weight:bold">'+esc(a.title)+'</div>' +
-          '<div style="font-size:8.5pt;color:#555;margin-top:1px">'+esc(a.authors)+(a.affiliation?' &#8212; '+esc(a.affiliation):'')+'</div>' +
-          '<div style="font-size:8pt;color:#888;margin-top:1px">'+stepFull(a.step)+(a.editor?' &middot; Editor: '+esc(a.editor):'')+'</div>' +
+          '<div style="font-size:11pt;font-weight:bold">'+esc(a.title)+'</div>' +
+          '<div style="font-size:11pt;color:#555;margin-top:1px">'+esc(a.authors)+(a.affiliation?' &#8212; '+esc(a.affiliation):'')+'</div>' +
+          '<div style="font-size:11pt;color:#888;margin-top:1px">'+stepFull(a.step)+(a.editor?' &middot; Editor: '+esc(a.editor):'')+'</div>' +
         '</td></tr>';
     };
-    var sHdr = function(lbl){ return '<tr><td colspan="2" style="padding:7px 8px 3px;font-size:8.5pt;font-weight:bold;text-transform:uppercase;letter-spacing:.5px;color:#444;border-bottom:1px solid #bbb">'+lbl+'</td></tr>'; };
+    var sHdr = function(lbl){ return '<tr><td colspan="2" style="padding:7px 8px 3px;font-size:11pt;font-weight:bold;text-transform:uppercase;letter-spacing:.5px;color:#444;border-bottom:1px solid #bbb">'+lbl+'</td></tr>'; };
     fascicoliHtml += '<div style="margin-bottom:1.2rem;border:1px solid #ccc;padding:1rem;page-break-inside:avoid">' +
       '<div style="display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid #333;padding-bottom:.3rem;margin-bottom:.4rem">' +
         '<strong style="font-size:15pt">'+esc(iss.label)+(iss.pubblicato?' [Pubblicato]':'')+'</strong>' +
-        '<span style="font-size:8.5pt;color:#555">'+dl+'</span>' +
+        '<span style="font-size:11pt;color:#555">'+dl+'</span>' +
       '</div>' +
       (iss.theme?'<div style="font-size:15pt;color:#555;font-style:italic;margin-bottom:.4rem">'+esc(iss.theme)+'</div>':'') +
       (!ia.length ? '<p style="font-size:15pt;color:#888">Nessun articolo assegnato.</p>' :
@@ -1592,7 +1592,7 @@ function renderVerbale() {
         (lume.length ?sHdr('LUME') +lume.map(artRow).join('') :'') +
         (other.length?sHdr('Altro')+other.map(artRow).join(''):'') +
         '</table>') +
-      (iss.note?'<div style="font-size:8.5pt;color:#666;margin-top:.5rem;border-top:1px solid #eee;padding-top:.3rem">'+esc(iss.note)+'</div>':'') +
+      (iss.note?'<div style="font-size:11pt;color:#666;margin-top:.5rem;border-top:1px solid #eee;padding-top:.3rem">'+esc(iss.note)+'</div>':'') +
     '</div>';
   });
 
