@@ -526,7 +526,7 @@ const SC = {
 const EDITORS = ['Carmen Guida','Floriana Zucaro','Gerardo Carpentieri','Peppe Mazzeo','Romano Fistola','Rosa Anna La Rocca','Rosaria Battarra','Stefano Franco'];
 const COPYEDITORS = ['Gerardo Carpentieri','Laura Ascione',"Nunzia D'Amico",'Stella Pennino','Tonia Stiuso','Valerio Martinelli'];
 const LS_KEY = 'tema-journal-v2';
-const GS_URL = 'https://script.google.com/macros/s/AKfycbw9t5Dx-pPEq0_FJlZNHSXOlKFQa4LNQMjykh81VHg_8OJXpkSW56KORYqWrLVYpnOx/exec';
+const GS_URL = 'https://script.google.com/macros/s/AKfycbw-zoJjfEfLlTygx6hLfs82hHVq4RN9YKlZov16u1CP1Xw3u9DKtOgfvLyf8oaT4pyA/exec';
 
 let issues = [], articles = [], editingArtId = null, editingIssKey = null;
 let saveTimer = null, sessionUnlocked = false, pendingAction = null;
@@ -616,28 +616,32 @@ function persist() {
     attempt++;
     fetch(GS_URL, {
       method: 'POST',
-      body: payload,
-      headers: {'Content-Type': 'application/json'}
+      body: payload
     })
-    .then(function(r){ return r.text(); })
+    .then(function(r){
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.text();
+    })
     .then(function(txt) {
       if (txt && txt.trim() === 'OK') {
         setSaving(false);
-        document.getElementById('saveLbl').textContent = 'Salvato';
+        document.getElementById('saveLbl').textContent = 'Salvato ✓';
         setTimeout(function(){ document.getElementById('saveLbl').textContent = 'Dati salvati'; }, 2000);
       } else if (attempt < 3) {
+        document.getElementById('saveLbl').textContent = 'Riprovo (' + attempt + '/3)...';
         setTimeout(tryPost, 2000);
       } else {
         setSaving(false);
-        document.getElementById('saveLbl').textContent = 'Errore salvataggio — riprova';
+        document.getElementById('saveLbl').textContent = 'GS non risponde — riprova';
       }
     })
-    .catch(function() {
+    .catch(function(err) {
       if (attempt < 3) {
-        setTimeout(tryPost, 2000);
+        document.getElementById('saveLbl').textContent = 'Riprovo (' + attempt + '/3)...';
+        setTimeout(tryPost, 3000);
       } else {
         setSaving(false);
-        document.getElementById('saveLbl').textContent = 'Errore rete — dati non salvati';
+        document.getElementById('saveLbl').textContent = 'Errore: ' + (err.message || 'rete');
       }
     });
   }
