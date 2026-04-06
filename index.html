@@ -2250,17 +2250,23 @@ function initFilters() {
 
 
 var adminMode = false;
+var currentUser = '';
 
 function doLogin() {
   var u = document.getElementById('loginUser').value.trim();
   var p = document.getElementById('loginPass').value;
-  if ((u === 'RedazioneTeMA' && p === '#ViaSanRocco37@') || (u === 'GateKeeper' && p === 'GateNapoli03')) {
-    adminMode = true;
+  if (u === 'RedazioneTeMA' && p === '#ViaSanRocco37@') {
+    adminMode = true; currentUser = 'RedazioneTeMA';
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'block';
+    bootApp();
+  } else if (u === 'GateKeeper' && p === 'GateNapoli03') {
+    adminMode = false; currentUser = 'GateKeeper';
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('mainApp').style.display = 'block';
     bootApp();
   } else if (u === 'EditorTeMA' && p === 'tEMA8009') {
-    adminMode = false;
+    adminMode = false; currentUser = 'EditorTeMA';
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('mainApp').style.display = 'block';
     bootApp();
@@ -2289,16 +2295,25 @@ function bootApp() {
   if (adminMode) {
     setTimeout(unlockAllAdmin, 500);
     renderGk();
-  } else {
-    // EditorTeMA: hide GateKeeper evaluation, Verbale PDF and Backup button
+  } else if (currentUser === 'GateKeeper') {
+    // GateKeeper: come EditorTeMA ma con accesso al pannello GateKeeper evaluation
     var bkpBtn = document.querySelector('[onclick="backupData()"]');
     if (bkpBtn) bkpBtn.style.display = 'none';
-    var tabsToHide = ['gatekeeper', 'verbale'];
+    var tabsToHide = ['verbale'];
     tabsToHide.forEach(function(tab) {
       var btn = document.querySelector('.tab[data-tab="'+tab+'"]');
       if (btn) btn.style.display = 'none';
     });
-    // Switch to first visible tab (lista)
+    renderGk();
+  } else {
+    // EditorTeMA: hide GateKeeper evaluation, Verbale PDF and Backup button
+    var bkpBtn2 = document.querySelector('[onclick="backupData()"]');
+    if (bkpBtn2) bkpBtn2.style.display = 'none';
+    var tabsToHide2 = ['gatekeeper', 'verbale'];
+    tabsToHide2.forEach(function(tab) {
+      var btn = document.querySelector('.tab[data-tab="'+tab+'"]');
+      if (btn) btn.style.display = 'none';
+    });
     switchTab('lista');
   }
   loadData();
