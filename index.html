@@ -327,7 +327,7 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
   <div class="fr"><label>Autori</label><input id="fAuthors"></div>
   <div class="fr"><label>Affiliazione</label><input id="fAffil"></div>
   <div class="g2">
-    <div class="fr"><label>Nazionalit&agrave;</label><input id="fNat"></div>
+    <div class="fr"><label>Nazione</label><input id="fNat"></div>
     <div class="fr"><label>Internazionale</label><select id="fIntlArt"><option value="">—</option><option value="si">S&igrave;</option><option value="no">No</option></select></div>
   </div>
   <div class="fsl">Contenuto</div>
@@ -409,6 +409,7 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
   <div class="g2" style="margin-top:6px;margin-bottom:12px;align-items:end">
     <div class="fr" style="margin-bottom:0"><label>Decisione dell'editor</label><select id="fDecisioneEditor" onchange="checkDecisioneEditor()"><option value="">&#8212;</option><option value="Accept submission">Accept submission</option><option value="Revisions required">Revisions required</option><option value="Resubmit for Review">Resubmit for Review</option><option value="Resubmit Elsewhere">Resubmit Elsewhere</option><option value="Decline submission">Decline submission</option></select></div>
     <div class="fr" id="fDataRevisioneWrap" style="margin-bottom:0;display:none"><label>Data consegna versione revisionata</label><input type="date" id="fDataRevisione"></div>
+  <div class="fr" id="fDataAccettazioneWrap" style="margin-bottom:0;display:none"><label>Data di accettazione</label><input type="date" id="fDataAccettazione"></div>
   </div>
   <!-- Secondo processo di revisione (visibile solo con Resubmit for Review) -->
   <div id="rev2Section" style="display:none;border-top:1.5px dashed var(--brd);padding-top:1rem;margin-top:.5rem">
@@ -418,6 +419,7 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
     <div class="g2" style="margin-top:6px;align-items:end">
       <div class="fr" style="margin-bottom:0"><label>Decisione dell'editor (2° round)</label><select id="fDecisioneEditor2" onchange="checkDecisioneEditor2()"><option value="">&#8212;</option><option value="Accept submission">Accept submission</option><option value="Revisions required">Revisions required</option><option value="Resubmit for Review">Resubmit for Review</option><option value="Resubmit Elsewhere">Resubmit Elsewhere</option><option value="Decline submission">Decline submission</option></select></div>
       <div class="fr" id="fDataRevisione2Wrap" style="margin-bottom:0;display:none"><label>Data consegna versione revisionata (2°)</label><input type="date" id="fDataRevisione2"></div>
+    <div class="fr" id="fDataAccettazione2Wrap" style="margin-bottom:0;display:none"><label>Data di accettazione (2°)</label><input type="date" id="fDataAccettazione2"></div>
     </div>
   </div>
   <div class="fsl">Note</div>
@@ -770,7 +772,7 @@ function artCard(a, showEdit) {
         // Title + authors
         '<div style="font-size:20px;font-weight:600;line-height:1.4">'+esc(a.title)+'</div>' +
         '<div style="font-size:20px;color:var(--tx2);margin-top:2px">'+esc(a.authors)+(a.affiliation?' &middot; '+esc(a.affiliation):'')+'</div>' +
-        (a.nationality ? '<div style="font-size:20px;color:var(--tx3)">Nazionalit&agrave;: '+esc(a.nationality)+'</div>' : '') +
+        (a.nationality ? '<div style="font-size:20px;color:var(--tx3)">Nazione: '+esc(a.nationality)+'</div>' : '') +
         // Line 2: Fascicolo + Sezione + Internazionale
         '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:5px">' +
           (isslbl ? '<span class="badge b-amber">'+esc(isslbl.label)+(a.articleNum?' &middot; n.'+a.articleNum:'')+'</span>' : '') +
@@ -788,6 +790,8 @@ function artCard(a, showEdit) {
       if (a.decisioneEditor2 && a.decisioneEditor2 !== '') info.push('<strong>Decisione 2°:</strong> '+esc(a.decisioneEditor2));
       if (a.dataRevisione && a.dataRevisione !== '') info.push('<strong>Consegna rev.:</strong> '+new Date(a.dataRevisione).toLocaleDateString('it-IT'));
       if (a.dataRevisione2 && a.dataRevisione2 !== '') info.push('<strong>Consegna 2°:</strong> '+new Date(a.dataRevisione2).toLocaleDateString('it-IT'));
+      if (a.dataAccettazione && a.dataAccettazione !== '') info.push('<strong style="color:var(--green-tx)">✓ Accettato il:</strong> '+new Date(a.dataAccettazione).toLocaleDateString('it-IT'));
+      if (a.dataAccettazione2 && a.dataAccettazione2 !== '') info.push('<strong style="color:var(--green-tx)">✓ Accettato (2°) il:</strong> '+new Date(a.dataAccettazione2).toLocaleDateString('it-IT'));
       if (!info.length) return '';
       return '<div style="font-size:20px;margin-top:6px;padding:5px 10px;background:var(--sur2);border-radius:var(--r);display:flex;flex-wrap:wrap;gap:10px">'+info.join(' &middot; ')+'</div>';
     })() +
@@ -1653,12 +1657,16 @@ function checkDecisioneEditor() {
   if (sec) sec.style.display = (val === 'Resubmit for Review') ? 'block' : 'none';
   var wrap = document.getElementById('fDataRevisioneWrap');
   if (wrap) wrap.style.display = (val === 'Revisions required') ? 'block' : 'none';
+  var wrapAcc = document.getElementById('fDataAccettazioneWrap');
+  if (wrapAcc) wrapAcc.style.display = (val === 'Accept submission') ? 'block' : 'none';
 }
 
 function checkDecisioneEditor2() {
   var val = document.getElementById('fDecisioneEditor2').value;
   var wrap = document.getElementById('fDataRevisione2Wrap');
   if (wrap) wrap.style.display = (val === 'Revisions required') ? 'block' : 'none';
+  var wrapAcc = document.getElementById('fDataAccettazione2Wrap');
+  if (wrapAcc) wrapAcc.style.display = (val === 'Accept submission') ? 'block' : 'none';
 }
 
 function renderRevList2() {
@@ -1863,6 +1871,8 @@ function openNewArt() {
   document.getElementById('fDecisioneEditor2').value='';
   document.getElementById('fDataRevisione').value='';
   document.getElementById('fDataRevisione2').value='';
+  document.getElementById('fDataAccettazione').value='';
+  document.getElementById('fDataAccettazione2').value='';
   checkDecisioneEditor(); checkDecisioneEditor2();
   buildIssOpts('fIssArt','');
   if (!adminMode)   if (!adminMode) lockAllGroups();
@@ -1915,6 +1925,8 @@ function openEditArt(id) {
   document.getElementById('fDecisioneEditor2').value=a.decisioneEditor2||'';
   document.getElementById('fDataRevisione').value=a.dataRevisione||'';
   document.getElementById('fDataRevisione2').value=a.dataRevisione2||'';
+  document.getElementById('fDataAccettazione').value=a.dataAccettazione||'';
+  document.getElementById('fDataAccettazione2').value=a.dataAccettazione2||'';
   checkDecisioneEditor(); checkDecisioneEditor2();
   buildIssOpts('fIssArt',a.issue||'');
   if (!adminMode)   if (!adminMode) lockAllGroups();
@@ -1959,7 +1971,9 @@ function saveArt() {
     decisioneEditor:document.getElementById('fDecisioneEditor').value,
     decisioneEditor2:document.getElementById('fDecisioneEditor2').value,
     dataRevisione:document.getElementById('fDataRevisione').value,
-    dataRevisione2:document.getElementById('fDataRevisione2').value
+    dataRevisione2:document.getElementById('fDataRevisione2').value,
+    dataAccettazione:document.getElementById('fDataAccettazione').value,
+    dataAccettazione2:document.getElementById('fDataAccettazione2').value
   };
   if (!data.id||!data.title){ alert('ID e Titolo sono obbligatori.'); return; }
   if (editingArtId) {
