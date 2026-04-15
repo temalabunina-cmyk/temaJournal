@@ -1623,8 +1623,8 @@ function renderVerbale() {
     return '<div class="ae">' +
       '<p><strong>'+(idx2+1)+'. #'+esc(a.id)+'</strong> &mdash; <em>'+esc(a.title)+'</em></p>' +
       (a.authors ? '<p>'+esc(a.authors)+(a.affiliation?' &middot; '+esc(a.affiliation):'')+(a.nationality?' &middot; '+esc(a.nationality):'')+'</p>' : '') +
-      '<p>'+vStep(a.step)+(a.editor?' &middot; Editor: <strong>'+esc(a.editor)+'</strong>':'')+(isslbl?' &middot; Fascicolo: '+esc(isslbl.label)+(a.articleNum?' n.'+a.articleNum:''):'')+'</p>' +
-      (a.section?'<p>Sezione: '+esc(a.section)+(a.intl==='si'?' &middot; Contributo internazionale':'')+'</p>':'') +
+      '<p>'+vStep(a.step)+(a.editor?' &middot; Editor: <strong>'+esc(a.editor)+'</strong>':'')+(a.step==='18'&&a.copyeditor?' &middot; Copyeditor: <strong>'+esc(a.copyeditor)+'</strong>':'')+(isslbl?' &middot; Fascicolo: '+esc(isslbl.label)+(a.articleNum?' n.'+a.articleNum:''):'')+'</p>' +
+      (a.section?'<p>Sezione: <strong>'+esc(a.section)+'</strong>'+(a.intl==='si'?' &middot; Contributo internazionale':'')+'</p>':'') +
       (function(){
         var refs = [
           'References: '+(a.refsTotal||0),
@@ -1634,7 +1634,6 @@ function renderVerbale() {
           'JCR 2y: '+(a.citeJCR2y||0)
         ];
         if (a.length) refs.push('Lunghezza: '+a.length+' car.');
-        if (a.impaginato) refs.push('<strong>Impaginato</strong>');
         return '<p>'+refs.join(' &middot; ')+'</p>';
       })() +
       (a.revisori && a.revisori.length ?
@@ -1683,6 +1682,7 @@ function renderVerbale() {
     return '<div class="ae">' +
       '<p><strong>'+(idx2+1)+'. #'+esc(a.id)+'</strong> &mdash; <em>'+esc(a.title)+'</em>' +
       (a.authors?' &mdash; '+esc(a.authors):'') + '</p>' +
+      (a.section?'<p>Sezione: <strong>'+esc(a.section)+'</strong>'+(a.intl==='si'?' &middot; Contributo internazionale':'')+'</p>':'') +
       (a.gatekeeper?'<p>GK: '+esc(a.gatekeeper)+'</p>':'') +
       (metrics.length?'<p>'+metrics.join(' &middot; ')+'</p>':'') +
       (a.dataSottomissione?'<p><strong>Sottomissione:</strong> '+new Date(a.dataSottomissione).toLocaleDateString('it-IT')+'</p>':'') +
