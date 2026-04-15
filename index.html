@@ -1621,8 +1621,8 @@ function renderVerbale() {
       '<p>'+stepFull(a.step)+(a.editor?' &middot; Editor: <strong>'+esc(a.editor)+'</strong>':'')+(isslbl?' &middot; Fascicolo: '+esc(isslbl.label)+(a.articleNum?' n.'+a.articleNum:''):'')+'</p>' +
       (a.section?'<p>Sezione: '+esc(a.section)+(a.intl==='si'?' &middot; Contributo internazionale':'')+'</p>':'') +
       (a.revisori && a.revisori.length ?
-        '<p><strong>Revisori:</strong></p>' +
-        '<ul style="margin:.2rem 0 .4rem 1.2rem;padding:0">' +
+        '<p style="font-size:11pt;margin:.4rem 0 .1rem"><strong>Revisori:</strong></p>' +
+        '<ul style="margin:.2rem 0 .4rem 1.2rem;padding:0;font-size:11pt">' +
         a.revisori.map(function(r, ri) {
           var parts = ['<strong>'+(ri+1)+'. '+esc(r.nome||'Revisore')+'</strong>'];
           if (r.affiliazione) parts.push(esc(r.affiliazione));
@@ -1630,12 +1630,12 @@ function renderVerbale() {
           if (r.dataConsegna) parts.push('Consegna: '+new Date(r.dataConsegna).toLocaleDateString('it-IT'));
           if (r.dataProroga)  parts.push('Proroga: '+new Date(r.dataProroga).toLocaleDateString('it-IT'));
           if (r.giudizio)     parts.push('Giudizio: <em>'+esc(r.giudizio)+'</em>');
-          return '<li style="margin-bottom:2px">'+parts.join(' &middot; ')+'</li>';
+          return '<li style="margin-bottom:2px;font-size:11pt">'+parts.join(' &middot; ')+'</li>';
         }).join('') +
         '</ul>' : '') +
       (a.revisori2 && a.revisori2.length ?
-        '<p><strong>Revisori 2° round:</strong></p>' +
-        '<ul style="margin:.2rem 0 .4rem 1.2rem;padding:0">' +
+        '<p style="font-size:11pt;margin:.4rem 0 .1rem"><strong>Revisori 2° round:</strong></p>' +
+        '<ul style="margin:.2rem 0 .4rem 1.2rem;padding:0;font-size:11pt">' +
         a.revisori2.map(function(r, ri) {
           var parts = ['<strong>'+(ri+1)+'. '+esc(r.nome||'Revisore')+'</strong>'];
           if (r.affiliazione) parts.push(esc(r.affiliazione));
@@ -1643,7 +1643,7 @@ function renderVerbale() {
           if (r.dataConsegna) parts.push('Consegna: '+new Date(r.dataConsegna).toLocaleDateString('it-IT'));
           if (r.dataProroga)  parts.push('Proroga: '+new Date(r.dataProroga).toLocaleDateString('it-IT'));
           if (r.giudizio)     parts.push('Giudizio: <em>'+esc(r.giudizio)+'</em>');
-          return '<li style="margin-bottom:2px">'+parts.join(' &middot; ')+'</li>';
+          return '<li style="margin-bottom:2px;font-size:11pt">'+parts.join(' &middot; ')+'</li>';
         }).join('') +
         '</ul>' : '') +
       (info.length ? '<p>'+info.join(' &middot; ')+'</p>' : '') +
