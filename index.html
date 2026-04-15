@@ -1392,7 +1392,9 @@ function renderPub() {
 function renderRifRef() {
   var q = (document.getElementById('srchRifRef').value||'').toLowerCase();
   var f = articles.filter(function(a) {
-    if (a.step !== '8b') return false;
+    var isDeclined = a.decisioneEditor === 'Decline submission' || a.decisioneEditor2 === 'Decline submission';
+    if (!isDeclined && a.step !== '14') return false;
+    if (a.status !== 'Rifiutato') return false;
     if (q && (a.id+' '+a.title+' '+a.authors).toLowerCase().indexOf(q) < 0) return false;
     return true;
   });
@@ -1404,7 +1406,7 @@ function renderRifRef() {
 function renderRifGk() {
   var q = (document.getElementById('srchRifGk').value||'').toLowerCase();
   var f = articles.filter(function(a) {
-    if (a.step !== '7b') return false;
+    if (a.step !== '6') return false;
     if (q && (a.id+' '+a.title+' '+a.authors).toLowerCase().indexOf(q) < 0) return false;
     return true;
   });
@@ -2084,23 +2086,14 @@ function saveArt() {
     articles.push(data);
     sendNotification('insert', data.id, data.title);
   }
-  // Gestione automatica Decline submission
+  // Gestione automatica Decline submission → status Rifiutato
   var aidx2 = articles.findIndex(function(a){ return a.id === data.id; });
   if (aidx2 >= 0) {
     var isDeclined = (data.decisioneEditor === 'Decline submission' || data.decisioneEditor2 === 'Decline submission');
-    var wasDeclined = (articles[aidx2].step === '8b' && articles[aidx2].status === 'Rifiutato');
-    if (isDeclined && !wasDeclined) {
-      // Salva lo step/status precedente per poterlo ripristinare
-      articles[aidx2]._prevStep = articles[aidx2].step;
-      articles[aidx2]._prevStatus = articles[aidx2].status;
-      articles[aidx2].step = '8b';
+    if (isDeclined) {
       articles[aidx2].status = 'Rifiutato';
-    } else if (!isDeclined && wasDeclined) {
-      // Ripristina lo step/status precedente
-      articles[aidx2].step = articles[aidx2]._prevStep || data.step || '';
-      articles[aidx2].status = articles[aidx2]._prevStatus || data.status || 'Sottomesso';
-      delete articles[aidx2]._prevStep;
-      delete articles[aidx2]._prevStatus;
+    } else if (articles[aidx2].status === 'Rifiutato' && !isDeclined) {
+      articles[aidx2].status = 'Sottomesso';
     }
   }
   document.getElementById('artModal').classList.remove('open');
@@ -2130,6 +2123,8 @@ function rifiutoTurnitin() {
     if (idx >= 0) {
       articles[idx].comunicazioneInviata = true;
       articles[idx].rispostaAutori = 'ritirato';
+      articles[idx].step = '4';
+      articles[idx].status = 'Rifiutato';
       if (!articles[idx].dataComunicazione) {
         articles[idx].dataComunicazione = new Date().toISOString().slice(0,10);
       }
