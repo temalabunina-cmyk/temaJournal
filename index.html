@@ -809,8 +809,7 @@ function artCard(a, showEdit) {
 function renderStats() {
   // Articoli in lavorazione (hanno editor assegnato, non rifiutati/pubblicati)
   var listaArts = articles.filter(function(a) {
-    if (a.status === 'Pubblicato' || a.step === '19') return false;
-    if (a.step === '8b' || a.step === '7b') return false;
+    if (a.status === 'Pubblicato' || a.status === 'Rifiutato' || a.step === '19') return false;
     if (!a.editor || a.editor === '') return false;
     return true;
   });
@@ -1350,8 +1349,7 @@ function renderLista() {
   var fI2= document.getElementById('fIntl').value;
   var fIs= document.getElementById('fIss').value;
   var f = articles.filter(function(a) {
-    if (a.status === 'Pubblicato' || a.step === '19') return false;
-    if (a.step === '8b' || a.step === '7b') return false;
+    if (a.status === 'Pubblicato' || a.status === 'Rifiutato' || a.step === '19') return false;
     if (!a.editor || a.editor === '') return false;
     if (q && (a.id+' '+a.title+' '+a.authors+' '+a.affiliation).toLowerCase().indexOf(q) < 0) return false;
     if (fE  && a.editor  !== fE)  return false;
@@ -2149,7 +2147,8 @@ function autoStep(a) {
 
   // St.→ St.14: Decisione editor = Decline submission
   if (dec1 === 'Decline submission' || dec2 === 'Decline submission') {
-    if (parseInt(a.step) < 14) a.step = '14';
+    a.step = '14';
+    a.status = 'Rifiutato';
   }
 
   // St.→ St.16: Decisione editor = Resubmit for Review
@@ -2219,16 +2218,7 @@ function saveArt() {
     articles.push(data);
     sendNotification('insert', data.id, data.title);
   }
-  // Gestione automatica Decline submission → status Rifiutato
-  var aidx2 = articles.findIndex(function(a){ return a.id === data.id; });
-  if (aidx2 >= 0) {
-    var isDeclined = (data.decisioneEditor === 'Decline submission' || data.decisioneEditor2 === 'Decline submission');
-    if (isDeclined) {
-      articles[aidx2].status = 'Rifiutato';
-    } else if (articles[aidx2].status === 'Rifiutato' && !isDeclined) {
-      articles[aidx2].status = 'Sottomesso';
-    }
-  }
+
   document.getElementById('artModal').classList.remove('open');
   schedSave(); refresh();
 }
