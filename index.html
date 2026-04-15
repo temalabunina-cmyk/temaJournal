@@ -196,8 +196,8 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:10px">
     <div style="font-size:16px;font-weight:700">Generatore verbale</div>
     <div style="display:flex;gap:8px">
-      <button class="btn" id="btnRefreshVerbale">Aggiorna anteprima</button>
-      <button class="btn btn-p" id="btnPrintVerbale">Stampa / Salva PDF</button>
+      <button class="btn" id="btnRefreshVerbale" onclick="renderVerbale()">Aggiorna anteprima</button>
+      <button class="btn btn-p" id="btnPrintVerbale" onclick="printVerbale()">Stampa / Salva PDF</button>
     </div>
   </div>
   <div class="vform">
@@ -1551,47 +1551,30 @@ function renderVerbale() {
   var outro   = document.getElementById('vOutro').value || '';
   var oggi    = new Date().toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit',year:'numeric'});
 
-  var workArts = articles.filter(function(a){
-    return a.status !== 'Pubblicato' && a.step !== '19' && a.step !== '8b' && a.step !== '7b';
+  // Articoli in lavorazione: step 7-18, non rifiutati, non pubblicati
+  var inLavorazione = articles.filter(function(a){
+    var s = parseInt(a.step) || 0;
+    return a.status !== 'Pubblicato' && a.status !== 'Rifiutato' && s >= 7 && s <= 18;
   });
 
-  var artEntry = function(a, i) {
-    var isslbl = issues.find(function(x){ return x.key===a.issue; });
-    return '<div class="ae">' +
-      '<p><strong>'+(i+1)+'. '+esc(a.id)+'</strong> &#8211; <em>'+esc(a.title)+'</em>' +
-      (a.authors?' di '+esc(a.authors)+','  : '')+' '+esc(a.affiliation||'')+'</p>' +
-      (a.step?'<p>Step: '+stepFull(a.step)+'</p>':'') +
-      (a.editor?'<p>Editor: <strong>'+esc(a.editor)+'</strong></p>':'') +
-      (isslbl?'<p>Fascicolo: '+esc(isslbl.label)+(a.articleNum?' &middot; n.'+a.articleNum:'')+'</p>':'') +
-      (a.notes?'<p>'+esc(a.notes)+'</p>':'') +
-      (a.revisori && a.revisori.length ?
-        '<p style="margin-top:5px;margin-bottom:0"><strong>Revisori:</strong> ' +
-        a.revisori.map(function(r, ri) {
-          var parts = [(ri+1)+'. '+esc(r.nome||'Revisore')];
-          if (r.affiliazione) parts.push(esc(r.affiliazione));
-          if (r.accettazione) parts.push(esc(r.accettazione));
-          if (r.dataConsegna) parts.push('consegna '+new Date(r.dataConsegna).toLocaleDateString('it-IT'));
-          if (r.giudizio) parts.push('<em>'+esc(r.giudizio)+'</em>');
-          return parts.join(' &middot; ');
-        }).join(' | ') + '</p>' : '') +
-      '</div>';
-  };
+  // Articoli in fase iniziale: step 1-6
+  var inIngresso = articles.filter(function(a){
+    var s = parseInt(a.step) || 0;
+    return a.status !== 'Pubblicato' && a.status !== 'Rifiutato' && s >= 1 && s <= 5;
+  });
 
-  var sec = function(title, arts) {
-    if (!arts.length) return '';
-    return '<h2>'+title+' ('+arts.length+')</h2>'+arts.map(artEntry).join('');
-  };
-
+  // ── Sezione fascicoli ─────────────────────────────────────────────────────
   var fascicoliHtml = '';
   issues.forEach(function(iss) {
     var ia = articles.filter(function(a){ return a.issue===iss.key; });
     var focus = ia.filter(function(a){return a.section==='Focus';}).sort(function(a,b){return (a.articleNum||999)-(b.articleNum||999);});
     var lume  = ia.filter(function(a){return a.section==='LUME';}).sort(function(a,b){return (a.articleNum||999)-(b.articleNum||999);});
-    var other = ia.filter(function(a){return a.section!=='Focus'&&a.section!=='LUME';}).sort(function(a,b){return (a.articleNum||999)-(b.articleNum||999);});
+    var rnsV  = ia.filter(function(a){return a.section==='RNs';}).sort(function(a,b){return (a.articleNum||999)-(b.articleNum||999);});
+    var other = ia.filter(function(a){return a.section!=='Focus'&&a.section!=='LUME'&&a.section!=='RNs';}).sort(function(a,b){return (a.articleNum||999)-(b.articleNum||999);});
     var dl = iss.deadline ? new Date(iss.deadline).toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'}) : 'TBD';
     var artRow = function(a) {
       return '<tr>' +
-        '<td style="width:28px;text-align:right;padding:4px 6px;color:#666;font-size:15pt;vertical-align:top;font-family:monospace">'+(a.articleNum||'&#8212;')+'</td>' +
+        '<td style="width:28px;text-align:right;padding:4px 6px;color:#666;font-size:11pt;vertical-align:top;font-family:monospace">'+(a.articleNum||'&#8212;')+'</td>' +
         '<td style="padding:4px 8px;border-bottom:1px solid #eee">' +
           '<div style="font-size:11pt;font-weight:bold">'+esc(a.title)+'</div>' +
           '<div style="font-size:11pt;color:#555;margin-top:1px">'+esc(a.authors)+(a.affiliation?' &#8212; '+esc(a.affiliation):'')+'</div>' +
@@ -1604,35 +1587,130 @@ function renderVerbale() {
         '<strong style="font-size:15pt">'+esc(iss.label)+(iss.pubblicato?' [Pubblicato]':'')+'</strong>' +
         '<span style="font-size:11pt;color:#555">'+dl+'</span>' +
       '</div>' +
-      (iss.theme?'<div style="font-size:15pt;color:#555;font-style:italic;margin-bottom:.4rem">'+esc(iss.theme)+'</div>':'') +
-      (!ia.length ? '<p style="font-size:15pt;color:#888">Nessun articolo assegnato.</p>' :
+      (iss.theme?'<div style="font-size:11pt;color:#555;font-style:italic;margin-bottom:.4rem">'+esc(iss.theme)+'</div>':'') +
+      (!ia.length ? '<p style="font-size:11pt;color:#888">Nessun articolo assegnato.</p>' :
         '<table style="width:100%;border-collapse:collapse">' +
         (focus.length?sHdr('Focus')+focus.map(artRow).join(''):'') +
         (lume.length ?sHdr('LUME') +lume.map(artRow).join('') :'') +
+        (rnsV.length ?sHdr('RNs')  +rnsV.map(artRow).join('') :'') +
         (other.length?sHdr('Altro')+other.map(artRow).join(''):'') +
         '</table>') +
       (iss.note?'<div style="font-size:11pt;color:#666;margin-top:.5rem;border-top:1px solid #eee;padding-top:.3rem">'+esc(iss.note)+'</div>':'') +
     '</div>';
   });
 
-  var byStep = function(s){ return workArts.filter(function(a){return a.step===s;}); };
-  var byStatus = function(s){ return workArts.filter(function(a){return a.status===s && !a.step;}); };
+  // ── Scheda articolo in lavorazione (stile scheda sintetica) ───────────────
+  var artCard2 = function(a, idx2) {
+    var isslbl = issues.find(function(x){ return x.key===a.issue; });
+    var sim = a.similarity !== null && a.similarity !== '' ? a.similarity+'%' : '—';
+    var ai  = a.aiPercent  !== null && a.aiPercent  !== '' ? a.aiPercent+'%'  : '—';
+    var info = [];
+    if (a.dataSottomissione) info.push('<strong>Sottomissione:</strong> '+new Date(a.dataSottomissione).toLocaleDateString('it-IT'));
+    if (a.dataComunicazione) info.push('<strong>Comunicazione Turnitin:</strong> '+new Date(a.dataComunicazione).toLocaleDateString('it-IT'));
+    if (a.decisioneEditor && a.decisioneEditor !== '') info.push('<strong>Decisione editor:</strong> '+esc(a.decisioneEditor));
+    if (a.dataRevisione && a.dataRevisione !== '') info.push('<strong>Consegna rev.:</strong> '+new Date(a.dataRevisione).toLocaleDateString('it-IT'));
+    if (a.decisioneEditor2 && a.decisioneEditor2 !== '') info.push('<strong>Decisione editor 2°:</strong> '+esc(a.decisioneEditor2));
+    if (a.dataRevisione2 && a.dataRevisione2 !== '') info.push('<strong>Consegna rev. 2°:</strong> '+new Date(a.dataRevisione2).toLocaleDateString('it-IT'));
+    if (a.dataAccettazione && a.dataAccettazione !== '') info.push('<strong>Data accettazione:</strong> '+new Date(a.dataAccettazione).toLocaleDateString('it-IT'));
+    if (a.dataAccettazione2 && a.dataAccettazione2 !== '') info.push('<strong>Data accettazione 2°:</strong> '+new Date(a.dataAccettazione2).toLocaleDateString('it-IT'));
+    if (a.deadline && a.deadline !== '') info.push('<strong>Deadline:</strong> '+new Date(a.deadline).toLocaleDateString('it-IT'));
+
+    return '<div class="ae">' +
+      '<p><strong>'+(idx2+1)+'. #'+esc(a.id)+'</strong> &mdash; <em>'+esc(a.title)+'</em></p>' +
+      (a.authors ? '<p>'+esc(a.authors)+(a.affiliation?' &middot; '+esc(a.affiliation):'')+(a.nationality?' &middot; '+esc(a.nationality):'')+'</p>' : '') +
+      '<p>'+stepFull(a.step)+(a.editor?' &middot; Editor: <strong>'+esc(a.editor)+'</strong>':'')+(isslbl?' &middot; Fascicolo: '+esc(isslbl.label)+(a.articleNum?' n.'+a.articleNum:''):'')+'</p>' +
+      (a.section?'<p>Sezione: '+esc(a.section)+(a.intl==='si'?' &middot; Contributo internazionale':'')+'</p>':'') +
+      (a.revisori && a.revisori.length ?
+        '<p><strong>Revisori:</strong></p>' +
+        '<ul style="margin:.2rem 0 .4rem 1.2rem;padding:0">' +
+        a.revisori.map(function(r, ri) {
+          var parts = ['<strong>'+(ri+1)+'. '+esc(r.nome||'Revisore')+'</strong>'];
+          if (r.affiliazione) parts.push(esc(r.affiliazione));
+          if (r.accettazione) parts.push('Stato: <em>'+esc(r.accettazione)+'</em>');
+          if (r.dataConsegna) parts.push('Consegna: '+new Date(r.dataConsegna).toLocaleDateString('it-IT'));
+          if (r.dataProroga)  parts.push('Proroga: '+new Date(r.dataProroga).toLocaleDateString('it-IT'));
+          if (r.giudizio)     parts.push('Giudizio: <em>'+esc(r.giudizio)+'</em>');
+          return '<li style="margin-bottom:2px">'+parts.join(' &middot; ')+'</li>';
+        }).join('') +
+        '</ul>' : '') +
+      (a.revisori2 && a.revisori2.length ?
+        '<p><strong>Revisori 2° round:</strong></p>' +
+        '<ul style="margin:.2rem 0 .4rem 1.2rem;padding:0">' +
+        a.revisori2.map(function(r, ri) {
+          var parts = ['<strong>'+(ri+1)+'. '+esc(r.nome||'Revisore')+'</strong>'];
+          if (r.affiliazione) parts.push(esc(r.affiliazione));
+          if (r.accettazione) parts.push('Stato: <em>'+esc(r.accettazione)+'</em>');
+          if (r.dataConsegna) parts.push('Consegna: '+new Date(r.dataConsegna).toLocaleDateString('it-IT'));
+          if (r.dataProroga)  parts.push('Proroga: '+new Date(r.dataProroga).toLocaleDateString('it-IT'));
+          if (r.giudizio)     parts.push('Giudizio: <em>'+esc(r.giudizio)+'</em>');
+          return '<li style="margin-bottom:2px">'+parts.join(' &middot; ')+'</li>';
+        }).join('') +
+        '</ul>' : '') +
+      (info.length ? '<p>'+info.join(' &middot; ')+'</p>' : '') +
+      (a.notes ? '<p style="font-style:italic;color:#555">'+esc(a.notes)+'</p>' : '') +
+    '</div>';
+  };
+
+  // ── Scheda articolo in ingresso (step 1-6, compatta) ─────────────────────
+  var artCardIngresso = function(a, idx2) {
+    return '<div class="ae">' +
+      '<p><strong>'+(idx2+1)+'. #'+esc(a.id)+'</strong> &mdash; <em>'+esc(a.title)+'</em>' +
+      (a.authors?' &mdash; '+esc(a.authors):'') + '</p>' +
+      '<p>'+stepFull(a.step)+
+        (a.similarity!==null&&a.similarity!==''?' &middot; Sim. '+a.similarity+'%':'') +
+        (a.aiPercent!==null&&a.aiPercent!==''?' &middot; AI '+a.aiPercent+'%':'') +
+        (a.gatekeeper?' &middot; GK: '+esc(a.gatekeeper):'') +
+      '</p>' +
+      (a.dataSottomissione?'<p><strong>Sottomissione:</strong> '+new Date(a.dataSottomissione).toLocaleDateString('it-IT')+'</p>':'') +
+      (a.dataComunicazione?'<p><strong>Comunicazione Turnitin inviata il:</strong> '+new Date(a.dataComunicazione).toLocaleDateString('it-IT')+
+        (a.comunicazioneInviata?' &middot; <em>Inviata</em>':'')+'</p>':'') +
+      (a.rispostaAutori && a.rispostaAutori!==''?'<p><strong>Risposta autori:</strong> '+esc(a.rispostaAutori)+'</p>':'') +
+      (a.notes ? '<p style="font-style:italic;color:#555">'+esc(a.notes)+'</p>' : '') +
+    '</div>';
+  };
 
   document.getElementById('verbalePreview').innerHTML =
     '<div class="vprev" id="verbaleContent">' +
-    '<h1>Verbale n. '+esc(num)+' della riunione della Redazione di TeMA<br><span style="font-size:20px;font-weight:400">'+esc(dateStr)+'</span></h1>' +
+    '<h1>Verbale n. '+esc(num)+' della riunione della Redazione di TeMA<br><span style="font-size:16px;font-weight:400">'+esc(dateStr)+'</span></h1>' +
     '<p><strong>Presenti:</strong> '+esc(presenti)+'</p>' +
-    (intro?'<h2>TEMI AFFRONTATI</h2><p>'+esc(intro).replace(/n/g,'<br>')+'</p>':'') +
+    (intro?'<h2>TEMI AFFRONTATI</h2><p>'+esc(intro).replace(/\n/g,'<br>')+'</p>':'') +
+
     '<h2>FASCICOLI</h2>' +
     (issues.length ? fascicoliHtml : '<p>Nessun fascicolo definito.</p>') +
-    '<h2>STATO DI LAVORAZIONE DEGLI ARTICOLI</h2>' +
-    sec(sl('1')+' \u00b7 '+STEPS['1'], workArts.filter(function(a){return a.step==='1'||a.status==='GateKeeper evaluation';})) +
-    sec("Assegnato all'Editor", workArts.filter(function(a){return a.step==='2';})) +
-    (function(){ var h=''; ['3','4','5','6','7','8','9','10','11','12','13','14','15','16','17'].forEach(function(s){ var arts=byStep(s); if(arts.length) h+=sec(sl(s)+' \u00b7 '+STEPS[s],arts); }); return h; })() +
-    (outro?'<h2>ORDINE DEL GIORNO PROSSIMA RIUNIONE</h2><p>'+esc(outro).replace(/n/g,'<br>')+'</p>':'') +
+
+    '<h2>ARTICOLI IN LAVORAZIONE (St.7&ndash;18)</h2>' +
+    (function(){
+      if (!inLavorazione.length) return '<p style="color:#888">Nessun articolo in lavorazione.</p>';
+      var h = '';
+      for (var s = 7; s <= 18; s++) {
+        var group = inLavorazione.filter(function(a){ return parseInt(a.step)===s; });
+        if (!group.length) continue;
+        h += '<h3 style="margin:1.2rem 0 .4rem;font-size:13pt;border-bottom:1px solid #ccc;padding-bottom:.2rem">'
+           + esc(STEPS[String(s)]||('St.'+s)) + ' ('+group.length+')</h3>';
+        h += group.map(artCard2).join('');
+      }
+      return h;
+    })() +
+
+    '<h2>ARTICOLI IN INGRESSO (St.1&ndash;5)</h2>' +
+    (function(){
+      if (!inIngresso.length) return '<p style="color:#888">Nessun articolo in ingresso.</p>';
+      var h = '';
+      for (var s = 1; s <= 5; s++) {
+        var group = inIngresso.filter(function(a){ return parseInt(a.step)===s; });
+        if (!group.length) continue;
+        h += '<h3 style="margin:1.2rem 0 .4rem;font-size:13pt;border-bottom:1px solid #ccc;padding-bottom:.2rem">'
+           + esc(STEPS[String(s)]||('St.'+s)) + ' ('+group.length+')</h3>';
+        h += group.map(artCardIngresso).join('');
+      }
+      return h;
+    })() +
+
+    (outro?'<h2>ORDINE DEL GIORNO PROSSIMA RIUNIONE</h2><p>'+esc(outro).replace(/\n/g,'<br>')+'</p>':'') +
     '<p style="margin-top:2rem;text-align:right"><em>'+oggi+'<br>Verbale '+esc(num)+'</em></p>' +
     '</div>';
 }
+
 
 function printVerbale() {
   renderVerbale();
