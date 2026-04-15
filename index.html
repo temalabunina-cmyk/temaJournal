@@ -94,11 +94,12 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
 .arow:last-child{border-bottom:none}
 .anum{font-size:20px;font-weight:700;color:var(--tx2);text-align:right;font-family:monospace}
 .vform{background:var(--sur);border:1px solid var(--brd);border-radius:var(--rl);padding:1rem 1.25rem;margin-bottom:1rem;box-shadow:var(--sh)}
-.vprev{font-size:20px;line-height:1.9;color:#111;background:#fff;padding:2rem;border:1px solid var(--brd);border-radius:var(--rl)}
+.vprev{font-size:13px;line-height:1.6;color:#111;background:#fff;padding:2rem;border:1px solid var(--brd);border-radius:var(--rl)}
 .vprev h1{font-size:20px;font-weight:700;text-align:center;border-bottom:1.5px solid #333;padding-bottom:.5rem;margin-bottom:1rem}
 .vprev h2{font-size:20px;font-weight:700;margin:1.2rem 0 .4rem;border-bottom:.5px solid #aaa;padding-bottom:.2rem}
 .vprev p{margin:.3rem 0;font-size:12.5px}
 .vprev .ae{margin:.6rem 0 .8rem 1rem;border-left:2px solid #ccc;padding-left:.8rem}
+.vprev ul,.vprev li{font-size:inherit;line-height:inherit}
 .sim-ok{background:var(--green-bg);color:var(--green-tx)}
 .sim-warn{background:var(--amber-bg);color:var(--amber-tx)}
 .sim-danger{background:var(--red-bg);color:var(--red-tx)}
@@ -1551,6 +1552,12 @@ function renderVerbale() {
   var outro   = document.getElementById('vOutro').value || '';
   var oggi    = new Date().toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit',year:'numeric'});
 
+  // Helper: step label senza prefisso 'St.X'
+  var vStep = function(s) {
+    if (!s) return '';
+    return STEPS[s] ? STEPS[s].replace(/^St\.\d+\s*·\s*/,'') : ('Step '+s);
+  };
+
   // Articoli in lavorazione: step 7-18, non rifiutati, non pubblicati
   var inLavorazione = articles.filter(function(a){
     var s = parseInt(a.step) || 0;
@@ -1618,11 +1625,11 @@ function renderVerbale() {
     return '<div class="ae">' +
       '<p><strong>'+(idx2+1)+'. #'+esc(a.id)+'</strong> &mdash; <em>'+esc(a.title)+'</em></p>' +
       (a.authors ? '<p>'+esc(a.authors)+(a.affiliation?' &middot; '+esc(a.affiliation):'')+(a.nationality?' &middot; '+esc(a.nationality):'')+'</p>' : '') +
-      '<p>'+stepFull(a.step)+(a.editor?' &middot; Editor: <strong>'+esc(a.editor)+'</strong>':'')+(isslbl?' &middot; Fascicolo: '+esc(isslbl.label)+(a.articleNum?' n.'+a.articleNum:''):'')+'</p>' +
+      '<p>'+vStep(a.step)+(a.editor?' &middot; Editor: <strong>'+esc(a.editor)+'</strong>':'')+(isslbl?' &middot; Fascicolo: '+esc(isslbl.label)+(a.articleNum?' n.'+a.articleNum:''):'')+'</p>' +
       (a.section?'<p>Sezione: '+esc(a.section)+(a.intl==='si'?' &middot; Contributo internazionale':'')+'</p>':'') +
       (a.revisori && a.revisori.length ?
-        '<p style="font-size:11pt;margin:.4rem 0 .1rem"><strong>Revisori:</strong></p>' +
-        '<ul style="margin:.2rem 0 .4rem 1.2rem;padding:0;font-size:11pt">' +
+        '<p style="margin:.4rem 0 .1rem"><strong>Revisori:</strong></p>' +
+        '<ul style="margin:.2rem 0 .4rem 1.2rem;padding:0">' +
         a.revisori.map(function(r, ri) {
           var parts = ['<strong>'+(ri+1)+'. '+esc(r.nome||'Revisore')+'</strong>'];
           if (r.affiliazione) parts.push(esc(r.affiliazione));
@@ -1630,12 +1637,12 @@ function renderVerbale() {
           if (r.dataConsegna) parts.push('Consegna: '+new Date(r.dataConsegna).toLocaleDateString('it-IT'));
           if (r.dataProroga)  parts.push('Proroga: '+new Date(r.dataProroga).toLocaleDateString('it-IT'));
           if (r.giudizio)     parts.push('Giudizio: <em>'+esc(r.giudizio)+'</em>');
-          return '<li style="margin-bottom:2px;font-size:11pt">'+parts.join(' &middot; ')+'</li>';
+          return '<li style="margin-bottom:2px">'+parts.join(' &middot; ')+'</li>';
         }).join('') +
         '</ul>' : '') +
       (a.revisori2 && a.revisori2.length ?
-        '<p style="font-size:11pt;margin:.4rem 0 .1rem"><strong>Revisori 2° round:</strong></p>' +
-        '<ul style="margin:.2rem 0 .4rem 1.2rem;padding:0;font-size:11pt">' +
+        '<p style="margin:.4rem 0 .1rem"><strong>Revisori 2° round:</strong></p>' +
+        '<ul style="margin:.2rem 0 .4rem 1.2rem;padding:0">' +
         a.revisori2.map(function(r, ri) {
           var parts = ['<strong>'+(ri+1)+'. '+esc(r.nome||'Revisore')+'</strong>'];
           if (r.affiliazione) parts.push(esc(r.affiliazione));
@@ -1643,7 +1650,7 @@ function renderVerbale() {
           if (r.dataConsegna) parts.push('Consegna: '+new Date(r.dataConsegna).toLocaleDateString('it-IT'));
           if (r.dataProroga)  parts.push('Proroga: '+new Date(r.dataProroga).toLocaleDateString('it-IT'));
           if (r.giudizio)     parts.push('Giudizio: <em>'+esc(r.giudizio)+'</em>');
-          return '<li style="margin-bottom:2px;font-size:11pt">'+parts.join(' &middot; ')+'</li>';
+          return '<li style="margin-bottom:2px">'+parts.join(' &middot; ')+'</li>';
         }).join('') +
         '</ul>' : '') +
       (info.length ? '<p>'+info.join(' &middot; ')+'</p>' : '') +
@@ -1653,19 +1660,21 @@ function renderVerbale() {
 
   // ── Scheda articolo in ingresso (step 1-6, compatta) ─────────────────────
   var artCardIngresso = function(a, idx2) {
+    var metrics = [];
+    if (a.similarity!==null&&a.similarity!=='') metrics.push('Sim. '+a.similarity+'%');
+    if (a.aiPercent!==null&&a.aiPercent!=='')   metrics.push('AI '+a.aiPercent+'%');
+    if (a.refsTotal) metrics.push('Refs: '+a.refsTotal);
+    if (a.length)    metrics.push('Lunghezza: '+a.length+' car.');
+    if (a.impaginato) metrics.push('<strong>Impaginato</strong>');
     return '<div class="ae">' +
       '<p><strong>'+(idx2+1)+'. #'+esc(a.id)+'</strong> &mdash; <em>'+esc(a.title)+'</em>' +
       (a.authors?' &mdash; '+esc(a.authors):'') + '</p>' +
-      '<p>'+stepFull(a.step)+
-        (a.similarity!==null&&a.similarity!==''?' &middot; Sim. '+a.similarity+'%':'') +
-        (a.aiPercent!==null&&a.aiPercent!==''?' &middot; AI '+a.aiPercent+'%':'') +
-        (a.gatekeeper?' &middot; GK: '+esc(a.gatekeeper):'') +
-      '</p>' +
+      (a.gatekeeper?'<p>GK: '+esc(a.gatekeeper)+'</p>':'') +
+      (metrics.length?'<p>'+metrics.join(' &middot; ')+'</p>':'') +
       (a.dataSottomissione?'<p><strong>Sottomissione:</strong> '+new Date(a.dataSottomissione).toLocaleDateString('it-IT')+'</p>':'') +
-      (a.dataComunicazione?'<p><strong>Comunicazione Turnitin inviata il:</strong> '+new Date(a.dataComunicazione).toLocaleDateString('it-IT')+
-        (a.comunicazioneInviata?' &middot; <em>Inviata</em>':'')+'</p>':'') +
-      (a.rispostaAutori && a.rispostaAutori!==''?'<p><strong>Risposta autori:</strong> '+esc(a.rispostaAutori)+'</p>':'') +
-      (a.notes ? '<p style="font-style:italic;color:#555">'+esc(a.notes)+'</p>' : '') +
+      (a.step==='3'&&a.dataComunicazione?'<p><strong>Comunicazione Turnitin inviata il:</strong> '+new Date(a.dataComunicazione).toLocaleDateString('it-IT')+'</p>':'') +
+      (a.rispostaAutori&&a.rispostaAutori!==''?'<p><strong>Risposta autori:</strong> '+esc(a.rispostaAutori)+'</p>':'') +
+      (a.notes?'<p style="font-style:italic;color:#555">'+esc(a.notes)+'</p>':'') +
     '</div>';
   };
 
@@ -1686,7 +1695,7 @@ function renderVerbale() {
         var group = inLavorazione.filter(function(a){ return parseInt(a.step)===s; });
         if (!group.length) continue;
         h += '<h3 style="margin:1.2rem 0 .4rem;font-size:13pt;border-bottom:1px solid #ccc;padding-bottom:.2rem">'
-           + esc(STEPS[String(s)]||('St.'+s)) + ' ('+group.length+')</h3>';
+           + (STEPS[String(s)] ? esc(STEPS[String(s)].replace(/^St\.\d+\s*·\s*/,'')) : ('Step '+s)) + ' ('+group.length+')</h3>';
         h += group.map(artCard2).join('');
       }
       return h;
@@ -1700,7 +1709,7 @@ function renderVerbale() {
         var group = inIngresso.filter(function(a){ return parseInt(a.step)===s; });
         if (!group.length) continue;
         h += '<h3 style="margin:1.2rem 0 .4rem;font-size:13pt;border-bottom:1px solid #ccc;padding-bottom:.2rem">'
-           + esc(STEPS[String(s)]||('St.'+s)) + ' ('+group.length+')</h3>';
+           + (STEPS[String(s)] ? esc(STEPS[String(s)].replace(/^St\.\d+\s*·\s*/,'')) : ('Step '+s)) + ' ('+group.length+')</h3>';
         h += group.map(artCardIngresso).join('');
       }
       return h;
