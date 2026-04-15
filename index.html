@@ -1495,7 +1495,8 @@ function renderNumeri() {
     var ia = articles.filter(function(a){ return a.issue===iss.key; });
     var focus = ia.filter(function(a){return a.section==='Focus';}).sort(function(a,b){return (a.articleNum||999)-(b.articleNum||999);});
     var lume  = ia.filter(function(a){return a.section==='LUME';}).sort(function(a,b){return (a.articleNum||999)-(b.articleNum||999);});
-    var other = ia.filter(function(a){return a.section!=='Focus'&&a.section!=='LUME';}).sort(function(a,b){return (a.articleNum||999)-(b.articleNum||999);});
+    var rns   = ia.filter(function(a){return a.section==='RNs';}).sort(function(a,b){return (a.articleNum||999)-(b.articleNum||999);});
+    var other = ia.filter(function(a){return a.section!=='Focus'&&a.section!=='LUME'&&a.section!=='RNs';}).sort(function(a,b){return (a.articleNum||999)-(b.articleNum||999);});
     var dl = iss.deadline ? new Date(iss.deadline).toLocaleDateString('it-IT',{day:'2-digit',month:'short',year:'numeric'}) : 'TBD';
     return '<div class="card">' +
       '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:8px">' +
