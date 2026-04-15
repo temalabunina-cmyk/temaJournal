@@ -1627,6 +1627,17 @@ function renderVerbale() {
       (a.authors ? '<p>'+esc(a.authors)+(a.affiliation?' &middot; '+esc(a.affiliation):'')+(a.nationality?' &middot; '+esc(a.nationality):'')+'</p>' : '') +
       '<p>'+vStep(a.step)+(a.editor?' &middot; Editor: <strong>'+esc(a.editor)+'</strong>':'')+(isslbl?' &middot; Fascicolo: '+esc(isslbl.label)+(a.articleNum?' n.'+a.articleNum:''):'')+'</p>' +
       (a.section?'<p>Sezione: '+esc(a.section)+(a.intl==='si'?' &middot; Contributo internazionale':'')+'</p>':'') +
+      (function(){
+        var refs = [];
+        if (a.refsTotal) refs.push('References: '+a.refsTotal);
+        if (a.citeTeMA)  refs.push('TeMA: '+a.citeTeMA);
+        if (a.citeTeMA2226) refs.push('TeMA 22-26: '+a.citeTeMA2226);
+        if (a.citeJCR)   refs.push('JCR: '+a.citeJCR);
+        if (a.citeJCR2y) refs.push('JCR 2y: '+a.citeJCR2y);
+        if (a.length)    refs.push('Lunghezza: '+a.length+' car.');
+        if (a.impaginato) refs.push('<strong>Impaginato</strong>');
+        return refs.length ? '<p>'+refs.join(' &middot; ')+'</p>' : '';
+      })() +
       (a.revisori && a.revisori.length ?
         '<p style="margin:.4rem 0 .1rem"><strong>Revisori:</strong></p>' +
         '<ul style="margin:.2rem 0 .4rem 1.2rem;padding:0">' +
@@ -1654,7 +1665,7 @@ function renderVerbale() {
         }).join('') +
         '</ul>' : '') +
       (info.length ? '<p>'+info.join(' &middot; ')+'</p>' : '') +
-      (a.notes ? '<p style="font-style:italic;color:#555">'+esc(a.notes)+'</p>' : '') +
+      (a.notes ? '<p style="font-style:italic;color:#555"><strong>Note:</strong> '+esc(a.notes)+'</p>' : '') +
     '</div>';
   };
 
@@ -1663,18 +1674,28 @@ function renderVerbale() {
     var metrics = [];
     if (a.similarity!==null&&a.similarity!=='') metrics.push('Sim. '+a.similarity+'%');
     if (a.aiPercent!==null&&a.aiPercent!=='')   metrics.push('AI '+a.aiPercent+'%');
-    if (a.refsTotal) metrics.push('Refs: '+a.refsTotal);
-    if (a.length)    metrics.push('Lunghezza: '+a.length+' car.');
-    if (a.impaginato) metrics.push('<strong>Impaginato</strong>');
+    if (a.refsTotal)    metrics.push('References: '+a.refsTotal);
+    if (a.citeTeMA)     metrics.push('TeMA: '+a.citeTeMA);
+    if (a.citeTeMA2226) metrics.push('TeMA 22-26: '+a.citeTeMA2226);
+    if (a.citeJCR)      metrics.push('JCR: '+a.citeJCR);
+    if (a.citeJCR2y)    metrics.push('JCR 2y: '+a.citeJCR2y);
+    if (a.length)       metrics.push('Lunghezza: '+a.length+' car.');
+    if (a.impaginato)   metrics.push('<strong>Impaginato</strong>');
     return '<div class="ae">' +
       '<p><strong>'+(idx2+1)+'. #'+esc(a.id)+'</strong> &mdash; <em>'+esc(a.title)+'</em>' +
       (a.authors?' &mdash; '+esc(a.authors):'') + '</p>' +
       (a.gatekeeper?'<p>GK: '+esc(a.gatekeeper)+'</p>':'') +
       (metrics.length?'<p>'+metrics.join(' &middot; ')+'</p>':'') +
       (a.dataSottomissione?'<p><strong>Sottomissione:</strong> '+new Date(a.dataSottomissione).toLocaleDateString('it-IT')+'</p>':'') +
-      (a.step==='3'&&a.dataComunicazione?'<p><strong>Comunicazione Turnitin inviata il:</strong> '+new Date(a.dataComunicazione).toLocaleDateString('it-IT')+'</p>':'') +
+      (a.step==='3'&&a.dataComunicazione?(function(){
+        var sent = new Date(a.dataComunicazione);
+        var scad = new Date(sent); scad.setDate(scad.getDate()+30);
+        var giorni = Math.ceil((scad - new Date()) / 86400000);
+        var cdStr = giorni > 0 ? ' &middot; <strong>Countdown: '+giorni+' giorni</strong>' : ' &middot; <strong style="color:#b71c1c">Scaduto</strong>';
+        return '<p><strong>Comunicazione Turnitin inviata il:</strong> '+sent.toLocaleDateString('it-IT')+cdStr+'</p>';
+      })():'') +
       (a.rispostaAutori&&a.rispostaAutori!==''?'<p><strong>Risposta autori:</strong> '+esc(a.rispostaAutori)+'</p>':'') +
-      (a.notes?'<p style="font-style:italic;color:#555">'+esc(a.notes)+'</p>':'') +
+      (a.notes?'<p style="font-style:italic;color:#555"><strong>Note:</strong> '+esc(a.notes)+'</p>':'') +
     '</div>';
   };
 
@@ -1695,7 +1716,7 @@ function renderVerbale() {
         var group = inLavorazione.filter(function(a){ return parseInt(a.step)===s; });
         if (!group.length) continue;
         h += '<h3 style="margin:1.2rem 0 .4rem;font-size:13pt;border-bottom:1px solid #ccc;padding-bottom:.2rem">'
-           + (STEPS[String(s)] ? esc(STEPS[String(s)].replace(/^St\.\d+\s*·\s*/,'')) : ('Step '+s)) + ' ('+group.length+')</h3>';
+           + 'St.'+s+' &middot; ' + (STEPS[String(s)] ? esc(STEPS[String(s)].replace(/^St\.\d+\s*·\s*/,'')) : ('Step '+s)) + ' ('+group.length+')</h3>';
         h += group.map(artCard2).join('');
       }
       return h;
@@ -1709,7 +1730,7 @@ function renderVerbale() {
         var group = inIngresso.filter(function(a){ return parseInt(a.step)===s; });
         if (!group.length) continue;
         h += '<h3 style="margin:1.2rem 0 .4rem;font-size:13pt;border-bottom:1px solid #ccc;padding-bottom:.2rem">'
-           + (STEPS[String(s)] ? esc(STEPS[String(s)].replace(/^St\.\d+\s*·\s*/,'')) : ('Step '+s)) + ' ('+group.length+')</h3>';
+           + 'St.'+s+' &middot; ' + (STEPS[String(s)] ? esc(STEPS[String(s)].replace(/^St\.\d+\s*·\s*/,'')) : ('Step '+s)) + ' ('+group.length+')</h3>';
         h += group.map(artCardIngresso).join('');
       }
       return h;
