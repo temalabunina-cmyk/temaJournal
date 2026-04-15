@@ -1998,12 +1998,32 @@ function autoStep(a) {
     if (negativi > 0) a.step = '13';
   }
 
-  // St.→ St.14: Decisione editor = Revisions required o Resubmit for Review
+  // St.→ St.7: editor assegnato
+  if (a.editor && a.editor !== '' && parseInt(a.step) < 7) {
+    a.step = '7';
+  }
+
+  // St.→ St.13: Decisione editor = Revisions required o Resubmit for Review
   var dec1 = a.decisioneEditor || '';
   var dec2 = a.decisioneEditor2 || '';
   if (dec1 === 'Revisions required' || dec1 === 'Resubmit for Review' ||
       dec2 === 'Revisions required' || dec2 === 'Resubmit for Review') {
+    if (parseInt(a.step) < 13) a.step = '13';
+  }
+
+  // St.→ St.14: Decisione editor = Decline submission
+  if (dec1 === 'Decline submission' || dec2 === 'Decline submission') {
     if (parseInt(a.step) < 14) a.step = '14';
+  }
+
+  // St.→ St.16: Decisione editor = Resubmit for Review
+  if (dec1 === 'Resubmit for Review' || dec2 === 'Resubmit for Review') {
+    if (parseInt(a.step) < 16) a.step = '16';
+  }
+
+  // St.→ St.18: copyeditor assegnato
+  if (a.copyeditor && a.copyeditor !== '' && parseInt(a.step) < 18) {
+    a.step = '18';
   }
 
   return a;
@@ -2091,7 +2111,7 @@ function rifiutoGK() {
   requirePwd(function() {
     var idx = articles.findIndex(function(a){ return a.id === capturedId; });
     if (idx >= 0) {
-      articles[idx].step = '7b';
+      articles[idx].step = '6';
       articles[idx].status = 'Rifiutato';
     }
     document.getElementById('artModal').classList.remove('open');
