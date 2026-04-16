@@ -1291,11 +1291,8 @@ function renderGk() {
     // ✅ FILTRO CORRETTO PER GK:
     var f = articles.filter(function(a) {
 
-        // Escludi pubblicati
-        if (a.status === 'Pubblicato' || a.step === '19') return false;
-
-        // Escludi rifiutati
-        if (a.step === '8b' || a.step === '7b') return false;
+        // Escludi pubblicati e rifiutati
+        if (a.status === 'Pubblicato' || a.status === 'Rifiutato' || a.step === '19') return false;
 
         // ✅ GK = articoli SENZA EDITOR
         if (a.editor && a.editor.trim() !== '') return false;
