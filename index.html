@@ -515,7 +515,7 @@ const SC = {
 const EDITORS = ['Carmen Guida','Floriana Zucaro','Gerardo Carpentieri','Peppe Mazzeo','Romano Fistola','Rosa Anna La Rocca','Rosaria Battarra','Stefano Franco'];
 const COPYEDITORS = ['Gerardo Carpentieri','Laura Ascione',"Nunzia D'Amico",'Stella Pennino','Tonia Stiuso','Valerio Martinelli'];
 const LS_KEY = 'tema-journal-v2';
-const GS_URL = 'https://script.google.com/macros/s/AKfycbwKUx6i-s3sv-ylnO-BfJRP50H935XIOKp-ynw39ew77u1BdGxenNJfxmIMsIhTyz0q/exec';
+const GS_URL = 'https://script.google.com/macros/s/AKfycbxRQhenX_lZqL8J0Vta-NaA1DMWP4zQ6HJqwba_p5WArEsw2JHELVAA6pZ_GavGVb9e/exec';
 
 let issues = [], articles = [], editingArtId = null, editingIssKey = null;
 let saveTimer = null, sessionUnlocked = false, pendingAction = null;
@@ -646,29 +646,6 @@ function backupData() {
   document.body.appendChild(a);
   a.click();
   setTimeout(function(){ URL.revokeObjectURL(url); a.remove(); }, 500);
-}
-
-var vDriveText = '';
-
-async function loadDriveText() {
-  var urls = [
-    'https://corsproxy.io/?' + encodeURIComponent('https://docs.google.com/document/d/12cVL95qgRyurYjBw93yP3HE8hgi0jlp76PVad4Qy8gc/export?format=txt'),
-    'https://api.allorigins.win/raw?url=' + encodeURIComponent('https://docs.google.com/document/d/12cVL95qgRyurYjBw93yP3HE8hgi0jlp76PVad4Qy8gc/export?format=txt')
-  ];
-  for (var i = 0; i < urls.length; i++) {
-    try {
-      var resp = await fetch(urls[i]);
-      if (!resp.ok) continue;
-      var text = await resp.text();
-      if (text && text.length > 5) {
-        vDriveText = text.trim();
-        if (document.getElementById('verbaleContent')) renderVerbale();
-        return;
-      }
-    } catch(e) { continue; }
-  }
-  console.warn('Drive text load failed on all proxies');
-  vDriveText = '';
 }
 
 function schedSave() { setSaving(true); clearTimeout(saveTimer); saveTimer = setTimeout(persist, 600); }
@@ -1808,7 +1785,6 @@ function renderVerbale() {
       h += '</table>';
       return h;
     })() +
-    (vDriveText ? '<h2>NOTE AGGIUNTIVE</h2><div style="white-space:pre-wrap">'+esc(vDriveText)+'</div>' : '') +
     '<p style="margin-top:2rem;text-align:right"><em>'+oggi+'<br>Verbale '+esc(num)+'</em></p>' +
     '</div>';
 }
@@ -2513,7 +2489,7 @@ function switchTab(name) {
   if (name==='lista')         renderLista();
   if (name==='editori')       renderTeam();
   if (name==='numeri')        renderNumeri();
-  if (name==='verbale')       { rebuildIssFilters(); loadDriveText().then(renderVerbale); }
+  if (name==='verbale')       { rebuildIssFilters(); renderVerbale(); }
   if (name==='pubblicati')    { rebuildIssFilters(); renderPub(); }
   if (name==='rifiutati') { renderRifRef(); renderRifGk(); renderRifTur(); }
 }
