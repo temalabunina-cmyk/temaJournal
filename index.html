@@ -651,15 +651,24 @@ function backupData() {
 var vDriveText = '';
 
 async function loadDriveText() {
-  try {
-    var resp = await fetch(GS_URL + '?action=gdoc&fileId=12cVL95qgRyurYjBw93yP3HE8hgi0jlp76PVad4Qy8gc');
-    if (!resp.ok) throw new Error('HTTP ' + resp.status);
-    var data = await resp.json();
-    vDriveText = data.text || '';
-  } catch(e) {
-    console.warn('Drive text load failed:', e);
-    vDriveText = '';
+  var urls = [
+    'https://corsproxy.io/?' + encodeURIComponent('https://docs.google.com/document/d/12cVL95qgRyurYjBw93yP3HE8hgi0jlp76PVad4Qy8gc/export?format=txt'),
+    'https://api.allorigins.win/raw?url=' + encodeURIComponent('https://docs.google.com/document/d/12cVL95qgRyurYjBw93yP3HE8hgi0jlp76PVad4Qy8gc/export?format=txt')
+  ];
+  for (var i = 0; i < urls.length; i++) {
+    try {
+      var resp = await fetch(urls[i]);
+      if (!resp.ok) continue;
+      var text = await resp.text();
+      if (text && text.length > 5) {
+        vDriveText = text.trim();
+        if (document.getElementById('verbaleContent')) renderVerbale();
+        return;
+      }
+    } catch(e) { continue; }
   }
+  console.warn('Drive text load failed on all proxies');
+  vDriveText = '';
 }
 
 function schedSave() { setSaving(true); clearTimeout(saveTimer); saveTimer = setTimeout(persist, 600); }
