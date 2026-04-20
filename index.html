@@ -1814,6 +1814,9 @@ function printVerbale() {
   if (!c) { alert("Genera prima l'anteprima."); return; }
   var bodyHtml = c.innerHTML;
   var vNum = document.getElementById('vNum').value || '';
+  var vDateRaw = document.getElementById('vDate').value || '';
+  var vDateFmt = vDateRaw ? new Date(vDateRaw).toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit',year:'numeric'}).replace(/\//g,'-') : '';
+  var docTitle = 'Verbale TeMA' + (vNum?' n.'+vNum:'') + (vDateFmt?' del '+vDateFmt:'');
 
   var css =
     '@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap");' +
@@ -1831,8 +1834,7 @@ function printVerbale() {
     'table{width:100%;border-collapse:collapse;font-size:10pt}' +
     'td{vertical-align:top;padding:2px 5px}' +
     '@media print{' +
-      '@page{size:A4;margin:1.8cm 1.8cm 2.2cm 1.8cm}' +
-      '@page{@bottom-center{content:"Verbale TeMA \u2013 Pag. " counter(page) " di " counter(pages);font-size:9pt;color:#555}}' +
+      '@page{size:A4;margin:1.8cm 1.8cm 2.2cm 1.8cm;@bottom-center{content:"Verbale TeMA \u2013 Pag. " counter(page) " di " counter(pages);font-size:9pt;color:#555}}' +
       'html,body{margin:0;padding:0}' +
       '.ae{page-break-inside:avoid}' +
       'h2,h3{page-break-after:avoid}' +
@@ -1841,7 +1843,7 @@ function printVerbale() {
 
   var fullHtml = '<!DOCTYPE html><html lang="it"><head>' +
     '<meta charset="utf-8">' +
-    '<title>Verbale TeMA' + (vNum?' n.'+vNum:'') + '</title>' +
+    '<title>'+docTitle+'</title>' +
     '<style>' + css + '</style>' +
     '</head><body>' + bodyHtml + '</body></html>';
 
