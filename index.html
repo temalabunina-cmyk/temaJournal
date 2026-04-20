@@ -100,6 +100,9 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
 .vprev p{margin:.3rem 0;font-size:12.5px}
 .vprev .ae{margin:.6rem 0 .8rem 1rem;border-left:2px solid #ccc;padding-left:.8rem}
 .vprev ul,.vprev li{font-size:inherit;line-height:inherit}
+.drive-doc{font-size:inherit;line-height:inherit}
+.drive-doc p{margin:.3rem 0}
+.drive-doc *{font-family:Roboto,Arial,sans-serif}
 .sim-ok{background:var(--green-bg);color:var(--green-tx)}
 .sim-warn{background:var(--amber-bg);color:var(--amber-tx)}
 .sim-danger{background:var(--red-bg);color:var(--red-tx)}
@@ -1801,7 +1804,11 @@ function renderVerbale() {
       h += '</table>';
       return h;
     })() +
-    (vDriveText ? '<h2>NOTE EDITORIALI</h2><div style="white-space:pre-wrap">'+esc(vDriveText)+'</div>' : '') +
+    (vDriveText ? (function(){
+      var bodyMatch = vDriveText.match(/<body[^>]*>([\s\S]*)<\/body>/i);
+      var html = bodyMatch ? bodyMatch[1] : vDriveText;
+      return '<h2>NOTE EDITORIALI</h2><div class="drive-doc">'+html+'</div>';
+    })() : '') +
     '<p style="margin-top:2rem;text-align:right"><em>'+oggi+'<br>Verbale '+esc(num)+'</em></p>' +
     '</div>';
 }
