@@ -208,9 +208,6 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
       <div class="fr"><label>Data riunione</label><input id="vDate" type="date"></div>
       <div class="fr"><label>Fascicolo di riferimento</label><select id="vIss"></select></div>
     </div>
-    <div class="fr"><label>Presenti</label><input id="vPresenti"></div>
-    <div class="fr"><label>Temi affrontati</label><textarea id="vIntro" rows="3"></textarea></div>
-    <div class="fr"><label>Ordine del giorno prossima riunione</label><textarea id="vOutro" rows="2"></textarea></div>
   </div>
   <div id="verbalePreview"></div>
 </div>
@@ -649,6 +646,20 @@ function backupData() {
   document.body.appendChild(a);
   a.click();
   setTimeout(function(){ URL.revokeObjectURL(url); a.remove(); }, 500);
+}
+
+var vDriveText = '';
+
+async function loadDriveText() {
+  try {
+    var resp = await fetch(GS_URL + '?action=gdoc&fileId=1qxGrrkzA-LFU9euloDVw_-dHKnrF240yF_5YId_CE98');
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    var data = await resp.json();
+    vDriveText = data.text || '';
+  } catch(e) {
+    console.warn('Drive text load failed:', e);
+    vDriveText = '';
+  }
 }
 
 function schedSave() { setSaving(true); clearTimeout(saveTimer); saveTimer = setTimeout(persist, 600); }
@@ -1555,9 +1566,8 @@ function renderVerbale() {
   var num     = document.getElementById('vNum').value || '&#8212;';
   var dateVal = document.getElementById('vDate').value;
   var dateStr = dateVal ? new Date(dateVal).toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long',year:'numeric'}) : '&#8212;';
-  var presenti= document.getElementById('vPresenti').value || '&#8212;';
-  var intro   = document.getElementById('vIntro').value || '';
-  var outro   = document.getElementById('vOutro').value || '';
+  var intro   = '';
+  var outro   = '';
   var oggi    = new Date().toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit',year:'numeric'});
 
   var vStep = function(s) {
@@ -1705,7 +1715,6 @@ function renderVerbale() {
   document.getElementById('verbalePreview').innerHTML =
     '<div class="vprev" id="verbaleContent">' +
     '<h1>Verbale n. '+esc(num)+' della riunione della Redazione di TeMA<br><span style="font-size:16px;font-weight:400">'+esc(dateStr)+'</span></h1>' +
-    '<p><strong>Presenti:</strong> '+esc(presenti)+'</p>' +
     (intro?'<h2>TEMI AFFRONTATI</h2><p>'+esc(intro).replace(/\n/g,'<br>')+'</p>':'') +
     '<h2>PROSSIMI NUMERI</h2>' +
     (issues.length ? fascicoliHtml : '<p>Nessun fascicolo definito.</p>') +
@@ -1790,6 +1799,7 @@ function renderVerbale() {
       h += '</table>';
       return h;
     })() +
+    (vDriveText ? '<h2>NOTE AGGIUNTIVE</h2><div style="white-space:pre-wrap">'+esc(vDriveText)+'</div>' : '') +
     '<p style="margin-top:2rem;text-align:right"><em>'+oggi+'<br>Verbale '+esc(num)+'</em></p>' +
     '</div>';
 }
@@ -2494,7 +2504,7 @@ function switchTab(name) {
   if (name==='lista')         renderLista();
   if (name==='editori')       renderTeam();
   if (name==='numeri')        renderNumeri();
-  if (name==='verbale')       { rebuildIssFilters(); renderVerbale(); }
+  if (name==='verbale')       { rebuildIssFilters(); loadDriveText().then(renderVerbale); }
   if (name==='pubblicati')    { rebuildIssFilters(); renderPub(); }
   if (name==='rifiutati') { renderRifRef(); renderRifGk(); renderRifTur(); }
 }
