@@ -879,11 +879,15 @@ function gkCard(a) {
   var aiHigh  = aiVal  && parseFloat(a.aiPercent)  > 30;
   var bothLow = simVal && aiVal && parseFloat(a.similarity) < 30 && parseFloat(a.aiPercent) < 30;
   var card = artCard(a, true);
+  var gkApproved = bothLow && a.step === '5';
   if (simHigh || aiHigh) {
+    // Rosso: non supera Turnitin
     card = card.replace('<div class="card">', '<div class="card" style="background:#fff5f5;border-color:#f5b7b1;">');
-  } else if (bothLow) {
+  } else if (gkApproved) {
+    // Verde: approvato dal GateKeeper
     card = card.replace('<div class="card">', '<div class="card" style="background:#f0fff4;border-color:#9ae6b4;">');
   }
+  // Senza colore: da valutare dal GateKeeper (bothLow ma non ancora approvato)
   // Impaginato badge (shown after Internazionale in GK cards)
   var impBadge = a.impaginato ? '<span class="badge b-ok" style="white-space:nowrap">Impaginato</span>' : '';
   // Inject impaginato after the last badge in line 2 (Internazionale)
@@ -2104,7 +2108,8 @@ function openEditArt(id) {
   document.getElementById('gkRow').style.display=(a.editor&&a.editor!=='')?'none':'block';
   document.getElementById('btnDel').style.display='inline-block';
   document.getElementById('btnRifiutoGK').style.display=adminMode?'inline-block':'none';
-  document.getElementById('btnAccettazioneGK').style.display=(adminMode||currentUser==='GateKeeper')?'inline-block':'none';
+  var _showAccGk = (adminMode||currentUser==='GateKeeper') && (!a.editor || a.editor==='');
+  document.getElementById('btnAccettazioneGK').style.display=_showAccGk?'inline-block':'none';
   document.getElementById('btnRifiutoTur').style.display=adminMode?'inline-block':'none';
   document.getElementById('stepHint').textContent=a.step&&STEPS[a.step]?STEPS[a.step]:'';
   currentRevisori=JSON.parse(JSON.stringify(a.revisori||[])); renderRevList();
@@ -2278,7 +2283,7 @@ function accettazioneGK() {
   var capturedId = editingArtId;
   var idx = articles.findIndex(function(a){ return a.id === capturedId; });
   if (idx >= 0) {
-    articles[idx].step = '7';
+    articles[idx].step = '5';
     articles[idx].status = 'Sottomesso';
   }
   document.getElementById('artModal').classList.remove('open');
