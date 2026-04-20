@@ -659,7 +659,24 @@ async function loadDriveText() {
     var resp = await fetch(GS_URL + '?action=gdoc&fileId=1BizhUtvLCFm5g4fB3pscfBp483rBoXr7Q4QAETesEhI');
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
     var data = await resp.json();
-    vDriveText = (data.text || '').trim();
+    var raw = (data.text || '').trim();
+    if (raw) {
+      // Extract body content
+      var bodyMatch = raw.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+      var html = bodyMatch ? bodyMatch[1] : raw;
+      // Convert bold/italic inline styles to semantic tags
+      html = html.replace(/<span[^>]*font-weight\s*:\s*700[^>]*>([\s\S]*?)<\/span>/g, '<strong>$1</strong>');
+      html = html.replace(/<span[^>]*font-style\s*:\s*italic[^>]*>([\s\S]*?)<\/span>/g, '<em>$1</em>');
+      // Remove all remaining inline styles but keep tag structure
+      html = html.replace(/ style="[^"]*"/g, '');
+      html = html.replace(/ class="[^"]*"/g, '');
+      html = html.replace(/<span>/g, '').replace(/<\/span>/g, '');
+      // Remove empty paragraphs markers but keep br/p structure
+      html = html.replace(/<p><br[^>]*><\/p>/g, '<p>&nbsp;</p>');
+      vDriveText = html;
+    } else {
+      vDriveText = '';
+    }
     renderVerbale();
   } catch(e) {
     console.warn('Drive text load failed:', e);
@@ -1804,11 +1821,7 @@ function renderVerbale() {
       h += '</table>';
       return h;
     })() +
-    (vDriveText ? (function(){
-      var bodyMatch = vDriveText.match(/<body[^>]*>([\s\S]*)<\/body>/i);
-      var html = bodyMatch ? bodyMatch[1] : vDriveText;
-      return '<h2>NOTE EDITORIALI</h2><div class="drive-doc">'+html+'</div>';
-    })() : '') +
+    (vDriveText ? '<h2>NOTE EDITORIALI</h2><div class="drive-doc">'+vDriveText+'</div>' : '') +
     '<p style="margin-top:2rem;text-align:right"><em>'+oggi+'<br>Verbale '+esc(num)+'</em></p>' +
     '</div>';
 }
