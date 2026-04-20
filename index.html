@@ -652,7 +652,7 @@ var vDriveText = '';
 
 async function loadDriveText() {
   try {
-    var resp = await fetch(GS_URL + '?action=gdoc&fileId=1qxGrrkzA-LFU9euloDVw_-dHKnrF240yF_5YId_CE98');
+    var resp = await fetch(GS_URL + '?action=gdoc&fileId=12cVL95qgRyurYjBw93yP3HE8hgi0jlp76PVad4Qy8gc');
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
     var data = await resp.json();
     vDriveText = data.text || '';
