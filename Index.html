@@ -1,0 +1,2694 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TeMA Journal — Gestione Editoriale</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f8f7f4;--sur:#fff;--sur2:#f2f0ec;--brd:#e0ddd8;--brd2:#ccc9c2;
+  --tx:#1a1917;--tx2:#1a1917;--tx3:#1a1917;
+  --blue:#1a56db;--blue-bg:#eef3fd;--blue-tx:#1a3a6b;
+  --green:#2d7a3a;--green-bg:#e8f5eb;--green-tx:#1a4a21;
+  --amber:#b45309;--amber-bg:#fef3e2;--amber-tx:#7c3a00;
+  --red:#c0392b;--red-bg:#fdecea;--red-tx:#7a1f17;
+  --purple:#5b3d9e;--purple-bg:#f0ebfe;--purple-tx:#3a2060;
+  --teal:#0e7c6b;--teal-bg:#e4f5f2;--teal-tx:#09483e;
+  --orange:#c05621;--orange-bg:#fef0e6;--orange-tx:#7a3210;
+  --pink:#9d2b6e;--pink-bg:#fce8f4;--pink-tx:#5e1840;
+  --coral:#b03a1e;--coral-bg:#fce8e3;--coral-tx:#6b2010;
+  --r:8px;--rl:12px;--sh:0 1px 3px rgba(0,0,0,.08);
+}
+body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-size:20px;min-height:100vh;padding:0 10%;box-sizing:border-box}
+.app{padding:1.5rem 0}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;gap:12px;flex-wrap:wrap;border-bottom:1.5px solid var(--brd);padding-bottom:1rem}
+.brand-name{font-size:24px;font-weight:700}
+.brand-sub{font-size:20px;color:var(--tx)}
+.save-dot{width:8px;height:8px;border-radius:50%;background:#2d7a3a;display:inline-block;transition:background .3s}
+.save-dot.saving{background:#b45309;animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.save-lbl{font-size:20px;color:var(--tx)}
+.stats-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:1.5rem}
+.stat{background:var(--sur);border:1px solid var(--brd);border-radius:var(--rl);padding:1rem;text-align:center;box-shadow:var(--sh)}
+.stat-edit{outline:none;font-size:26px;font-weight:700;width:80px;text-align:center;border:none;border-bottom:1.5px dashed var(--brd2);background:transparent;color:var(--blue);cursor:text}
+.field-locked{pointer-events:none;opacity:.55;cursor:not-allowed}
+.field-locked select{background:var(--sur2)}
+.stat-lbl{font-size:20px;color:var(--tx2);margin-bottom:4px;line-height:1.3}
+.stat-val{font-size:28px;font-weight:700}
+.stat-sub{font-size:20px;color:var(--tx3);margin-top:2px}
+.tabs{display:flex;gap:2px;margin-bottom:1.5rem;border-bottom:1.5px solid var(--brd);flex-wrap:wrap}
+.tab{padding:8px 14px;cursor:pointer;border:none;background:none;font-size:20px;color:var(--tx2);border-bottom:2.5px solid transparent;margin-bottom:-1.5px;white-space:nowrap}
+.tab.active{color:var(--tx);border-bottom-color:var(--tx);font-weight:600}
+.tab:hover:not(.active){color:var(--tx);background:var(--sur2);border-radius:6px 6px 0 0}
+.sec{display:none}.sec.active{display:block}
+.card{background:var(--sur);border:1px solid var(--brd);border-radius:var(--rl);padding:1rem 1.25rem;margin-bottom:12px;box-shadow:var(--sh)}
+.badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:20px;font-weight:600}
+.b-gk{background:var(--orange-bg);color:var(--orange-tx)}
+.b-sub{background:var(--sur2);color:var(--tx2)}
+.b-ref{background:var(--blue-bg);color:var(--blue-tx)}
+.b-rev{background:var(--amber-bg);color:var(--amber-tx)}
+.b-copy{background:var(--purple-bg);color:var(--purple-tx)}
+.b-ok{background:var(--green-bg);color:var(--green-tx)}
+.b-no{background:var(--red-bg);color:var(--red-tx)}
+.b-gray{background:var(--sur2);color:var(--tx2)}
+.b-teal{background:var(--teal-bg);color:var(--teal-tx)}
+.b-amber{background:var(--amber-bg);color:var(--amber-tx)}
+.b-blue{background:var(--blue-bg);color:var(--blue-tx)}
+.b-purple{background:var(--purple-bg);color:var(--purple-tx)}
+.b-pink{background:var(--pink-bg);color:var(--pink-tx)}
+.b-coral{background:var(--coral-bg);color:var(--coral-tx)}
+.btn{padding:7px 14px;border:1px solid var(--brd2);border-radius:var(--r);background:var(--sur);color:var(--tx);font-size:20px;cursor:pointer}
+.btn:hover{background:var(--sur2)}
+.btn-p{background:var(--tx);color:var(--sur);border-color:var(--tx)}
+.btn-p:hover{opacity:.85}
+.btn-d{background:var(--red-bg);color:var(--red-tx);border-color:#f5b7b1}
+.toolbar{display:flex;gap:8px;margin-bottom:1rem;align-items:center;flex-wrap:wrap}
+.toolbar select,.toolbar input{font-size:20px;padding:6px 10px;border:1px solid var(--brd);border-radius:var(--r);background:var(--sur);color:var(--tx)}
+.srch{flex:1;min-width:160px}
+.note-box{background:var(--sur2);border-radius:var(--r);padding:10px 12px;font-size:20px;color:var(--tx);margin-top:8px;line-height:1.6}
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:var(--sur);border-radius:var(--rl);border:1px solid var(--brd);padding:1.5rem;width:80vw;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.modal h3{font-size:20px;font-weight:700;margin-bottom:1rem}
+.fsl{font-size:20px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.8px;margin:1rem 0 8px;padding-top:1rem;border-top:1px solid var(--brd)}
+.fsl.first{margin-top:0;border-top:none;padding-top:0}
+.fr{margin-bottom:10px}
+.fr label{display:block;font-size:20px;color:var(--tx);margin-bottom:3px}
+.fr input,.fr select,.fr textarea{width:100%;padding:8px 10px;border:1px solid var(--brd);border-radius:var(--r);font-size:20px;background:var(--sur);color:var(--tx)}
+.fr textarea{resize:vertical}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.g4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px}
+.mfoot{display:flex;gap:8px;justify-content:flex-end;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--brd)}
+.stt{position:relative;display:inline-block}
+.stag{display:inline-flex;align-items:center;background:var(--purple-bg);color:var(--purple-tx);font-size:20px;font-weight:600;padding:2px 8px;border-radius:20px;cursor:help}
+.spop{display:none;position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--sur);border:1px solid var(--brd);border-radius:var(--r);padding:8px 12px;font-size:20px;white-space:nowrap;z-index:200;min-width:240px;color:var(--tx);line-height:1.5;box-shadow:var(--sh)}
+.stt:hover .spop{display:block}
+.mm{font-size:20px;padding:3px 8px;border-radius:20px;background:var(--sur2);color:var(--tx)}
+.issh{font-size:20px;font-weight:700;color:var(--tx);text-transform:uppercase;letter-spacing:.6px;margin:12px 0 6px;padding-bottom:4px;border-bottom:1px solid var(--brd)}
+.arow{display:grid;grid-template-columns:32px 1fr auto;gap:8px;align-items:start;padding:7px 0;border-bottom:1px solid var(--brd)}
+.arow:last-child{border-bottom:none}
+.anum{font-size:20px;font-weight:700;color:var(--tx2);text-align:right;font-family:monospace}
+.vform{background:var(--sur);border:1px solid var(--brd);border-radius:var(--rl);padding:1rem 1.25rem;margin-bottom:1rem;box-shadow:var(--sh)}
+.vprev{font-size:13px;line-height:1.6;color:#111;background:#fff;padding:2rem;border:1px solid var(--brd);border-radius:var(--rl)}
+.vprev h1{font-size:20px;font-weight:700;text-align:center;border-bottom:1.5px solid #333;padding-bottom:.5rem;margin-bottom:1rem}
+.vprev h2{font-size:20px;font-weight:700;margin:1.2rem 0 .4rem;border-bottom:.5px solid #aaa;padding-bottom:.2rem}
+.vprev p{margin:.3rem 0;font-size:12.5px}
+.vprev .ae{margin:.6rem 0 .8rem 1rem;border-left:2px solid #ccc;padding-left:.8rem}
+.vprev ul,.vprev li{font-size:inherit;line-height:inherit}
+.sim-ok{background:var(--green-bg);color:var(--green-tx)}
+.sim-warn{background:var(--amber-bg);color:var(--amber-tx)}
+.sim-danger{background:var(--red-bg);color:var(--red-tx)}
+.banner{background:#eef3fd;border:1px solid #c3d4f7;border-radius:var(--r);padding:8px 14px;font-size:20px;color:#1a3a6b;margin-bottom:1.25rem;display:flex;align-items:center;gap:8px}
+.rev-card{background:var(--sur2);border:1px solid var(--brd);border-radius:var(--r);padding:10px 12px;margin-bottom:8px}
+@media(max-width:900px){.stats-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:600px){.stats-grid{grid-template-columns:repeat(2,1fr)};.g3,.g4{grid-template-columns:1fr 1fr}}
+
+#loginScreen{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center}
+#loginBox{background:var(--sur);border:1px solid var(--brd);border-radius:var(--rl);padding:2.5rem 2rem;width:min(380px,90vw);box-shadow:0 20px 60px rgba(0,0,0,.12)}
+
+.fr textarea.autoresize {
+  resize: none;
+  overflow: hidden;
+  min-height: 60px;
+}
+</style>
+</head>
+<body>
+
+<div id="loginScreen">
+  <div id="loginBox">
+    <div style="font-size:22px;font-weight:700;margin-bottom:.25rem">TeMA Journal</div>
+    <div style="font-size:16px;color:var(--tx);margin-bottom:1.75rem">Gestione editoriale &mdash; Accesso riservato</div>
+    <div class="fr">
+      <label>Username</label>
+      <input type="text" id="loginUser" placeholder="Username" autocomplete="username">
+    </div>
+    <div class="fr">
+      <label>Password</label>
+      <input type="password" id="loginPass" placeholder="Password" autocomplete="current-password">
+    </div>
+    <div id="loginErr" style="font-size:16px;color:var(--red);margin-bottom:12px;display:none">Username o password errati.</div>
+    <button class="btn btn-p" onclick="doLogin()" style="width:100%;padding:10px;font-size:16px">Accedi</button>
+  </div>
+</div>
+
+<div class="app" id="mainApp" style="display:none">
+<div class="topbar">
+  <div>
+      <div class="brand-name">TeMA Journal</div>
+      <div class="brand-sub">Gestione editoriale</div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+    <span class="save-dot" id="saveDot"></span>
+    <span class="save-lbl" id="saveLbl">Dati salvati</span>
+    <button class="btn btn-p" id="btnNuovo">+ Nuovo articolo</button>
+    <button class="btn" onclick="backupData()" title="Scarica backup JSON" style="padding:7px 10px;font-size:13px">&#128229; Backup</button>
+  </div>
+</div>
+<input type="file" id="importFile" accept=".json" style="display:none">
+<div class="stats-grid" id="statsGrid"></div>
+<div class="tabs">
+  <button class="tab active" data-tab="gatekeeper">GateKeeper evaluation</button>
+  <button class="tab" data-tab="lista">Articoli in lavorazione</button>
+  <button class="tab" data-tab="editori">Assegnazioni</button>
+  <button class="tab" data-tab="numeri">Prossimi numeri</button>
+  <button class="tab" data-tab="verbale">Verbale PDF</button>
+  <button class="tab" data-tab="pubblicati">Articoli pubblicati</button>
+  <button class="tab" data-tab="rifiutati">Rifiutati</button>
+  <button class="tab" data-tab="tutti">Tutti gli articoli</button>
+</div>
+<div class="sec" id="sec-gatekeeper">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+    <div style="font-size:16px;font-weight:700">GateKeeper evaluation</div>
+    <span id="gkCount" style="font-size:20px;color:var(--tx2);font-family:sans-serif"></span>
+  </div>
+  <div style="display:flex;align-items:center;justify-content:flex-end;margin-bottom:10px;gap:8px">
+    <button class="btn btn-p" onclick="printTurnitin()">&#128438; Stampa / Salva PDF Report GateKeeper</button>
+  </div>
+  <div class="toolbar"><input class="srch" type="text" id="srchGk" placeholder="Cerca..."></div>
+  <div id="gkEl"></div>
+</div>
+<div class="sec" id="sec-lista">
+  <div class="toolbar">
+    <input class="srch" type="text" id="srchLista" placeholder="Cerca titolo, autore, ID...">
+    <select id="fEd"></select>
+    <select id="fSt"><option value="">Tutti gli step</option></select>
+    <select id="fSec"><option value="">Tutte le sezioni</option><option>Focus</option><option>LUME</option><option>SI</option><option>RNs</option></select>
+    <select id="fIntl"><option value="">Tutti</option><option value="si">Internazionali</option><option value="no">Nazionali</option></select>
+    <select id="fIss"></select>
+  </div>
+  <div id="listaEl"></div>
+</div>
+<div class="sec" id="sec-editori"><div id="teamEl"></div></div>
+<div class="sec" id="sec-numeri">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+    <div style="font-size:16px;font-weight:700">Prossimi numeri</div>
+    <button class="btn" id="btnNuovoFasc">+ Nuovo fascicolo</button>
+  </div>
+  <div id="numeriEl"></div>
+</div>
+<div class="sec" id="sec-verbale">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:10px">
+    <div style="font-size:16px;font-weight:700">Generatore verbale</div>
+    <div style="display:flex;gap:8px">
+      <button class="btn" id="btnRefreshVerbale" onclick="renderVerbale()">Aggiorna anteprima</button>
+      <button class="btn btn-p" id="btnPrintVerbale" onclick="printVerbale()">Stampa / Salva PDF</button>
+    </div>
+  </div>
+  <div class="vform">
+    <div class="fsl first">Intestazione</div>
+    <div class="g3">
+      <div class="fr"><label>Numero verbale</label><input id="vNum" placeholder="es. 8/26"></div>
+      <div class="fr"><label>Data riunione</label><input id="vDate" type="date"></div>
+      <div class="fr"><label>Fascicolo di riferimento</label><select id="vIss"></select></div>
+    </div>
+    <div class="fr"><label>Presenti</label><input id="vPresenti"></div>
+    <div class="fr"><label>Temi affrontati</label><textarea id="vIntro" rows="3"></textarea></div>
+    <div class="fr"><label>Ordine del giorno prossima riunione</label><textarea id="vOutro" rows="2"></textarea></div>
+  </div>
+  <div id="verbalePreview"></div>
+</div>
+<div class="sec" id="sec-pubblicati">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+    <div style="font-size:16px;font-weight:700">Articoli pubblicati</div>
+    <span id="pubCount" style="font-size:20px;color:var(--tx2);font-family:sans-serif"></span>
+  </div>
+  <div class="toolbar">
+    <input class="srch" type="text" id="srchPub" placeholder="Cerca...">
+    <select id="fIssPub"></select>
+  </div>
+  <div id="pubEl"></div>
+</div>
+<div class="sec" id="sec-rifiutati">
+  <div style="font-size:16px;font-weight:700;margin-bottom:1rem">Rifiutati</div>
+
+  <div style="border:1px solid var(--brd);border-radius:var(--r);margin-bottom:8px;overflow:hidden">
+    <div onclick="toggleAccordion('acc-ref')" style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;cursor:pointer;background:var(--sur2);user-select:none">
+      <span style="font-size:20px;font-weight:700;font-family:sans-serif">Rifiutato dal referaggio</span>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span id="rifRefCount" style="font-size:20px;color:var(--tx2);font-family:sans-serif"></span>
+        <span id="acc-ref-icon" style="font-size:20px;color:var(--tx2)">&#9660;</span>
+      </div>
+    </div>
+    <div id="acc-ref" style="padding:12px;display:block">
+      <div class="toolbar" style="margin-bottom:10px"><input class="srch" type="text" id="srchRifRef" placeholder="Cerca..." oninput="renderRifRef()"></div>
+      <div id="rifRefEl"></div>
+    </div>
+  </div>
+
+  <div style="border:1px solid var(--brd);border-radius:var(--r);margin-bottom:8px;overflow:hidden">
+    <div onclick="toggleAccordion('acc-gk')" style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;cursor:pointer;background:var(--sur2);user-select:none">
+      <span style="font-size:20px;font-weight:700;font-family:sans-serif">Rifiutato dal GateKeeper</span>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span id="rifGkCount" style="font-size:20px;color:var(--tx2);font-family:sans-serif"></span>
+        <span id="acc-gk-icon" style="font-size:20px;color:var(--tx2)">&#9660;</span>
+      </div>
+    </div>
+    <div id="acc-gk" style="padding:12px;display:none">
+      <div class="toolbar" style="margin-bottom:10px"><input class="srch" type="text" id="srchRifGk" placeholder="Cerca..." oninput="renderRifGk()"></div>
+      <div id="rifGkEl"></div>
+    </div>
+  </div>
+
+  <div style="border:1px solid var(--brd);border-radius:var(--r);margin-bottom:8px;overflow:hidden">
+    <div onclick="toggleAccordion('acc-tur')" style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;cursor:pointer;background:var(--sur2);user-select:none">
+      <span style="font-size:20px;font-weight:700;font-family:sans-serif">Rifiutati dal controllo Turnitin</span>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span id="rifTurCount" style="font-size:20px;color:var(--tx2);font-family:sans-serif"></span>
+        <span id="acc-tur-icon" style="font-size:20px;color:var(--tx2)">&#9660;</span>
+      </div>
+    </div>
+    <div id="acc-tur" style="padding:12px;display:none">
+      <div class="toolbar" style="margin-bottom:10px"><input class="srch" type="text" id="srchRifTur" placeholder="Cerca..." oninput="renderRifTur()"></div>
+      <div id="rifTurEl"></div>
+    </div>
+  </div>
+</div>
+
+<div class="sec" id="sec-tutti">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+    <div style="font-size:22px;font-weight:700">Tutti gli articoli</div>
+    <span id="tuttiCount" style="font-size:20px;color:var(--tx)"></span>
+  </div>
+  <div class="toolbar">
+    <input class="srch" type="text" id="srchTutti" placeholder="Cerca titolo, autore, ID...">
+    <select id="fEdTutti"></select>
+    <select id="fStTutti"><option value="">Tutti gli step</option></select>
+    <select id="fSecTutti"><option value="">Tutte le sezioni</option><option>Focus</option><option>LUME</option><option>SI</option><option>RNs</option></select>
+    <select id="fIntlTutti"><option value="">Tutti</option><option value="si">Internazionali</option><option value="no">Nazionali</option></select>
+    <select id="fIssTutti"></select>
+  </div>
+  <div id="tuttiEl"></div>
+</div>
+</div>
+
+<!-- ARTICLE MODAL -->
+<div class="modal-bg" id="artModal">
+<div class="modal">
+  <h3 id="artModalTitle">Nuovo articolo</h3>
+  <div class="fsl first" style="display:flex;align-items:center;justify-content:space-between">Identificazione</div>
+  <div class="g2">
+    <div class="fr"><label>ID Manoscritto *</label><div style="display:flex;align-items:center;gap:6px"><input id="fId" style="flex:1" disabled><button type="button" class="btn" id="btnUnlockId" style="font-size:20px;padding:2px 8px;flex-shrink:0">&#128274;</button></div></div>
+    <div class="fr"><label>Data di sottomissione</label><div style="display:flex;align-items:center;gap:6px"><input type="date" id="fDataSottomissione" style="flex:1" disabled><button type="button" class="btn" id="btnUnlockDataSott" style="font-size:11px;padding:2px 8px;flex-shrink:0">&#128274;</button></div></div>
+    <div class="fr">
+      <label>Step editoriale <span class="stt"><span style="font-size:10px;background:var(--purple-bg);color:var(--purple-tx);padding:1px 6px;border-radius:20px;cursor:help;font-family:sans-serif">?</span><div class="spop" id="stepHint"></div></span></label>
+      <select id="fStep">
+      <option value="">—</option>
+      <option value="1">St 1 · Ricevimento dell'articolo</option>
+      <option value="2">St 2 · Verifica con Turnitin</option>
+      <option value="3">St 3 · Invio comunicazione Turnitin agli autori</option>
+      <option value="4">St 4 · Rifiuto Turnitin</option>
+      <option value="5">St 5 · Assegnazione al GateKeeper</option>
+      <option value="6">St 6 · Rifiuto GateKeeper</option>
+      <option value="7">St 7 · Assegnazione all'editor</option>
+      <option value="8">St 8 · L'Editor invita gli autori a modificare l'articolo</option>
+      <option value="9">St 9 · Individuazione dei revisori</option>
+      <option value="10">St 10 · Invio ai revisori</option>
+      <option value="11">St 11 · Accettazione incarico di 1 revisore</option>
+      <option value="12">St 12 · Accettazione incarico di 2 revisori</option>
+      <option value="13">St 13 · Invio agli autori per le modifiche</option>
+      <option value="14">St 14 · Comunicazione rifiuto articolo</option>
+      <option value="15">St 15 · Ricevimento articolo revisionato</option>
+      <option value="16">St 16 · Eventuale riassegnazione ai revisori</option>
+      <option value="17">St 17 · Verifica metadati e citazioni</option>
+      <option value="18">St 18 · Impaginazione</option>
+      <option value="19">St 19 · Pubblicazione</option>
+    </select>
+    </div>
+  </div>
+  <div class="fr"><label>Titolo *</label><textarea id="fTitle" rows="2" class="autoresize" oninput="autoResize(this)"></textarea></div>
+  <div class="fsl">Autori</div>
+  <div class="fr"><label>Autori</label><input id="fAuthors"></div>
+  <div class="fr"><label>Affiliazione</label><input id="fAffil"></div>
+  <div class="g2">
+    <div class="fr"><label>Nazione</label><input id="fNat"></div>
+    <div class="fr"><label>Internazionale</label><select id="fIntlArt"><option value="">—</option><option value="si">S&igrave;</option><option value="no">No</option></select></div>
+  </div>
+  <div class="fsl">Contenuto</div>
+  <div class="fr"><label>Abstract</label><textarea id="fAbstract" rows="3" class="autoresize" oninput="autoResize(this)"></textarea></div>
+  <div class="g2">
+    <div class="fr"><label>Lunghezza (parole)</label><input id="fLen" type="number"></div>
+    <div class="fr" style="display:flex;align-items:center;padding-top:22px">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:20px;font-weight:600;color:var(--green-tx)">
+        <input type="checkbox" id="fImpaginato" style="width:auto;accent-color:var(--green);width:16px;height:16px">
+        Articolo impaginato
+      </label>
+    </div>
+  </div>
+  <div class="fsl" style="display:flex;align-items:center;justify-content:space-between">Antiplagio e AI<button type="button" class="btn" id="btnUnlockAnti" style="font-size:20px;padding:2px 8px">&#128274; Sblocca</button></div>
+  <div class="field-locked" id="antiGroup">
+  <div class="g2">
+    <div class="fr"><label>% Similarit&agrave; (Turnitin)</label><input id="fSim" type="number" min="0" max="100" step="0.1" oninput="checkAntiplagio()"></div>
+    <div class="fr"><label>% Contenuto AI (Turnitin)</label><input id="fAi" type="number" min="0" max="100" step="0.1" oninput="checkAntiplagio()"></div>
+  </div>
+  <div id="antiplagioAlert" style="display:none;background:#fff5f5;border:1px solid #f5b7b1;border-radius:var(--r);padding:12px 14px;margin-top:8px">
+    <div style="font-size:20px;font-weight:700;color:var(--red);margin-bottom:10px;font-family:sans-serif">&#9888; Valori superiori al 30% — gestione comunicazione autori</div>
+    <div class="g2">
+      <div class="fr">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-bottom:6px">
+          <input type="checkbox" id="fComunicazioneInviata" style="width:auto;accent-color:var(--red)">
+          <span>Comunicazione inviata agli autori</span>
+        </label>
+        <label style="font-size:20px;color:var(--tx2);font-family:sans-serif">Data invio comunicazione</label>
+        <input type="date" id="fDataComunicazione">
+      </div>
+      <div class="fr"><label>Risposta degli autori</label>
+        <select id="fRispostaAutori">
+          <option value="">&#8212; In attesa &#8212;</option>
+          <option value="risposto">Hanno risposto</option>
+          <option value="non_risposto">Non hanno risposto</option>
+          <option value="ritirato">Hanno ritirato l'articolo</option>
+        </select>
+      </div>
+    </div>
+  </div>
+  </div>
+  <div class="fsl" style="display:flex;align-items:center;justify-content:space-between">Processo editoriale<button type="button" class="btn" id="btnUnlockProc" style="font-size:20px;padding:2px 8px">&#128274; Sblocca</button></div>
+  <input type="hidden" id="fStatus" value="Sottomesso">
+  <input type="hidden" id="fDead" value="">
+  <div class="g3 field-locked" id="procGroup">
+    <div class="fr" id="gkRow"><label>GateKeeper</label>
+      <select id="fGk"><option value="">— Seleziona —</option><option>Lilli Gargiulo</option></select>
+    </div>
+    <div class="fr"><label>Editor</label>
+      <select id="fEd2">
+        <option value="">— Seleziona —</option>
+        <option>Carmen Guida</option><option>Floriana Zucaro</option><option>Gerardo Carpentieri</option>
+        <option>Peppe Mazzeo</option><option>Romano Fistola</option><option>Rosa Anna La Rocca</option>
+        <option>Rosaria Battarra</option><option>Stefano Franco</option>
+      </select>
+    </div>
+    <div class="fr"><label>Copyeditor</label>
+      <select id="fCopy">
+        <option value="">— Seleziona —</option>
+        <option>Gerardo Carpentieri</option><option>Laura Ascione</option><option>Nunzia D'Amico</option>
+        <option>Stella Pennino</option><option>Tonia Stiuso</option><option>Valerio Martinelli</option>
+      </select>
+    </div>
+  </div>
+  <div class="fsl">Metriche citazionali</div>
+  <div style="margin-bottom:10px"><a href="https://claude.ai/public/artifacts/aa71145a-e704-4214-984f-c7cbbdb5549f" target="_blank" rel="noopener" class="btn" style="font-size:20px;display:inline-flex;align-items:center;gap:6px">&#128200; Calcola indicatori citazionali</a>
+    <a href="https://m365.cloud.microsoft/chat/?titleId=T_bf89364a-8203-fa2f-d08e-67e555bef1fe&amp;source=embedded-builder" target="_blank" rel="noopener" class="btn" style="font-size:20px;display:inline-flex;align-items:center;gap:6px">&#128196; References in stile APA</a></div>
+  <div class="g3">
+    <div class="fr"><label>References totali</label><input id="fRefs" type="number" min="0"></div>
+    <div class="fr"><label>Citazioni TeMA</label><input id="fCTeMA" type="number" min="0"></div>
+    <div class="fr"><label>Citazioni TeMA 2022&ndash;2026</label><input id="fCTeMA2226" type="number" min="0"></div>
+  </div>
+  <div class="g2">
+    <div class="fr"><label>Citazioni JCR totale</label><input id="fCJCR" type="number" min="0"></div>
+    <div class="fr"><label>Citazioni JCR last 2 years</label><input id="fCJCR2y" type="number" min="0"></div>
+  </div>
+  <div class="fsl">Processo di revisione</div>
+  <div id="revList"></div>
+  <button class="btn" id="btnAddRev" style="margin-bottom:10px;font-size:20px">+ Aggiungi revisore</button>
+  <div class="g2" style="margin-top:6px;margin-bottom:12px;align-items:end">
+    <div class="fr" style="margin-bottom:0"><label>Decisione dell'editor</label><select id="fDecisioneEditor" onchange="checkDecisioneEditor()"><option value="">&#8212;</option><option value="Accept submission">Accept submission</option><option value="Revisions required">Revisions required</option><option value="Resubmit for Review">Resubmit for Review</option><option value="Resubmit Elsewhere">Resubmit Elsewhere</option><option value="Decline submission">Decline submission</option></select></div>
+    <div class="fr" id="fDataRevisioneWrap" style="margin-bottom:0;display:none"><label>Data consegna versione revisionata</label><input type="date" id="fDataRevisione"></div>
+  <div class="fr" id="fDataAccettazioneWrap" style="margin-bottom:0;display:none"><label>Data di accettazione</label><input type="date" id="fDataAccettazione"></div>
+  </div>
+  <!-- Secondo processo di revisione (visibile solo con Resubmit for Review) -->
+  <div id="rev2Section" style="display:none;border-top:1.5px dashed var(--brd);padding-top:1rem;margin-top:.5rem">
+    <div class="fsl" style="margin-top:0;border-top:none;padding-top:0">Processo di revisione 2</div>
+    <div id="revList2"></div>
+    <button class="btn" id="btnAddRev2" style="margin-bottom:10px;font-size:20px">+ Aggiungi revisore (2° round)</button>
+    <div class="g2" style="margin-top:6px;align-items:end">
+      <div class="fr" style="margin-bottom:0"><label>Decisione dell'editor (2° round)</label><select id="fDecisioneEditor2" onchange="checkDecisioneEditor2()"><option value="">&#8212;</option><option value="Accept submission">Accept submission</option><option value="Revisions required">Revisions required</option><option value="Resubmit for Review">Resubmit for Review</option><option value="Resubmit Elsewhere">Resubmit Elsewhere</option><option value="Decline submission">Decline submission</option></select></div>
+      <div class="fr" id="fDataRevisione2Wrap" style="margin-bottom:0;display:none"><label>Data consegna versione revisionata (2°)</label><input type="date" id="fDataRevisione2"></div>
+    <div class="fr" id="fDataAccettazione2Wrap" style="margin-bottom:0;display:none"><label>Data di accettazione (2°)</label><input type="date" id="fDataAccettazione2"></div>
+    </div>
+  </div>
+  <div class="fsl">Note</div>
+  <div class="fr"><textarea id="fNotes" rows="3"></textarea></div>
+  <div class="fsl" style="display:flex;align-items:center;justify-content:space-between">Pubblicazione<button type="button" class="btn" id="btnUnlockPub" style="font-size:20px;padding:2px 8px">&#128274; Sblocca</button></div>
+  <div class="field-locked" id="pubGroup">
+  <div class="g3">
+    <div class="fr"><label>Fascicolo</label><select id="fIssArt"></select></div>
+    <div class="fr"><label>Sezione</label><select id="fSecArt"><option>Focus</option><option>LUME</option><option>SI</option><option>RNs</option><option>—</option></select></div>
+    <div class="fr"><label>N&deg; nel fascicolo</label><input id="fArtNum" type="number" min="1"></div>
+  </div>
+  </div>
+  <div class="mfoot">
+    <button class="btn btn-d" id="btnDel" style="margin-right:auto;display:none">Elimina</button>
+    <button class="btn" id="btnAccettazioneGK" style="display:none;background:var(--green-bg);color:var(--green-tx);border-color:#a0d4b0">✓ Accettazione GateKeeper</button>
+    <button class="btn" id="btnRifiutoGK" style="display:none;background:var(--orange-bg);color:var(--orange-tx);border-color:#f5b7a0">Rifiuto GateKeeper</button>
+    <button class="btn" id="btnRifiutoTur" style="display:none;background:var(--amber-bg);color:var(--amber-tx);border-color:#f5d5a0">Rifiuto Turnitin</button>
+    <button class="btn" id="btnArtCancel">Annulla</button>
+    <button class="btn btn-p" id="btnArtSave">Salva</button>
+  </div>
+</div>
+</div>
+
+<!-- ISSUE MODAL -->
+<div class="modal-bg" id="issModal">
+<div class="modal" style="max-width:420px">
+  <h3 id="issModalTitle">Nuovo fascicolo</h3>
+  <div class="fr"><label>Tipo</label>
+    <select id="iType"><option value="ordinario">Numero ordinario</option><option value="si">Numero Speciale (SI)</option></select>
+  </div>
+  <div class="fr" id="iYearRow"><label>Anno</label><input id="iYear" type="number" value="2026" min="2020" max="2040"></div>
+  <div class="fr" id="iNumRow"><label>Numero (1&ndash;3)</label>
+    <select id="iNum"><option value="1">01</option><option value="2">02</option><option value="3">03</option></select>
+  </div>
+  <div class="fr"><label>Tema / Titolo</label><input id="iTheme"></div>
+  <div class="fr"><label>Data prevista pubblicazione</label><input id="iDeadline" type="date"></div>
+  <div class="fr"><label>Note</label><textarea id="iNotes" rows="2"></textarea></div>
+  <div class="fr" style="display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--brd);margin-top:4px">
+    <input type="checkbox" id="iPub" style="width:auto;accent-color:var(--green)">
+    <label for="iPub" style="font-size:20px;font-weight:600;color:var(--green-tx);cursor:pointer;margin:0;font-family:sans-serif">Fascicolo pubblicato &mdash; sposta tutti gli articoli in Pubblicati</label>
+  </div>
+  <div class="mfoot">
+    <button class="btn btn-d" id="btnDelIss" style="margin-right:auto;display:none">Elimina fascicolo</button>
+    <button class="btn" id="btnIssCancel">Annulla</button>
+    <button class="btn btn-p" id="btnIssSave">Salva</button>
+  </div>
+</div>
+</div>
+
+<!-- PASSWORD MODAL -->
+<div class="modal-bg" id="pwdModal" style="z-index:200">
+<div class="modal" style="max-width:340px;text-align:center">
+  <div style="font-size:28px;margin-bottom:.5rem">&#128274;</div>
+  <h3 style="margin-bottom:.5rem">Accesso riservato</h3>
+  <p style="font-size:20px;color:var(--tx2);margin-bottom:1rem;font-family:sans-serif">Inserisci la password per procedere.</p>
+  <div class="fr" style="text-align:left"><label>Password</label><input type="password" id="pwdInput"></div>
+  <div id="pwdErr" style="font-size:20px;color:var(--red);margin-top:4px;display:none;font-family:sans-serif">Password errata.</div>
+  <div style="display:flex;gap:8px;justify-content:center;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--brd)">
+    <button class="btn" id="btnPwdCancel">Annulla</button>
+    <button class="btn btn-p" id="btnPwdOk">Accedi</button>
+  </div>
+</div>
+</div>
+
+<script>
+const DEF_ISSUES=[{"key":"01/2026","label":"TeMA 01/2026","type":"ordinario","year":2026,"num":1,"theme":"The city challenges and external agents","deadline":"2026-04-30","note":"Pubblicazione prevista 30/04/2026"}];
+const DEF_ARTICLES=[{"id":"11322","dataSottomissione":"","title":"Biodiversity and Ecological Network: GeoAI for Modica Green city","authors":"Chiara Spadaro, Celestina Fazia","affiliation":"Università Kore","nationality":"Italia","intl":"no","abstract":"","length":0,"impaginato":false,"section":"LUME","status":"Concluso","step":"12","issue":"01/2026","articleNum":6,"deadline":"","editor":"Romano Fistola","copyeditor":"Valerio Martinelli","gatekeeper":"","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[],"revisori2":[],"decisioneEditor":"","decisioneEditor2":"","dataRevisione":"","dataRevisione2":""},{"id":"11343","dataSottomissione":"2024-12-10","title":"Monitoring Urban Dynamics Using Google Earth and GeoAI","authors":"Francesco Lamonaca","affiliation":"University of Calabria","nationality":"Italia","intl":"no","abstract":"Urban areas face mounting pressure from increased space demand, degrading key environmental services. Thus, understanding Land Use/Land Cover (LULC) changes is vital. In order to offer a robust decision-support framework for urban planning and environmental conservation, this study presents an innovative measurement method based on Google Earth Engine and Unsupervised K-means Clustering of multispectral satellite images to map urban and vegetation shifts. The proposed method was applied in 15 southern Italian cities and the results were validated with ESA Land Cover dataset. Results show 167 hectares consumed from 2005 to 2021. Since the F1 score harmonizes the balance between precision and recall into a single metric, it can be used as evaluation metric for the proposal. In particular, F1 scores were 0.64 for urban areas and 0.92 for vegetation areas. Given that the classification was unsupervised, an F1-score of 0.64 can be considered a favorable result, particularly considering the challenges of accurately classifying the diverse land cover types in Landsat imagery with a 30-meter resolution. For these reasons, these results show the potential to make the proposed method a useful tool for aiding policymakers and urban planners in making informed decisions to mitigate the adverse effects of urban growth on the environment.","length":39898,"impaginato":true,"section":"LUME","status":"Sottomesso","step":"12","issue":"01/2026","articleNum":10,"deadline":"","editor":"Gerardo Carpentieri","copyeditor":"Gerardo Carpentieri","gatekeeper":"","similarity":null,"aiPercent":null,"refsTotal":39,"citeTeMA":4,"citeTeMA2226":3,"citeJCR":8,"citeJCR2y":6,"notes":"Ex special Issue GeoAI (Francini) sono stati svolti due cicli di referaggio\nIn data 24/03/2026 ha sottomesso la versione revisionata del paper","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[],"revisori2":[],"decisioneEditor":"","decisioneEditor2":"","dataRevisione":"","dataRevisione2":""},{"id":"11344","dataSottomissione":"","title":"Evaluating Urban Fabric Transformations Using GeoAI","authors":"Alessandro Vitale","affiliation":"Università della Calabria","nationality":"Italia","intl":"no","abstract":"","length":0,"impaginato":false,"section":"LUME","status":"Concluso","step":"12","issue":"01/2026","articleNum":8,"deadline":"","editor":"Rosa Anna La Rocca","copyeditor":"Nunzia D'Amico","gatekeeper":"","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[],"revisori2":[],"decisioneEditor":"","decisioneEditor2":"","dataRevisione":"","dataRevisione2":""},{"id":"11378","title":"AI as a Tool for Urban Regeneration Processes","authors":"Carlo Adornetto","affiliation":"Università della Calabria","nationality":"Italia","intl":"no","abstract":"","length":0,"section":"LUME","status":"Copyediting","step":"12","issue":"","articleNum":null,"deadline":"","editor":"Romano Fistola","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"SI Francini. In attesa di secondo referee."},{"id":"11551","dataSottomissione":"","title":"CITISENSE. Enhancing Urban Well-being through Smart Design, Data and AI","authors":"Pierfrancesco Celani, Daniel Enrique Sardo, Massimo Zupi, Margherita Tufarelli, Adriano Bisello","affiliation":"Università della Calabria; Università di Firenze; ITESO Guadalajara","nationality":"Italia / Messico","intl":"si","abstract":"","length":0,"impaginato":false,"section":"LUME","status":"Concluso","step":"12","issue":"01/2026","articleNum":9,"deadline":"","editor":"Gerardo Carpentieri","copyeditor":"Gerardo Carpentieri","gatekeeper":"","similarity":null,"aiPercent":null,"refsTotal":53,"citeTeMA":8,"citeTeMA2226":4,"citeJCR":24,"citeJCR2y":7,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[],"revisori2":[],"decisioneEditor":"","decisioneEditor2":"","dataRevisione":"","dataRevisione2":""},{"id":"12394","title":"Assessing Urban Growth and Pollution through Nightlight Data: A Case Study in Thailand","authors":"Chaichana Kulworatit, Phuvis Kerdpramote, Saranya Saetang","affiliation":"KMITL Bangkok","nationality":"Tailandia","intl":"si","abstract":"","length":0,"section":"LUME","status":"Concluso","step":"12","issue":"01/2026","articleNum":3,"deadline":"","editor":"Floriana Zucaro","copyeditor":"Nunzia D'Amico","gatekeeper":"","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[]},{"id":"12458","title":"Exploring Governance Challenges in Coastal and Marine Tourism","authors":"Barbara Gasparini, Emanuel Giannotti, Vittore Negretto, Denis Maragno","affiliation":"IUAV","nationality":"Italia","intl":"no","abstract":"","length":0,"section":"LUME","status":"Concluso","step":"12","issue":"01/2026","articleNum":4,"deadline":"","editor":"Rosa Anna La Rocca","copyeditor":"Stella Pennino","gatekeeper":"","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[]},{"id":"12609","title":"Liberal and deliberative democracy in planning paradigms: reflections on upper-scale planning in Türkiye","authors":"Büşra Durmaz, Cihan Ercetin","affiliation":"KU Leuven, Belgio","nationality":"Belgio / Turchia","intl":"si","abstract":"","length":0,"section":"LUME","status":"In referaggio","step":"8","issue":"","articleNum":null,"deadline":"2026-02-28","editor":"Romano Fistola","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"L'Editor ha inviato (23 febbraio 2026) all'autore alcuni commenti per rivedere il paper prima della selezione del secondo revisore.","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[{"nome":"Lucia Saganeiti ","affiliazione":"CNR","dataConsegna":"","accettazione":"completato","dataProroga":"","giudizio":"Resubmit for Review"}]},{"id":"12621","dataSottomissione":"","title":"The Impact of Land Use and Land Cover (LULC) Changes on Coastal Dynamics Through Landscape Structure","authors":"Makbulenur Onur","affiliation":"Karadeniz Technical University, Turchia","nationality":"Turchia","intl":"si","abstract":"Coastal areas are regions characterized by complex dynamics resulting from the interaction between natural processes and human activities. This study was conducted on two adjacent beach areas in Budva, Montenegro: one that has been affected by land use and land cover (LULC) change, and another that remains unaffected. The research provides a comparative analysis of the impacts of LULC changes on coastal landscape structure, spatial characteristics, and user perception. The Analytic Hierarchy Process (AHP) was employed as the multi-criteria decision-making method, while data related to user perceptions were analyzed using the SPSS statistical software.The study focused on key criteria such as coastal protection, biodiversity, aesthetic value, and public usability. The findings reveal that LULC changes have significant effects on the ecological and visual integrity of coastal areas, as well as on user satisfaction. In this context, the study recommends careful monitoring of LULC changes and adapting landscape planning decisions accordingly to ensure sustainable coastal development. The results quantitatively demonstrate the differences between the two selected areas. Furthermore, the study evaluated how users perceive these changes, based on criteria such as aesthetic value, recreational use, and environmental comfort levels. A user-centered landscape performance analysis was conducted accordingly. In order to clearly reveal the effects of change, a comparative assessment was made between a beach area that experienced LULC change and one that remained unchanged. The findings highlight that preserving natural characteristics in coastal areas plays a critical role in enhancing user satisfaction, aesthetic quality, and ecological sustainability. Therefore, the study emphasizes the importance of nature-based solutions and multi-criteria analyses grounded in user perception in coastal management strategies.","length":0,"impaginato":false,"section":"Focus","status":"Revisione autore","step":"12","issue":"01/2026","articleNum":1,"deadline":"2026-03-25","editor":"Floriana Zucaro","copyeditor":"Tonia Stiuso","gatekeeper":"Lilli Gargiulo","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[{"nome":"Nzuzo Nxumalo ","affiliazione":"","dataConsegna":"","accettazione":"completato","dataProroga":"","giudizio":"Resubmit for Review"},{"nome":"Firdevs KULAK TORUN","affiliazione":"","dataConsegna":"","accettazione":"completato","dataProroga":"","giudizio":"Revisions required"}],"revisori2":[],"decisioneEditor":"Revisions required","decisioneEditor2":"","dataRevisione":"2026-03-09","dataRevisione2":""},{"id":"12634","title":"Beyond the Map Decision Support Systems for Spatial and Mobility Planning","authors":"Mara Ladu, Ginevra Balletto, Tanja Congiu, Gianfranco Fancello, Ernesto Fontes Pupo","affiliation":"Università di Cagliari","nationality":"Italia","intl":"no","abstract":"","length":0,"section":"LUME","status":"Concluso","step":"12","issue":"01/2026","articleNum":5,"deadline":"","editor":"Carmen Guida","copyeditor":"Laura Ascione","gatekeeper":"","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[]},{"id":"12656","dataSottomissione":"","title":"Spatial and temporal evolution of urban reserve available land resources in the karst region of North China from 1990 to 2020","authors":"Shujin Wang, Shanzhong Qi","affiliation":"Shandong Normal University, China","nationality":"Cina","intl":"si","abstract":"","length":0,"impaginato":false,"section":"Focus","status":"In referaggio","step":"12","issue":"01/2026","articleNum":2,"deadline":"2026-03-29","editor":"Floriana Zucaro","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[],"revisori2":[],"decisioneEditor":"","decisioneEditor2":"","dataRevisione":"","dataRevisione2":""},{"id":"12696","dataSottomissione":"","title":"Impact of Renewable Energy Systems on Water Ecosystem Services","authors":"Maria Cristina Marino, Beniamino Murgante","affiliation":"Università della Basilicata","nationality":"Italia","intl":"no","abstract":"","length":0,"impaginato":false,"section":"LUME","status":"Revisione autore","step":"8","issue":"","articleNum":null,"deadline":"2026-03-21","editor":"Gerardo Carpentieri","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"Versione revisionata attesa per il 21 marzo.","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[],"revisori2":[],"decisioneEditor":"","decisioneEditor2":"","dataRevisione":"","dataRevisione2":""},{"id":"12735","dataSottomissione":"","title":"Planning for Sustainable Tourism in Protected Areas","authors":"Rachele Gatto, Francesco Scorza","affiliation":"Università della Basilicata","nationality":"Italia","intl":"no","abstract":"","length":0,"impaginato":false,"section":"—","status":"Revisione autore","step":"12","issue":"","articleNum":null,"deadline":"2026-03-16","editor":"Rosa Anna La Rocca","copyeditor":"Stella Pennino","gatekeeper":"Lilli Gargiulo","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[],"revisori2":[],"decisioneEditor":"","decisioneEditor2":"","dataRevisione":"","dataRevisione2":""},{"id":"12803","dataSottomissione":"","title":"Examining the temporal and spatial change of current land cover types in Demre District using machine learning","authors":"Sibel Akten, Hüseyin Batuhan Dündar, Atila Gül","affiliation":"Suleyman University, Turchia","nationality":"Turchia","intl":"si","abstract":"","length":0,"impaginato":false,"section":"LUME","status":"In referaggio","step":"5","issue":"01/2026","articleNum":7,"deadline":"2026-03-09","editor":"Carmen Guida","copyeditor":"Laura Ascione","gatekeeper":"Lilli Gargiulo","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[],"revisori2":[],"decisioneEditor":"","decisioneEditor2":"","dataRevisione":"","dataRevisione2":""},{"id":"13052","title":"Climate Adaptation and Mitigation. A Multicriteria Decision-Support System for the Basilicata Region","authors":"Alfonso Annunziata, Francesco Scorza","affiliation":"Università della Basilicata","nationality":"Italia","intl":"no","abstract":"","length":0,"section":"Focus","status":"Sottomesso","step":"3","issue":"","articleNum":null,"deadline":"","editor":"Rosaria Battarra","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"L'editor comunica di voler invitare gli autori ad inviare una nuova versione del contributo in linea con il format della rivista.","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[]},{"id":"13106","dataSottomissione":"2026-01-10","title":"Logistics and overtourism: urban system vulnerabilities across Italian cities scales: A comparative multi-scale assessment of overtourism–last-mile conflicts","authors":"Irina Di Ruocco","affiliation":"University of Insubria","nationality":"Italia","intl":"no","abstract":"This paper addresses the problem of urban logistics in the years of overtourism.","length":50834,"impaginato":true,"section":"Focus","status":"Sottomesso","step":"1","issue":"","articleNum":null,"deadline":"","editor":"","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":2,"aiPercent":24,"refsTotal":42,"citeTeMA":2,"citeTeMA2226":0,"citeJCR":15,"citeJCR2y":5,"notes":"Il paper nella prima sottomissione aveva un AI > 30%.","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[],"revisori2":[],"decisioneEditor":"","decisioneEditor2":"","dataRevisione":"","dataRevisione2":""},{"id":"13110","title":"Identification and mapping of traffic congestion hotspots in urban areas","authors":"Frederic Laurent esse esse","affiliation":"University of Douala, Cameroon","nationality":"Camerun","intl":"si","abstract":"","length":0,"section":"Focus","status":"GateKeeper evaluation","step":"8b","issue":"","articleNum":null,"deadline":"","editor":"Gerardo Carpentieri","copyeditor":"","gatekeeper":"","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"L'articolo è stato rifiutato il 16 marzo 2026","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[]},{"id":"13143","title":"Evaluating the efficacy of smart technologies in disseminating transportation systems information during earthquake scenarios","authors":"Izza Anwer, Irfan Yousuf","affiliation":"Susan University of Engineering and Technology, Lahore","nationality":"Pakistan","intl":"si","abstract":"","length":0,"section":"Focus","status":"Sottomesso","step":"3","issue":"","articleNum":null,"deadline":"","editor":"Peppe Mazzeo","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[]},{"id":"13148","dataSottomissione":"2026-01-27","title":"Climate Change and Beach Tourism","authors":"Pathmanandakumar Vyddiyaratnam","affiliation":"Eastern University Sri Lanka","nationality":"Sri Lanka","intl":"si","abstract":"Climate change poses growing challenges to coastal tourism destinations.","length":58497,"impaginato":true,"section":"Focus","status":"Sottomesso","step":"1","issue":"","articleNum":null,"deadline":"","editor":"","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":8,"aiPercent":59,"refsTotal":57,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":7,"citeJCR2y":2,"notes":"","comunicazioneInviata":true,"dataComunicazione":"2026-03-17","rispostaAutori":"","revisori":[],"revisori2":[],"decisioneEditor":"","decisioneEditor2":"","dataRevisione":"","dataRevisione2":""},{"id":"13165","title":"Methodological Approaches for Food Security Mapping","authors":"Silvia Zannin, Denis Maragno","affiliation":"IUAV","nationality":"Italia","intl":"no","abstract":"","length":0,"section":"LUME","status":"Sottomesso","step":"3","issue":"","articleNum":null,"deadline":"","editor":"Rosaria Battarra","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[]},{"id":"13170","dataSottomissione":"2026-01-29","title":"Geospatial Analytics for Public Transport Safety","authors":"Gayathri S., Paulose N Kuriakose","affiliation":"School of Planning and Architecture, Bhopal","nationality":"India","intl":"si","abstract":"Public transport systems in the Global South operate within complex socio-spatial conditions.","length":37339,"impaginato":true,"section":"Focus","status":"Sottomesso","step":"1","issue":"","articleNum":null,"deadline":"","editor":"","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":6,"aiPercent":43,"refsTotal":46,"citeTeMA":1,"citeTeMA2226":1,"citeJCR":16,"citeJCR2y":4,"notes":"","comunicazioneInviata":true,"dataComunicazione":"2026-03-17","rispostaAutori":"","revisori":[],"revisori2":[],"decisioneEditor":"","decisioneEditor2":"","dataRevisione":"","dataRevisione2":""},{"id":"13275","dataSottomissione":"","title":"AI-Driven Public Transport Corridor Design for Sustainable Urban Mobility","authors":"Agus Mansur, Rizal Syarifuddin, Hari Purnomo, Winda Nur Cahyo","affiliation":"Universitas Islam, Indonesia","nationality":"Indonesia","intl":"si","abstract":"","length":0,"impaginato":false,"section":"—","status":"In referaggio","step":"8","issue":"","articleNum":null,"deadline":"2026-03-28","editor":"Gerardo Carpentieri","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"In attesa della risposta degli autori.","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[{"nome":"Ivan Gunawan","affiliazione":"","dataConsegna":"","accettazione":"completato","dataProroga":"","giudizio":"Revisions required"},{"nome":"Rangga Primadasa ","affiliazione":"","dataConsegna":"","accettazione":"completato","dataProroga":"","giudizio":"Revisions required"}],"revisori2":[],"decisioneEditor":"Revisions required","decisioneEditor2":"","dataRevisione":"2026-04-19","dataRevisione2":""},{"id":"13276","title":"Role of tourism in environment sustainability","authors":"Rafaqet Ali, Khuda Bakhsh, Muhammad Asim Yasin","affiliation":"Comsats University Islamabad","nationality":"Pakistan","intl":"si","abstract":"","length":0,"section":"—","status":"Sottomesso","step":"2","issue":"","articleNum":null,"deadline":"","editor":"Rosa Anna La Rocca","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[]},{"id":"13329","title":"Tactical Urbanism in Rome","authors":"Francesca Paola Mondelli, Chiara Amato","affiliation":"Università Roma Tre","nationality":"Italia","intl":"no","abstract":"","length":0,"section":"—","status":"GateKeeper evaluation","step":"8","issue":"","articleNum":null,"deadline":"","editor":"Carmen Guida","copyeditor":"","gatekeeper":"","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[]},{"id":"13350","dataSottomissione":"2026-02-24","title":"Spatial accessibility and daily mobility of residents in the collective housing","authors":"Lyes Tahraoui; Tahar BAOUNI; Mohammed BAKOUR","affiliation":"Polytechnic School of Architecture and Urban Planning (EPAU)","nationality":"Algeria","intl":"si","abstract":"This research analyzes the spatial accessibility and daily mobility practices of the residents of the AADL city.","length":49365,"impaginato":true,"section":"Focus","status":"Sottomesso","step":"1","issue":"","articleNum":null,"deadline":"","editor":"Carmen Guida","copyeditor":"","gatekeeper":"","similarity":7,"aiPercent":28,"refsTotal":48,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":21,"citeJCR2y":3,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[],"revisori2":[],"decisioneEditor":"","decisioneEditor2":"","dataRevisione":"","dataRevisione2":""},{"id":"13353","dataSottomissione":"2026-02-24","title":"Assessing housing affordability via synthetic index","authors":"Emanuele Dell'Oca, Marta Bottero","affiliation":"Polytecnic University of Turin","nationality":"Italia","intl":"no","abstract":"Housing affordability is a critical challenge.","length":50666,"impaginato":false,"section":"Focus","status":"Sottomesso","step":"1","issue":"","articleNum":null,"deadline":"","editor":"","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":8,"aiPercent":59,"refsTotal":50,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":15,"citeJCR2y":3,"notes":"","comunicazioneInviata":true,"dataComunicazione":"2026-02-25","rispostaAutori":"risposto","revisori":[],"revisori2":[],"decisioneEditor":"","decisioneEditor2":"","dataRevisione":"","dataRevisione2":""},{"id":"13357","title":"Geospatial analysis on metro-induced land use change","authors":"Kaviya Asokan, Sudhan Srinivas","affiliation":"Hindustan Institute of Technology and Science, India","nationality":"India","intl":"si","abstract":"","length":0,"section":"—","status":"GateKeeper evaluation","step":"6","issue":"","articleNum":null,"deadline":"","editor":"Carmen Guida","copyeditor":"","gatekeeper":"","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[{"nome":"Caterina Pietra","affiliazione":"University of pavia","dataConsegna":"2026-03-13","accettazione":"accettato","dataProroga":"","giudizio":""},{"nome":"Geoff Boeing","affiliazione":"","dataConsegna":"2026-03-13","accettazione":"in attesa","dataProroga":"","giudizio":""},{"nome":"Massimo Palme","affiliazione":"","dataConsegna":"2026-03-13","accettazione":"in attesa","dataProroga":"","giudizio":""}]},{"id":"13371","title":"Spatial analysis and urban development through the integration of ChatGPT-like large language models and QGIS","authors":"Valerio della Sala","affiliation":"Autonomous University of Barcelona","nationality":"Spagna","intl":"si","abstract":"The rapid convergence of AI and GIS.","length":57892,"impaginato":false,"section":"Focus","status":"Sottomesso","step":"1","issue":"","articleNum":null,"deadline":"","editor":"","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":1,"aiPercent":89,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"","comunicazioneInviata":true,"dataComunicazione":"2026-03-10","rispostaAutori":"","revisori":[]},{"id":"13416","dataSottomissione":"","title":"Detection of Floating Debris Zones in the Chao Phraya River","authors":"Chaichana Kulworatit, Niphat Craypo","affiliation":"King Mongkut's Institute of Technology Ladkrabang","nationality":"Thailandia","intl":"si","abstract":"Floating debris in urban rivers is an increasing environmental concern.","length":49366,"impaginato":false,"section":"Focus","status":"Sottomesso","step":"1","issue":"","articleNum":null,"deadline":"","editor":"","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":8,"aiPercent":77,"refsTotal":64,"citeTeMA":8,"citeTeMA2226":6,"citeJCR":9,"citeJCR2y":7,"notes":"","comunicazioneInviata":true,"dataComunicazione":"2026-03-22","rispostaAutori":"","revisori":[],"revisori2":[],"decisioneEditor":"","decisioneEditor2":"","dataRevisione":"","dataRevisione2":""},{"id":"13421","title":"MULTI-PATHWAY ASSESSMENT OF HEAVY METAL POLLUTION","authors":"Ogunade Josiah Ayodelea, Peter Sanjo Adewale, Emmanuel Elijah Ameh","affiliation":"Centre for Environmental Studies and Sustainable Development (CESSED) Lagos State University","nationality":"Nigeria","intl":"si","abstract":"Electronic waste is an escalating concern.","length":49424,"section":"Focus","status":"Sottomesso","step":"1","issue":"","articleNum":null,"deadline":"","editor":"","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":8,"aiPercent":99,"refsTotal":33,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":3,"citeJCR2y":1,"notes":"","comunicazioneInviata":true,"dataComunicazione":"2026-03-22","rispostaAutori":"","revisori":[]},{"id":"13424","title":"Microclimate-Oriented Generative Design in Astana","authors":"Arslan Barakbayev, Yelena Feoktistova, Oxana Gurskaya, Tatiana Inozemtseva","affiliation":"Seifullin Kazakh Agrotechnical Research University","nationality":"Kazakhstan","intl":"si","abstract":"This article examines the application of a hybrid generative approach.","length":37075,"impaginato":true,"section":"Focus","status":"Sottomesso","step":"2","issue":"","articleNum":null,"deadline":"","editor":"Floriana Zucaro","copyeditor":"","gatekeeper":"","similarity":7,"aiPercent":20,"refsTotal":26,"citeTeMA":3,"citeTeMA2226":2,"citeJCR":15,"citeJCR2y":11,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[],"revisori2":[],"decisioneEditor":"","decisioneEditor2":"","dataRevisione":"","dataRevisione2":""},{"id":"13434","dataSottomissione":"2026-03-24","title":"Estimation of Above-Ground Biomass and Carbon Stock","authors":"R. Alex Immanual Jeyasingh, Suguna Devakumari Malayappan, R. Isaac Manuel","affiliation":"Karunya Institute of Technology and Sciences, Coimbatore","nationality":"India","intl":"si","abstract":"Rapid land-use transformation in southern India.","length":12119,"impaginato":false,"section":"Focus","status":"Rifiutato","step":"7b","issue":"","articleNum":null,"deadline":"","editor":"","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":5,"aiPercent":69,"refsTotal":7,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":1,"citeJCR2y":1,"notes":"Articolo molto breve e con AI alta.","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[],"revisori2":[],"decisioneEditor":"","decisioneEditor2":"","dataRevisione":"","dataRevisione2":""},{"id":"13439","dataSottomissione":"2026-03-27","title":"An Improved PTAL Method Using the Household Survey Data in Accessibility Analysis","authors":"Elia Odabasi, Yalçın Alver","affiliation":"Ege university","nationality":"Turchia","intl":"si","abstract":"Accessibility is a critical factor in the evaluation of public transport systems.","length":48052,"impaginato":false,"section":"Focus","status":"Sottomesso","step":"1","issue":"","articleNum":null,"deadline":"","editor":"Carmen Guida","copyeditor":"","gatekeeper":"","similarity":5,"aiPercent":12,"refsTotal":34,"citeTeMA":1,"citeTeMA2226":1,"citeJCR":25,"citeJCR2y":1,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[],"revisori2":[],"decisioneEditor":"","decisioneEditor2":"","dataRevisione":"","dataRevisione2":""},{"id":"13440","dataSottomissione":"2026-03-27","title":"The difference between refugees and migrants due to climate change","authors":"Anatolii Getman, Volodymyr Steshenko, Volodymyr Shekhovtsov, Oleh Tarasov, Svitlana Kozar","affiliation":"Yaroslav Mudryi National Law University","nationality":"Ucraina","intl":"si","abstract":"The objective of this paper is to draw a legal distinction.","length":54251,"impaginato":false,"section":"Focus","status":"Rifiutato","step":"7b","issue":"","articleNum":null,"deadline":"","editor":"","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":8,"aiPercent":18,"refsTotal":41,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":1,"citeJCR2y":1,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[],"revisori2":[],"decisioneEditor":"","decisioneEditor2":"","dataRevisione":"","dataRevisione2":""},{"id":"13441","dataSottomissione":"2026-03-29","title":"Decoding the Architecture of Informal Land Tenure","authors":"VICTOR OLUTOPE IGE","affiliation":"FEDERAL UNIVERSITY OF TECHNOLOGY, AKURE","nationality":"Nigeria","intl":"si","abstract":"Even though formalisation of land tenure has been acknowledged as central.","length":31034,"impaginato":false,"section":"Focus","status":"Sottomesso","step":"1","issue":"","articleNum":null,"deadline":"","editor":"","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":8,"aiPercent":0,"refsTotal":31,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":2,"citeJCR2y":0,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[],"revisori2":[],"decisioneEditor":"","decisioneEditor2":"","dataRevisione":"","dataRevisione2":""},{"id":"13448","dataSottomissione":"2026-04-02","title":"From Production to Memory: The Spatial and Social Role of Tea Collection Points","authors":"Ece Varol; İlknur Kati","affiliation":"Department of Architecture at Recep Tayyip Erdoğan University","nationality":"Turchia","intl":"si","abstract":"In the rural settlements of the Eastern Black Sea Region, tea collection centers have emerged.","length":48836,"impaginato":true,"section":"Focus","status":"Sottomesso","step":"1","issue":"","articleNum":null,"deadline":"","editor":"","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":7,"aiPercent":95,"refsTotal":13,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":1,"citeJCR2y":1,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[],"revisori2":[],"decisioneEditor":"","decisioneEditor2":"","dataRevisione":"","dataRevisione2":""},{"id":"13452","dataSottomissione":"2026-04-05","title":"AI for 15 Minute City Assessments in Lahore, Pakistan. AI Applications for Urban Mobility and Proximity Planning","authors":"Farrukh Baig, Omer Shujat Bhatti, Fahad Khan, Saddam Hussain, Noman Sahito, Amjad Ali","affiliation":"King Fahd University of Petroleum and Minerals, Dhahran; School of Architecture & Planning, University of Management and Technology, Lahore","nationality":"Saudi Arabia, Pakistan","intl":"si","abstract":"The 15-minute city concept has gained prominence as a post-pandemic planning model for human-centric, low-carbon, and equitable neighborhoods. However, empirical applications remain concentrated in the Global North and East Asian contexts, leaving rapidly urbanizing South Asian metropolises largely unexamined. To address this gap, this study evaluates the proximity readiness of Lahore, Pakistan, using an artificial intelligence-based diagnostic tool.","length":60627,"impaginato":true,"section":"Focus","status":"Sottomesso","step":"1","issue":"","articleNum":null,"deadline":"","editor":"","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":7,"aiPercent":95,"refsTotal":50,"citeTeMA":3,"citeTeMA2226":3,"citeJCR":31,"citeJCR2y":26,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[],"revisori2":[],"decisioneEditor":"","decisioneEditor2":"","dataRevisione":"","dataRevisione2":""}];
+
+const STEPS = {
+  '1':'St.1 · Ricevimento dell\'articolo',
+  '2':'St.2 · Verifica con Turnitin',
+  '3':'St.3 · Invio comunicazione Turnitin agli autori',
+  '4':'St.4 · Rifiuto Turnitin',
+  '5':'St.5 · Assegnazione al GateKeeper',
+  '6':'St.6 · Rifiuto GateKeeper',
+  '7':'St.7 · Assegnazione all\'editor',
+  '8':'St.8 · L\'Editor invita gli autori a modificare l\'articolo prima dell\'avvio del processo di revisione',
+  '9':'St.9 · Individuazione dei revisori',
+  '10':'St.10 · Invio ai revisori',
+  '11':'St.11 · Accettazione incarico di 1 revisore',
+  '12':'St.12 · Accettazione incarico di 2 revisori',
+  '13':'St.13 · Invio agli autori per le modifiche',
+  '14':'St.14 · Comunicazione rifiuto articolo',
+  '15':'St.15 · Ricevimento articolo revisionato',
+  '16':'St.16 · Eventuale riassegnazione ai revisori',
+  '17':'St.17 · Verifica metadati e citazioni',
+  '18':'St.18 · Impaginazione',
+  '19':'St.19 · Pubblicazione'
+};
+const SC = {
+  'GateKeeper evaluation':'b-gk','Sottomesso':'b-sub','In referaggio':'b-ref',
+  'Revisione autore':'b-rev','Copyediting':'b-copy',
+  'Concluso':'b-ok','Pubblicato':'b-ok','Rifiutato':'b-no'
+};
+const EDITORS = ['Carmen Guida','Floriana Zucaro','Gerardo Carpentieri','Peppe Mazzeo','Romano Fistola','Rosa Anna La Rocca','Rosaria Battarra','Stefano Franco'];
+const COPYEDITORS = ['Gerardo Carpentieri','Laura Ascione',"Nunzia D'Amico",'Stella Pennino','Tonia Stiuso','Valerio Martinelli'];
+const LS_KEY = 'tema-journal-v2';
+const GS_URL = 'https://script.google.com/macros/s/AKfycbwKUx6i-s3sv-ylnO-BfJRP50H935XIOKp-ynw39ew77u1BdGxenNJfxmIMsIhTyz0q/exec';
+
+let issues = [], articles = [], editingArtId = null, editingIssKey = null;
+let saveTimer = null, sessionUnlocked = false, pendingAction = null;
+let currentRevisori = [];
+
+var citeScore2024 = '2,3';
+var citeScoreTracker = '3,4';
+
+function openScopus() {
+  window.open('https://www.scopus.com/sourceid/21101185191', '_blank');
+}
+
+function loadCiteScores() {
+  try {
+    var d = JSON.parse(localStorage.getItem('tema-citescores') || '{}');
+    if (d.citeScore2024) citeScore2024 = d.citeScore2024;
+    if (d.citeScoreTracker) citeScoreTracker = d.citeScoreTracker;
+  } catch(e) {}
+}
+function saveCiteScores() {
+  var v1 = document.getElementById('citeScore2024');
+  var v2 = document.getElementById('citeScoreTracker');
+  if (v1) citeScore2024 = v1.value;
+  if (v2) citeScoreTracker = v2.value;
+  try { localStorage.setItem('tema-citescores', JSON.stringify({citeScore2024:citeScore2024, citeScoreTracker:citeScoreTracker})); } catch(e) {}
+}
+
+function loadData() {
+  setSaving(true);
+  document.getElementById('saveLbl').textContent = 'Caricamento da Google Sheets...';
+
+  fetch(GS_URL)
+    .then(function(r){ return r.text(); })
+    .then(function(text) {
+      var gsData = null;
+      try { gsData = JSON.parse(text); } catch(e) {}
+
+      if (gsData && gsData.articles && gsData.articles.length) {
+        issues   = gsData.issues && gsData.issues.length ? gsData.issues : JSON.parse(JSON.stringify(DEF_ISSUES));
+        articles = gsData.articles;
+        setSaving(false);
+        document.getElementById('saveLbl').textContent = 'Dati sincronizzati';
+        rebuildIssFilters();
+        refresh();
+      } else {
+        // GS vuoto — carica i dati di default e li salva su GS
+        issues   = JSON.parse(JSON.stringify(DEF_ISSUES));
+        articles = JSON.parse(JSON.stringify(DEF_ARTICLES));
+        setSaving(false);
+        document.getElementById('saveLbl').textContent = 'Dati predefiniti caricati';
+        rebuildIssFilters();
+        refresh();
+        schedSave(); // spinge i default su GS
+      }
+    })
+    .catch(function() {
+      // Rete non disponibile — carica i default
+      issues   = JSON.parse(JSON.stringify(DEF_ISSUES));
+      articles = JSON.parse(JSON.stringify(DEF_ARTICLES));
+      setSaving(false);
+      document.getElementById('saveLbl').textContent = 'Rete non disponibile';
+      rebuildIssFilters();
+      refresh();
+    });
+}
+
+
+function setSaving(s) {
+  var dot = document.getElementById('saveDot'), lbl = document.getElementById('saveLbl');
+  if (s) { dot.classList.add('saving'); lbl.textContent = 'Salvataggio...'; }
+  else   { dot.classList.remove('saving'); lbl.textContent = 'Dati salvati'; }
+}
+function sendNotification(action, artId, artTitle) {
+  var params = new URLSearchParams({action: action, artId: artId, artTitle: artTitle});
+  fetch(GS_URL + '?' + params.toString(), { method: 'POST', body: '' })
+    .catch(function() {});
+}
+
+function persist() {
+  setSaving(true);
+  document.getElementById('saveLbl').textContent = 'Salvataggio...';
+
+  var payload = JSON.stringify({issues:issues, articles:articles, _ts: Date.now()});
+
+  var attempt = 0;
+  function tryPost() {
+    attempt++;
+    fetch(GS_URL, {
+      method: 'POST',
+      body: payload
+    })
+    .then(function(r){
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.text();
+    })
+    .then(function(txt) {
+      if (txt && txt.trim() === 'OK') {
+        setSaving(false);
+        document.getElementById('saveLbl').textContent = 'Salvato ✓';
+        setTimeout(function(){ document.getElementById('saveLbl').textContent = 'Dati salvati'; }, 2000);
+      } else if (attempt < 3) {
+        document.getElementById('saveLbl').textContent = 'Riprovo (' + attempt + '/3)...';
+        setTimeout(tryPost, 2000);
+      } else {
+        setSaving(false);
+        document.getElementById('saveLbl').textContent = 'GS non risponde — riprova';
+      }
+    })
+    .catch(function(err) {
+      if (attempt < 3) {
+        document.getElementById('saveLbl').textContent = 'Riprovo (' + attempt + '/3)...';
+        setTimeout(tryPost, 3000);
+      } else {
+        setSaving(false);
+        document.getElementById('saveLbl').textContent = 'Errore: ' + (err.message || 'rete');
+      }
+    });
+  }
+  tryPost();
+}
+function backupData() {
+  var payload = JSON.stringify({issues:issues, articles:articles, _backup: new Date().toISOString()}, null, 2);
+  var blob = new Blob([payload], {type:'application/json;charset=utf-8'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'tema_backup_' + new Date().toISOString().slice(0,10) + '.json';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(function(){ URL.revokeObjectURL(url); a.remove(); }, 500);
+}
+
+function schedSave() { setSaving(true); clearTimeout(saveTimer); saveTimer = setTimeout(persist, 600); }
+
+function requirePwd(action) {
+  pendingAction = action;
+  document.getElementById('pwdInput').value = '';
+  document.getElementById('pwdErr').style.display = 'none';
+  document.getElementById('pwdModal').classList.add('open');
+  setTimeout(function(){ document.getElementById('pwdInput').focus(); }, 100);
+}
+function checkPwd() {
+  if (document.getElementById('pwdInput').value === 'Tecchio80') {
+    document.getElementById('pwdModal').classList.remove('open');
+    var action = pendingAction;
+    pendingAction = null;
+    if (action) { setTimeout(function(){ action(); }, 50); }
+  } else {
+    document.getElementById('pwdErr').style.display = 'block';
+    document.getElementById('pwdInput').value = '';
+    document.getElementById('pwdInput').focus();
+  }
+}
+
+function stAbbr(s) {
+  if (!s) return '';
+  var label = STEPS[s] ? STEPS[s].replace(/^St\.\d+\s*·\s*/,'') : '';
+  var num = 'St.'+s;
+  if (!label) return num;
+  var short = label.length > 28 ? label.slice(0,26)+'…' : label;
+  return num+' &middot; '+short;
+}
+
+function sl(s) {
+  var m = {'1':'St.1','2':'St.2','3':'St.3','4':'St.4','5':'St.5',
+           '6':'St.6','7':'St.7','8':'St.8','9':'St.9','10':'St.10',
+           '11':'St.11','12':'St.12','13':'St.13','14':'St.14','15':'St.15',
+           '16':'St.16','17':'St.17','18':'St.18','19':'St.19'};
+  return m[s] || ('St.'+s);
+}
+function stepFull(s) {
+  if (!s) return '';
+  return STEPS[s] ? esc(STEPS[s]) : sl(s);
+}
+function simCls(v) {
+  if (v === null || v === undefined || v === '') return '';
+  return v < 20 ? 'sim-ok' : (v < 40 ? 'sim-warn' : 'sim-danger');
+}
+function fmtDl(d) {
+  if (!d) return null;
+  var today = new Date(), dd = new Date(d), diff = Math.round((dd - today) / 86400000);
+  var f = dd.toLocaleDateString('it-IT', {day:'2-digit', month:'short'});
+  if (diff < 0)  return {text:'Scaduto '+f, cls:'color:var(--red);font-weight:600'};
+  if (diff <= 5) return {text:'Scade '+f,   cls:'color:var(--red);font-weight:600'};
+  if (diff <= 14)return {text:'Scade '+f,   cls:'color:var(--green)'};
+  return {text:'Entro '+f, cls:'color:var(--tx2)'};
+}
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function buildIssOpts(selId, cur) {
+  var sel = document.getElementById(selId);
+  sel.innerHTML = '<option value="">&#8212; Seleziona &#8212;</option>';
+  issues.forEach(function(i) {
+    var o = document.createElement('option');
+    o.value = i.key; o.textContent = i.label;
+    if (i.key === cur) o.selected = true;
+    sel.appendChild(o);
+  });
+}
+function rebuildIssFilters() {
+  ['fIss','fIssPub','vIss'].forEach(function(id) {
+    var sel = document.getElementById(id);
+    if (!sel) return;
+    var cur = sel.value;
+    var emptyLabel = (id === 'vIss') ? '&#8212; Tutti &#8212;' : 'Tutti i fascicoli';
+    sel.innerHTML = '<option value="">'+emptyLabel+'</option>';
+    issues.forEach(function(i) {
+      var o = document.createElement('option'); o.value = i.key; o.textContent = i.label; sel.appendChild(o);
+    });
+    sel.value = cur;
+  });
+}
+
+// ── artCard: unified card for all sections ────────────────────────────────────
+function antiplagiCountdown(a) {
+    return "";
+}
+
+function artCard(a, showEdit) {
+  var isslbl = issues.find(function(i){ return i.key === a.issue; });
+  var dl = fmtDl(a.deadline);
+  var hasCite = a.refsTotal || a.citeTeMA || a.citeTeMA2226 || a.citeJCR || a.citeJCR2y;
+  var hasSim = (a.similarity !== null && a.similarity !== undefined && a.similarity !== '');
+  var hasAi  = (a.aiPercent  !== null && a.aiPercent  !== undefined && a.aiPercent  !== '');
+
+  var revHtml = '';
+  if (a.revisori && a.revisori.length) {
+    revHtml = '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">';
+    a.revisori.forEach(function(r) {
+      revHtml += '<span class="mm">'+esc(r.nome||'Revisore')+(r.affiliazione?' &middot; '+esc(r.affiliazione):'')+(r.accettazione?' &middot; '+esc(r.accettazione):'')+(r.dataConsegna?' &middot; Consegna: '+new Date(r.dataConsegna).toLocaleDateString('it-IT'):'')+'</span>';
+    });
+    revHtml += '</div>';
+  }
+
+  var metaHtml = '';
+  if (hasSim || hasAi || hasCite) {
+    metaHtml = '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">';
+    if (hasSim) metaHtml += '<span class="badge mm '+simCls(a.similarity)+'">Sim. '+a.similarity+'%</span>';
+    if (hasAi)  metaHtml += '<span class="badge mm '+simCls(a.aiPercent)+'">AI '+a.aiPercent+'%</span>';
+    if (a.refsTotal)    metaHtml += '<span class="mm">Refs: '+a.refsTotal+'</span>';
+    if (a.citeTeMA)     metaHtml += '<span class="mm">TeMA: '+a.citeTeMA+'</span>';
+    if (a.citeTeMA2226) metaHtml += '<span class="mm">TeMA 22-26: '+a.citeTeMA2226+'</span>';
+    if (a.citeJCR)      metaHtml += '<span class="mm">JCR: '+a.citeJCR+'</span>';
+    if (a.citeJCR2y)    metaHtml += '<span class="mm">JCR 2y: '+a.citeJCR2y+'</span>';
+    metaHtml += '</div>';
+  }
+
+  var editBtn = showEdit ? '<button class="btn" style="flex-shrink:0;font-size:20px" onclick="openEditArt(this.dataset.id)" data-id="'+esc(a.id)+'">' + 'Modifica</button>' : '';
+
+  // Step badge color based on status
+  var stepBadgeCls = a.status ? (SC[a.status] || 'b-gray') : 'b-gray';
+
+  return '<div class="card">' +
+    '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:6px">' +
+      '<div style="flex:1">' +
+        // Line 1: ID + Step per esteso (sigla + testo) + Editor + GateKeeper
+        '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px">' +
+          '<span style="font-size:20px;font-weight:700;color:var(--tx3);font-family:monospace">#'+esc(a.id)+'</span>' +
+          (a.step ? '<span style="font-size:20px;color:var(--purple-tx);font-weight:600">'+stepFull(a.step)+'</span>' : '') +
+          (a.editor ? '<span class="badge b-blue">'+esc(a.editor)+'</span>' : '') +
+          (a.gatekeeper && (!a.editor || a.editor === '') ? '<span class="badge b-pink">'+esc(a.gatekeeper)+'</span>' : '') +
+        '</div>' +
+        // Title + authors
+        '<div style="font-size:20px;font-weight:600;line-height:1.4">'+esc(a.title)+'</div>' +
+        '<div style="font-size:20px;color:var(--tx2);margin-top:2px">'+esc(a.authors)+(a.affiliation?' &middot; '+esc(a.affiliation):'')+'</div>' +
+        (a.nationality ? '<div style="font-size:20px;color:var(--tx3)">Nazione: '+esc(a.nationality)+'</div>' : '') +
+        // Line 2: Fascicolo + Sezione + Internazionale
+        '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:5px">' +
+          (isslbl ? '<span class="badge b-amber">'+esc(isslbl.label)+(a.articleNum?' &middot; n.'+a.articleNum:'')+'</span>' : '') +
+          (a.section && a.section !== '—' && a.section !== '-' ? '<span class="badge b-gray">'+esc(a.section)+'</span>' : '') +
+          (a.intl === 'si' ? '<span class="badge b-teal">Internazionale</span>' : '') +
+        '</div>' +
+      '</div>' +
+      editBtn +
+    '</div>' +
+    metaHtml + revHtml +
+    (a.notes ? '<div class="note-box">'+esc(a.notes)+'</div>' : '') +
+    (function(){
+      var info = [];
+      if (a.decisioneEditor && a.decisioneEditor !== '') info.push('<strong>Decisione:</strong> '+esc(a.decisioneEditor));
+      if (a.decisioneEditor2 && a.decisioneEditor2 !== '') info.push('<strong>Decisione 2°:</strong> '+esc(a.decisioneEditor2));
+      if (a.dataRevisione && a.dataRevisione !== '') info.push('<strong>Consegna rev.:</strong> '+new Date(a.dataRevisione).toLocaleDateString('it-IT'));
+      if (a.dataRevisione2 && a.dataRevisione2 !== '') info.push('<strong>Consegna 2°:</strong> '+new Date(a.dataRevisione2).toLocaleDateString('it-IT'));
+      if (a.dataAccettazione && a.dataAccettazione !== '') info.push('<strong style="color:var(--green-tx)">✓ Accettato il:</strong> '+new Date(a.dataAccettazione).toLocaleDateString('it-IT'));
+      if (a.dataAccettazione2 && a.dataAccettazione2 !== '') info.push('<strong style="color:var(--green-tx)">✓ Accettato (2°) il:</strong> '+new Date(a.dataAccettazione2).toLocaleDateString('it-IT'));
+      if (!info.length) return '';
+      return '<div style="font-size:20px;margin-top:6px;padding:5px 10px;background:var(--sur2);border-radius:var(--r);display:flex;flex-wrap:wrap;gap:10px">'+info.join(' &middot; ')+'</div>';
+    })() +
+    antiplagiCountdown(a) +
+
+    // Footer: step badge (color by status) + copyeditor + deadline
+        (a.copyeditor ? '<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--brd)"><span class="badge b-purple">'+esc(a.copyeditor)+'</span></div>' : '') +
+  '</div>';
+}
+
+// ── Section renderers ─────────────────────────────────────────────────────────
+function renderStats() {
+  // Articoli in lavorazione (hanno editor assegnato, non rifiutati/pubblicati)
+  var listaArts = articles.filter(function(a) {
+    if (a.status === 'Pubblicato' || a.status === 'Rifiutato' || a.step === '19') return false;
+    if (!a.editor || a.editor === '') return false;
+    return true;
+  });
+  // Articoli GK che hanno superato Turnitin (sim<30 E ai<30, entrambi valorizzati)
+  var gkOkArts = articles.filter(function(a) {
+    if (a.status === 'Pubblicato' || a.step === '19') return false;
+    if (a.step === '8b' || a.step === '7b') return false;
+    if (a.editor && a.editor !== '') return false; // già in lavorazione
+    var sim = parseFloat(a.similarity), ai = parseFloat(a.aiPercent);
+    return !isNaN(sim) && sim < 30 && !isNaN(ai) && ai < 30;
+  });
+  // Totale = lavorazione + GK ok (no duplicati)
+  var activeIds = {};
+  listaArts.forEach(function(a){ activeIds[a.id] = a; });
+  gkOkArts.forEach(function(a){ activeIds[a.id] = a; });
+  var activeArts = Object.values(activeIds);
+  var t = activeArts.length;
+  var intl = activeArts.filter(function(a){ return a.intl === 'si'; }).length;
+  var allArts = articles.length;
+
+  var nextIss = null;
+  var sortedIss = issues.filter(function(i){ return !i.pubblicato && i.deadline; })
+    .sort(function(a,b){ return new Date(a.deadline) - new Date(b.deadline); });
+  if (sortedIss.length) nextIss = sortedIss[0];
+  if (!nextIss) nextIss = issues.find(function(i){ return articles.some(function(a){ return a.issue===i.key; }); });
+
+  var t2226 = 0, t2226Count = 0;
+  if (nextIss) {
+    var issArts = articles.filter(function(a){ return a.issue === nextIss.key; });
+    t2226 = issArts.reduce(function(s,a){ return s+(parseInt(a.citeTeMA2226)||0); }, 0);
+    t2226Count = issArts.length;
+  }
+  var avg = t2226Count > 0 ? Math.round((t2226/t2226Count)*10)/10 : 0;
+  var issLabel = nextIss ? nextIss.label : '—';
+
+  document.getElementById('statsGrid').innerHTML =
+    '<div class="stat"><div class="stat-lbl">Totale articoli</div><div class="stat-val">'+t+'</div></div>' +
+    '<div class="stat"><div class="stat-lbl">Internazionali</div><div class="stat-val" style="color:var(--teal)">'+intl+'</div><div class="stat-sub">su '+t+' totali</div></div>' +
+    '<div class="stat"><div class="stat-lbl">Cit. TeMA 22-26</div><div class="stat-val" style="color:var(--purple)">'+t2226+'</div><div class="stat-sub">'+esc(issLabel)+' &middot; media '+avg+'</div></div>' +
+    '<div class="stat" style="grid-column:span 2">' +
+      '<div style="display:flex;gap:0;border-radius:var(--r);overflow:hidden">' +
+        '<div style="flex:1;padding:.75rem .5rem;border-right:1px solid var(--brd);cursor:pointer" onclick="openScopus()">' +
+          '<div class="stat-lbl" style="margin-bottom:4px">CiteScore 2024</div>' +
+          '<input class="stat-edit" id="citeScore2024" value="'+citeScore2024+'" onchange="saveCiteScores()" onclick="event.stopPropagation()">' +
+          '<div class="stat-sub">Scopus &#8599;</div></div>' +
+        '<div style="flex:1;padding:.75rem .5rem;cursor:pointer" onclick="openScopus()">' +
+          '<div class="stat-lbl" style="margin-bottom:4px">CiteScoreTracker 2025</div>' +
+          '<input class="stat-edit" id="citeScoreTracker" value="'+citeScoreTracker+'" onchange="saveCiteScores()" style="color:var(--teal)" onclick="event.stopPropagation()">' +
+          '<div class="stat-sub">Scopus &#8599;</div></div>' +
+      '</div></div>';
+}
+
+function gkCard(a) {
+  var simVal = (a.similarity !== null && a.similarity !== undefined && a.similarity !== '');
+  var aiVal  = (a.aiPercent  !== null && a.aiPercent  !== undefined && a.aiPercent  !== '');
+  var simHigh = simVal && parseFloat(a.similarity) > 30;
+  var aiHigh  = aiVal  && parseFloat(a.aiPercent)  > 30;
+  var bothLow = simVal && aiVal && parseFloat(a.similarity) < 30 && parseFloat(a.aiPercent) < 30;
+  var card = artCard(a, true);
+  if (simHigh || aiHigh) {
+    card = card.replace('<div class="card">', '<div class="card" style="background:#fff5f5;border-color:#f5b7b1;">');
+  } else if (bothLow) {
+    card = card.replace('<div class="card">', '<div class="card" style="background:#f0fff4;border-color:#9ae6b4;">');
+  }
+  // Impaginato badge (shown after Internazionale in GK cards)
+  var impBadge = a.impaginato ? '<span class="badge b-ok" style="white-space:nowrap">Impaginato</span>' : '';
+  // Inject impaginato after the last badge in line 2 (Internazionale)
+  if (impBadge) {
+    var line2Marker = '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:5px">';
+    var line2Close = '</div>';
+    var line2Pos = card.lastIndexOf(line2Marker);
+    if (line2Pos >= 0) {
+      var closePos = card.indexOf(line2Close, line2Pos + line2Marker.length);
+      if (closePos >= 0) card = card.slice(0, closePos) + impBadge + card.slice(closePos);
+    }
+  }
+  // Build a single unified metrics row (sim + AI + citations all together)
+  var metricsRow = '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">' +
+    (simVal ? '<span class="badge mm '+simCls(a.similarity)+'">Sim. '+a.similarity+'%</span>' : '<span class="mm">Sim. —</span>') +
+    (aiVal  ? '<span class="badge mm '+simCls(a.aiPercent)+'">AI '+a.aiPercent+'%</span>'     : '<span class="mm">AI —</span>') +
+    '<span class="mm">Refs: '+(a.refsTotal||0)+'</span>' +
+    '<span class="mm">TeMA: '+(a.citeTeMA||0)+'</span>' +
+    '<span class="mm">TeMA 22-26: '+(a.citeTeMA2226||0)+'</span>' +
+    '<span class="mm">JCR: '+(a.citeJCR||0)+'</span>' +
+    '<span class="mm">JCR 2y: '+(a.citeJCR2y||0)+'</span>' +
+    '</div>' +
+    (function(){
+      if (!(simHigh || aiHigh) || !a.comunicazioneInviata) return '';
+      var txt = '&#9993; Comunicazione inviata';
+      var countdown = '';
+      if (a.dataComunicazione) {
+        var dataInvio = new Date(a.dataComunicazione);
+        txt += ' il ' + dataInvio.toLocaleDateString('it-IT');
+        var scadenza = new Date(dataInvio); scadenza.setDate(scadenza.getDate() + 30);
+        var giorni = Math.ceil((scadenza - new Date()) / 86400000);
+        if (giorni > 0) countdown = ' &middot; Countdown risposta autori: ' + giorni + ' giorni rimanenti';
+        else countdown = ' &middot; Scaduto';
+      }
+      if (a.rispostaAutori && a.rispostaAutori !== '') countdown = ' &middot; Risposta: ' + esc(a.rispostaAutori);
+      return '<div style="margin-top:5px;font-size:20px;color:var(--red)">' + txt + countdown + '</div>';
+    })();
+  // Remove any existing metaHtml row (sim/AI badges already generated by artCard)
+  // and replace with our unified row
+  var existingMetaRe = /<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">(<span class="badge mm [^<]*>[^<]*<\/span>|<span class="mm">[^<]*<\/span>)+<\/div>/;
+  if (existingMetaRe.test(card)) {
+    card = card.replace(existingMetaRe, metricsRow);
+  } else {
+    // No existing row — insert before footer
+    var footerMarker = '<div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;padding-top:8px;border-top';
+    var pos = card.lastIndexOf(footerMarker);
+    if (pos >= 0) card = card.slice(0, pos) + metricsRow + card.slice(pos);
+  }
+  return card;
+}
+
+function renderTutti() {
+  var q   = (document.getElementById('srchTutti').value||'').toLowerCase();
+  var fE  = document.getElementById('fEdTutti')  ? document.getElementById('fEdTutti').value  : '';
+  var fS  = document.getElementById('fStTutti')  ? document.getElementById('fStTutti').value  : '';
+  var fSc = document.getElementById('fSecTutti') ? document.getElementById('fSecTutti').value : '';
+  var fI2 = document.getElementById('fIntlTutti')? document.getElementById('fIntlTutti').value: '';
+  var fIs = document.getElementById('fIssTutti') ? document.getElementById('fIssTutti').value : '';
+  var f = articles.filter(function(a) {
+    if (q && (a.id+' '+a.title+' '+a.authors+' '+a.affiliation).toLowerCase().indexOf(q) < 0) return false;
+    if (fE  && a.editor  !== fE)  return false;
+    if (fS  && a.step    !== fS)  return false;
+    if (fSc && a.section !== fSc) return false;
+    if (fI2 && a.intl    !== fI2) return false;
+    if (fIs && a.issue   !== fIs) return false;
+    return true;
+  });
+  f.sort(function(a,b){ return parseInt(b.id) - parseInt(a.id); });
+  document.getElementById('tuttiCount').textContent = f.length+' articol'+(f.length===1?'o':'i');
+  document.getElementById('tuttiEl').innerHTML = f.length ? f.map(function(a){ return artCard(a,true); }).join('') :
+    '<div style="text-align:center;padding:3rem;color:var(--tx)">Nessun articolo trovato.</div>';
+}
+
+function toggleAccordion(id) {
+  var el = document.getElementById(id);
+  var icon = document.getElementById(id+'-icon');
+  if (!el) return;
+  var open = el.style.display !== 'none';
+  el.style.display = open ? 'none' : 'block';
+  if (icon) icon.innerHTML = open ? '&#9658;' : '&#9660;';
+}
+
+async function printGkPDF() {
+  var gkArts = articles.filter(function(a) {
+    if (a.status === 'Pubblicato' || a.step === '19') return false;
+    var _sim=parseFloat(a.similarity),_ai=parseFloat(a.aiPercent);
+    if (a.rispostaAutori && a.rispostaAutori!=='' && (_sim>30||_ai>30)) return false;
+    if (a.step === '8b' || a.step === '7b') return false;
+    if (a.editor && a.editor !== '') return false;
+    // Solo articoli con sim>30 O ai>30, oppure senza valori ancora inseriti
+    var simMissing = isNaN(_sim) || a.similarity === null || a.similarity === '';
+    var aiMissing  = isNaN(_ai)  || a.aiPercent  === null || a.aiPercent  === '';
+    var simHigh = !simMissing && _sim > 30;
+    var aiHigh  = !aiMissing  && _ai  > 30;
+    // Escludi solo se ENTRAMBI i valori sono presenti e ENTRAMBI sotto 30
+    if (!simMissing && !aiMissing && !simHigh && !aiHigh) return false;
+    return true;
+  }).sort(function(a,b){
+    var simA=parseFloat(a.similarity),aiA=parseFloat(a.aiPercent);
+    var simB=parseFloat(b.similarity),aiB=parseFloat(b.aiPercent);
+    var aOk=!isNaN(simA)&&simA<30&&!isNaN(aiA)&&aiA<30;
+    var bOk=!isNaN(simB)&&simB<30&&!isNaN(aiB)&&aiB<30;
+    if(aOk&&!bOk) return -1; if(!aOk&&bOk) return 1;
+    return parseInt(b.id)-parseInt(a.id);
+  });
+
+  // Show loading indicator
+  var btn = document.querySelector('[onclick="printGkPDF()"]');
+  var origText = btn ? btn.innerHTML : '';
+  if (btn) { btn.innerHTML = '&#8987; Traduzione abstract in corso...'; btn.disabled = true; }
+
+  // Translate abstracts via Claude API
+  async function translateAbstract(text) {
+    if (!text || !text.trim()) return '';
+    try {
+      var resp = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 1000,
+          messages: [{
+            role: 'user',
+            content: 'Traduci in italiano questo abstract scientifico. Rispondi solo con la traduzione: ' + text
+          }]
+        })
+      });
+      var data = await resp.json();
+      return data.content && data.content[0] ? data.content[0].text : '';
+    } catch(e) { return ''; }
+  }
+
+  // Translate only articles with non-empty abstracts
+  var translations = {};
+  for (var i = 0; i < gkArts.length; i++) {
+    var a = gkArts[i];
+    if (a.abstract && a.abstract.trim()) {
+      translations[a.id] = await translateAbstract(a.abstract);
+    }
+  }
+
+  if (btn) { btn.innerHTML = origText; btn.disabled = false; }
+
+  var today = new Date().toLocaleDateString('it-IT');
+
+  var cards = gkArts.map(function(a) {
+    var sim = (a.similarity!==null&&a.similarity!=='')?a.similarity+'%':'—';
+    var ai  = (a.aiPercent!==null&&a.aiPercent!=='')?a.aiPercent+'%':'—';
+    var simRed = parseFloat(a.similarity)>30;
+    var aiRed  = parseFloat(a.aiPercent)>30;
+    var commHtml = '';
+    if (a.comunicazioneInviata && a.dataComunicazione) {
+      var dataInvio = new Date(a.dataComunicazione);
+      var scad = new Date(dataInvio); scad.setDate(scad.getDate()+30);
+      var giorni = Math.ceil((scad-new Date())/86400000);
+      commHtml = '<p style="font-size:9px;color:#b71c1c;margin:4px 0">&#9993; Comunicazione inviata il '+dataInvio.toLocaleDateString('it-IT')+
+        (giorni>0?' &middot; Countdown: '+giorni+' giorni rimanenti':' &middot; Scaduto')+'</p>';
+    }
+    var metricStyle = 'display:inline-block;margin-right:8px;font-size:9px;font-weight:bold';
+    var absHtml = '<div style="font-size:9px;margin-top:6px;border-top:1px solid #eee;padding-top:5px;line-height:1.5">';
+    if (a.abstract && a.abstract.trim()) {
+      absHtml += '<b>Abstract (originale):</b> '+esc(a.abstract);
+      if (translations[a.id]) {
+        absHtml += '<br><br><b>Abstract (italiano):</b> '+esc(translations[a.id]);
+      }
+    } else {
+      absHtml += '<b>Abstract:</b> <i style="color:#999">Non disponibile</i>';
+    }
+    absHtml += '</div>';
+
+    return '<div style="border:1px solid #bbb;padding:10px 12px;margin-bottom:12px;page-break-inside:avoid">'+
+      '<div style="font-size:9px;font-weight:bold;color:#555;margin-bottom:3px;font-family:monospace">#'+esc(a.id)+(a.section?' &middot; '+esc(a.section):'')+(a.nationality?' &middot; '+esc(a.nationality):'')+'</div>'+
+      '<div style="font-size:12px;font-weight:bold;line-height:1.35;margin-bottom:3px">'+esc(a.title)+'</div>'+
+      '<div style="font-size:9px;color:#444;margin-bottom:5px">'+esc(a.authors||'')+(a.affiliation?' &middot; '+esc(a.affiliation):'')+'</div>'+
+      '<div style="margin:5px 0">'+
+        '<span style="'+metricStyle+';color:'+(simRed?'#b71c1c':'#1b5e20')+'">Sim. '+sim+'</span>'+
+        '<span style="'+metricStyle+';color:'+(aiRed?'#b71c1c':'#1b5e20')+'">AI '+ai+'</span>'+
+        '<span style="'+metricStyle+'">Refs: '+(a.refsTotal||0)+'</span>'+
+        '<span style="'+metricStyle+'">TeMA: '+(a.citeTeMA||0)+'</span>'+
+        '<span style="'+metricStyle+'">22-26: '+(a.citeTeMA2226||0)+'</span>'+
+        '<span style="'+metricStyle+'">JCR: '+(a.citeJCR||0)+'</span>'+
+        '<span style="'+metricStyle+'">JCR 2y: '+(a.citeJCR2y||0)+'</span>'+
+      '</div>'+
+      commHtml+
+      absHtml+
+      (a.notes?'<p style="font-size:9px;color:#666;font-style:italic;margin-top:3px">Note: '+esc(a.notes)+'</p>':'')+
+    '</div>';
+  }).join('');
+
+  var html = '<!DOCTYPE html><html lang="it"><head><meta charset="utf-8">'+
+    '<title>GateKeeper Evaluation TeMA '+today+'</title>'+
+    '<style>'+
+    'body{font-family:Arial,sans-serif;font-size:11px;color:#111;margin:1.5cm;padding:0}'+
+    'h1{font-size:15px;margin:0 0 4px 0;border-bottom:2px solid #222;padding-bottom:8px}'+
+    '.sub{font-size:9px;color:#555;margin:4px 0 18px 0}'+
+    '@media print{@page{size:A4 portrait;margin:1.5cm} body{margin:0}}'+
+    '</style></head><body>'+
+    '<h1>TeMA Journal &mdash; GateKeeper Evaluation</h1>'+
+    '<p class="sub">Generato il '+today+' &middot; '+gkArts.length+' articol'+(gkArts.length===1?'o':'i')+' in valutazione</p>'+
+    cards+'</body></html>';
+
+  var blob = new Blob([html], {type: 'text/html;charset=utf-8'});
+  var url = URL.createObjectURL(blob);
+  var link = document.createElement('a');
+  link.href = url;
+  link.download = 'GateKeeper_Evaluation_' + new Date().toISOString().slice(0,10) + '.html';
+  document.body.appendChild(link);
+  link.click();
+  setTimeout(function(){ URL.revokeObjectURL(url); link.remove(); }, 500);
+}
+
+
+function renderTurnitin() {
+  var gkArts = articles.filter(function(a) {
+    if (a.status === 'Pubblicato' || a.step === '19') return false;
+    var _sim=parseFloat(a.similarity),_ai=parseFloat(a.aiPercent);
+    if (a.rispostaAutori && a.rispostaAutori!=='' && (_sim>30||_ai>30)) return false;
+    if (a.step === '8b' || a.step === '7b') return false;
+    if (a.editor && a.editor !== '') return false;
+    // Solo articoli che hanno superato la verifica Turnitin: entrambi i valori presenti e < 30
+    var simOk = !isNaN(_sim) && a.similarity!==null && a.similarity!=='' && _sim < 30;
+    var aiOk  = !isNaN(_ai)  && a.aiPercent!==null  && a.aiPercent!==''  && _ai  < 30;
+    if (!(simOk && aiOk)) return false;
+    return true;
+  }).sort(function(a,b){ return parseInt(b.id)-parseInt(a.id); });
+
+  var today = new Date().toLocaleDateString('it-IT');
+
+  var html = '<div style="border-bottom:2px solid #222;padding-bottom:10px;margin-bottom:20px">' +
+    '<div style="font-size:16px;font-weight:700;margin-bottom:2px">TeMA Journal &mdash; Report per GateKeeper</div>' +
+    '<div style="font-size:11px;color:#666">Generato il '+today+' &middot; '+gkArts.length+' articol'+(gkArts.length===1?'o':'i')+' da valutare</div>' +
+    '</div>';
+
+  if (!gkArts.length) {
+    html += '<div style="text-align:center;padding:2rem;color:#666">Nessun articolo da segnalare.</div>';
+  } else {
+    html += gkArts.map(function(a) {
+      var sim = (a.similarity!==null&&a.similarity!=='')?a.similarity+'%':'—';
+      var ai  = (a.aiPercent!==null&&a.aiPercent!=='')?a.aiPercent+'%':'—';
+      var simRed = parseFloat(a.similarity)>30;
+      var aiRed  = parseFloat(a.aiPercent)>30;
+      var metricStyle = 'display:inline-block;margin-right:10px;font-size:11px;font-weight:bold';
+      var commHtml = '';
+      if (a.comunicazioneInviata && a.dataComunicazione) {
+        var dataInvio = new Date(a.dataComunicazione);
+        var scad = new Date(dataInvio); scad.setDate(scad.getDate()+30);
+        var giorni = Math.ceil((scad-new Date())/86400000);
+        commHtml = '<div style="font-size:11px;color:#b71c1c;margin-top:5px">&#9993; Comunicazione inviata il '+dataInvio.toLocaleDateString('it-IT')+
+          (giorni>0?' &middot; Countdown: '+giorni+' giorni rimanenti':' &middot; Scaduto')+'</div>';
+      }
+      var absHtml = '<div style="font-size:11px;margin-top:8px;border-top:1px solid #eee;padding-top:8px;line-height:1.6">';
+      if (a.abstract && a.abstract.trim()) {
+        absHtml += '<b>Abstract:</b><br>'+esc(a.abstract);
+      } else {
+        absHtml += '<b>Abstract:</b> <i style="color:#999">Non disponibile</i>';
+      }
+      absHtml += '</div>';
+      return '<div style="border:1px solid #ccc;padding:12px 14px;margin-bottom:14px;page-break-inside:avoid">' +
+        '<div style="font-size:10px;font-weight:bold;color:#555;font-family:monospace;margin-bottom:4px">#'+esc(a.id)+(a.section?' &middot; '+esc(a.section):'')+(a.nationality?' &middot; '+esc(a.nationality):'')+'</div>' +
+        '<div style="font-size:13px;font-weight:bold;line-height:1.35;margin-bottom:4px">'+esc(a.title)+'</div>' +
+        '<div style="font-size:11px;color:#444;margin-bottom:6px">'+esc(a.authors||'')+(a.affiliation?' &middot; '+esc(a.affiliation):'')+'</div>' +
+        '<div style="margin:5px 0">' +
+          '<span style="'+metricStyle+';color:'+(simRed?'#b71c1c':'#1b5e20')+'">Sim. '+sim+'</span>' +
+          '<span style="'+metricStyle+';color:'+(aiRed?'#b71c1c':'#1b5e20')+'">AI '+ai+'</span>' +
+          '<span style="'+metricStyle+'">Refs: '+(a.refsTotal||0)+'</span>' +
+          '<span style="'+metricStyle+'">TeMA: '+(a.citeTeMA||0)+'</span>' +
+          '<span style="'+metricStyle+'">22-26: '+(a.citeTeMA2226||0)+'</span>' +
+          '<span style="'+metricStyle+'">JCR: '+(a.citeJCR||0)+'</span>' +
+          '<span style="'+metricStyle+'">JCR 2y: '+(a.citeJCR2y||0)+'</span>' +
+        '</div>' +
+        commHtml +
+        absHtml +
+        (a.notes?'<div style="font-size:11px;color:#666;font-style:italic;margin-top:6px">Note: '+esc(a.notes)+'</div>':'') +
+      '</div>';
+    }).join('');
+  }
+
+  document.getElementById('turnitinPreview').innerHTML = html;
+}
+
+async function printTurnitin() {
+  var btn = document.querySelector('[onclick*="printTurnitin"]');
+  var origText = btn ? btn.innerHTML : '';
+  if (btn) { btn.innerHTML = '&#8987; Traduzione in corso...'; btn.disabled = true; }
+
+  var gkArts = articles.filter(function(a) {
+    if (a.status === 'Pubblicato' || a.step === '19') return false;
+    var _sim=parseFloat(a.similarity),_ai=parseFloat(a.aiPercent);
+    if (a.rispostaAutori && a.rispostaAutori!=='' && (_sim>30||_ai>30)) return false;
+    if (a.step === '8b' || a.step === '7b') return false;
+    if (a.editor && a.editor !== '') return false;
+    var simOk = !isNaN(_sim) && a.similarity!==null && a.similarity!=='' && _sim < 30;
+    var aiOk  = !isNaN(_ai)  && a.aiPercent!==null  && a.aiPercent!==''  && _ai  < 30;
+    if (!(simOk && aiOk)) return false;
+    return true;
+  }).sort(function(a,b){ return parseInt(b.id)-parseInt(a.id); });
+
+  // Translate via MyMemory (free, no auth, no CORS issues)
+  async function translateAbstract(text) {
+    if (!text || !text.trim()) return '';
+    try {
+      // Split long texts into chunks of 500 chars max
+      var chunks = [];
+      var words = text.split(' ');
+      var chunk = '';
+      for (var w = 0; w < words.length; w++) {
+        if ((chunk + ' ' + words[w]).length > 480) {
+          if (chunk) chunks.push(chunk.trim());
+          chunk = words[w];
+        } else {
+          chunk = chunk ? chunk + ' ' + words[w] : words[w];
+        }
+      }
+      if (chunk) chunks.push(chunk.trim());
+
+      var translated = [];
+      for (var c = 0; c < chunks.length; c++) {
+        var url = 'https://api.mymemory.translated.net/get?q=' +
+          encodeURIComponent(chunks[c]) + '&langpair=en|it';
+        var resp = await fetch(url);
+        var data = await resp.json();
+        translated.push(data.responseData ? data.responseData.translatedText : chunks[c]);
+        // Small delay to avoid rate limiting
+        if (c < chunks.length - 1) await new Promise(function(r){ setTimeout(r, 300); });
+      }
+      return translated.join(' ');
+    } catch(e) { return ''; }
+  }
+
+  // Translate all abstracts
+  var translations = {};
+  for (var i = 0; i < gkArts.length; i++) {
+    var a = gkArts[i];
+    if (a.abstract && a.abstract.trim()) {
+      translations[a.id] = await translateAbstract(a.abstract);
+    }
+  }
+
+  if (btn) { btn.innerHTML = origText; btn.disabled = false; }
+
+  var today = new Date().toLocaleDateString('it-IT');
+  var metricStyle = 'display:inline-block;margin-right:10px;font-size:12px;font-weight:bold';
+
+  var cards = gkArts.map(function(a) {
+    var sim = (a.similarity!==null&&a.similarity!=='')?a.similarity+'%':'—';
+    var ai  = (a.aiPercent!==null&&a.aiPercent!=='')?a.aiPercent+'%':'—';
+    var simRed = parseFloat(a.similarity)>30;
+    var aiRed  = parseFloat(a.aiPercent)>30;
+    var commHtml = '';
+    if (a.comunicazioneInviata && a.dataComunicazione) {
+      var dataInvio = new Date(a.dataComunicazione);
+      var scad = new Date(dataInvio); scad.setDate(scad.getDate()+30);
+      var giorni = Math.ceil((scad-new Date())/86400000);
+      commHtml = '<p style="font-size:13px;color:#b71c1c;margin:5px 0">&#9993; Comunicazione inviata il '+
+        dataInvio.toLocaleDateString('it-IT')+
+        (giorni>0?' &middot; Countdown: '+giorni+' giorni rimanenti':' &middot; Scaduto')+'</p>';
+    }
+    var absSection = '<div style="font-size:13px;margin-top:8px;border-top:1px solid #ddd;padding-top:8px;line-height:1.6">';
+    if (a.abstract && a.abstract.trim()) {
+      absSection += '<b>Abstract (originale):</b><br>'+esc(a.abstract);
+      absSection += '<br><br><b>Abstract (italiano):</b><br>';
+      absSection += (translations[a.id] && translations[a.id].trim())
+        ? esc(translations[a.id])
+        : '<i style="color:#999">Traduzione non disponibile</i>';
+    } else {
+      absSection += '<b>Abstract:</b> <i style="color:#999">Non disponibile</i>';
+    }
+    absSection += '</div>';
+
+    return '<div style="border:1px solid #bbb;border-radius:3px;padding:12px 14px;margin-bottom:14px;page-break-inside:avoid">'+
+      '<div style="font-size:12px;font-weight:bold;color:#555;font-family:monospace;margin-bottom:4px">#'+esc(a.id)+
+        (a.section?' &middot; '+esc(a.section):'')+(a.nationality?' &middot; '+esc(a.nationality):'')+'</div>'+
+      '<div style="font-size:13px;font-weight:bold;line-height:1.35;margin-bottom:4px">'+esc(a.title)+'</div>'+
+      '<div style="font-size:13px;color:#444;margin-bottom:6px">'+esc(a.authors||'')+
+        (a.affiliation?' &middot; '+esc(a.affiliation):'')+'</div>'+
+      '<div style="margin:5px 0">'+
+        '<span style="'+metricStyle+';color:'+(simRed?'#b71c1c':'#1b5e20')+'">Sim. '+sim+'</span>'+
+        '<span style="'+metricStyle+';color:'+(aiRed?'#b71c1c':'#1b5e20')+'">AI '+ai+'</span>'+
+        '<span style="'+metricStyle+'">Refs: '+(a.refsTotal||0)+'</span>'+
+        '<span style="'+metricStyle+'">TeMA: '+(a.citeTeMA||0)+'</span>'+
+        '<span style="'+metricStyle+'">22-26: '+(a.citeTeMA2226||0)+'</span>'+
+        '<span style="'+metricStyle+'">JCR: '+(a.citeJCR||0)+'</span>'+
+        '<span style="'+metricStyle+'">JCR 2y: '+(a.citeJCR2y||0)+'</span>'+
+      '</div>'+
+      commHtml+absSection+
+      (a.notes?'<div style="font-size:13px;color:#666;font-style:italic;margin-top:6px">Note: '+esc(a.notes)+'</div>':'')+
+    '</div>';
+  }).join('');
+
+  var html = '<!DOCTYPE html><html lang="it"><head><meta charset="utf-8">'+
+    '<title>Report per GateKeeper TeMA '+today+'</title>'+
+    '<style>body{font-family:Arial,sans-serif;font-size:13px;color:#111}'+
+    '@media print{@page{size:A4 portrait;margin:1.8cm 1.5cm}body{margin:0}}'+
+    '@media screen{body{margin:1.5cm}}'+
+    '.header{border-bottom:2px solid #222;padding-bottom:10px;margin-bottom:18px}'+
+    '.header h1{font-size:18px;margin:0 0 3px}.header p{font-size:12px;color:#555;margin:0}'+
+    '</style></head><body>'+
+    '<div class="header"><h1>TeMA Journal &mdash; Report per GateKeeper</h1>'+
+    '<p>Generato il '+today+' &middot; '+gkArts.length+' articol'+(gkArts.length===1?'o':'i')+' approvati da Turnitin</p></div>'+
+    (gkArts.length ? cards : '<p style="text-align:center;color:#999">Nessun articolo da segnalare.</p>')+
+    '</body></html>';
+
+  var w = window.open('', '_blank');
+  if (!w) { alert('Consenti i popup per questo sito e riprova.'); return; }
+  w.document.write(html);
+  w.document.close();
+  setTimeout(function(){ w.print(); }, 600);
+}
+
+
+function renderGk() {
+
+    var q = (document.getElementById('srchGk').value || '').toLowerCase();
+
+    // ✅ FILTRO CORRETTO PER GK:
+    var f = articles.filter(function(a) {
+
+        // Escludi pubblicati e rifiutati
+        if (a.status === 'Pubblicato' || a.status === 'Rifiutato' || a.step === '19') return false;
+
+        // ✅ GK = articoli SENZA EDITOR
+        if (a.editor && a.editor.trim() !== '') return false;
+
+        // Ricerca
+        if (q && (a.id + ' ' + a.title + ' ' + a.authors).toLowerCase().indexOf(q) < 0)
+            return false;
+
+        return true;
+    });
+
+    // ✅ ORDINAMENTO DEFINITIVO:
+    // 1. Prima similarity > 30
+    // 2. Poi gli altri
+    // 3. Dentro ogni gruppo: ID decrescente
+    f = f.sort(function (a, b) {
+
+        function highSim(x) {
+            var s = parseFloat(x.similarity);
+            return !isNaN(s) && s > 30;
+        }
+
+        var aHigh = highSim(a);
+        var bHigh = highSim(b);
+
+        // Prima >30%
+        if (aHigh && !bHigh) return -1;
+        if (!aHigh && bHigh) return 1;
+
+        // Poi ID DECRESCENTE
+        return parseInt(b.id) - parseInt(a.id);
+    });
+
+    // ✅ RENDER LISTA
+    document.getElementById('gkCount').textContent =
+        f.length + ' articol' + (f.length === 1 ? 'o' : 'i');
+
+    document.getElementById('gkEl').innerHTML =
+        f.length
+            ? f.map(function (a) { return gkCard(a); }).join('')
+            : '<div style="text-align:center;padding:3rem;color:var(--tx2)">Nessun articolo in valutazione.</div>';
+}
+
+
+
+function renderLista() {
+  var q  = (document.getElementById('srchLista').value||'').toLowerCase();
+  var fE = document.getElementById('fEd').value;
+  var fS = document.getElementById('fSt').value;
+  var fSc= document.getElementById('fSec').value;
+  var fI2= document.getElementById('fIntl').value;
+  var fIs= document.getElementById('fIss').value;
+  var f = articles.filter(function(a) {
+    if (a.status === 'Pubblicato' || a.status === 'Rifiutato' || a.step === '19') return false;
+    if (!a.editor || a.editor === '') return false;
+    if (q && (a.id+' '+a.title+' '+a.authors+' '+a.affiliation).toLowerCase().indexOf(q) < 0) return false;
+    if (fE  && a.editor  !== fE)  return false;
+    if (fS  && a.step    !== fS)  return false;
+    if (fSc && a.section !== fSc) return false;
+    if (fI2 && a.intl    !== fI2) return false;
+    if (fIs && a.issue   !== fIs) return false;
+    return true;
+  });
+  f.sort(function(a,b){ return parseInt(b.id) - parseInt(a.id); });
+  document.getElementById('listaEl').innerHTML = f.length ? f.map(function(a){ return artCard(a,true); }).join('') :
+    '<div style="text-align:center;padding:3rem;color:var(--tx2)">Nessun articolo trovato.</div>';
+}
+
+function renderPub() {
+  var q  = (document.getElementById('srchPub').value||'').toLowerCase();
+  var fIs= document.getElementById('fIssPub').value;
+  var f = articles.filter(function(a) {
+    if (a.status !== 'Pubblicato' && a.step !== '19') return false;
+    if (q && (a.id+' '+a.title+' '+a.authors).toLowerCase().indexOf(q) < 0) return false;
+    if (fIs && a.issue !== fIs) return false;
+    return true;
+  });
+  f = f.sort(function(a, b) {
+    var simA = parseFloat(a.similarity), aiA = parseFloat(a.aiPercent);
+    var simB = parseFloat(b.similarity), aiB = parseFloat(b.aiPercent);
+    var aOk = !isNaN(simA) && simA < 30 && !isNaN(aiA) && aiA < 30;
+    var bOk = !isNaN(simB) && simB < 30 && !isNaN(aiB) && aiB < 30;
+    if (aOk && !bOk) return -1;
+    if (!aOk && bOk) return 1;
+    // Both groups sorted by ID descending
+    return parseInt(b.id) - parseInt(a.id);
+  });
+  document.getElementById('pubCount').textContent = f.length+' articol'+(f.length===1?'o':'i');
+  document.getElementById('pubEl').innerHTML = f.length ? f.map(function(a){ return artCard(a,true); }).join('') :
+    '<div style="text-align:center;padding:3rem;color:var(--tx2)">Nessun articolo pubblicato.</div>';
+}
+
+function renderRifRef() {
+  var q = (document.getElementById('srchRifRef').value||'').toLowerCase();
+  var f = articles.filter(function(a) {
+    var isDeclined = a.decisioneEditor === 'Decline submission' || a.decisioneEditor2 === 'Decline submission';
+    if (!isDeclined && a.step !== '14') return false;
+    if (a.status !== 'Rifiutato') return false;
+    if (q && (a.id+' '+a.title+' '+a.authors).toLowerCase().indexOf(q) < 0) return false;
+    return true;
+  });
+  document.getElementById('rifRefCount').textContent = f.length+' articol'+(f.length===1?'o':'i');
+  document.getElementById('rifRefEl').innerHTML = f.length ? f.map(function(a){ return artCard(a,true); }).join('') :
+    '<div style="text-align:center;padding:3rem;color:var(--tx2)">Nessun articolo.</div>';
+}
+
+function renderRifGk() {
+  var q = (document.getElementById('srchRifGk').value||'').toLowerCase();
+  var f = articles.filter(function(a) {
+    if (a.step !== '6') return false;
+    if (q && (a.id+' '+a.title+' '+a.authors).toLowerCase().indexOf(q) < 0) return false;
+    return true;
+  });
+  document.getElementById('rifGkCount').textContent = f.length+' articol'+(f.length===1?'o':'i');
+  document.getElementById('rifGkEl').innerHTML = f.length ? f.map(function(a){ return artCard(a,true); }).join('') :
+    '<div style="text-align:center;padding:3rem;color:var(--tx2)">Nessun articolo.</div>';
+}
+
+function renderTeam() {
+  var h = '<div style="font-size:16px;font-weight:700;margin-bottom:1rem">GateKeeper</div>';
+  var gk = articles.filter(function(a){ return a.gatekeeper==='Lilli Gargiulo' && (!a.editor||a.editor==='') && (a.step==='1'||a.status==='GateKeeper evaluation') && a.step !== '8b' && a.step !== '7b' && a.status !== 'Rifiutato' &&
+    !isNaN(parseFloat(a.similarity)) && parseFloat(a.similarity) < 30 &&
+    !isNaN(parseFloat(a.aiPercent)) && parseFloat(a.aiPercent) < 30; });
+  h += '<div class="card"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:'+(gk.length?'10px':'0')+'">' +
+    '<div style="font-size:20px;font-weight:700">Lilli Gargiulo</div>' +
+    '<span style="font-size:20px;font-weight:600;color:var(--orange)">'+gk.length+' articoli in valutazione</span>' +
+    '</div>' +
+    (gk.length ? '<div>'+gk.map(function(a){
+      return '<div style="font-size:20px;padding:4px 0;border-bottom:1px solid var(--brd);display:flex;gap:8px;align-items:center">' +
+        '<span style="font-family:monospace;color:var(--tx3);font-size:16px;flex-shrink:0">#'+esc(a.id)+'</span>' +
+        '<span style="flex:1;line-height:1.4">'+(a.title.length>70?a.title.slice(0,70)+'...':a.title)+'</span>' +
+        '<span class="badge b-gk" style="white-space:nowrap">'+sl(a.step||'1')+'</span>' +
+        '</div>';
+    }).join('')+'</div>' : '') + '</div>';
+
+  h += '<div style="font-size:16px;font-weight:700;margin:1.5rem 0 1rem">Editor</div>';
+  EDITORS.forEach(function(ed) {
+    var mine = articles.filter(function(a){ return a.editor===ed && a.status !== 'Pubblicato' && a.step !== '19' && a.step !== '8b' && a.step !== '7b' && a.status !== 'Rifiutato'; }).sort(function(a,b){
+      var sa = parseFloat(a.step)||0, sb = parseFloat(b.step)||0;
+      return sb - sa;
+    });
+    h += '<div class="card"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:'+(mine.length?'10px':'0')+'">' +
+      '<div style="font-size:20px;font-weight:700">'+esc(ed)+'</div>' +
+      '<span style="font-size:20px;font-weight:600;color:var(--blue)">'+mine.length+' in lavorazione</span>' +
+      '</div>' +
+      (mine.length ? '<div>'+mine.map(function(a){
+        return '<div style="font-size:20px;padding:4px 0;border-bottom:1px solid var(--brd);display:flex;gap:8px">' +
+          '<span style="font-family:monospace;color:var(--tx3);font-size:16px">#'+esc(a.id)+'</span>' +
+          '<span style="flex:1">'+(a.title.length>65?a.title.slice(0,65)+'...':a.title)+'</span>' +
+          '<span style="font-size:18px;color:var(--purple-tx);font-weight:600;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px;display:inline-block">'+stAbbr(a.step||'')+'</span>' +
+          '</div>';
+      }).join('')+'</div>' : '') + '</div>';
+  });
+
+  h += '<div style="font-size:16px;font-weight:700;margin:1.5rem 0 1rem">Copyeditor</div>';
+  COPYEDITORS.forEach(function(ce) {
+    var mine = articles.filter(function(a){ return a.copyeditor===ce && a.step !== '8b' && a.step !== '7b' && a.status !== 'Rifiutato'; });
+    var artList = mine.map(function(a){
+      return '<div style="font-size:20px;padding:4px 0;border-bottom:1px solid var(--brd);display:flex;gap:8px;align-items:start">'
+        + '<span style="font-family:monospace;color:var(--tx3);font-size:16px;flex-shrink:0">#'+esc(a.id)+'</span>'
+        + '<div style="flex:1">'
+        + '<div style="line-height:1.4">'+(a.title.length>65?a.title.slice(0,65)+'...':a.title)+'</div>'
+        + (a.editor?'<div style="font-size:20px;color:var(--tx2);margin-top:1px">Editor: '+esc(a.editor)+'</div>':'')
+        + '</div></div>';
+    }).join('');
+    h += '<div class="card"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:'+(mine.length?'10px':'0')+'">'
+      + '<div style="font-size:20px;font-weight:700">'+esc(ce)+'</div>'
+      + '<span style="font-size:20px;font-weight:600;color:var(--purple-tx)">'+mine.length+' assegnati</span>'
+      + '</div>'
+      + (mine.length ? '<div>'+artList+'</div>' : '')
+      + '</div>';
+  });
+  document.getElementById('teamEl').innerHTML = h;
+}
+
+function renderNumeri() {
+  var activeIssues = issues.filter(function(i){ return !i.pubblicato; });
+  var pubIssues    = issues.filter(function(i){ return  i.pubblicato; });
+
+  function issCard(iss) {
+    var artRow = function(a) {
+      return '<div class="arow" style="align-items:start">' +
+        '<div class="anum" style="padding-top:2px">'+(a.articleNum||'&#8212;')+'</div>' +
+        '<div>' +
+          '<div style="display:flex;align-items:baseline;gap:6px;margin-bottom:2px">' +
+            '<span style="font-size:16px;font-weight:700;color:var(--tx3);font-family:monospace;flex-shrink:0">#'+esc(a.id)+'</span>' +
+            '<span style="font-size:20px;font-weight:600;line-height:1.4">'+(a.title.length>80?a.title.slice(0,80)+'...':a.title)+'</span>' +
+          '</div>' +
+          '<div style="font-size:20px;color:var(--tx2);margin-top:2px">'+esc(a.authors)+(a.affiliation?' &middot; '+esc(a.affiliation):'')+'</div>' +
+          (a.editor ? '<div style="font-size:20px;color:var(--blue-tx);font-weight:600;margin-top:2px">'+esc(a.editor)+'</div>' : '') +
+        '</div>' +
+        '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;padding-top:2px">' +
+          (a.step ? '<span style="font-size:20px;color:var(--purple-tx);font-weight:600;white-space:nowrap;text-align:right">'+stepFull(a.step)+'</span>' : '') +
+          (a.intl==='si'?'<span class="badge b-teal" style="white-space:nowrap">Intl.</span>':'') +
+        '</div>' +
+      '</div>';
+    };
+    var ia = articles.filter(function(a){ return a.issue===iss.key; });
+    var focus = ia.filter(function(a){return a.section==='Focus';}).sort(function(a,b){return (a.articleNum||999)-(b.articleNum||999);});
+    var lume  = ia.filter(function(a){return a.section==='LUME';}).sort(function(a,b){return (a.articleNum||999)-(b.articleNum||999);});
+    var rns   = ia.filter(function(a){return a.section==='RNs';}).sort(function(a,b){return (a.articleNum||999)-(b.articleNum||999);});
+    var other = ia.filter(function(a){return a.section!=='Focus'&&a.section!=='LUME'&&a.section!=='RNs';}).sort(function(a,b){return (a.articleNum||999)-(b.articleNum||999);});
+    var dl = iss.deadline ? new Date(iss.deadline).toLocaleDateString('it-IT',{day:'2-digit',month:'short',year:'numeric'}) : 'TBD';
+    return '<div class="card">' +
+      '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:8px">' +
+        '<div><div style="font-size:20px;font-weight:700">'+esc(iss.label)+(iss.pubblicato?'&nbsp;<span class="badge b-ok">Pubblicato</span>':'')+'</div>' +
+        (iss.theme?'<div style="font-size:20px;color:var(--tx2);margin-top:2px">'+esc(iss.theme)+'</div>':'')+'</div>' +
+        '<div style="display:flex;gap:6px;align-items:center;flex-shrink:0">' +
+          '<span class="badge '+(iss.type==='si'?'b-coral':'b-amber')+'" style="white-space:nowrap">'+(iss.type==='si'?'SI &middot; ':'')+esc(dl)+'</span>' +
+          '<button class="btn" style="font-size:20px" onclick="openEditIss(this.dataset.key)" data-key="'+esc(iss.key)+'">' + 'Modifica</button>' +
+        '</div>' +
+      '</div>' +
+      (iss.note?'<div class="note-box">'+esc(iss.note)+'</div>':'') +
+      (focus.length?'<div class="issh">Focus</div>'+focus.map(artRow).join(''):'') +
+      (lume.length ?'<div class="issh">LUME</div>' +lume.map(artRow).join('') :'') +
+      (rns.length  ?'<div class="issh">RNs</div>'  +rns.map(artRow).join('')  :'') +
+      (other.length?'<div class="issh">Altro</div>'+other.map(artRow).join(''):'') +
+      (!ia.length?'<div style="font-size:20px;color:var(--tx2);padding:8px 0">Nessun articolo assegnato.</div>':'') +
+    '</div>';
+
+  }
+
+  var activeHtml = activeIssues.length
+    ? activeIssues.map(issCard).join('')
+    : '<div style="font-size:20px;color:var(--tx2);padding:1rem">Nessun fascicolo attivo.</div>';
+
+  var pubHtml = '';
+  if (pubIssues.length) {
+    pubHtml = '<div style="border:1px solid var(--brd);border-radius:var(--r);margin-top:1.5rem;overflow:hidden">' +
+      '<div onclick="toggleAccordion(\'acc-pub-issues\')" style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;cursor:pointer;background:var(--sur2);user-select:none">' +
+        '<span style="font-size:20px;font-weight:700">Prossimi numeri pubblicati</span>' +
+        '<div style="display:flex;align-items:center;gap:10px">' +
+          '<span style="font-size:20px;color:var(--tx2)">'+pubIssues.length+' fascicol'+(pubIssues.length===1?'o':'i')+'</span>' +
+          '<span id="acc-pub-issues-icon" style="font-size:20px;color:var(--tx2)">&#9658;</span>' +
+        '</div>' +
+      '</div>' +
+      '<div id="acc-pub-issues" style="padding:12px;display:none">' +
+        pubIssues.map(issCard).join('') +
+      '</div>' +
+    '</div>';
+  }
+
+  document.getElementById('numeriEl').innerHTML = activeHtml + pubHtml;
+}
+function renderVerbale() {
+  var num     = document.getElementById('vNum').value || '&#8212;';
+  var dateVal = document.getElementById('vDate').value;
+  var dateStr = dateVal ? new Date(dateVal).toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long',year:'numeric'}) : '&#8212;';
+  var presenti= document.getElementById('vPresenti').value || '&#8212;';
+  var intro   = document.getElementById('vIntro').value || '';
+  var outro   = document.getElementById('vOutro').value || '';
+  var oggi    = new Date().toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit',year:'numeric'});
+
+  var vStep = function(s) {
+    if (!s) return '';
+    return STEPS[s] ? STEPS[s].replace(/^St\.\d+\s*·\s*/,'') : ('Step '+s);
+  };
+
+  var inLavorazione = articles.filter(function(a){
+    var s = parseInt(a.step) || 0;
+    return a.status !== 'Pubblicato' && a.status !== 'Rifiutato' && s >= 7 && s <= 18;
+  });
+  var inIngresso = articles.filter(function(a){
+    var s = parseInt(a.step) || 0;
+    return a.status !== 'Pubblicato' && a.status !== 'Rifiutato' && s >= 1 && s <= 5;
+  });
+
+  // Fascicoli
+  var fascicoliHtml = '';
+  issues.forEach(function(iss) {
+    var ia = articles.filter(function(a){ return a.issue===iss.key; });
+    var focus = ia.filter(function(a){return a.section==='Focus';}).sort(function(a,b){return (a.articleNum||999)-(b.articleNum||999);});
+    var lume  = ia.filter(function(a){return a.section==='LUME';}).sort(function(a,b){return (a.articleNum||999)-(b.articleNum||999);});
+    var rnsV  = ia.filter(function(a){return a.section==='RNs';}).sort(function(a,b){return (a.articleNum||999)-(b.articleNum||999);});
+    var other = ia.filter(function(a){return a.section!=='Focus'&&a.section!=='LUME'&&a.section!=='RNs';}).sort(function(a,b){return (a.articleNum||999)-(b.articleNum||999);});
+    var dl = iss.deadline ? new Date(iss.deadline).toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'}) : 'TBD';
+    var artRow = function(a) {
+      return '<tr>' +
+        '<td style="width:28px;text-align:right;padding:4px 6px;color:#666;font-size:11pt;vertical-align:top;font-family:monospace">'+(a.articleNum||'&#8212;')+'</td>' +
+        '<td style="padding:4px 8px;border-bottom:1px solid #eee">' +
+          '<div style="font-size:11pt;font-weight:bold">'+esc(a.title)+'</div>' +
+          '<div style="font-size:11pt;color:#555;margin-top:1px">'+esc(a.authors)+(a.affiliation?' &#8212; '+esc(a.affiliation):'')+'</div>' +
+          '<div style="font-size:11pt;color:#888;margin-top:1px">'+stepFull(a.step)+(a.editor?' &middot; Editor: '+esc(a.editor):'')+'</div>' +
+        '</td></tr>';
+    };
+    var sHdr = function(lbl){ return '<tr><td colspan="2" style="padding:7px 8px 3px;font-size:11pt;font-weight:bold;text-transform:uppercase;letter-spacing:.5px;color:#444;border-bottom:1px solid #bbb">'+lbl+'</td></tr>'; };
+    fascicoliHtml += '<div style="margin-bottom:1.2rem;border:1px solid #ccc;padding:1rem;page-break-inside:avoid">' +
+      '<div style="display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid #333;padding-bottom:.3rem;margin-bottom:.4rem">' +
+        '<strong style="font-size:15pt">'+esc(iss.label)+(iss.pubblicato?' [Pubblicato]':'')+'</strong>' +
+        '<span style="font-size:11pt;color:#555">'+dl+'</span>' +
+      '</div>' +
+      (iss.theme?'<div style="font-size:11pt;color:#555;font-style:italic;margin-bottom:.4rem">'+esc(iss.theme)+'</div>':'') +
+      (!ia.length ? '<p style="font-size:11pt;color:#888">Nessun articolo assegnato.</p>' :
+        '<table style="width:100%;border-collapse:collapse">' +
+        (focus.length?sHdr('Focus')+focus.map(artRow).join(''):'') +
+        (lume.length ?sHdr('LUME') +lume.map(artRow).join('') :'') +
+        (rnsV.length ?sHdr('RNs')  +rnsV.map(artRow).join('') :'') +
+        (other.length?sHdr('Altro')+other.map(artRow).join(''):'') +
+        '</table>') +
+      (iss.note?'<div style="font-size:11pt;color:#666;margin-top:.5rem;border-top:1px solid #eee;padding-top:.3rem">'+esc(iss.note)+'</div>':'') +
+    '</div>';
+  });
+
+  // artCard2 (St.7-18)
+  var artCard2 = function(a, idx2) {
+    var isslbl = issues.find(function(x){ return x.key===a.issue; });
+    var info = [];
+    if (a.dataSottomissione) info.push('<strong>Sottomissione:</strong> '+new Date(a.dataSottomissione).toLocaleDateString('it-IT'));
+    if (a.dataComunicazione) info.push('<strong>Comunicazione Turnitin:</strong> '+new Date(a.dataComunicazione).toLocaleDateString('it-IT'));
+    if (a.decisioneEditor && a.decisioneEditor !== '') info.push('<strong>Decisione editor:</strong> '+esc(a.decisioneEditor));
+    if (a.dataRevisione && a.dataRevisione !== '') info.push('<strong>Consegna rev.:</strong> '+new Date(a.dataRevisione).toLocaleDateString('it-IT'));
+    if (a.decisioneEditor2 && a.decisioneEditor2 !== '') info.push('<strong>Decisione editor 2°:</strong> '+esc(a.decisioneEditor2));
+    if (a.dataRevisione2 && a.dataRevisione2 !== '') info.push('<strong>Consegna rev. 2°:</strong> '+new Date(a.dataRevisione2).toLocaleDateString('it-IT'));
+    if (a.dataAccettazione && a.dataAccettazione !== '') info.push('<strong>Data accettazione:</strong> '+new Date(a.dataAccettazione).toLocaleDateString('it-IT'));
+    if (a.dataAccettazione2 && a.dataAccettazione2 !== '') info.push('<strong>Data accettazione 2°:</strong> '+new Date(a.dataAccettazione2).toLocaleDateString('it-IT'));
+    if (a.deadline && a.deadline !== '') info.push('<strong>Deadline:</strong> '+new Date(a.deadline).toLocaleDateString('it-IT'));
+
+    return '<div class="ae">' +
+      '<p><strong>'+(idx2+1)+'. #'+esc(a.id)+'</strong> &mdash; <em>'+esc(a.title)+'</em></p>' +
+      (a.authors ? '<p>'+esc(a.authors)+(a.affiliation?' &middot; '+esc(a.affiliation):'')+(a.nationality?' &middot; '+esc(a.nationality):'')+'</p>' : '') +
+      '<p>'+vStep(a.step)+
+        (a.editor?' &middot; Editor: <strong>'+esc(a.editor)+'</strong>':'')+
+        (a.step==='18'&&a.copyeditor?' &middot; Copyeditor: <strong>'+esc(a.copyeditor)+'</strong>':'')+
+        (isslbl?' &middot; Fascicolo: '+esc(isslbl.label)+(a.articleNum?' n.'+a.articleNum:''):'')+'</p>' +
+      (a.section?'<p>Sezione: <strong>'+esc(a.section)+'</strong>'+(a.intl==='si'?' &middot; Contributo internazionale':'')+'</p>':'') +
+      (function(){
+        var refs = [
+          'References: '+(a.refsTotal||0),
+          'TeMA: '+(a.citeTeMA||0),
+          'TeMA 22-26: '+(a.citeTeMA2226||0),
+          'JCR: '+(a.citeJCR||0),
+          'JCR 2y: '+(a.citeJCR2y||0)
+        ];
+        if (a.length) refs.push('Lunghezza: '+a.length+' car.');
+        return '<p>'+refs.join(' &middot; ')+'</p>';
+      })() +
+      (a.revisori && a.revisori.length ?
+        '<p style="margin:.4rem 0 .1rem"><strong>Revisori:</strong></p>' +
+        '<ul style="margin:.2rem 0 .4rem 1.2rem;padding:0">' +
+        a.revisori.map(function(r, ri) {
+          var parts = ['<strong>'+(ri+1)+'. '+esc(r.nome||'Revisore')+'</strong>'];
+          if (r.affiliazione) parts.push(esc(r.affiliazione));
+          if (r.accettazione) parts.push('Stato: <em>'+esc(r.accettazione)+'</em>');
+          if (r.dataConsegna) parts.push('Consegna: '+new Date(r.dataConsegna).toLocaleDateString('it-IT'));
+          if (r.dataProroga)  parts.push('Proroga: '+new Date(r.dataProroga).toLocaleDateString('it-IT'));
+          if (r.giudizio)     parts.push('Giudizio: <em>'+esc(r.giudizio)+'</em>');
+          return '<li style="margin-bottom:2px">'+parts.join(' &middot; ')+'</li>';
+        }).join('') + '</ul>' : '') +
+      (a.revisori2 && a.revisori2.length ?
+        '<p style="margin:.4rem 0 .1rem"><strong>Revisori 2° round:</strong></p>' +
+        '<ul style="margin:.2rem 0 .4rem 1.2rem;padding:0">' +
+        a.revisori2.map(function(r, ri) {
+          var parts = ['<strong>'+(ri+1)+'. '+esc(r.nome||'Revisore')+'</strong>'];
+          if (r.affiliazione) parts.push(esc(r.affiliazione));
+          if (r.accettazione) parts.push('Stato: <em>'+esc(r.accettazione)+'</em>');
+          if (r.dataConsegna) parts.push('Consegna: '+new Date(r.dataConsegna).toLocaleDateString('it-IT'));
+          if (r.dataProroga)  parts.push('Proroga: '+new Date(r.dataProroga).toLocaleDateString('it-IT'));
+          if (r.giudizio)     parts.push('Giudizio: <em>'+esc(r.giudizio)+'</em>');
+          return '<li style="margin-bottom:2px">'+parts.join(' &middot; ')+'</li>';
+        }).join('') + '</ul>' : '') +
+      (info.length ? '<p>'+info.join(' &middot; ')+'</p>' : '') +
+      (a.notes ? '<p style="font-style:italic;color:#555"><strong>Note:</strong> '+esc(a.notes)+'</p>' : '') +
+    '</div>';
+  };
+
+  // artCardIngresso (St.1-5)
+  var artCardIngresso = function(a, idx2) {
+    var metrics = [];
+    if (a.similarity!==null&&a.similarity!=='') metrics.push('Sim. '+a.similarity+'%');
+    if (a.aiPercent!==null&&a.aiPercent!=='')   metrics.push('AI '+a.aiPercent+'%');
+    metrics.push('References: '+(a.refsTotal||0));
+    metrics.push('TeMA: '+(a.citeTeMA||0));
+    metrics.push('TeMA 22-26: '+(a.citeTeMA2226||0));
+    metrics.push('JCR: '+(a.citeJCR||0));
+    metrics.push('JCR 2y: '+(a.citeJCR2y||0));
+    if (a.length)     metrics.push('Lunghezza: '+a.length+' car.');
+    return '<div class="ae">' +
+      '<p><strong>'+(idx2+1)+'. #'+esc(a.id)+'</strong> &mdash; <em>'+esc(a.title)+'</em>' +
+      (a.authors?' &mdash; '+esc(a.authors):'') + '</p>' +
+      (a.section?'<p>Sezione: <strong>'+esc(a.section)+'</strong>'+(a.intl==='si'?' &middot; Contributo internazionale':'')+'</p>':'') +
+      (a.gatekeeper?'<p>GK: '+esc(a.gatekeeper)+'</p>':'') +
+      (metrics.length?'<p>'+metrics.join(' &middot; ')+'</p>':'') +
+      (a.dataSottomissione?'<p><strong>Sottomissione:</strong> '+new Date(a.dataSottomissione).toLocaleDateString('it-IT')+'</p>':'') +
+      (a.step==='3'&&a.dataComunicazione?(function(){
+        var sent = new Date(a.dataComunicazione);
+        var scad = new Date(sent); scad.setDate(scad.getDate()+30);
+        var giorni = Math.ceil((scad - new Date()) / 86400000);
+        var cdStr = giorni > 0 ? ' &middot; <strong>Countdown: '+giorni+' giorni</strong>' : ' &middot; <strong style="color:#b71c1c">Scaduto</strong>';
+        return '<p><strong>Comunicazione Turnitin inviata il:</strong> '+sent.toLocaleDateString('it-IT')+cdStr+'</p>';
+      })():'') +
+      (a.rispostaAutori&&a.rispostaAutori!==''?'<p><strong>Risposta autori:</strong> '+esc(a.rispostaAutori)+'</p>':'') +
+      (a.notes?'<p style="font-style:italic;color:#555"><strong>Note:</strong> '+esc(a.notes)+'</p>':'') +
+    '</div>';
+  };
+
+  document.getElementById('verbalePreview').innerHTML =
+    '<div class="vprev" id="verbaleContent">' +
+    '<h1>Verbale n. '+esc(num)+' della riunione della Redazione di TeMA<br><span style="font-size:16px;font-weight:400">'+esc(dateStr)+'</span></h1>' +
+    '<p><strong>Presenti:</strong> '+esc(presenti)+'</p>' +
+    (intro?'<h2>TEMI AFFRONTATI</h2><p>'+esc(intro).replace(/\n/g,'<br>')+'</p>':'') +
+    '<h2>PROSSIMI NUMERI</h2>' +
+    (issues.length ? fascicoliHtml : '<p>Nessun fascicolo definito.</p>') +
+    '<h2>ARTICOLI IN LAVORAZIONE (St.7&ndash;18)</h2>' +
+    (function(){
+      if (!inLavorazione.length) return '<p style="color:#888">Nessun articolo in lavorazione.</p>';
+      var h = '';
+      for (var s = 7; s <= 18; s++) {
+        var group = inLavorazione.filter(function(a){ return parseInt(a.step)===s; });
+        if (!group.length) continue;
+        h += '<h3 style="margin:1.2rem 0 .4rem;font-size:13pt;border-bottom:1px solid #ccc;padding-bottom:.2rem">'
+           + 'St.'+s+' &middot; ' + (STEPS[String(s)] ? esc(STEPS[String(s)].replace(/^St\.\d+\s*·\s*/,'')) : ('Step '+s)) + ' ('+group.length+')</h3>';
+        h += group.map(artCard2).join('');
+      }
+      return h;
+    })() +
+    '<h2>ARTICOLI IN INGRESSO (St.1&ndash;5)</h2>' +
+    (function(){
+      if (!inIngresso.length) return '<p style="color:#888">Nessun articolo in ingresso.</p>';
+      var h = '';
+      for (var s = 1; s <= 5; s++) {
+        var group = inIngresso.filter(function(a){ return parseInt(a.step)===s; });
+        if (!group.length) continue;
+        h += '<h3 style="margin:1.2rem 0 .4rem;font-size:13pt;border-bottom:1px solid #ccc;padding-bottom:.2rem">'
+           + 'St.'+s+' &middot; ' + (STEPS[String(s)] ? esc(STEPS[String(s)].replace(/^St\.\d+\s*·\s*/,'')) : ('Step '+s)) + ' ('+group.length+')</h3>';
+        h += group.map(artCardIngresso).join('');
+      }
+      return h;
+    })() +
+    (outro?'<h2>ORDINE DEL GIORNO PROSSIMA RIUNIONE</h2><p>'+esc(outro).replace(/\n/g,'<br>')+'</p>':'') +
+    (function(){
+      var h = '<h2>ASSEGNAZIONI</h2>';
+
+      // GateKeeper: totale articoli + lista ID (senza St.)
+      var gkA = articles.filter(function(a){
+        return a.gatekeeper==='Lilli Gargiulo'&&(!a.editor||a.editor==='')&&
+          a.status!=='Pubblicato'&&a.status!=='Rifiutato'&&a.step!=='19'&&
+          !isNaN(parseFloat(a.similarity))&&parseFloat(a.similarity)<30&&
+          !isNaN(parseFloat(a.aiPercent))&&parseFloat(a.aiPercent)<30;
+      });
+      h += '<h3>GateKeeper &mdash; Lilli Gargiulo ('+gkA.length+' articoli)</h3>';
+      if (gkA.length) {
+        var gkIds = gkA.map(function(a){ return '#'+esc(a.id); }).join(' &nbsp;|&nbsp; ');
+        h += '<p>'+gkIds+'</p>';
+      } else { h += '<p style="color:#888">Nessun articolo.</p>'; }
+
+      // Editor: una riga per editor, articoli raggruppati per step con ID
+      var EDS = ['Carmen Guida','Floriana Zucaro','Gerardo Carpentieri','Peppe Mazzeo','Romano Fistola','Rosa Anna La Rocca','Rosaria Battarra','Stefano Franco'];
+      h += '<table style="width:100%;border-collapse:collapse;font-size:10pt;margin-top:1rem">';
+      h += '<tr style="background:#f0f0f0"><th style="text-align:left;padding:4px 6px;border:1px solid #ccc;width:22%">Editor</th><th style="text-align:left;padding:4px 6px;border:1px solid #ccc">Articoli per Step</th></tr>';
+      EDS.forEach(function(ed){
+        var arts = articles.filter(function(a){ return a.editor===ed&&a.status!=='Pubblicato'&&a.status!=='Rifiutato'&&a.step!=='19'; });
+        if (!arts.length) return;
+        // Group by step
+        var byStep = {};
+        arts.forEach(function(a){
+          var s = a.step||'?';
+          if (!byStep[s]) byStep[s] = [];
+          byStep[s].push(a.id);
+        });
+        var stepKeys = Object.keys(byStep).sort(function(a,b){ return (parseInt(a)||0)-(parseInt(b)||0); });
+        var lines = stepKeys.map(function(s){
+          var ids = byStep[s].map(function(id){ return '#'+esc(id); }).join(' ');
+          return 'St.'+s+' ('+byStep[s].length+'): '+ids;
+        });
+        h += '<tr><td style="padding:4px 6px;border:1px solid #ddd;font-weight:bold;vertical-align:top">'+esc(ed)+' ('+arts.length+')</td>'
+          +'<td style="padding:4px 6px;border:1px solid #ddd">'+lines.join('<br>')+'</td></tr>';
+      });
+      h += '</table>';
+
+      // Copyeditor: totale articoli + lista ID
+      var CPS = ["Gerardo Carpentieri","Laura Ascione","Nunzia D'Amico","Stella Pennino","Tonia Stiuso","Valerio Martinelli"];
+      h += '<table style="width:100%;border-collapse:collapse;font-size:10pt;margin-top:1rem">';
+      h += '<tr style="background:#f0f0f0"><th style="text-align:left;padding:4px 6px;border:1px solid #ccc;width:22%">Copyeditor</th><th style="text-align:left;padding:4px 6px;border:1px solid #ccc">Articoli</th></tr>';
+      CPS.forEach(function(ce){
+        var arts = articles.filter(function(a){ return a.copyeditor===ce&&a.status!=='Rifiutato'; });
+        if (!arts.length) return;
+        var items = arts.map(function(a){ return '#'+esc(a.id); }).join(' &nbsp;|&nbsp; ');
+        h += '<tr><td style="padding:4px 6px;border:1px solid #ddd;font-weight:bold">'+esc(ce)+' ('+arts.length+')</td>'
+          +'<td style="padding:4px 6px;border:1px solid #ddd">'+items+'</td></tr>';
+      });
+      h += '</table>';
+      return h;
+    })() +
+    '<p style="margin-top:2rem;text-align:right"><em>'+oggi+'<br>Verbale '+esc(num)+'</em></p>' +
+    '</div>';
+}
+
+function printVerbale() {
+  renderVerbale();
+  var c = document.getElementById('verbaleContent');
+  if (!c) { alert("Genera prima l'anteprima."); return; }
+  var bodyHtml = c.innerHTML;
+  var vNum = document.getElementById('vNum').value || '';
+
+  var css =
+    '@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap");' +
+    'html,body{margin:0;padding:0;font-family:Roboto,Arial,sans-serif;font-size:11pt;line-height:1.6;color:#111}' +
+    'h1{font-size:14pt;font-weight:700;text-align:center;border-bottom:2px solid #222;padding-bottom:.5rem;margin:0 0 1rem}' +
+    'h1 span{font-size:11pt;font-weight:400;display:block;margin-top:.3rem}' +
+    'h2{font-size:12pt;font-weight:700;margin:1.2rem 0 .3rem;border-bottom:1px solid #aaa;padding-bottom:.15rem;page-break-after:avoid}' +
+    'h3{font-size:11pt;font-weight:700;margin:.8rem 0 .2rem;border-bottom:1px dotted #ccc;padding-bottom:.1rem;page-break-after:avoid}' +
+    'p{margin:.2rem 0;font-size:11pt}' +
+    'ul{margin:.2rem 0 .3rem 1.2rem;padding:0}' +
+    'li{margin-bottom:2px;font-size:11pt}' +
+    '.ae{margin:.5rem 0 .6rem 1rem;border-left:2px solid #bbb;padding-left:.7rem;page-break-inside:avoid}' +
+    'table{width:100%;border-collapse:collapse;font-size:10pt}' +
+    'td{vertical-align:top}' +
+    '@media print{' +
+      '@page{size:A4;margin:2cm 2cm 2.5cm 2cm}' +
+      '@page{@bottom-center{content:"Verbale TeMA – Pag. " counter(page) " di " counter(pages);font-size:9pt;color:#555}}' +
+      'body{margin:0}' +
+      '.ae{page-break-inside:avoid}' +
+      'h2,h3{page-break-after:avoid}' +
+      'p,li{orphans:3;widows:3}' +
+    '}';
+
+  var fullHtml = '<!DOCTYPE html><html lang="it"><head>' +
+    '<meta charset="utf-8">' +
+    '<title>Verbale TeMA' + (vNum?' n.'+vNum:'') + '</title>' +
+    '<style>' + css + '</style>' +
+    '</head><body>' + bodyHtml + '</body></html>';
+
+  var w = window.open('', '_blank');
+  if (!w) { alert('Consenti i popup per questo sito e riprova.'); return; }
+  w.document.write(fullHtml);
+  w.document.close();
+  // Trigger print dialog after content loads
+  w.onload = function(){ w.focus(); w.print(); };
+  setTimeout(function(){ if (!w.closed) { w.focus(); w.print(); } }, 800);
+}
+
+
+var currentRevisori2 = [];
+
+function checkDecisioneEditor() {
+  var val = document.getElementById('fDecisioneEditor').value;
+  var sec = document.getElementById('rev2Section');
+  if (sec) sec.style.display = (val === 'Resubmit for Review') ? 'block' : 'none';
+  var wrap = document.getElementById('fDataRevisioneWrap');
+  if (wrap) wrap.style.display = (val === 'Revisions required') ? 'block' : 'none';
+  var wrapAcc = document.getElementById('fDataAccettazioneWrap');
+  if (wrapAcc) wrapAcc.style.display = (val === 'Accept submission') ? 'block' : 'none';
+}
+
+function checkDecisioneEditor2() {
+  var val = document.getElementById('fDecisioneEditor2').value;
+  var wrap = document.getElementById('fDataRevisione2Wrap');
+  if (wrap) wrap.style.display = (val === 'Revisions required') ? 'block' : 'none';
+  var wrapAcc = document.getElementById('fDataAccettazione2Wrap');
+  if (wrapAcc) wrapAcc.style.display = (val === 'Accept submission') ? 'block' : 'none';
+}
+
+function renderRevList2() {
+  var c = document.getElementById('revList2');
+  if (!c) return;
+  if (!currentRevisori2.length) {
+    c.innerHTML = '<div style="font-size:20px;color:var(--tx3);padding:4px 0">Nessun revisore inserito.</div>';
+    return;
+  }
+  var h = '';
+  currentRevisori2.forEach(function(r, i) {
+    h += '<div class="rev-card">' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">' +
+        '<span style="font-size:20px;font-weight:700">Revisore '+(i+1)+'</span>' +
+        '<button class="btn" style="font-size:20px;padding:2px 8px;color:var(--red)" onclick="removeRev2('+i+')">Rimuovi</button>' +
+      '</div>' +
+      '<div class="g2" style="gap:8px">' +
+        '<div class="fr" style="margin-bottom:6px"><label>Nome e Cognome</label>' +
+          '<input value="'+esc(r.nome||'')+'" oninput="currentRevisori2['+i+'].nome=this.value" placeholder="es. Mario Rossi"></div>' +
+        '<div class="fr" style="margin-bottom:6px"><label>Affiliazione</label>' +
+          '<input value="'+esc(r.affiliazione||'')+'" oninput="currentRevisori2['+i+'].affiliazione=this.value"></div>' +
+        '<div class="fr" style="margin-bottom:6px"><label>Data consegna revisione</label>' +
+          '<input type="date" value="'+esc(r.dataConsegna||'')+'" oninput="currentRevisori2['+i+'].dataConsegna=this.value"></div>' +
+        '<div class="fr" style="margin-bottom:6px"><label>Stato revisione</label>' +
+          '<select onchange="currentRevisori2['+i+'].accettazione=this.value">' +
+            '<option value=""'+((!r.accettazione)?' selected':'')+'>&#8212;</option>' +
+            '<option value="in attesa"'+(r.accettazione==='in attesa'?' selected':'')+'>In attesa</option>' +
+            '<option value="accettato"'+(r.accettazione==='accettato'?' selected':'')+'>Accettato</option>' +
+            '<option value="rifiutato"'+(r.accettazione==='rifiutato'?' selected':'')+'>Rifiutato</option>' +
+            '<option value="completato"'+(r.accettazione==='completato'?' selected':'')+'>Completato</option>' +
+          '</select></div>' +
+        '<div class="fr" style="margin-bottom:6px"><label>Data proroga</label>' +
+          '<input type="date" value="'+esc(r.dataProroga||'')+'" oninput="currentRevisori2['+i+'].dataProroga=this.value"></div>' +
+      '</div>' +
+      '<div class="fr" style="margin-top:4px"><label>Giudizio</label>' +
+        '<select onchange="currentRevisori2['+i+'].giudizio=this.value">' +
+          '<option value=""'+((!r.giudizio)?' selected':'')+'>&#8212;</option>' +
+          '<option value="Accept submission"'+(r.giudizio==="Accept submission"?' selected':'')+'>Accept submission</option>' +
+          '<option value="Revisions required"'+(r.giudizio==="Revisions required"?' selected':'')+'>Revisions required</option>' +
+          '<option value="Resubmit for Review"'+(r.giudizio==="Resubmit for Review"?' selected':'')+'>Resubmit for Review</option>' +
+          '<option value="Resubmit Elsewhere"'+(r.giudizio==="Resubmit Elsewhere"?' selected':'')+'>Resubmit Elsewhere</option>' +
+          '<option value="Decline submission"'+(r.giudizio==="Decline submission"?' selected':'')+'>Decline submission</option>' +
+        '</select></div>' +
+    '</div>';
+  });
+  c.innerHTML = h;
+}
+function removeRev2(i) { currentRevisori2.splice(i,1); renderRevList2(); }
+
+function renderRevList() {
+  var c = document.getElementById('revList');
+  if (!currentRevisori.length) {
+    c.innerHTML = '<div style="font-size:20px;color:var(--tx3);padding:4px 0">Nessun revisore inserito.</div>';
+    return;
+  }
+  var h = '';
+  currentRevisori.forEach(function(r, i) {
+    h += '<div class="rev-card">' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">' +
+        '<span style="font-size:20px;font-weight:700">Revisore '+(i+1)+'</span>' +
+        '<button class="btn" style="font-size:20px;padding:2px 8px;color:var(--red)" onclick="removeRev('+i+')">Rimuovi</button>' +
+      '</div>' +
+      '<div class="g2" style="gap:8px">' +
+        '<div class="fr" style="margin-bottom:6px"><label>Nome e Cognome</label>' +
+          '<input value="'+esc(r.nome||'')+'" oninput="currentRevisori['+i+'].nome=this.value" placeholder="es. Mario Rossi"></div>' +
+        '<div class="fr" style="margin-bottom:6px"><label>Affiliazione</label>' +
+          '<input value="'+esc(r.affiliazione||'')+'" oninput="currentRevisori['+i+'].affiliazione=this.value"></div>' +
+        '<div class="fr" style="margin-bottom:6px"><label>Data consegna revisione</label>' +
+          '<input type="date" value="'+esc(r.dataConsegna||'')+'" oninput="currentRevisori['+i+'].dataConsegna=this.value"></div>' +
+        '<div class="fr" style="margin-bottom:6px"><label>Stato revisione</label>' +
+          '<select onchange="currentRevisori['+i+'].accettazione=this.value">' +
+            '<option value=""'+((!r.accettazione)?' selected':'')+'>&#8212;</option>' +
+            '<option value="in attesa"'+(r.accettazione==='in attesa'?' selected':'')+'>In attesa</option>' +
+            '<option value="accettato"'+(r.accettazione==='accettato'?' selected':'')+'>Accettato</option>' +
+            '<option value="rifiutato"'+(r.accettazione==='rifiutato'?' selected':'')+'>Rifiutato</option>' +
+            '<option value="completato"'+(r.accettazione==='completato'?' selected':'')+'>Completato</option>' +
+          '</select></div>' +
+        '<div class="fr" style="margin-bottom:6px"><label>Data proroga</label>' +
+          '<input type="date" value="'+esc(r.dataProroga||'')+'" oninput="currentRevisori['+i+'].dataProroga=this.value"></div>' +
+      '</div>' +
+      '<div class="fr" style="margin-top:4px"><label>Giudizio</label>' +
+        '<select onchange="currentRevisori['+i+'].giudizio=this.value">' +
+          '<option value=""'+(r.giudizio===''||!r.giudizio?' selected':'')+'>&#8212;</option>' +
+          '<option value="Accept submission"'+(r.giudizio==='Accept submission'?' selected':'')+'>Accept submission</option>' +
+          '<option value="Revisions required"'+(r.giudizio==='Revisions required'?' selected':'')+'>Revisions required</option>' +
+          '<option value="Resubmit for Review"'+(r.giudizio==='Resubmit for Review'?' selected':'')+'>Resubmit for Review</option>' +
+          '<option value="Resubmit Elsewhere"'+(r.giudizio==='Resubmit Elsewhere'?' selected':'')+'>Resubmit Elsewhere</option>' +
+          '<option value="Decline submission"'+(r.giudizio==='Decline submission'?' selected':'')+'>Decline submission</option>' +
+        '</select></div>' +
+    '</div>';
+  });
+  c.innerHTML = h;
+}
+function removeRev(i) { currentRevisori.splice(i,1); renderRevList(); }
+
+function makeUnlocker(groupId, btnId) {
+  return function() {
+    requirePwd(function() {
+      var grp = document.getElementById(groupId);
+      var btn = document.getElementById(btnId);
+      if (grp) grp.classList.remove('field-locked');
+      if (btn) { btn.textContent = '\u{1F513} Sbloccato'; btn.disabled = true; }
+    });
+  };
+}
+
+function unlockAllAdmin() {
+  // Unlock fId
+  var fId = document.getElementById('fId');
+  var btnId = document.getElementById('btnUnlockId');
+  if (fId) fId.disabled = false;
+  if (btnId) { btnId.textContent = '\u{1F513}'; btnId.disabled = true; }
+  // Unlock fDataSottomissione
+  var fDs = document.getElementById('fDataSottomissione');
+  var btnDs = document.getElementById('btnUnlockDataSott');
+  if (fDs) fDs.disabled = false;
+  if (btnDs) { btnDs.textContent = '\u{1F513}'; btnDs.disabled = true; }
+  // Unlock groups
+  ['antiGroup','pubGroup','procGroup'].forEach(function(id) {
+    var grp = document.getElementById(id);
+    if (grp) grp.classList.remove('field-locked');
+  });
+  ['btnUnlockAnti','btnUnlockPub','btnUnlockProc'].forEach(function(id) {
+    var btn = document.getElementById(id);
+    if (btn) { btn.textContent = '\u{1F513} Sbloccato'; btn.disabled = true; }
+  });
+  // Mark session as unlocked so requirePwd is bypassed
+  sessionUnlocked = true;
+}
+
+function lockAllGroups() {
+  // Lock fId individually
+  var fId = document.getElementById('fId');
+  var btnId = document.getElementById('btnUnlockId');
+  if (fId) fId.disabled = true;
+  if (btnId) { btnId.textContent = '\u{1F512}'; btnId.disabled = false; }
+  var fDs = document.getElementById('fDataSottomissione');
+  var btnDs = document.getElementById('btnUnlockDataSott');
+  if (fDs) fDs.disabled = true;
+  if (btnDs) { btnDs.textContent = '\u{1F512}'; btnDs.disabled = false; }
+  var fDs = document.getElementById('fDataSottomissione');
+  var btnDs = document.getElementById('btnUnlockDataSott');
+  if (fDs) fDs.disabled = true;
+  if (btnDs) { btnDs.textContent = '\u{1F512}'; btnDs.disabled = false; }
+  // Lock groups
+  ['antiGroup','pubGroup','procGroup'].forEach(function(id) {
+    var grp = document.getElementById(id);
+    if (grp) grp.classList.add('field-locked');
+  });
+  ['btnUnlockAnti','btnUnlockPub','btnUnlockProc'].forEach(function(id) {
+    var btn = document.getElementById(id);
+    if (btn) { btn.textContent = '\u{1F512} Sblocca'; btn.disabled = false; }
+  });
+}
+
+function unlockProcGroup() {
+  requirePwd(function() {
+    var grp = document.getElementById('procGroup');
+    var btn = document.getElementById('btnUnlockProc');
+    if (grp) grp.classList.remove('field-locked');
+    if (btn) { btn.textContent = '\u{1F513} Sbloccato'; btn.disabled = true; }
+  });
+}
+
+function lockProcGroup() {
+  var grp = document.getElementById('procGroup');
+  var btn = document.getElementById('btnUnlockProc');
+  if (grp) grp.classList.add('field-locked');
+  if (btn) { btn.textContent = '\u{1F512} Sblocca'; btn.disabled = false; }
+}
+
+function checkAntiplagio() {
+  var sim = parseFloat(document.getElementById('fSim').value) || 0;
+  var ai  = parseFloat(document.getElementById('fAi').value)  || 0;
+  var box = document.getElementById('antiplagioAlert');
+  if (box) box.style.display = (sim > 30 || ai > 30) ? 'block' : 'none';
+}
+
+function openNewArt() {
+  editingArtId = null;
+  document.getElementById('artModalTitle').textContent = 'Nuovo articolo';
+  ['fId','fTitle','fAuthors','fAffil','fNat','fAbstract','fNotes'].forEach(function(id){ document.getElementById(id).value=''; });
+  ['fLen','fArtNum','fRefs','fCTeMA','fCTeMA2226','fCJCR','fCJCR2y','fSim','fAi'].forEach(function(id){ document.getElementById(id).value=''; });
+  document.getElementById('fDataSottomissione').value='';
+  document.getElementById('fImpaginato').checked=false;
+  document.getElementById('fEd2').value=''; document.getElementById('fCopy').value='';
+  document.getElementById('fGk').value=''; document.getElementById('fIntlArt').value='';
+  document.getElementById('fComunicazioneInviata').checked=false;
+  document.getElementById('fDataComunicazione').value='';
+  document.getElementById('fRispostaAutori').value='';
+  if(document.getElementById('antiplagioAlert')) document.getElementById('antiplagioAlert').style.display='none';
+  document.getElementById('fStep').value=''; document.getElementById('fSecArt').selectedIndex=0;
+  document.getElementById('fStatus').value='Sottomesso'; document.getElementById('fDead').value='';
+  document.getElementById('gkRow').style.display='block';
+  document.getElementById('btnDel').style.display='none';
+  document.getElementById('btnRifiutoGK').style.display='none';
+  document.getElementById('btnAccettazioneGK').style.display='none';
+  document.getElementById('btnRifiutoTur').style.display='none';
+  document.getElementById('stepHint').textContent='';
+  currentRevisori=[]; renderRevList();
+  currentRevisori2=[]; renderRevList2();
+  document.getElementById('fDecisioneEditor').value='';
+  document.getElementById('fDecisioneEditor2').value='';
+  document.getElementById('fDataRevisione').value='';
+  document.getElementById('fDataRevisione2').value='';
+  document.getElementById('fDataAccettazione').value='';
+  document.getElementById('fDataAccettazione2').value='';
+  checkDecisioneEditor(); checkDecisioneEditor2();
+  buildIssOpts('fIssArt','');
+  if (!adminMode)   if (!adminMode) lockAllGroups();
+  document.getElementById('artModal').classList.add('open');
+}
+function openEditArt(id) {
+  var a = articles.find(function(x){ return x.id===id; });
+  if (!a) return;
+  editingArtId = id;
+  document.getElementById('artModalTitle').textContent = 'Modifica articolo #'+id;
+  document.getElementById('fId').value=a.id;
+  document.getElementById('fDataSottomissione').value=a.dataSottomissione||'';
+  document.getElementById('fTitle').value=a.title;
+  document.getElementById('fAuthors').value=a.authors||'';
+  document.getElementById('fAffil').value=a.affiliation||'';
+  document.getElementById('fNat').value=a.nationality||'';
+  document.getElementById('fIntlArt').value=a.intl||'';
+  document.getElementById('fAbstract').value=a.abstract||'';
+  setTimeout(function(){ autoResize(document.getElementById('fAbstract')); }, 0);
+  document.getElementById('fLen').value=a.length||'';
+  document.getElementById('fImpaginato').checked=!!(a.impaginato);
+  document.getElementById('fSecArt').value=a.section||'Focus';
+  document.getElementById('fStep').value=a.step||'';
+  document.getElementById('fStatus').value=a.status||'Sottomesso';
+  document.getElementById('fDead').value=a.deadline||'';
+  document.getElementById('fArtNum').value=a.articleNum||'';
+  document.getElementById('fEd2').value=a.editor||'';
+  document.getElementById('fCopy').value=a.copyeditor||'';
+  document.getElementById('fGk').value=a.gatekeeper||'';
+  document.getElementById('fSim').value=(a.similarity!==null&&a.similarity!==undefined)?a.similarity:'';
+  document.getElementById('fAi').value=(a.aiPercent!==null&&a.aiPercent!==undefined)?a.aiPercent:'';
+  document.getElementById('fRefs').value=a.refsTotal||'';
+  document.getElementById('fCTeMA').value=a.citeTeMA||'';
+  document.getElementById('fCTeMA2226').value=a.citeTeMA2226||'';
+  document.getElementById('fCJCR').value=a.citeJCR||'';
+  document.getElementById('fCJCR2y').value=a.citeJCR2y||'';
+  document.getElementById('fNotes').value=a.notes||'';
+  document.getElementById('fComunicazioneInviata').checked=!!(a.comunicazioneInviata);
+  document.getElementById('fDataComunicazione').value=a.dataComunicazione||'';
+  document.getElementById('fRispostaAutori').value=a.rispostaAutori||'';
+  checkAntiplagio();
+  document.getElementById('gkRow').style.display=(a.editor&&a.editor!=='')?'none':'block';
+  document.getElementById('btnDel').style.display='inline-block';
+  document.getElementById('btnRifiutoGK').style.display=adminMode?'inline-block':'none';
+  document.getElementById('btnAccettazioneGK').style.display=(adminMode||currentUser==='GateKeeper')?'inline-block':'none';
+  document.getElementById('btnRifiutoTur').style.display=adminMode?'inline-block':'none';
+  document.getElementById('stepHint').textContent=a.step&&STEPS[a.step]?STEPS[a.step]:'';
+  currentRevisori=JSON.parse(JSON.stringify(a.revisori||[])); renderRevList();
+  currentRevisori2=JSON.parse(JSON.stringify(a.revisori2||[])); renderRevList2();
+  document.getElementById('fDecisioneEditor').value=a.decisioneEditor||'';
+  document.getElementById('fDecisioneEditor2').value=a.decisioneEditor2||'';
+  document.getElementById('fDataRevisione').value=a.dataRevisione||'';
+  document.getElementById('fDataRevisione2').value=a.dataRevisione2||'';
+  document.getElementById('fDataAccettazione').value=a.dataAccettazione||'';
+  document.getElementById('fDataAccettazione2').value=a.dataAccettazione2||'';
+  checkDecisioneEditor(); checkDecisioneEditor2();
+  buildIssOpts('fIssArt',a.issue||'');
+  if (!adminMode)   if (!adminMode) lockAllGroups();
+  document.getElementById('artModal').classList.add('open');
+}
+function autoStep(a) {
+  var sim = parseFloat(a.similarity);
+  var ai  = parseFloat(a.aiPercent);
+  var simOk = !isNaN(sim) && a.similarity !== null && a.similarity !== '';
+  var aiOk  = !isNaN(ai)  && a.aiPercent  !== null && a.aiPercent  !== '';
+  var step  = parseInt(a.step) || 0;
+
+  // St.1 → St.2: valori Turnitin inseriti
+  if (step <= 1 && simOk && aiOk) {
+    a.step = '2';
+  }
+
+  // St.2 → St.3: comunicazione inviata (valori >30)
+  if (step <= 2 && simOk && aiOk && (sim > 30 || ai > 30) && a.comunicazioneInviata) {
+    a.step = '3';
+  }
+
+  // St.2/3 → St.4: rifiuto Turnitin (rispostaAutori = ritirato)
+  if (step <= 3 && (sim > 30 || ai > 30) && a.rispostaAutori === 'ritirato') {
+    a.step = '4';
+  }
+
+  // St.2 → St.5: verifica Turnitin superata (entrambi <30)
+  if (step <= 2 && simOk && aiOk && sim < 30 && ai < 30) {
+    a.step = '5';
+  }
+
+  // St.5 → St.6: rifiuto GateKeeper (già gestito da rifiutoGK → step 7b)
+
+  // St.5 → St.7: editor assegnato
+  if (step <= 5 && a.editor && a.editor !== '') {
+    a.step = '7';
+  }
+
+  // St.7 → St.8: editor ha inviato integrazione (campo note compilato dopo st.7)
+  // Non automatizzabile senza campo dedicato — skip
+
+  // St.7/8 → St.9: almeno un revisore individuato
+  if (step <= 8 && a.revisori && a.revisori.length > 0) {
+    a.step = '9';
+  }
+
+  // St.9 → St.10: almeno un revisore con accettazione != ''
+  if (step <= 9 && a.revisori && a.revisori.some(function(r){ return r.accettazione && r.accettazione !== ''; })) {
+    a.step = '10';
+  }
+
+  // St.10 → St.11: esattamente 1 revisore ha accettato/completato
+  if (step <= 10 && a.revisori) {
+    var accettati = a.revisori.filter(function(r){ return r.accettazione === 'accettato' || r.accettazione === 'completato'; }).length;
+    if (accettati === 1) a.step = '11';
+    // St.11 → St.12: entrambi accettati/completati
+    if (accettati >= 2) a.step = '12';
+  }
+
+  // St.12 → St.13: almeno un revisore ha giudizio negativo (Decline/Resubmit Elsewhere)
+  if (step <= 12 && a.revisori) {
+    var negativi = a.revisori.filter(function(r){
+      return r.giudizio === 'Decline submission' || r.giudizio === 'Resubmit Elsewhere';
+    }).length;
+    if (negativi > 0) a.step = '13';
+  }
+
+  // St.→ St.7: editor assegnato
+  if (a.editor && a.editor !== '' && parseInt(a.step) < 7) {
+    a.step = '7';
+  }
+
+  // St.→ St.13: Decisione editor = Revisions required o Resubmit for Review
+  var dec1 = a.decisioneEditor || '';
+  var dec2 = a.decisioneEditor2 || '';
+  if (dec1 === 'Revisions required' || dec1 === 'Resubmit for Review' ||
+      dec2 === 'Revisions required' || dec2 === 'Resubmit for Review') {
+    if (parseInt(a.step) < 13) a.step = '13';
+  }
+
+  // St.→ St.14: Decisione editor = Decline submission
+  if (dec1 === 'Decline submission' || dec2 === 'Decline submission') {
+    a.step = '14';
+    a.status = 'Rifiutato';
+  }
+
+  // St.→ St.16: Decisione editor = Resubmit for Review
+  if (dec1 === 'Resubmit for Review' || dec2 === 'Resubmit for Review') {
+    if (parseInt(a.step) < 16) a.step = '16';
+  }
+
+  // St.→ St.18: copyeditor assegnato
+  if (a.copyeditor && a.copyeditor !== '' && parseInt(a.step) < 18) {
+    a.step = '18';
+  }
+
+  return a;
+}
+
+function saveArt() {
+  var sim=document.getElementById('fSim').value, ai=document.getElementById('fAi').value;
+  var data={
+    id:document.getElementById('fId').value.trim(),
+    dataSottomissione:document.getElementById('fDataSottomissione').value,
+    title:document.getElementById('fTitle').value.trim(),
+    authors:document.getElementById('fAuthors').value.trim(),
+    affiliation:document.getElementById('fAffil').value.trim(),
+    nationality:document.getElementById('fNat').value.trim(),
+    intl:document.getElementById('fIntlArt').value,
+    abstract:document.getElementById('fAbstract').value.trim(),
+    length:parseInt(document.getElementById('fLen').value)||0,
+    impaginato:document.getElementById('fImpaginato').checked,
+    section:document.getElementById('fSecArt').value,
+    status:document.getElementById('fStatus').value,
+    step:document.getElementById('fStep').value,
+    issue:document.getElementById('fIssArt').value,
+    articleNum:parseInt(document.getElementById('fArtNum').value)||null,
+    deadline:document.getElementById('fDead').value,
+    editor:document.getElementById('fEd2').value,
+    copyeditor:document.getElementById('fCopy').value,
+    gatekeeper:document.getElementById('fGk').value,
+    similarity:sim!==''?parseFloat(sim):null,
+    aiPercent:ai!==''?parseFloat(ai):null,
+    refsTotal:parseInt(document.getElementById('fRefs').value)||0,
+    citeTeMA:parseInt(document.getElementById('fCTeMA').value)||0,
+    citeTeMA2226:parseInt(document.getElementById('fCTeMA2226').value)||0,
+    citeJCR:parseInt(document.getElementById('fCJCR').value)||0,
+    citeJCR2y:parseInt(document.getElementById('fCJCR2y').value)||0,
+    notes:document.getElementById('fNotes').value.trim(),
+
+    comunicazioneInviata:document.getElementById('fComunicazioneInviata').checked,
+    dataComunicazione:document.getElementById('fDataComunicazione').value,
+    rispostaAutori:document.getElementById('fRispostaAutori').value,
+    revisori:JSON.parse(JSON.stringify(currentRevisori)),
+    revisori2:JSON.parse(JSON.stringify(currentRevisori2)),
+    decisioneEditor:document.getElementById('fDecisioneEditor').value,
+    decisioneEditor2:document.getElementById('fDecisioneEditor2').value,
+    dataRevisione:document.getElementById('fDataRevisione').value,
+    dataRevisione2:document.getElementById('fDataRevisione2').value,
+    dataAccettazione:document.getElementById('fDataAccettazione').value,
+    dataAccettazione2:document.getElementById('fDataAccettazione2').value
+  };
+  if (!data.id||!data.title){ alert('ID e Titolo sono obbligatori.'); return; }
+  data = autoStep(data);
+  if (editingArtId) {
+    var idx=articles.findIndex(function(a){ return a.id===editingArtId; });
+    if (idx>=0) articles[idx]=data;
+  } else {
+    if (articles.find(function(a){ return a.id===data.id; })){ alert('ID gi\u00e0 esistente.'); return; }
+    if (!data.step || data.step === '') data.step = '1';
+    articles.push(data);
+    sendNotification('insert', data.id, data.title);
+  }
+
+  document.getElementById('artModal').classList.remove('open');
+  schedSave(); refresh();
+}
+function accettazioneGK() {
+  if (!editingArtId) return;
+  var capturedId = editingArtId;
+  var idx = articles.findIndex(function(a){ return a.id === capturedId; });
+  if (idx >= 0) {
+    articles[idx].step = '7';
+    articles[idx].status = 'Sottomesso';
+  }
+  document.getElementById('artModal').classList.remove('open');
+  editingArtId = null;
+  schedSave();
+  refresh();
+}
+
+function rifiutoGK() {
+  if (!editingArtId) return;
+  var capturedId = editingArtId;
+  requirePwd(function() {
+    var idx = articles.findIndex(function(a){ return a.id === capturedId; });
+    if (idx >= 0) {
+      articles[idx].step = '6';
+      articles[idx].status = 'Rifiutato';
+    }
+    document.getElementById('artModal').classList.remove('open');
+    editingArtId = null;
+    schedSave();
+    refresh();
+  });
+}
+
+function rifiutoTurnitin() {
+  if (!editingArtId) return;
+  var capturedId = editingArtId;
+  requirePwd(function() {
+    var idx = articles.findIndex(function(a){ return a.id === capturedId; });
+    if (idx >= 0) {
+      articles[idx].comunicazioneInviata = true;
+      articles[idx].rispostaAutori = 'ritirato';
+      articles[idx].step = '4';
+      articles[idx].status = 'Rifiutato';
+      if (!articles[idx].dataComunicazione) {
+        articles[idx].dataComunicazione = new Date().toISOString().slice(0,10);
+      }
+    }
+    document.getElementById('artModal').classList.remove('open');
+    editingArtId = null;
+    schedSave();
+    refresh();
+  });
+}
+
+function deleteArt() {
+  if (!editingArtId) return;
+  var capturedId = editingArtId;
+  requirePwd(function() {
+    var delArt = articles.find(function(a){ return a.id === capturedId; });
+    articles = articles.filter(function(a){ return a.id !== capturedId; });
+    if (delArt) sendNotification('delete', delArt.id, delArt.title);
+    document.getElementById('artModal').classList.remove('open');
+    editingArtId = null;
+    schedSave();
+    refresh();
+  });
+}
+
+function openNewIss() {
+  editingIssKey=null;
+  document.getElementById('issModalTitle').textContent='Nuovo fascicolo';
+  document.getElementById('iType').value='ordinario';
+  document.getElementById('iYear').value=2026;
+  document.getElementById('iNum').value='1';
+  document.getElementById('iTheme').value='';
+  document.getElementById('iDeadline').value='';
+  document.getElementById('iNotes').value='';
+  document.getElementById('iPub').checked=false;
+  document.getElementById('iNumRow').style.display='block';
+  document.getElementById('btnDelIss').style.display='none';
+  document.getElementById('issModal').classList.add('open');
+}
+function openEditIss(key) {
+  var iss=issues.find(function(i){ return i.key===key; });
+  if (!iss) return;
+  editingIssKey=key;
+  document.getElementById('issModalTitle').textContent='Modifica fascicolo';
+  document.getElementById('iType').value=iss.type;
+  document.getElementById('iYear').value=iss.year||2026;
+  document.getElementById('iNum').value=iss.num||'1';
+  document.getElementById('iTheme').value=iss.theme||'';
+  document.getElementById('iDeadline').value=iss.deadline||'';
+  document.getElementById('iNotes').value=iss.note||'';
+  document.getElementById('iPub').checked=!!iss.pubblicato;
+  document.getElementById('iNumRow').style.display=iss.type==='ordinario'?'block':'none';
+  document.getElementById('btnDelIss').style.display='inline-block';
+  document.getElementById('issModal').classList.add('open');
+}
+function saveIss() {
+  var type=document.getElementById('iType').value;
+  var year=parseInt(document.getElementById('iYear').value)||2026;
+  var num=parseInt(document.getElementById('iNum').value)||1;
+  var theme=document.getElementById('iTheme').value.trim();
+  var deadline=document.getElementById('iDeadline').value;
+  var note=document.getElementById('iNotes').value.trim();
+  var pub=document.getElementById('iPub').checked;
+  // Check if we are removing publication status
+  var wasPublished = editingIssKey && issues.find(function(i){ return i.key===editingIssKey; }) &&
+                     issues.find(function(i){ return i.key===editingIssKey; }).pubblicato;
+  var unpublishing = wasPublished && !pub;
+  if (pub || unpublishing) {
+    requirePwd(function(){ doSaveIss(type,year,num,theme,deadline,note,pub,unpublishing); });
+  } else {
+    doSaveIss(type,year,num,theme,deadline,note,pub,false);
+  }
+}
+
+function doSaveIss(type,year,num,theme,deadline,note,pub,unpublishing) {
+  var key,label;
+  if (type==='ordinario'){ key=String(num).padStart(2,'0')+'/'+year; label='TeMA '+key; }
+  else { key=editingIssKey||('SI-'+Date.now()); label='SI '+theme.slice(0,40); }
+  if (editingIssKey) {
+    var idx=issues.findIndex(function(i){ return i.key===editingIssKey; });
+    if (idx>=0) issues[idx]=Object.assign({},issues[idx],{type:type,year:year,num:num,theme:theme,deadline:deadline,note:note,label:label,pubblicato:pub});
+  } else {
+    if (issues.find(function(i){ return i.key===key; })){ alert('Fascicolo gi\u00e0 esistente.'); return; }
+    issues.push({key:key,label:label,type:type,year:year,num:num,theme:theme,deadline:deadline,note:note,pubblicato:pub});
+  }
+  if (pub) {
+    var issKey=editingIssKey||key;
+    articles.forEach(function(a){ if (a.issue===issKey && a.status!=='Rifiutato') { a.status='Pubblicato'; a.step='19'; } });
+  }
+  if (unpublishing) {
+    var issKey2=editingIssKey||key;
+    articles.forEach(function(a){
+      if (a.issue===issKey2 && a.status==='Pubblicato') a.status='Sottomesso';
+    });
+  }
+  document.getElementById('issModal').classList.remove('open');
+  schedSave(); rebuildIssFilters(); renderNumeri();
+}
+function deleteIss() {
+  if (!editingIssKey) return;
+  var capturedKey = editingIssKey;
+  requirePwd(function() {
+    issues = issues.filter(function(i){ return i.key !== capturedKey; });
+    articles.forEach(function(a){ if(a.issue===capturedKey) a.issue=''; });
+    document.getElementById('issModal').classList.remove('open');
+    editingIssKey = null;
+    schedSave();
+    rebuildIssFilters();
+    renderNumeri();
+    refresh();
+  });
+}
+
+function exportData() {
+  var blob=new Blob([JSON.stringify({issues:issues,articles:articles},null,2)],{type:'application/json'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a'); a.href=url; a.download='tema-journal-'+new Date().toISOString().slice(0,10)+'.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(url); },3000);
+}
+function importData(e) {
+  var file=e.target.files[0]; if (!file) return;
+  var reader=new FileReader();
+  reader.onload=function(ev){
+    try {
+      var d=JSON.parse(ev.target.result);
+      if (d.issues) issues=d.issues;
+      if (d.articles) articles=d.articles;
+      schedSave(); rebuildIssFilters(); refresh();
+      alert('Importazione completata: '+articles.length+' articoli.');
+    } catch(err){ alert('Errore nel file JSON.'); }
+  };
+  reader.readAsText(file); e.target.value='';
+}
+
+function renderRifTur() {
+  var q = (document.getElementById('srchRifTur').value||'').toLowerCase();
+  var f = articles.filter(function(a) {
+    if (!a.rispostaAutori || a.rispostaAutori === '') return false;
+    var sim = parseFloat(a.similarity); var ai = parseFloat(a.aiPercent);
+    if (!(sim > 30 || ai > 30)) return false;
+    if (q && (a.id+' '+a.title+' '+a.authors).toLowerCase().indexOf(q) < 0) return false;
+    return true;
+  });
+  document.getElementById('rifTurCount').textContent = f.length+' articol'+(f.length===1?'o':'i');
+  document.getElementById('rifTurEl').innerHTML = f.length ? f.map(function(a){ return artCard(a,true); }).join('') :
+    '<div style="text-align:center;padding:3rem;color:var(--tx2)">Nessun articolo.</div>';
+}
+
+function updateTabCounts() {
+    var gkCount = articles.filter(function(a){
+        if(a.status==='Pubblicato' || a.step==='18') return false;
+        if(a.step==='8b' || a.step==='7b') return false;
+        if(a.editor && a.editor.trim()!=='') return false;
+        return true;
+    }).length;
+    var listaCount = articles.filter(function(a){
+        if(a.status==='Pubblicato' || a.step==='18') return false;
+        if(a.step==='8b' || a.step==='7b') return false;
+        if(!a.editor || a.editor.trim()==='') return false;
+        return true;
+    }).length;
+    document.querySelectorAll('.tab').forEach(function(btn){
+        var tab=btn.dataset.tab;
+        if(tab==='gatekeeper') btn.textContent='GateKeeper evaluation ('+gkCount+')';
+        if(tab==='lista') btn.textContent='Articoli in lavorazione ('+listaCount+')';
+    });
+}
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(function(t){ t.classList.toggle('active',t.dataset.tab===name); });
+  document.querySelectorAll('.sec').forEach(function(s){ s.classList.toggle('active',s.id==='sec-'+name); });
+  if (name==='tutti')         renderTutti();
+  if (name==='gatekeeper')    renderGk();
+  if (name==='lista')         renderLista();
+  if (name==='editori')       renderTeam();
+  if (name==='numeri')        renderNumeri();
+  if (name==='verbale')       { rebuildIssFilters(); renderVerbale(); }
+  if (name==='pubblicati')    { rebuildIssFilters(); renderPub(); }
+  if (name==='rifiutati') { renderRifRef(); renderRifGk(); renderRifTur(); }
+}
+function refresh() {
+  renderStats();
+  updateTabCounts();
+  var active=document.querySelector('.tab.active');
+  if (active) switchTab(active.dataset.tab);
+}
+
+function initFilters() {
+  var edSel=document.getElementById('fEd');
+  edSel.innerHTML='<option value="">Tutti gli editor</option>';
+  EDITORS.forEach(function(e){ var o=document.createElement('option');o.value=e;o.textContent=e;edSel.appendChild(o); });
+  var stSel=document.getElementById('fSt');
+  Object.keys(STEPS).forEach(function(k){
+    var o=document.createElement('option'); o.value=k; o.textContent=STEPS[k].slice(0,40);
+    stSel.appendChild(o);
+  });
+  rebuildIssFilters();
+
+  // Populate Tutti editor select (same as Lista)
+  var edSelT = document.getElementById('fEdTutti');
+  if (edSelT) {
+    edSelT.innerHTML = '<option value="">Tutti gli editor</option>';
+    ['Carmen Guida','Floriana Zucaro','Gerardo Carpentieri','Peppe Mazzeo',
+     'Romano Fistola','Rosa Anna La Rocca','Rosaria Battarra','Stefano Franco'].forEach(function(e){
+      edSelT.innerHTML += '<option value="'+e+'">'+e+'</option>';
+    });
+  }
+
+  // Populate Tutti step select (same as Lista)
+  var stSelT = document.getElementById('fStTutti');
+  if (stSelT) {
+    stSelT.innerHTML = '<option value="">Tutti gli step</option>';
+    Object.keys(STEPS).forEach(function(k){
+      stSelT.innerHTML += '<option value="'+k+'">'+STEPS[k]+'</option>';
+    });
+  }
+}
+
+
+var adminMode = false;
+var currentUser = '';
+
+function doLogin() {
+  var u = document.getElementById('loginUser').value.trim();
+  var p = document.getElementById('loginPass').value;
+  if (u === 'RedazioneTeMA' && p === '#ViaSanRocco37@') {
+    adminMode = true; currentUser = 'RedazioneTeMA';
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'block';
+    bootApp();
+  } else if (u === 'GateKeeper' && p === 'GateNapoli03') {
+    adminMode = false; currentUser = 'GateKeeper';
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'block';
+    bootApp();
+  } else if (u === 'EditorTeMA' && p === 'tEMA8009') {
+    adminMode = false; currentUser = 'EditorTeMA';
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'block';
+    bootApp();
+  } else {
+    document.getElementById('loginErr').style.display = 'block';
+    document.getElementById('loginPass').value = '';
+    document.getElementById('loginPass').focus();
+  }
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = el.scrollHeight + 'px';
+}
+
+function bootApp() {
+
+  document.getElementById('loginPass').addEventListener('keydown', function(e){
+    if (e.key === 'Enter') doLogin();
+  });
+  document.getElementById('loginUser').addEventListener('keydown', function(e){
+    if (e.key === 'Enter') document.getElementById('loginPass').focus();
+  });
+
+  loadCiteScores(); initFilters(); renderStats(); updateTabCounts();
+  if (adminMode) {
+    setTimeout(unlockAllAdmin, 500);
+    renderGk();
+  } else if (currentUser === 'GateKeeper') {
+    // GateKeeper: come EditorTeMA ma con accesso al pannello GateKeeper evaluation
+    var bkpBtn = document.querySelector('[onclick="backupData()"]');
+    if (bkpBtn) bkpBtn.style.display = 'none';
+    var tabsToHide = ['verbale'];
+    tabsToHide.forEach(function(tab) {
+      var btn = document.querySelector('.tab[data-tab="'+tab+'"]');
+      if (btn) btn.style.display = 'none';
+    });
+    renderGk();
+  } else {
+    // EditorTeMA: hide GateKeeper evaluation, Verbale PDF and Backup button
+    var bkpBtn2 = document.querySelector('[onclick="backupData()"]');
+    if (bkpBtn2) bkpBtn2.style.display = 'none';
+    var tabsToHide2 = ['gatekeeper', 'verbale'];
+    tabsToHide2.forEach(function(tab) {
+      var btn = document.querySelector('.tab[data-tab="'+tab+'"]');
+      if (btn) btn.style.display = 'none';
+    });
+    switchTab('lista');
+  }
+  loadData();
+  document.getElementById('vDate').value=new Date().toISOString().slice(0,10);
+
+  document.querySelectorAll('.tab').forEach(function(btn){
+    btn.addEventListener('click',function(){ switchTab(btn.dataset.tab); });
+  });
+  document.getElementById('btnNuovo').addEventListener('click',function(){ requirePwd(openNewArt); });
+  document.getElementById('importFile').addEventListener('change',importData);
+  document.getElementById('btnNuovoFasc').addEventListener('click',openNewIss);
+  document.getElementById('btnIssSave').addEventListener('click',saveIss);
+  document.getElementById('btnDelIss').addEventListener('click',deleteIss);
+  document.getElementById('btnIssCancel').addEventListener('click',function(){ document.getElementById('issModal').classList.remove('open'); });
+  document.getElementById('iType').addEventListener('change',function(){
+    document.getElementById('iNumRow').style.display=this.value==='ordinario'?'block':'none';
+  });
+  document.getElementById('btnArtSave').addEventListener('click',saveArt);
+  document.getElementById('btnUnlockProc').addEventListener('click',unlockProcGroup);
+  document.getElementById('btnUnlockId').addEventListener('click',function(){
+    requirePwd(function(){
+      var f=document.getElementById('fId'), b=document.getElementById('btnUnlockId');
+      if(f){f.disabled=false; f.focus();}
+      if(b){b.textContent='\u{1F513}'; b.disabled=true;}
+    });
+  });
+  document.getElementById('btnUnlockDataSott').addEventListener('click',function(){
+    requirePwd(function(){
+      var f=document.getElementById('fDataSottomissione'), b=document.getElementById('btnUnlockDataSott');
+      if(f){f.disabled=false; f.focus();}
+      if(b){b.textContent='\u{1F513}'; b.disabled=true;}
+    });
+  });
+  document.getElementById('btnUnlockDataSott').addEventListener('click',function(){
+    requirePwd(function(){
+      var f=document.getElementById('fDataSottomissione'), b=document.getElementById('btnUnlockDataSott');
+      if(f){f.disabled=false; f.focus();}
+      if(b){b.textContent='\u{1F513}'; b.disabled=true;}
+    });
+  });
+  document.getElementById('btnUnlockAnti').addEventListener('click',makeUnlocker('antiGroup','btnUnlockAnti'));
+  document.getElementById('btnUnlockPub').addEventListener('click',makeUnlocker('pubGroup','btnUnlockPub'));
+  document.getElementById('btnDel').addEventListener('click',deleteArt);
+  document.getElementById('btnAccettazioneGK').addEventListener('click',accettazioneGK);
+  document.getElementById('btnRifiutoGK').addEventListener('click',rifiutoGK);
+  document.getElementById('btnRifiutoTur').addEventListener('click',rifiutoTurnitin);
+  document.getElementById('btnArtCancel').addEventListener('click',function(){ document.getElementById('artModal').classList.remove('open'); });
+  document.getElementById('btnAddRev').addEventListener('click',function(){ currentRevisori.push({nome:'',affiliazione:'',dataConsegna:'',accettazione:'',dataProroga:'',giudizio:''}); renderRevList(); });
+  document.getElementById('btnAddRev2').addEventListener('click',function(){ currentRevisori2.push({nome:'',affiliazione:'',dataConsegna:'',accettazione:'',dataProroga:'',giudizio:''}); renderRevList2(); });
+  document.getElementById('fEd2').addEventListener('change',function(){
+    document.getElementById('gkRow').style.display=(this.value&&this.value!=='')?'none':'block';
+    if (this.value) document.getElementById('fGk').value='';
+  });
+  document.getElementById('fStep').addEventListener('change',function(){
+    document.getElementById('stepHint').textContent=STEPS[this.value]||'';
+  });
+  document.getElementById('btnRefreshVerbale').addEventListener('click',renderVerbale);
+  document.getElementById('btnPrintVerbale').addEventListener('click',printVerbale);
+  document.getElementById('srchTutti').addEventListener('input',renderTutti);
+  document.getElementById('fEdTutti').addEventListener('change',renderTutti);
+  document.getElementById('fStTutti').addEventListener('change',renderTutti);
+  document.getElementById('fSecTutti').addEventListener('change',renderTutti);
+  document.getElementById('fIntlTutti').addEventListener('change',renderTutti);
+  document.getElementById('fIssTutti').addEventListener('change',renderTutti);
+  document.getElementById('srchGk').addEventListener('input',renderGk);
+  document.getElementById('srchLista').addEventListener('input',renderLista);
+  document.getElementById('fEd').addEventListener('change',renderLista);
+  document.getElementById('fSt').addEventListener('change',renderLista);
+  document.getElementById('fSec').addEventListener('change',renderLista);
+  document.getElementById('fIntl').addEventListener('change',renderLista);
+  document.getElementById('fIss').addEventListener('change',renderLista);
+  document.getElementById('srchPub').addEventListener('input',renderPub);
+  document.getElementById('fIssPub').addEventListener('change',renderPub);
+  // rifiutati search handled via oninput in HTML
+  document.getElementById('btnPwdOk').addEventListener('click',checkPwd);
+  document.getElementById('btnPwdCancel').addEventListener('click',function(){ document.getElementById('pwdModal').classList.remove('open'); });
+  document.getElementById('pwdInput').addEventListener('keydown',function(e){ if(e.key==='Enter') checkPwd(); });
+  ['artModal','issModal'].forEach(function(id){
+    document.getElementById(id).addEventListener('click',function(e){
+      if (e.target===this) this.classList.remove('open');
+    });
+  });
+  // pwdModal backdrop does NOT close artModal/issModal
+  document.getElementById('pwdModal').addEventListener('click',function(e){
+    if (e.target===this) {
+      this.classList.remove('open');
+      pendingAction = null;
+    }
+  });
+}
+
+
+</script>
+</body>
+</html>
