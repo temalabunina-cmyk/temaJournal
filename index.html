@@ -519,7 +519,7 @@ const SC = {
 const EDITORS = ['Carmen Guida','Floriana Zucaro','Gerardo Carpentieri','Peppe Mazzeo','Romano Fistola','Rosa Anna La Rocca','Rosaria Battarra','Stefano Franco'];
 const COPYEDITORS = ['Gerardo Carpentieri','Laura Ascione',"Nunzia D'Amico",'Stella Pennino','Tonia Stiuso','Valerio Martinelli'];
 const LS_KEY = 'tema-journal-v2';
-const GS_URL = 'https://script.google.com/macros/s/AKfycbxZGTvYaIwtxejandv1NQY4fyjKpjmx5GnhmGGFN5MBKJ3b-E8dGMy5c2KAlCr3tyKZ/exec';
+const GS_URL = 'https://script.google.com/macros/s/AKfycbznjMGWYy9lQSRx-RhTfdgnt-YkEDv1vZRjVZvF62QD9hJ1qeZalCZxCxgak3H01zVp/exec';
 
 let issues = [], articles = [], editingArtId = null, editingIssKey = null;
 let saveTimer = null, sessionUnlocked = false, pendingAction = null;
@@ -659,65 +659,13 @@ async function loadDriveText() {
     var resp = await fetch(GS_URL + '?action=gdoc&fileId=1BizhUtvLCFm5g4fB3pscfBp483rBoXr7Q4QAETesEhI');
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
     var data = await resp.json();
-    var raw = (data.text || '').trim();
-    if (raw) {
-      // Parse HTML from Google Docs using DOMParser
-      var parser = new DOMParser();
-      var doc = parser.parseFromString(raw, 'text/html');
-      var body = doc.body;
-      // Clean: remove style/script/meta tags
-      body.querySelectorAll('style,script,meta,head').forEach(function(el){ el.remove(); });
-      // Remove all class attributes
-      body.querySelectorAll('[class]').forEach(function(el){ el.removeAttribute('class'); });
-      // Remove all style attributes EXCEPT on spans with bold/italic (we remap those)
-      body.querySelectorAll('[style]').forEach(function(el) {
-        var s = el.getAttribute('style') || '';
-        var tag = el.tagName.toLowerCase();
-        if (tag === 'span' || tag === 'p' || tag === 'div') {
-          var newEl;
-          if (/font-weight\s*:\s*(700|bold)/i.test(s) && /font-style\s*:\s*italic/i.test(s)) {
-            newEl = doc.createElement('strong');
-            var em = doc.createElement('em');
-            em.innerHTML = el.innerHTML;
-            newEl.appendChild(em);
-            el.replaceWith(newEl);
-          } else if (/font-weight\s*:\s*(700|bold)/i.test(s)) {
-            newEl = doc.createElement('strong');
-            newEl.innerHTML = el.innerHTML;
-            el.replaceWith(newEl);
-          } else if (/font-style\s*:\s*italic/i.test(s)) {
-            newEl = doc.createElement('em');
-            newEl.innerHTML = el.innerHTML;
-            el.replaceWith(newEl);
-          } else {
-            el.removeAttribute('style');
-          }
-        } else {
-          el.removeAttribute('style');
-        }
-      });
-      // Keep links but make them open in new tab
-      body.querySelectorAll('a').forEach(function(a) {
-        a.setAttribute('target', '_blank');
-        a.setAttribute('rel', 'noopener');
-        // Remove Google redirect wrapper if present
-        var href = a.getAttribute('href') || '';
-        var urlMatch = href.match(/[?&]q=([^&]+)/);
-        if (urlMatch) a.setAttribute('href', decodeURIComponent(urlMatch[1]));
-      });
-      // Remove id attributes (Google Docs adds them)
-      body.querySelectorAll('[id]').forEach(function(el){ el.removeAttribute('id'); });
-      vDriveText = body.innerHTML;
-    } else {
-      vDriveText = '';
-    }
+    vDriveText = (data.html || data.text || '').trim();
     renderVerbale();
   } catch(e) {
     console.warn('Drive text load failed:', e);
     vDriveText = '';
   }
 }
-
 function schedSave() { setSaving(true); clearTimeout(saveTimer); saveTimer = setTimeout(persist, 600); }
 
 function requirePwd(action) {
