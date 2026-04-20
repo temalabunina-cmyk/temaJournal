@@ -198,6 +198,7 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
     <div style="font-size:16px;font-weight:700">Generatore verbale</div>
     <div style="display:flex;gap:8px">
       <button class="btn" id="btnRefreshVerbale" onclick="renderVerbale()">Aggiorna anteprima</button>
+      <button class="btn" onclick="loadDriveText()">&#8635; Aggiorna note editoriali</button>
       <button class="btn btn-p" id="btnPrintVerbale" onclick="printVerbale()">Stampa / Salva PDF</button>
     </div>
   </div>
@@ -646,6 +647,21 @@ function backupData() {
   document.body.appendChild(a);
   a.click();
   setTimeout(function(){ URL.revokeObjectURL(url); a.remove(); }, 500);
+}
+
+var vDriveText = '';
+
+async function loadDriveText() {
+  try {
+    var resp = await fetch(GS_URL + '?action=gdoc&fileId=1BizhUtvLCFm5g4fB3pscfBp483rBoXr7Q4QAETesEhI');
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    var data = await resp.json();
+    vDriveText = (data.text || '').trim();
+    renderVerbale();
+  } catch(e) {
+    console.warn('Drive text load failed:', e);
+    vDriveText = '';
+  }
 }
 
 function schedSave() { setSaving(true); clearTimeout(saveTimer); saveTimer = setTimeout(persist, 600); }
@@ -1785,6 +1801,7 @@ function renderVerbale() {
       h += '</table>';
       return h;
     })() +
+    (vDriveText ? '<h2>NOTE EDITORIALI</h2><div style="white-space:pre-wrap">'+esc(vDriveText)+'</div>' : '') +
     '<p style="margin-top:2rem;text-align:right"><em>'+oggi+'<br>Verbale '+esc(num)+'</em></p>' +
     '</div>';
 }
@@ -2489,7 +2506,7 @@ function switchTab(name) {
   if (name==='lista')         renderLista();
   if (name==='editori')       renderTeam();
   if (name==='numeri')        renderNumeri();
-  if (name==='verbale')       { rebuildIssFilters(); renderVerbale(); }
+  if (name==='verbale')       { rebuildIssFilters(); loadDriveText(); }
   if (name==='pubblicati')    { rebuildIssFilters(); renderPub(); }
   if (name==='rifiutati') { renderRifRef(); renderRifGk(); renderRifTur(); }
 }
