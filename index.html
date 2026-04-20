@@ -157,7 +157,7 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
   <button class="tab active" data-tab="gatekeeper">GateKeeper evaluation</button>
   <button class="tab" data-tab="lista">Articoli in lavorazione</button>
   <button class="tab" data-tab="editori">Assegnazioni</button>
-  <button class="tab" data-tab="numeri">Fascicoli</button>
+  <button class="tab" data-tab="numeri">Prossimi numeri</button>
   <button class="tab" data-tab="verbale">Verbale PDF</button>
   <button class="tab" data-tab="pubblicati">Articoli pubblicati</button>
   <button class="tab" data-tab="rifiutati">Rifiutati</button>
@@ -188,7 +188,7 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
 <div class="sec" id="sec-editori"><div id="teamEl"></div></div>
 <div class="sec" id="sec-numeri">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
-    <div style="font-size:16px;font-weight:700">Fascicoli</div>
+    <div style="font-size:16px;font-weight:700">Prossimi numeri</div>
     <button class="btn" id="btnNuovoFasc">+ Nuovo fascicolo</button>
   </div>
   <div id="numeriEl"></div>
@@ -1523,7 +1523,7 @@ function renderNumeri() {
   if (pubIssues.length) {
     pubHtml = '<div style="border:1px solid var(--brd);border-radius:var(--r);margin-top:1.5rem;overflow:hidden">' +
       '<div onclick="toggleAccordion(\'acc-pub-issues\')" style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;cursor:pointer;background:var(--sur2);user-select:none">' +
-        '<span style="font-size:20px;font-weight:700">Fascicoli pubblicati</span>' +
+        '<span style="font-size:20px;font-weight:700">Prossimi numeri pubblicati</span>' +
         '<div style="display:flex;align-items:center;gap:10px">' +
           '<span style="font-size:20px;color:var(--tx2)">'+pubIssues.length+' fascicol'+(pubIssues.length===1?'o':'i')+'</span>' +
           '<span id="acc-pub-issues-icon" style="font-size:20px;color:var(--tx2)">&#9658;</span>' +
