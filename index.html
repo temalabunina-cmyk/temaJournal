@@ -661,19 +661,16 @@ async function loadDriveText() {
     var data = await resp.json();
     var raw = (data.text || '').trim();
     if (raw) {
-      // Extract body content
-      var bodyMatch = raw.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
-      var html = bodyMatch ? bodyMatch[1] : raw;
-      // Convert bold/italic inline styles to semantic tags
-      html = html.replace(/<span[^>]*font-weight\s*:\s*700[^>]*>([\s\S]*?)<\/span>/g, '<strong>$1</strong>');
-      html = html.replace(/<span[^>]*font-style\s*:\s*italic[^>]*>([\s\S]*?)<\/span>/g, '<em>$1</em>');
-      // Remove all remaining inline styles but keep tag structure
-      html = html.replace(/ style="[^"]*"/g, '');
-      html = html.replace(/ class="[^"]*"/g, '');
-      html = html.replace(/<span>/g, '').replace(/<\/span>/g, '');
-      // Remove empty paragraphs markers but keep br/p structure
-      html = html.replace(/<p><br[^>]*><\/p>/g, '<p>&nbsp;</p>');
-      vDriveText = html;
+      // Convert plain text to HTML preserving paragraphs and line breaks
+      // Split into paragraphs on double newlines
+      var paragraphs = raw.split(/\n\n+/);
+      vDriveText = paragraphs.map(function(p) {
+        var line = p.trim();
+        if (!line) return '';
+        // Convert single newlines to <br>
+        line = esc(line).replace(/\n/g, '<br>');
+        return '<p>' + line + '</p>';
+      }).filter(Boolean).join('');
     } else {
       vDriveText = '';
     }
