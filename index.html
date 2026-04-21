@@ -519,7 +519,7 @@ const SC = {
 const EDITORS = ['Carmen Guida','Floriana Zucaro','Gerardo Carpentieri','Peppe Mazzeo','Romano Fistola','Rosa Anna La Rocca','Rosaria Battarra','Stefano Franco'];
 const COPYEDITORS = ['Gerardo Carpentieri','Laura Ascione',"Nunzia D'Amico",'Stella Pennino','Tonia Stiuso','Valerio Martinelli'];
 const LS_KEY = 'tema-journal-v2';
-const GS_URL = 'https://script.google.com/macros/s/AKfycbznjMGWYy9lQSRx-RhTfdgnt-YkEDv1vZRjVZvF62QD9hJ1qeZalCZxCxgak3H01zVp/exec';
+const GS_URL = 'https://script.google.com/macros/s/AKfycbxEfRQa9yFnx5GooMk7gi35y1jaCv0mW0Fg_NaCEhqt8SNpSwIfZVgyoZwhKe4-hSJn/exec';
 
 let issues = [], articles = [], editingArtId = null, editingIssKey = null;
 let saveTimer = null, sessionUnlocked = false, pendingAction = null;
@@ -1197,6 +1197,7 @@ async function printTurnitin() {
     var simOk = !isNaN(_sim) && a.similarity!==null && a.similarity!=='' && _sim < 30;
     var aiOk  = !isNaN(_ai)  && a.aiPercent!==null  && a.aiPercent!==''  && _ai  < 30;
     if (!(simOk && aiOk)) return false;
+    if (a.step === '5') return false; // già accettato dal GateKeeper
     return true;
   }).sort(function(a,b){ return parseInt(b.id)-parseInt(a.id); });
 
