@@ -2125,7 +2125,7 @@ function openEditArt(id) {
   checkAntiplagio();
   document.getElementById('gkRow').style.display=(a.editor&&a.editor!=='')?'none':'block';
   document.getElementById('btnDel').style.display='inline-block';
-  document.getElementById('btnRifiutoGK').style.display=adminMode?'inline-block':'none';
+  document.getElementById('btnRifiutoGK').style.display=(adminMode||currentUser==='GateKeeper')?'inline-block':'none';
   var _showAccGk = (adminMode||currentUser==='GateKeeper') && (!a.editor || a.editor==='');
   document.getElementById('btnAccettazioneGK').style.display=_showAccGk?'inline-block':'none';
   document.getElementById('btnRifiutoTur').style.display=adminMode?'inline-block':'none';
