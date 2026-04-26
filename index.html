@@ -811,7 +811,7 @@ function artCard(a, showEdit) {
       editBtn +
     '</div>' +
     metaHtml + revHtml +
-    (a.notes ? '<div class="note-box">'+esc(a.notes)+'</div>' : '') +
+    (a.notes ? '<div class="note-box">'+esc(a.notes).replace(/\n/g,'<br>')+'</div>' : '') +
     (function(){
       var info = [];
       if (a.decisioneEditor && a.decisioneEditor !== '') info.push('<strong>Decisione:</strong> '+esc(a.decisioneEditor));
@@ -1263,6 +1263,10 @@ async function printTurnitin() {
         (giorni>0?' &middot; Countdown: '+giorni+' giorni rimanenti':' &middot; Scaduto')+'</p>';
     }
     var absSection = '<div style="font-size:13px;margin-top:8px;border-top:1px solid #ddd;padding-top:8px;line-height:1.6">';
+    // Note in grassetto nero PRIMA dell'abstract
+    if (a.notes && a.notes.trim()) {
+      absSection += '<p style="color:#111;font-weight:bold;margin:0 0 8px">'+esc(a.notes).replace(/\n/g,'<br>')+'</p>';
+    }
     if (a.abstract && a.abstract.trim()) {
       absSection += '<b>Abstract (originale):</b><br>'+esc(a.abstract);
       absSection += '<br><br><b>Abstract (italiano):</b><br>';
