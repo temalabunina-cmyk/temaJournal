@@ -2513,23 +2513,41 @@ function renderRifTur() {
 }
 
 function updateTabCounts() {
-    var gkCount = articles.filter(function(a){
-        if(a.status==='Pubblicato' || a.step==='18') return false;
-        if(a.step==='8b' || a.step==='7b') return false;
-        if(a.editor && a.editor.trim()!=='') return false;
-        return true;
-    }).length;
-    var listaCount = articles.filter(function(a){
-        if(a.status==='Pubblicato' || a.step==='18') return false;
-        if(a.step==='8b' || a.step==='7b') return false;
-        if(!a.editor || a.editor.trim()==='') return false;
-        return true;
-    }).length;
-    document.querySelectorAll('.tab').forEach(function(btn){
-        var tab=btn.dataset.tab;
-        if(tab==='gatekeeper') btn.textContent='GateKeeper evaluation ('+gkCount+')';
-        if(tab==='lista') btn.textContent='Articoli in lavorazione ('+listaCount+')';
-    });
+  // GK evaluation: no editor, not Rifiutato, not Pubblicato, not step 19
+  var gkCount = articles.filter(function(a){
+    return a.status !== 'Pubblicato' && a.status !== 'Rifiutato' && a.step !== '19' &&
+           (!a.editor || a.editor === '');
+  }).length;
+
+  // Articoli in lavorazione: has editor, not Rifiutato, not Pubblicato, not step 19
+  var listaCount = articles.filter(function(a){
+    return a.status !== 'Pubblicato' && a.status !== 'Rifiutato' && a.step !== '19' &&
+           a.editor && a.editor !== '';
+  }).length;
+
+  // Rifiutati: status Rifiutato
+  var rifCount = articles.filter(function(a){
+    return a.status === 'Rifiutato';
+  }).length;
+
+  // Pubblicati
+  var pubCount = articles.filter(function(a){
+    return a.status === 'Pubblicato';
+  }).length;
+
+  // Tutti: tutti tranne Pubblicato e Rifiutato
+  var tuttiCount = articles.filter(function(a){
+    return a.status !== 'Pubblicato' && a.status !== 'Rifiutato';
+  }).length;
+
+  document.querySelectorAll('.tab').forEach(function(btn){
+    var tab = btn.dataset.tab;
+    if (tab === 'gatekeeper') btn.textContent = 'GateKeeper evaluation (' + gkCount + ')';
+    if (tab === 'lista')      btn.textContent = 'Articoli in lavorazione (' + listaCount + ')';
+    if (tab === 'rifiutati')  btn.textContent = 'Rifiutati (' + rifCount + ')';
+    if (tab === 'pubblicati') btn.textContent = 'Articoli pubblicati (' + pubCount + ')';
+    if (tab === 'tutti')      btn.textContent = 'Tutti gli articoli (' + tuttiCount + ')';
+  });
 }
 function switchTab(name) {
   document.querySelectorAll('.tab').forEach(function(t){ t.classList.toggle('active',t.dataset.tab===name); });
