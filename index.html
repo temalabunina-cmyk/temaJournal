@@ -1263,9 +1263,9 @@ async function printTurnitin() {
         (giorni>0?' &middot; Countdown: '+giorni+' giorni rimanenti':' &middot; Scaduto')+'</p>';
     }
     var absSection = '<div style="font-size:13px;margin-top:8px;border-top:1px solid #ddd;padding-top:8px;line-height:1.6">';
-    // Note in grassetto nero PRIMA dell'abstract
+    // Note PRIMA dell'abstract: 'Note:' in grassetto + testo normale
     if (a.notes && a.notes.trim()) {
-      absSection += '<p style="color:#111;font-weight:bold;margin:0 0 8px">'+esc(a.notes).replace(/\n/g,'<br>')+'</p>';
+      absSection += '<p style="color:#111;margin:0 0 8px"><b>Note:</b> '+esc(a.notes).replace(/\n/g,'<br>')+'</p>';
     }
     if (a.abstract && a.abstract.trim()) {
       absSection += '<b>Abstract (originale):</b><br>'+esc(a.abstract);
@@ -1294,8 +1294,7 @@ async function printTurnitin() {
         '<span style="'+metricStyle+'">JCR 2y: '+(a.citeJCR2y||0)+'</span>'+
       '</div>'+
       commHtml+absSection+
-      (a.notes?'<div style="font-size:13px;color:#666;font-style:italic;margin-top:6px">Note: '+esc(a.notes)+'</div>':'')+
-    '</div>';
+      '</div>';
   }
 
   // Group articles by category
