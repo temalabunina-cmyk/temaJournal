@@ -666,6 +666,24 @@ async function loadDriveText() {
     vDriveText = '';
   }
 }
+function printViaFrame(html) {
+  var frame = document.getElementById('printFrame');
+  // Remove and recreate to ensure clean state
+  var parent = frame.parentNode;
+  var newFrame = document.createElement('iframe');
+  newFrame.id = 'printFrame';
+  newFrame.style.cssText = 'display:none;position:fixed;width:0;height:0;border:0;top:0;left:0';
+  parent.replaceChild(newFrame, frame);
+  var doc = newFrame.contentDocument || newFrame.contentWindow.document;
+  doc.open();
+  doc.write(html);
+  doc.close();
+  setTimeout(function() {
+    newFrame.contentWindow.focus();
+    newFrame.contentWindow.print();
+  }, 600);
+}
+
 function schedSave() { setSaving(true); clearTimeout(saveTimer); saveTimer = setTimeout(persist, 600); }
 
 function requirePwd(action) {
@@ -1333,12 +1351,7 @@ async function printTurnitin() {
     (gkArts.length ? cards : '<p style="text-align:center;color:#999">Nessun articolo da segnalare.</p>')+
     '</body></html>';
 
-  var blob = new Blob([html], {type:'text/html;charset=utf-8'});
-  var blobUrl = URL.createObjectURL(blob);
-  var w = window.open(blobUrl, '_blank');
-  if (!w) { alert('Consenti i popup per questo sito e riprova.'); return; }
-  w.addEventListener('load', function(){ w.print(); });
-  setTimeout(function(){ URL.revokeObjectURL(blobUrl); }, 60000);
+  printViaFrame(html);
 }
 
 
@@ -1876,12 +1889,7 @@ function printVerbale() {
     '<style>' + css + '</style>' +
     '</head><body>' + bodyHtml + '</body></html>';
 
-  var blob = new Blob([fullHtml], {type:'text/html;charset=utf-8'});
-  var blobUrl = URL.createObjectURL(blob);
-  var w = window.open(blobUrl, '_blank');
-  if (!w) { alert('Consenti i popup per questo sito e riprova.'); return; }
-  w.addEventListener('load', function(){ w.focus(); w.print(); });
-  setTimeout(function(){ URL.revokeObjectURL(blobUrl); }, 60000);
+  printViaFrame(fullHtml);
 }
 
 
@@ -2759,5 +2767,6 @@ function bootApp() {
 
 
 </script>
+<iframe id="printFrame" style="display:none;position:fixed;width:0;height:0;border:0;top:0;left:0"></iframe>
 </body>
 </html>
