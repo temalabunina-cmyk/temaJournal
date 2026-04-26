@@ -1333,11 +1333,12 @@ async function printTurnitin() {
     (gkArts.length ? cards : '<p style="text-align:center;color:#999">Nessun articolo da segnalare.</p>')+
     '</body></html>';
 
-  var w = window.open('', '_blank');
+  var blob = new Blob([html], {type:'text/html;charset=utf-8'});
+  var blobUrl = URL.createObjectURL(blob);
+  var w = window.open(blobUrl, '_blank');
   if (!w) { alert('Consenti i popup per questo sito e riprova.'); return; }
-  w.document.write(html);
-  w.document.close();
-  setTimeout(function(){ w.print(); }, 600);
+  w.addEventListener('load', function(){ w.print(); });
+  setTimeout(function(){ URL.revokeObjectURL(blobUrl); }, 60000);
 }
 
 
@@ -1875,12 +1876,12 @@ function printVerbale() {
     '<style>' + css + '</style>' +
     '</head><body>' + bodyHtml + '</body></html>';
 
-  var w = window.open('', '_blank');
+  var blob = new Blob([fullHtml], {type:'text/html;charset=utf-8'});
+  var blobUrl = URL.createObjectURL(blob);
+  var w = window.open(blobUrl, '_blank');
   if (!w) { alert('Consenti i popup per questo sito e riprova.'); return; }
-  w.document.open();
-  w.document.write(fullHtml);
-  w.document.close();
-  setTimeout(function(){ w.focus(); w.print(); }, 1000);
+  w.addEventListener('load', function(){ w.focus(); w.print(); });
+  setTimeout(function(){ URL.revokeObjectURL(blobUrl); }, 60000);
 }
 
 
