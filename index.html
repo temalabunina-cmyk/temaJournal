@@ -897,10 +897,10 @@ function gkCard(a) {
   var gkApproved = bothLow && a.step === '5';
   if (simHigh || aiHigh) {
     // Rosso: non supera Turnitin
-    card = card.replace('<div class="card">', '<div class="card" style="background:#fff5f5;border-color:#f5b7b1;">');
+    card = card.replace('<div class="card">', '<div class="card" style="background:#ffe0e0;border-color:#e53e3e;border-width:2px;">');
   } else if (gkApproved) {
     // Verde: approvato dal GateKeeper
-    card = card.replace('<div class="card">', '<div class="card" style="background:#f0fff4;border-color:#9ae6b4;">');
+    card = card.replace('<div class="card">', '<div class="card" style="background:#c6f6d5;border-color:#2f855a;border-width:2px;">');
   }
   // Senza colore: da valutare dal GateKeeper (bothLow ma non ancora approvato)
   // Impaginato badge (shown after Internazionale in GK cards)
@@ -1196,8 +1196,9 @@ async function printTurnitin() {
     if (a.editor && a.editor !== '') return false;
     var simOk = !isNaN(_sim) && a.similarity!==null && a.similarity!=='' && _sim < 30;
     var aiOk  = !isNaN(_ai)  && a.aiPercent!==null  && a.aiPercent!==''  && _ai  < 30;
+    if (a.step === '1') return true; // St.1: ricevuto, da verificare
+    if (a.step === '5') return true; // St.5: approvato dal GK
     if (!(simOk && aiOk)) return false;
-    if (a.step === '5') return false; // già accettato dal GateKeeper
     return true;
   }).sort(function(a,b){ return parseInt(b.id)-parseInt(a.id); });
 
@@ -1247,7 +1248,7 @@ async function printTurnitin() {
   var today = new Date().toLocaleDateString('it-IT');
   var metricStyle = 'display:inline-block;margin-right:10px;font-size:12px;font-weight:bold';
 
-  var cards = gkArts.map(function(a) {
+  function buildCard(a) {
     var sim = (a.similarity!==null&&a.similarity!=='')?a.similarity+'%':'—';
     var ai  = (a.aiPercent!==null&&a.aiPercent!=='')?a.aiPercent+'%':'—';
     var simRed = parseFloat(a.similarity)>30;
@@ -1291,7 +1292,30 @@ async function printTurnitin() {
       commHtml+absSection+
       (a.notes?'<div style="font-size:13px;color:#666;font-style:italic;margin-top:6px">Note: '+esc(a.notes)+'</div>':'')+
     '</div>';
-  }).join('');
+  }
+
+  // Group articles by category
+  var gkSt1   = gkArts.filter(function(a){ return a.step==='1'; });
+  var gkOther = gkArts.filter(function(a){ return a.step!=='1'&&a.step!=='5'; });
+  var gkSt5   = gkArts.filter(function(a){ return a.step==='5'; });
+
+  function sectionHdr(label, count, color) {
+    return '<div style="background:'+color+';color:#fff;font-weight:bold;font-size:12pt;padding:6px 12px;margin:16px 0 6px;border-radius:3px">'+label+' ('+count+')</div>';
+  }
+
+  var cards = '';
+  if (gkSt1.length) {
+    cards += sectionHdr('St.1 — In attesa di verifica Turnitin', gkSt1.length, '#718096');
+    cards += gkSt1.map(buildCard).join('');
+  }
+  if (gkOther.length) {
+    cards += sectionHdr('Da valutare dal GateKeeper (Turnitin superato)', gkOther.length, '#2B6CB0');
+    cards += gkOther.map(buildCard).join('');
+  }
+  if (gkSt5.length) {
+    cards += sectionHdr('St.5 — Approvati dal GateKeeper', gkSt5.length, '#276749');
+    cards += gkSt5.map(buildCard).join('');
+  }
 
   var html = '<!DOCTYPE html><html lang="it"><head><meta charset="utf-8">'+
     '<title>Report per GateKeeper TeMA '+today+'</title>'+
