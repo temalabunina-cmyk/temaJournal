@@ -212,11 +212,11 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
   </div>
   <div class="vform">
     <div class="fsl first">Intestazione</div>
-    <div class="g3">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px 20px;align-items:end">
       <div class="fr"><label>Numero verbale</label><input id="vNum" placeholder="es. 8/26"></div>
-    <div class="fr"><a href="https://docs.google.com/document/d/1BizhUtvLCFm5g4fB3pscfBp483rBoXr7Q4QAETesEhI/edit" target="_blank" rel="noopener" class="btn" style="display:inline-flex;align-items:center;gap:6px;font-size:20px">&#128196; Apri Note Editoriali</a></div>
       <div class="fr"><label>Data riunione</label><input id="vDate" type="date"></div>
       <div class="fr"><label>Fascicolo di riferimento</label><select id="vIss"></select></div>
+      <div class="fr"><a href="https://docs.google.com/document/d/1BizhUtvLCFm5g4fB3pscfBp483rBoXr7Q4QAETesEhI/edit" target="_blank" rel="noopener" class="btn" style="display:inline-flex;align-items:center;gap:6px;font-size:20px;margin-top:22px">&#128196; Apri Note Editoriali</a></div>
     </div>
   </div>
   <div id="verbalePreview"></div>
@@ -1364,9 +1364,10 @@ function renderGk() {
         if (a.editor && a.editor.trim() !== '') return false;
 
         // Ricerca
-        if (q && (a.id + ' ' + a.title + ' ' + a.authors).toLowerCase().indexOf(q) < 0)
-            return false;
-
+        if (q && (a.id + ' ' + a.title + ' ' + a.authors).toLowerCase().indexOf(q) < 0) return false;
+        if (fGkStep && a.step !== fGkStep) return false;
+        if (fGkSec  && a.section !== fGkSec) return false;
+        if (fGkIntl && a.intl !== fGkIntl) return false;
         return true;
     });
 
