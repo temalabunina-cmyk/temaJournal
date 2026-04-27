@@ -175,6 +175,11 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
     <button class="btn btn-p" onclick="printTurnitin()">&#128438; Stampa / Salva PDF Report GateKeeper</button>
   </div>
   <div class="toolbar"><input class="srch" type="text" id="srchGk" placeholder="Cerca..."></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+    <select id="fGkStep" onchange="renderGk()" style="font-size:20px;padding:6px 10px;border:1px solid var(--brd);border-radius:var(--r);background:var(--sur)"><option value="">Tutti gli step</option><option value="1">St.1</option><option value="2">St.2</option><option value="3">St.3</option><option value="5">St.5 · Approvato GK</option></select>
+    <select id="fGkSec" onchange="renderGk()" style="font-size:20px;padding:6px 10px;border:1px solid var(--brd);border-radius:var(--r);background:var(--sur)"><option value="">Tutte le sezioni</option><option>Focus</option><option>LUME</option><option>RNs</option><option>SI</option></select>
+    <select id="fGkIntl" onchange="renderGk()" style="font-size:20px;padding:6px 10px;border:1px solid var(--brd);border-radius:var(--r);background:var(--sur)"><option value="">Tutti</option><option value="si">Internazionale</option><option value="no">Italia</option></select>
+  </div>
   <div id="gkEl"></div>
 </div>
 <div class="sec" id="sec-lista">
@@ -209,6 +214,7 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
     <div class="fsl first">Intestazione</div>
     <div class="g3">
       <div class="fr"><label>Numero verbale</label><input id="vNum" placeholder="es. 8/26"></div>
+    <div class="fr"><a href="https://docs.google.com/document/d/1BizhUtvLCFm5g4fB3pscfBp483rBoXr7Q4QAETesEhI/edit" target="_blank" rel="noopener" class="btn" style="display:inline-flex;align-items:center;gap:6px;font-size:20px">&#128196; Apri Note Editoriali</a></div>
       <div class="fr"><label>Data riunione</label><input id="vDate" type="date"></div>
       <div class="fr"><label>Fascicolo di riferimento</label><select id="vIss"></select></div>
     </div>
@@ -666,24 +672,6 @@ async function loadDriveText() {
     vDriveText = '';
   }
 }
-function printViaFrame(html) {
-  var frame = document.getElementById('printFrame');
-  // Remove and recreate to ensure clean state
-  var parent = frame.parentNode;
-  var newFrame = document.createElement('iframe');
-  newFrame.id = 'printFrame';
-  newFrame.style.cssText = 'display:none;position:fixed;width:0;height:0;border:0;top:0;left:0';
-  parent.replaceChild(newFrame, frame);
-  var doc = newFrame.contentDocument || newFrame.contentWindow.document;
-  doc.open();
-  doc.write(html);
-  doc.close();
-  setTimeout(function() {
-    newFrame.contentWindow.focus();
-    newFrame.contentWindow.print();
-  }, 600);
-}
-
 function schedSave() { setSaving(true); clearTimeout(saveTimer); saveTimer = setTimeout(persist, 600); }
 
 function requirePwd(action) {
@@ -1351,13 +1339,20 @@ async function printTurnitin() {
     (gkArts.length ? cards : '<p style="text-align:center;color:#999">Nessun articolo da segnalare.</p>')+
     '</body></html>';
 
-  printViaFrame(html);
+  var w = window.open('', '_blank');
+  if (!w) { alert('Consenti i popup per questo sito e riprova.'); return; }
+  w.document.write(html);
+  w.document.close();
+  setTimeout(function(){ w.print(); }, 600);
 }
 
 
 function renderGk() {
 
-    var q = (document.getElementById('srchGk').value || '').toLowerCase();
+    var q       = (document.getElementById('srchGk').value||'').toLowerCase();
+    var fGkStep = (document.getElementById('fGkStep')||{value:''}).value;
+    var fGkSec  = (document.getElementById('fGkSec') ||{value:''}).value;
+    var fGkIntl = (document.getElementById('fGkIntl')||{value:''}).value;
 
     // ✅ FILTRO CORRETTO PER GK:
     var f = articles.filter(function(a) {
@@ -1427,7 +1422,7 @@ function renderLista() {
     if (fIs && a.issue   !== fIs) return false;
     return true;
   });
-  f.sort(function(a,b){ return parseInt(b.id) - parseInt(a.id); });
+  f.sort(function(a,b){ var sa=parseInt(a.step)||0,sb=parseInt(b.step)||0; return sa!==sb?sa-sb:parseInt(b.id)-parseInt(a.id); });
   document.getElementById('listaEl').innerHTML = f.length ? f.map(function(a){ return artCard(a,true); }).join('') :
     '<div style="text-align:center;padding:3rem;color:var(--tx2)">Nessun articolo trovato.</div>';
 }
@@ -1462,7 +1457,10 @@ function renderRifRef() {
     var isDeclined = a.decisioneEditor === 'Decline submission' || a.decisioneEditor2 === 'Decline submission';
     if (!isDeclined && a.step !== '14') return false;
     if (a.status !== 'Rifiutato') return false;
-    if (q && (a.id+' '+a.title+' '+a.authors).toLowerCase().indexOf(q) < 0) return false;
+    if (q       && (a.id+' '+a.title+' '+a.authors).toLowerCase().indexOf(q) < 0) return false;
+    if (fGkStep && a.step !== fGkStep) return false;
+    if (fGkSec  && a.section !== fGkSec) return false;
+    if (fGkIntl && a.intl !== fGkIntl) return false;
     return true;
   });
   document.getElementById('rifRefCount').textContent = f.length+' articol'+(f.length===1?'o':'i');
@@ -1889,7 +1887,12 @@ function printVerbale() {
     '<style>' + css + '</style>' +
     '</head><body>' + bodyHtml + '</body></html>';
 
-  printViaFrame(fullHtml);
+  var w = window.open('', '_blank');
+  if (!w) { alert('Consenti i popup per questo sito e riprova.'); return; }
+  w.document.open();
+  w.document.write(fullHtml);
+  w.document.close();
+  setTimeout(function(){ w.focus(); w.print(); }, 800);
 }
 
 
@@ -2767,6 +2770,5 @@ function bootApp() {
 
 
 </script>
-<iframe id="printFrame" style="display:none;position:fixed;width:0;height:0;border:0;top:0;left:0"></iframe>
 </body>
 </html>
