@@ -1519,7 +1519,7 @@ function renderTeam() {
 
   h += '<div style="font-size:16px;font-weight:700;margin:1.5rem 0 1rem">Copyeditor</div>';
   COPYEDITORS.forEach(function(ce) {
-    var mine = articles.filter(function(a){ return a.copyeditor===ce && a.step !== '8b' && a.step !== '7b' && a.status !== 'Rifiutato'; });
+    var mine = articles.filter(function(a){ return a.copyeditor===ce && a.status !== 'Rifiutato' && a.status !== 'Pubblicato'; });
     var artList = mine.map(function(a){
       return '<div style="font-size:20px;padding:4px 0;border-bottom:1px solid var(--brd);display:flex;gap:8px;align-items:start">'
         + '<span style="font-family:monospace;color:var(--tx3);font-size:16px;flex-shrink:0">#'+esc(a.id)+'</span>'
