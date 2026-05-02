@@ -2176,6 +2176,11 @@ function openEditArt(id) {
   }
   document.getElementById('fSecArt').value=a.section||'Focus';
   document.getElementById('fStep').value=a.step||'';
+  // Show indicator if step is manually locked
+  var _stepLbl = document.querySelector('label[for="fStep"]') || document.querySelector('.fStep-label');
+  if (_stepLbl) _stepLbl.title = a.stepManuale ? 'Step impostato manualmente (autoStep disabilitato)' : '';
+  var _stepSel = document.getElementById('fStep');
+  if (_stepSel) _stepSel.style.borderColor = a.stepManuale ? 'var(--orange)' : '';
   document.getElementById('fStatus').value=a.status||'Sottomesso';
   document.getElementById('fDead').value=a.deadline||'';
   document.getElementById('fArtNum').value=a.articleNum||'';
@@ -2215,6 +2220,9 @@ function openEditArt(id) {
   document.getElementById('artModal').classList.add('open');
 }
 function autoStep(a) {
+  // Se lo step è stato impostato manualmente, non sovrascrivere
+  if (a.stepManuale) return a;
+
   var sim = parseFloat(a.similarity);
   var ai  = parseFloat(a.aiPercent);
   var simOk = !isNaN(sim) && a.similarity !== null && a.similarity !== '';
@@ -2324,6 +2332,7 @@ function saveArt() {
     section:document.getElementById('fSecArt').value,
     status:document.getElementById('fStatus').value,
     step:document.getElementById('fStep').value,
+    stepManuale: _stepManuale ? true : ((_origIdx>=0 && articles[_origIdx].stepManuale) ? articles[_origIdx].stepManuale : false),
     issue:document.getElementById('fIssArt').value,
     articleNum:parseInt(document.getElementById('fArtNum').value)||null,
     deadline:document.getElementById('fDead').value,
