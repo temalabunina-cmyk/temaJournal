@@ -2155,6 +2155,25 @@ function openEditArt(id) {
   setTimeout(function(){ autoResize(document.getElementById('fAbstract')); }, 0);
   document.getElementById('fLen').value=a.length||'';
   document.getElementById('fImpaginato').checked=!!(a.impaginato);
+  // OneDrive link
+  var _od = a.oneDrive||'';
+  document.getElementById('fOneDrive').value = _od;
+  var _odBtn = document.getElementById('fOneDriveBtn');
+  var _odWrap = document.getElementById('fOneDriveWrap');
+  if (adminMode) {
+    _odWrap.style.display = '';
+    document.getElementById('fOneDrive').style.display = 'block';
+    document.getElementById('fOneDrive').disabled = false;
+    _odBtn.href = _od;
+    _odBtn.style.display = _od ? 'inline-flex' : 'none';
+  } else if (currentUser === 'GateKeeper') {
+    _odWrap.style.display = _od ? '' : 'none';
+    document.getElementById('fOneDrive').style.display = 'none';
+    _odBtn.href = _od;
+    _odBtn.style.display = _od ? 'inline-flex' : 'none';
+  } else {
+    _odWrap.style.display = 'none';
+  }
   document.getElementById('fSecArt').value=a.section||'Focus';
   document.getElementById('fStep').value=a.step||'';
   document.getElementById('fStatus').value=a.status||'Sottomesso';
