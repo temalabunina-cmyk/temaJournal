@@ -348,6 +348,15 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
       </label>
     </div>
   </div>
+    <!-- OneDrive link: input per RedazioneTeMA, bottone per GateKeeper, nascosto per EditorTeMA -->
+    <div class="fr" id="fOneDriveWrap">
+      <label>Link OneDrive</label>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input id="fOneDrive" placeholder="https://..." style="flex:1"
+          oninput="var b=document.getElementById('fOneDriveBtn');b.href=this.value;b.style.display=this.value?'inline-flex':'none'">
+        <a id="fOneDriveBtn" href="#" target="_blank" rel="noopener" class="btn" style="display:none;white-space:nowrap">&#128279; Apri su OneDrive</a>
+      </div>
+    </div>
   <div class="fsl" style="display:flex;align-items:center;justify-content:space-between">Antiplagio e AI<button type="button" class="btn" id="btnUnlockAnti" style="font-size:20px;padding:2px 8px">&#128274; Sblocca</button></div>
   <div class="field-locked" id="antiGroup">
   <div class="g2">
@@ -2100,6 +2109,9 @@ function openNewArt() {
   ['fLen','fArtNum','fRefs','fCTeMA','fCTeMA2226','fCJCR','fCJCR2y','fSim','fAi'].forEach(function(id){ document.getElementById(id).value=''; });
   document.getElementById('fDataSottomissione').value='';
   document.getElementById('fImpaginato').checked=false;
+  document.getElementById('fOneDrive').value='';
+  document.getElementById('fOneDriveBtn').style.display='none';
+  document.getElementById('fOneDriveWrap').style.display = adminMode?'':'none';
   document.getElementById('fEd2').value=''; document.getElementById('fCopy').value='';
   document.getElementById('fGk').value=''; document.getElementById('fIntlArt').value='';
   document.getElementById('fComunicazioneInviata').checked=false;
@@ -2205,10 +2217,8 @@ function autoStep(a) {
     a.step = '4';
   }
 
-  // St.2 → St.5: verifica Turnitin superata (entrambi <30)
-  if (step <= 2 && simOk && aiOk && sim < 30 && ai < 30) {
-    a.step = '5';
-  }
+  // St.5 viene impostato solo dal pulsante 'Accettazione GateKeeper' — non in automatico
+  // Turnitin ok (sim<30 e AI<30) porta a St.2, non St.5
 
   // St.5 → St.6: rifiuto GateKeeper (già gestito da rifiutoGK → step 7b)
 
@@ -2291,6 +2301,7 @@ function saveArt() {
     abstract:document.getElementById('fAbstract').value.trim(),
     length:parseInt(document.getElementById('fLen').value)||0,
     impaginato:document.getElementById('fImpaginato').checked,
+    oneDrive:document.getElementById('fOneDrive').value||'',
     section:document.getElementById('fSecArt').value,
     status:document.getElementById('fStatus').value,
     step:document.getElementById('fStep').value,
