@@ -2316,6 +2316,13 @@ function autoStep(a) {
 }
 
 function saveArt() {
+  // Detect manual step change
+  var _origIdx = articles.findIndex(function(x){ return x.id===editingArtId; });
+  var _origStep = _origIdx>=0 ? (articles[_origIdx].step||'') : '';
+  var _newStep = document.getElementById('fStep').value;
+  var _stepManuale = (_origStep !== '' && _newStep !== _origStep) ? true
+    : (_origIdx>=0 && articles[_origIdx].stepManuale ? articles[_origIdx].stepManuale : false);
+
   var sim=document.getElementById('fSim').value, ai=document.getElementById('fAi').value;
   var data={
     id:document.getElementById('fId').value.trim(),
@@ -2332,7 +2339,7 @@ function saveArt() {
     section:document.getElementById('fSecArt').value,
     status:document.getElementById('fStatus').value,
     step:document.getElementById('fStep').value,
-    stepManuale: _stepManuale ? true : ((_origIdx>=0 && articles[_origIdx].stepManuale) ? articles[_origIdx].stepManuale : false),
+    stepManuale:_stepManuale,
     issue:document.getElementById('fIssArt').value,
     articleNum:parseInt(document.getElementById('fArtNum').value)||null,
     deadline:document.getElementById('fDead').value,
