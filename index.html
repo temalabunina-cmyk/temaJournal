@@ -1653,7 +1653,7 @@ function renderVerbale() {
         '<td style="width:28px;text-align:right;padding:4px 6px;color:#666;font-size:11pt;vertical-align:top;font-family:monospace">'+(a.articleNum||'&#8212;')+'</td>' +
         '<td style="padding:4px 8px;border-bottom:1px solid #eee">' +
           '<div style="font-size:11pt;font-weight:bold">'+esc(a.title)+'</div>' +
-          '<div style="font-size:11pt;color:#555;margin-top:1px">'+esc(a.authors)+(a.affiliation?' &#8212; '+esc(a.affiliation):'')+'</div>' +
+          '<div style="font-size:11pt;color:#555;margin-top:1px">'+esc(a.authors)+(a.affiliation?' &middot; '+esc(a.affiliation):'')+(a.nationality?' &middot; '+esc(a.nationality):'')+'</div>' +
           '<div style="font-size:11pt;color:#888;margin-top:1px">'+stepFull(a.step)+(a.editor?' &middot; Editor: '+esc(a.editor):'')+'</div>' +
         '</td></tr>';
     };
@@ -1749,8 +1749,8 @@ function renderVerbale() {
     metrics.push('JCR 2y: '+(a.citeJCR2y||0));
     if (a.length)     metrics.push('Lunghezza: '+a.length+' car.');
     return '<div class="ae">' +
-      '<p><strong>'+(idx2+1)+'. #'+esc(a.id)+'</strong> &mdash; <em>'+esc(a.title)+'</em>' +
-      (a.authors?' &mdash; '+esc(a.authors)+(a.affiliation?' &#8212; '+esc(a.affiliation):'')+(a.nationality?' &#8212; '+esc(a.nationality):''):'') + '</p>' +
+      '<p><strong>'+(idx2+1)+'. #'+esc(a.id)+'</strong> &mdash; <em>'+esc(a.title)+'</em></p>' +
+      (a.authors ? '<p>'+esc(a.authors)+(a.affiliation?' &middot; '+esc(a.affiliation):'')+(a.nationality?' &middot; '+esc(a.nationality):'')+'</p>' : '') +
       (a.section?'<p>Sezione: <strong>'+esc(a.section)+'</strong>'+(a.intl==='si'?' &middot; Contributo internazionale':'')+'</p>':'') +
       (a.gatekeeper?'<p>GK: '+esc(a.gatekeeper)+'</p>':'') +
       (metrics.length?'<p>'+metrics.join(' &middot; ')+'</p>':'') +
