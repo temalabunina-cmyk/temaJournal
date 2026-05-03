@@ -1493,9 +1493,9 @@ function renderRifGk() {
 
 function renderTeam() {
   var h = '<div style="font-size:16px;font-weight:700;margin-bottom:1rem">GateKeeper</div>';
-  var gk = articles.filter(function(a){ return a.gatekeeper==='Lilli Gargiulo' && (!a.editor||a.editor==='') && (a.step==='1'||a.status==='GateKeeper evaluation') && a.step !== '8b' && a.step !== '7b' && a.status !== 'Rifiutato' &&
-    !isNaN(parseFloat(a.similarity)) && parseFloat(a.similarity) < 30 &&
-    !isNaN(parseFloat(a.aiPercent)) && parseFloat(a.aiPercent) < 30; });
+  var gk = articles.filter(function(a){ return a.gatekeeper==='Lilli Gargiulo' && (!a.editor||a.editor==='') &&
+    a.status !== 'Rifiutato' && a.status !== 'Pubblicato' && a.step !== '19' &&
+    a.step==='5'; });
   h += '<div class="card"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:'+(gk.length?'10px':'0')+'">' +
     '<div style="font-size:20px;font-weight:700">Lilli Gargiulo</div>' +
     '<span style="font-size:20px;font-weight:600;color:var(--orange)">'+gk.length+' articoli in valutazione</span>' +
