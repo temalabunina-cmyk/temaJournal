@@ -1641,7 +1641,7 @@ function renderVerbale() {
 
   // Fascicoli
   var fascicoliHtml = '';
-  issues.forEach(function(iss) {
+  issues.filter(function(iss){ return !iss.pubblicato; }).forEach(function(iss) {
     var ia = articles.filter(function(a){ return a.issue===iss.key; });
     var focus = ia.filter(function(a){return a.section==='Focus';}).sort(function(a,b){return (a.articleNum||999)-(b.articleNum||999);});
     var lume  = ia.filter(function(a){return a.section==='LUME';}).sort(function(a,b){return (a.articleNum||999)-(b.articleNum||999);});
@@ -1750,7 +1750,7 @@ function renderVerbale() {
     if (a.length)     metrics.push('Lunghezza: '+a.length+' car.');
     return '<div class="ae">' +
       '<p><strong>'+(idx2+1)+'. #'+esc(a.id)+'</strong> &mdash; <em>'+esc(a.title)+'</em>' +
-      (a.authors?' &mdash; '+esc(a.authors):'') + '</p>' +
+      (a.authors?' &mdash; '+esc(a.authors)+(a.affiliation?' &#8212; '+esc(a.affiliation):'')+(a.nationality?' &#8212; '+esc(a.nationality):''):'') + '</p>' +
       (a.section?'<p>Sezione: <strong>'+esc(a.section)+'</strong>'+(a.intl==='si'?' &middot; Contributo internazionale':'')+'</p>':'') +
       (a.gatekeeper?'<p>GK: '+esc(a.gatekeeper)+'</p>':'') +
       (metrics.length?'<p>'+metrics.join(' &middot; ')+'</p>':'') +
