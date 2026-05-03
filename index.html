@@ -1733,7 +1733,7 @@ function renderVerbale() {
           return '<li style="margin-bottom:2px">'+parts.join(' &middot; ')+'</li>';
         }).join('') + '</ul>' : '') +
       (info.length ? '<p>'+info.join(' &middot; ')+'</p>' : '') +
-      (a.notes ? '<p style="font-style:italic;color:#555"><strong>Note:</strong> '+esc(a.notes)+'</p>' : '') +
+      (a.notes ? '<p style="font-style:italic;color:#555"><strong>Note:</strong> '+esc(a.notes).replace(/\n/g,'<br>')+'</p>' : '') +
     '</div>';
   };
 
@@ -1763,7 +1763,7 @@ function renderVerbale() {
         return '<p><strong>Comunicazione Turnitin inviata il:</strong> '+sent.toLocaleDateString('it-IT')+cdStr+'</p>';
       })():'') +
       (a.rispostaAutori&&a.rispostaAutori!==''?'<p><strong>Risposta autori:</strong> '+esc(a.rispostaAutori)+'</p>':'') +
-      (a.notes?'<p style="font-style:italic;color:#555"><strong>Note:</strong> '+esc(a.notes)+'</p>':'') +
+      (a.notes?'<p style="font-style:italic;color:#555"><strong>Note:</strong> '+esc(a.notes).replace(/\n/g,'<br>')+'</p>':'') +
     '</div>';
   };
 
