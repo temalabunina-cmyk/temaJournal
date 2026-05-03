@@ -176,7 +176,7 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
   </div>
   <div class="toolbar"><input class="srch" type="text" id="srchGk" placeholder="Cerca..."></div>
   <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
-    <select id="fGkStep" onchange="renderGk()" style="font-size:20px;padding:6px 10px;border:1px solid var(--brd);border-radius:var(--r);background:var(--sur)"><option value="">Tutti gli step</option><option value="1">St.1</option><option value="2">St.2</option><option value="3">St.3</option><option value="5">St.5 · Approvato GK</option></select>
+    <select id="fGkStep" onchange="renderGk()" style="font-size:20px;padding:6px 10px;border:1px solid var(--brd);border-radius:var(--r);background:var(--sur)"><option value="">Tutti gli step</option><option value="1">St.1</option><option value="2">St.2</option><option value="3">St.3</option><option value="5">St.5</option><option value="5a">St.5a · Approvato GK</option></select>
     <select id="fGkSec" onchange="renderGk()" style="font-size:20px;padding:6px 10px;border:1px solid var(--brd);border-radius:var(--r);background:var(--sur)"><option value="">Tutte le sezioni</option><option>Focus</option><option>LUME</option><option>RNs</option><option>SI</option></select>
     <select id="fGkIntl" onchange="renderGk()" style="font-size:20px;padding:6px 10px;border:1px solid var(--brd);border-radius:var(--r);background:var(--sur)"><option value="">Tutti</option><option value="si">Internazionale</option><option value="no">Italia</option></select>
   </div>
@@ -511,6 +511,7 @@ const STEPS = {
   '3':'St.3 · Invio comunicazione Turnitin agli autori',
   '4':'St.4 · Rifiuto Turnitin',
   '5':'St.5 · Assegnazione al GateKeeper',
+  '5a':'St.5a · Approvato dal GateKeeper',
   '6':'St.6 · Rifiuto GateKeeper',
   '7':'St.7 · Assegnazione all\'editor',
   '8':'St.8 · L\'Editor invita gli autori a modificare l\'articolo prima dell\'avvio del processo di revisione',
@@ -909,7 +910,7 @@ function gkCard(a) {
   var aiHigh  = aiVal  && parseFloat(a.aiPercent)  > 30;
   var bothLow = simVal && aiVal && parseFloat(a.similarity) < 30 && parseFloat(a.aiPercent) < 30;
   var card = artCard(a, true);
-  var gkApproved = bothLow && a.step === '5';
+  var gkApproved = a.step === '5a';
   if (simHigh || aiHigh) {
     // Rosso: non supera Turnitin
     card = card.replace('<div class="card">', '<div class="card" style="background:#ffe0e0;border-color:#e53e3e;border-width:2px;">');
@@ -1212,7 +1213,7 @@ async function printTurnitin() {
     var simOk = !isNaN(_sim) && a.similarity!==null && a.similarity!=='' && _sim < 30;
     var aiOk  = !isNaN(_ai)  && a.aiPercent!==null  && a.aiPercent!==''  && _ai  < 30;
     if (a.step === '1') return true; // St.1: ricevuto, da verificare
-    if (a.step === '5') return true; // St.5: approvato dal GK
+    if (a.step === '5a') return true; // St.5a: approvato dal GK
     if (!(simOk && aiOk)) return false;
     return true;
   }).sort(function(a,b){ return parseInt(b.id)-parseInt(a.id); });
@@ -1315,7 +1316,7 @@ async function printTurnitin() {
   // Group articles by category
   var gkSt1   = gkArts.filter(function(a){ return a.step==='1'; });
   var gkOther = gkArts.filter(function(a){ return a.step!=='1'&&a.step!=='5'; });
-  var gkSt5   = gkArts.filter(function(a){ return a.step==='5'; });
+  var gkSt5   = gkArts.filter(function(a){ return a.step==='5a'; });
 
   function sectionHdr(label, count, color) {
     return '<div style="background:'+color+';color:#fff;font-weight:bold;font-size:12pt;padding:6px 12px;margin:16px 0 6px;border-radius:3px">'+label+' ('+count+')</div>';
@@ -2202,7 +2203,7 @@ function openEditArt(id) {
   document.getElementById('gkRow').style.display=(a.editor&&a.editor!=='')?'none':'block';
   document.getElementById('btnDel').style.display='inline-block';
   document.getElementById('btnRifiutoGK').style.display=(adminMode||currentUser==='GateKeeper')?'inline-block':'none';
-  var _showAccGk = (adminMode||currentUser==='GateKeeper') && (!a.editor || a.editor==='');
+  var _showAccGk = (adminMode||currentUser==='GateKeeper') && (!a.editor || a.editor==='') && a.step !== '5a';
   document.getElementById('btnAccettazioneGK').style.display=_showAccGk?'inline-block':'none';
   document.getElementById('btnRifiutoTur').style.display=adminMode?'inline-block':'none';
   document.getElementById('stepHint').textContent=a.step&&STEPS[a.step]?STEPS[a.step]:'';
@@ -2221,6 +2222,8 @@ function openEditArt(id) {
 }
 function autoStep(a) {
   // Se lo step è stato impostato manualmente, non sovrascrivere
+  // St.5a è impostato solo dal pulsante Accettazione GK — non toccare
+  if (a.step === '5a') return a;
   if (a.stepManuale) return a;
 
   var sim = parseFloat(a.similarity);
@@ -2387,7 +2390,7 @@ function accettazioneGK() {
   var capturedId = editingArtId;
   var idx = articles.findIndex(function(a){ return a.id === capturedId; });
   if (idx >= 0) {
-    articles[idx].step = '5';
+    articles[idx].step = '5a';
     articles[idx].status = 'Sottomesso';
   }
   document.getElementById('artModal').classList.remove('open');
