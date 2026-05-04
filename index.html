@@ -1773,19 +1773,6 @@ function renderVerbale() {
     (intro?'<h2>TEMI AFFRONTATI</h2><p>'+esc(intro).replace(/\n/g,'<br>')+'</p>':'') +
     '<h2>PROSSIMI NUMERI</h2>' +
     (issues.length ? fascicoliHtml : '<p>Nessun fascicolo definito.</p>') +
-    '<h2>ARTICOLI IN LAVORAZIONE (St.7&ndash;18)</h2>' +
-    (function(){
-      if (!inLavorazione.length) return '<p style="color:#888">Nessun articolo in lavorazione.</p>';
-      var h = '';
-      for (var s = 7; s <= 18; s++) {
-        var group = inLavorazione.filter(function(a){ return parseInt(a.step)===s; });
-        if (!group.length) continue;
-        h += '<h3 style="margin:1.2rem 0 .4rem;font-size:13pt;border-bottom:1px solid #ccc;padding-bottom:.2rem">'
-           + 'St.'+s+' &middot; ' + (STEPS[String(s)] ? esc(STEPS[String(s)].replace(/^St\.\d+\s*·\s*/,'')) : ('Step '+s)) + ' ('+group.length+')</h3>';
-        h += group.map(artCard2).join('');
-      }
-      return h;
-    })() +
     '<h2>ARTICOLI IN INGRESSO (St.1&ndash;5)</h2>' +
     (function(){
       if (!inIngresso.length) return '<p style="color:#888">Nessun articolo in ingresso.</p>';
@@ -1796,6 +1783,19 @@ function renderVerbale() {
         h += '<h3 style="margin:1.2rem 0 .4rem;font-size:13pt;border-bottom:1px solid #ccc;padding-bottom:.2rem">'
            + 'St.'+s+' &middot; ' + (STEPS[String(s)] ? esc(STEPS[String(s)].replace(/^St\.\d+\s*·\s*/,'')) : ('Step '+s)) + ' ('+group.length+')</h3>';
         h += group.map(artCardIngresso).join('');
+      }
+      return h;
+    })() +
+    '<h2>ARTICOLI IN LAVORAZIONE (St.7&ndash;18)</h2>' +
+    (function(){
+      if (!inLavorazione.length) return '<p style="color:#888">Nessun articolo in lavorazione.</p>';
+      var h = '';
+      for (var s = 7; s <= 18; s++) {
+        var group = inLavorazione.filter(function(a){ return parseInt(a.step)===s; });
+        if (!group.length) continue;
+        h += '<h3 style="margin:1.2rem 0 .4rem;font-size:13pt;border-bottom:1px solid #ccc;padding-bottom:.2rem">'
+           + 'St.'+s+' &middot; ' + (STEPS[String(s)] ? esc(STEPS[String(s)].replace(/^St\.\d+\s*·\s*/,'')) : ('Step '+s)) + ' ('+group.length+')</h3>';
+        h += group.map(artCard2).join('');
       }
       return h;
     })() +
