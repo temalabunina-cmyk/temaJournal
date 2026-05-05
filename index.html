@@ -807,7 +807,7 @@ function artCard(a, showEdit) {
   return '<div class="card">' +
     '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:6px">' +
       '<div style="flex:1">' +
-        (_lmTxt ? '<div style="font-size:11px;color:#ccc;margin-bottom:3px">Ultima modifica: '+_lmTxt+'</div>' : '') +
+        (_lmTxt ? '<div style="font-size:11px;color:#111;margin-bottom:3px">Ultima modifica: '+_lmTxt+'</div>' : '') +
         // Line 1: ID + Step per esteso (sigla + testo) + Editor + GateKeeper
         '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px">' +
           '<span style="font-size:20px;font-weight:700;color:var(--tx3);font-family:monospace">#'+esc(a.id)+'</span>' +
@@ -1798,6 +1798,54 @@ function renderVerbale() {
         h += '<h3 style="margin:1.2rem 0 .4rem;font-size:13pt;border-bottom:1px solid #ccc;padding-bottom:.2rem">'
            + 'St.'+s+' &middot; ' + (STEPS[String(s)] ? esc(STEPS[String(s)].replace(/^St\.\d+\s*·\s*/,'')) : ('Step '+s)) + ' ('+group.length+')</h3>';
         h += group.map(artCard2).join('');
+      }
+      return h;
+    })() +
+
+    // ── Rifiutati ultimi 10 giorni ─────────────────────────────────────
+    (function(){
+      var cutoff = new Date();
+      cutoff.setDate(cutoff.getDate() - 10);
+      var rifAll = articles.filter(function(a){ return a.status==='Rifiutato'; });
+
+      // Categoria 1: rifiutati dal referaggio (step=14)
+      var rifRef = rifAll.filter(function(a){
+        var d = a.lastModified ? new Date(a.lastModified) : null;
+        return a.step==='14' && d && d >= cutoff;
+      });
+      // Categoria 2: rifiutati dal GK (step=6)
+      var rifGk = rifAll.filter(function(a){
+        var d = a.lastModified ? new Date(a.lastModified) : null;
+        return a.step==='6' && d && d >= cutoff;
+      });
+      // Categoria 3: rifiutati Turnitin (step=4)
+      var rifTur = rifAll.filter(function(a){
+        var d = a.lastModified ? new Date(a.lastModified) : null;
+        return a.step==='4' && d && d >= cutoff;
+      });
+
+      var total = rifRef.length + rifGk.length + rifTur.length;
+      if (!total) return '';
+
+      function rifCard(a) {
+        return '<div class="ae"><p><strong>#'+esc(a.id)+'</strong> &mdash; <em>'+esc(a.title)+'</em></p>'+
+          (a.authors?'<p>'+esc(a.authors)+(a.affiliation?' &middot; '+esc(a.affiliation):'')+(a.nationality?' &middot; '+esc(a.nationality):'')+'</p>':'')+
+          (a.notes?'<p><em>Note: '+esc(a.notes).replace(/\n/g,'<br>')+'</em></p>':'')+
+          '</div>';
+      }
+
+      var h = '<h2>ARTICOLI RIFIUTATI NEGLI ULTIMI 10 GIORNI</h2>';
+      if (rifRef.length) {
+        h += '<h3>Dal referaggio ('+rifRef.length+')</h3>';
+        h += rifRef.map(rifCard).join('');
+      }
+      if (rifGk.length) {
+        h += '<h3>Dal GateKeeper ('+rifGk.length+')</h3>';
+        h += rifGk.map(rifCard).join('');
+      }
+      if (rifTur.length) {
+        h += '<h3>Turnitin ('+rifTur.length+')</h3>';
+        h += rifTur.map(rifCard).join('');
       }
       return h;
     })() +
