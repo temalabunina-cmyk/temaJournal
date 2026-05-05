@@ -2144,7 +2144,9 @@ function openEditArt(id) {
   var a = articles.find(function(x){ return x.id===id; });
   if (!a) return;
   editingArtId = id;
-  document.getElementById('artModalTitle').textContent = 'Modifica articolo #'+id;
+  var _lm = a.lastModified ? new Date(a.lastModified).toLocaleString('it-IT',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '';
+  document.getElementById('artModalTitle').innerHTML = 'Modifica articolo #'+esc(id) +
+    (_lm ? '<span style="font-size:13px;font-weight:400;color:#bbb;margin-left:10px">Ultima modifica: '+_lm+'</span>' : '');
   document.getElementById('fId').value=a.id;
   document.getElementById('fDataSottomissione').value=a.dataSottomissione||'';
   document.getElementById('fTitle').value=a.title;
@@ -2343,6 +2345,7 @@ function saveArt() {
     status:document.getElementById('fStatus').value,
     step:document.getElementById('fStep').value,
     stepManuale:_stepManuale,
+    lastModified: new Date().toISOString(),
     issue:document.getElementById('fIssArt').value,
     articleNum:parseInt(document.getElementById('fArtNum').value)||null,
     deadline:document.getElementById('fDead').value,
