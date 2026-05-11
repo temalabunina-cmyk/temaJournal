@@ -1896,7 +1896,7 @@ function renderVerbale() {
       h += '<table style="width:100%;border-collapse:collapse;font-size:10pt;margin-top:1rem">';
       h += '<tr style="background:#f0f0f0"><th style="text-align:left;padding:4px 6px;border:1px solid #ccc;width:22%">Copyeditor</th><th style="text-align:left;padding:4px 6px;border:1px solid #ccc">Articoli</th></tr>';
       CPS.forEach(function(ce){
-        var arts = articles.filter(function(a){ return a.copyeditor===ce&&a.status!=='Rifiutato'; });
+        var arts = articles.filter(function(a){ return a.copyeditor===ce&&a.status!=='Rifiutato'&&a.status!=='Pubblicato'; });
         if (!arts.length) return;
         var items = arts.map(function(a){ return '#'+esc(a.id); }).join(' &nbsp;|&nbsp; ');
         h += '<tr><td style="padding:4px 6px;border:1px solid #ddd;font-weight:bold">'+esc(ce)+' ('+arts.length+')</td>'
