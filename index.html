@@ -214,6 +214,9 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
       <option value="2">≥2 inviti</option>
       <option value="3">≥3 inviti</option>
     </select>
+    <select id="fRevAnno" onchange="renderRevisori()" style="font-size:20px;padding:6px 10px;border:1px solid var(--brd);border-radius:var(--r);background:var(--sur)">
+      <option value="">Tutti gli anni</option>
+    </select>
   </div>
   <div id="revEl"></div>
 </div>
@@ -1493,6 +1496,32 @@ function renderRevisori() {
   var q      = (document.getElementById('srchRev').value||'').toLowerCase();
   var fStato = (document.getElementById('fRevStato').value||'').toLowerCase();
   var fMin   = parseInt(document.getElementById('fRevMin').value||'1');
+  var fAnno  = document.getElementById('fRevAnno') ? document.getElementById('fRevAnno').value : '';
+
+  // Populate year filter dynamically
+  var fRevAnnoEl = document.getElementById('fRevAnno');
+  if (fRevAnnoEl) {
+    var allYears = new Set();
+    articles.forEach(function(a) {
+      [(a.revisori||[]), (a.revisori2||[])].forEach(function(list) {
+        list.forEach(function(r) {
+          if (r.dataConsegna) allYears.add(new Date(r.dataConsegna).getFullYear());
+          if (r.dataProroga)  allYears.add(new Date(r.dataProroga).getFullYear());
+        });
+      });
+    });
+    var sortedYears = Array.from(allYears).sort().reverse();
+    var currentOpts = Array.from(fRevAnnoEl.options).slice(1).map(function(o){ return o.value; });
+    if (JSON.stringify(currentOpts) !== JSON.stringify(sortedYears.map(String))) {
+      while (fRevAnnoEl.options.length > 1) fRevAnnoEl.remove(1);
+      sortedYears.forEach(function(y) {
+        var opt = document.createElement('option');
+        opt.value = String(y); opt.textContent = String(y);
+        fRevAnnoEl.appendChild(opt);
+      });
+      fRevAnnoEl.value = fAnno;
+    }
+  }
 
   // Sort state: { col, dir }  col = 'nome'|'aff'|'tot'|'acc'|'comp'|'att'|'rif'
   if (!renderRevisori._sort) renderRevisori._sort = { col:'nome', dir:1 };
@@ -1523,6 +1552,14 @@ function renderRevisori() {
     if (q && nome.toLowerCase().indexOf(q) < 0) return false;
     if (rev.inviti.length < fMin) return false;
     if (fStato && !rev.inviti.some(function(i){ return i.stato.indexOf(fStato) >= 0; })) return false;
+    if (fAnno) {
+      var hasYear = rev.inviti.some(function(i){
+        var d = i.dataConsegna ? new Date(i.dataConsegna).getFullYear() : null;
+        var p = i.dataProroga ? new Date(i.dataProroga).getFullYear() : null;
+        return String(d)===fAnno || String(p)===fAnno;
+      });
+      if (!hasYear) return false;
+    }
     return true;
   });
 
