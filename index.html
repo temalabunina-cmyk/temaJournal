@@ -1490,10 +1490,15 @@ function renderPub() {
 }
 
 function renderRevisori() {
-  var q       = (document.getElementById('srchRev').value||'').toLowerCase();
-  var fStato  = (document.getElementById('fRevStato').value||'').toLowerCase();
-  var fMin    = parseInt(document.getElementById('fRevMin').value||'1');
+  var q      = (document.getElementById('srchRev').value||'').toLowerCase();
+  var fStato = (document.getElementById('fRevStato').value||'').toLowerCase();
+  var fMin   = parseInt(document.getElementById('fRevMin').value||'1');
 
+  // Sort state: { col, dir }  col = 'nome'|'aff'|'tot'|'acc'|'comp'|'att'|'rif'
+  if (!renderRevisori._sort) renderRevisori._sort = { col:'nome', dir:1 };
+  var sort = renderRevisori._sort;
+
+  // Build revisori map
   var revMap = {};
   function addRev(r, a) {
     var nome = (r.nome||'').trim();
@@ -1512,8 +1517,8 @@ function renderRevisori() {
     (a.revisori2||[]).forEach(function(r){ addRev(r, a); });
   });
 
-  var names = Object.keys(revMap).sort();
-  names = names.filter(function(nome) {
+  // Filter
+  var names = Object.keys(revMap).filter(function(nome) {
     var rev = revMap[nome];
     if (q && nome.toLowerCase().indexOf(q) < 0) return false;
     if (rev.inviti.length < fMin) return false;
@@ -1521,43 +1526,86 @@ function renderRevisori() {
     return true;
   });
 
+  // Sort
+  names.sort(function(a, b) {
+    var ra = revMap[a], rb = revMap[b];
+    var nAccA = ra.inviti.filter(function(i){ return i.stato.indexOf('accettato')>=0; }).length;
+    var nAccB = rb.inviti.filter(function(i){ return i.stato.indexOf('accettato')>=0; }).length;
+    var nCmpA = ra.inviti.filter(function(i){ return i.stato.indexOf('completato')>=0; }).length;
+    var nCmpB = rb.inviti.filter(function(i){ return i.stato.indexOf('completato')>=0; }).length;
+    var nAttA = ra.inviti.filter(function(i){ return i.stato===''||i.stato==='in attesa'; }).length;
+    var nAttB = rb.inviti.filter(function(i){ return i.stato===''||i.stato==='in attesa'; }).length;
+    var nRifA = ra.inviti.filter(function(i){ return i.stato.indexOf('rifiutato')>=0; }).length;
+    var nRifB = rb.inviti.filter(function(i){ return i.stato.indexOf('rifiutato')>=0; }).length;
+    var v;
+    if (sort.col==='nome') v = a.localeCompare(b);
+    else if (sort.col==='aff') v = ra.affiliazione.localeCompare(rb.affiliazione);
+    else if (sort.col==='tot') v = ra.inviti.length - rb.inviti.length;
+    else if (sort.col==='acc') v = nAccA - nAccB;
+    else if (sort.col==='comp') v = nCmpA - nCmpB;
+    else if (sort.col==='att') v = nAttA - nAttB;
+    else if (sort.col==='rif') v = nRifA - nRifB;
+    else v = 0;
+    return v * sort.dir;
+  });
+
+  // Sort arrow helper
+  function arrow(col) {
+    if (sort.col !== col) return '<span style="color:#ccc;font-size:10px"> ⇅</span>';
+    return sort.dir===1 ? '<span style="font-size:10px"> ↑</span>' : '<span style="font-size:10px"> ↓</span>';
+  }
+  function thClick(col) {
+    return 'onclick="var s=renderRevisori._sort;if(s.col===\''+col+'\')s.dir*=-1;else{s.col=\''+col+'\';s.dir=1;}renderRevisori();" style="cursor:pointer;user-select:none"';
+  }
+
   var html = '';
   if (!names.length) {
-    html = '<p style="color:#888">Nessun revisore trovato.</p>';
+    html = '<p style="color:#888;font-size:14px">Nessun revisore trovato.</p>';
   } else {
-    html += '<table style="width:100%;border-collapse:collapse;font-size:20px">';
+    html += '<table style="width:100%;border-collapse:collapse;font-size:14px">';
     html += '<thead><tr style="background:var(--sur);border-bottom:2px solid var(--brd)">'
-      + '<th style="text-align:left;padding:8px 10px">Revisore</th>'
-      + '<th style="text-align:left;padding:8px 10px">Affiliazione</th>'
-      + '<th style="text-align:center;padding:8px 10px">Inviti</th>'
-      + '<th style="text-align:center;padding:8px 10px">Accettato</th>'
-      + '<th style="text-align:center;padding:8px 10px">Completato</th>'
-      + '<th style="text-align:center;padding:8px 10px">In attesa</th>'
-      + '<th style="text-align:center;padding:8px 10px">Rifiutato</th>'
-      + '<th style="text-align:left;padding:8px 10px">Articoli</th>'
+      + '<th '+thClick('nome')+' style="text-align:left;padding:6px 8px">Revisore'+arrow('nome')+'</th>'
+      + '<th '+thClick('aff')+' style="text-align:left;padding:6px 8px">Affiliazione'+arrow('aff')+'</th>'
+      + '<th '+thClick('tot')+' style="text-align:center;padding:6px 8px">Inviti'+arrow('tot')+'</th>'
+      + '<th '+thClick('acc')+' style="text-align:center;padding:6px 8px">Accettato'+arrow('acc')+'</th>'
+      + '<th '+thClick('comp')+' style="text-align:center;padding:6px 8px">Completato'+arrow('comp')+'</th>'
+      + '<th '+thClick('att')+' style="text-align:center;padding:6px 8px">In attesa'+arrow('att')+'</th>'
+      + '<th '+thClick('rif')+' style="text-align:center;padding:6px 8px">Rifiutato'+arrow('rif')+'</th>'
+      + '<th style="text-align:left;padding:6px 8px">Articoli</th>'
       + '</tr></thead><tbody>';
+
     names.forEach(function(nome) {
       var rev = revMap[nome];
-      var nAcc  = rev.inviti.filter(function(i){ return i.stato.indexOf('accettato') >= 0; }).length;
-      var nComp = rev.inviti.filter(function(i){ return i.stato.indexOf('completato') >= 0; }).length;
-      var nAtt  = rev.inviti.filter(function(i){ return i.stato==='' || i.stato==='in attesa'; }).length;
-      var nRif  = rev.inviti.filter(function(i){ return i.stato.indexOf('rifiutato') >= 0; }).length;
-      var artLinks = rev.inviti.map(function(i){
-        return '<span style="font-size:11px;color:var(--purple-tx)">#'+esc(i.artId)+'</span>';
-      }).join(' ');
-      html += '<tr style="border-bottom:1px solid var(--brd);vertical-align:top">'
-        + '<td style="padding:7px 10px;font-weight:600">'+esc(nome)+'</td>'
-        + '<td style="padding:7px 10px;color:#666">'+esc(rev.affiliazione)+'</td>'
-        + '<td style="padding:7px 10px;text-align:center;font-weight:700">'+rev.inviti.length+'</td>'
-        + '<td style="padding:7px 10px;text-align:center">'+(!nAcc?'&mdash;':nAcc)+'</td>'
-        + '<td style="padding:7px 10px;text-align:center">'+(!nComp?'&mdash;':nComp)+'</td>'
-        + '<td style="padding:7px 10px;text-align:center">'+(!nAtt?'&mdash;':nAtt)+'</td>'
-        + '<td style="padding:7px 10px;text-align:center">'+(!nRif?'&mdash;':nRif)+'</td>'
-        + '<td style="padding:7px 10px">'+artLinks+'</td>'
+      var nAcc  = rev.inviti.filter(function(i){ return i.stato.indexOf('accettato')>=0; }).length;
+      var nComp = rev.inviti.filter(function(i){ return i.stato.indexOf('completato')>=0; }).length;
+      var nAtt  = rev.inviti.filter(function(i){ return i.stato===''||i.stato==='in attesa'; }).length;
+      var nRif  = rev.inviti.filter(function(i){ return i.stato.indexOf('rifiutato')>=0; }).length;
+
+      // Articoli: dropdown <details>/<summary>
+      var uid = 'rev_'+nome.replace(/\W/g,'_');
+      var artItems = rev.inviti.map(function(i){
+        return '<div style="padding:3px 0;font-size:13px">'
+          + '<span style="color:var(--purple-tx);font-weight:600">#'+esc(i.artId)+'</span>'
+          + ' '+esc(i.artTitle.length>50?i.artTitle.slice(0,48)+'…':i.artTitle)
+          + (i.stato?' <em style="color:#888">('+esc(i.stato)+')</em>':'')
+          + '</div>';
+      }).join('');
+      var artCell = '<details><summary style="cursor:pointer;font-size:13px;color:var(--purple-tx)">'+rev.inviti.length+' articol'+(rev.inviti.length===1?'o':'i')+'</summary>'
+        + '<div style="margin-top:4px;padding:4px 8px;background:var(--sur);border-radius:4px">'+artItems+'</div></details>';
+
+      html += '<tr style="border-bottom:1px solid var(--brd);vertical-align:middle">'
+        + '<td style="padding:6px 8px;font-weight:600;font-size:14px">'+esc(nome)+'</td>'
+        + '<td style="padding:6px 8px;color:#666;font-size:13px">'+esc(rev.affiliazione)+'</td>'
+        + '<td style="padding:6px 8px;text-align:center;font-weight:700">'+rev.inviti.length+'</td>'
+        + '<td style="padding:6px 8px;text-align:center">'+(!nAcc?'&mdash;':nAcc)+'</td>'
+        + '<td style="padding:6px 8px;text-align:center">'+(!nComp?'&mdash;':nComp)+'</td>'
+        + '<td style="padding:6px 8px;text-align:center">'+(!nAtt?'&mdash;':nAtt)+'</td>'
+        + '<td style="padding:6px 8px;text-align:center">'+(!nRif?'&mdash;':nRif)+'</td>'
+        + '<td style="padding:6px 8px">'+artCell+'</td>'
         + '</tr>';
     });
     html += '</tbody></table>';
-    html += '<p style="color:#888;font-size:11px;margin-top:8px">'+names.length+' revisori trovati</p>';
+    html += '<p style="color:#888;font-size:12px;margin-top:8px">'+names.length+' revisori trovati</p>';
   }
   document.getElementById('revEl').innerHTML = html;
 }
