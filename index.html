@@ -160,6 +160,7 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
   <button class="tab active" data-tab="gatekeeper">GateKeeper evaluation</button>
   <button class="tab" data-tab="lista">Articoli in lavorazione</button>
   <button class="tab" data-tab="editori">Assegnazioni</button>
+  <button class="tab" data-tab="revisori">Revisori</button>
   <button class="tab" data-tab="numeri">Prossimi numeri</button>
   <button class="tab" data-tab="verbale">Verbale PDF</button>
   <button class="tab" data-tab="pubblicati">Articoli pubblicati</button>
@@ -194,6 +195,29 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
   <div id="listaEl"></div>
 </div>
 <div class="sec" id="sec-editori"><div id="teamEl"></div></div>
+
+<div class="sec" id="sec-revisori">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:10px">
+    <div style="font-size:16px;font-weight:700">Revisori</div>
+  </div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+    <input id="srchRev" class="srch" type="text" placeholder="Cerca revisore..." oninput="renderRevisori()">
+    <select id="fRevStato" onchange="renderRevisori()" style="font-size:20px;padding:6px 10px;border:1px solid var(--brd);border-radius:var(--r);background:var(--sur)">
+      <option value="">Tutti gli stati</option>
+      <option value="accettato">Accettato</option>
+      <option value="rifiutato">Rifiutato</option>
+      <option value="in attesa">In attesa</option>
+      <option value="completato">Completato</option>
+    </select>
+    <select id="fRevMin" onchange="renderRevisori()" style="font-size:20px;padding:6px 10px;border:1px solid var(--brd);border-radius:var(--r);background:var(--sur)">
+      <option value="1">Tutti (≥1 invito)</option>
+      <option value="2">≥2 inviti</option>
+      <option value="3">≥3 inviti</option>
+    </select>
+  </div>
+  <div id="revEl"></div>
+</div>
+
 <div class="sec" id="sec-numeri">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
     <div style="font-size:16px;font-weight:700">Prossimi numeri</div>
@@ -1465,6 +1489,79 @@ function renderPub() {
     '<div style="text-align:center;padding:3rem;color:var(--tx2)">Nessun articolo pubblicato.</div>';
 }
 
+function renderRevisori() {
+  var q       = (document.getElementById('srchRev').value||'').toLowerCase();
+  var fStato  = (document.getElementById('fRevStato').value||'').toLowerCase();
+  var fMin    = parseInt(document.getElementById('fRevMin').value||'1');
+
+  var revMap = {};
+  function addRev(r, a) {
+    var nome = (r.nome||'').trim();
+    if (!nome) return;
+    if (!revMap[nome]) revMap[nome] = { affiliazione: r.affiliazione||'', inviti: [] };
+    revMap[nome].inviti.push({
+      artId: a.id, artTitle: a.title,
+      stato: (r.accettazione||'in attesa').toLowerCase(),
+      dataConsegna: r.dataConsegna||'',
+      dataProroga: r.dataProroga||'',
+      giudizio: r.giudizio||''
+    });
+  }
+  articles.forEach(function(a) {
+    (a.revisori||[]).forEach(function(r){ addRev(r, a); });
+    (a.revisori2||[]).forEach(function(r){ addRev(r, a); });
+  });
+
+  var names = Object.keys(revMap).sort();
+  names = names.filter(function(nome) {
+    var rev = revMap[nome];
+    if (q && nome.toLowerCase().indexOf(q) < 0) return false;
+    if (rev.inviti.length < fMin) return false;
+    if (fStato && !rev.inviti.some(function(i){ return i.stato.indexOf(fStato) >= 0; })) return false;
+    return true;
+  });
+
+  var html = '';
+  if (!names.length) {
+    html = '<p style="color:#888">Nessun revisore trovato.</p>';
+  } else {
+    html += '<table style="width:100%;border-collapse:collapse;font-size:20px">';
+    html += '<thead><tr style="background:var(--sur);border-bottom:2px solid var(--brd)">'
+      + '<th style="text-align:left;padding:8px 10px">Revisore</th>'
+      + '<th style="text-align:left;padding:8px 10px">Affiliazione</th>'
+      + '<th style="text-align:center;padding:8px 10px">Inviti</th>'
+      + '<th style="text-align:center;padding:8px 10px">Accettato</th>'
+      + '<th style="text-align:center;padding:8px 10px">Completato</th>'
+      + '<th style="text-align:center;padding:8px 10px">In attesa</th>'
+      + '<th style="text-align:center;padding:8px 10px">Rifiutato</th>'
+      + '<th style="text-align:left;padding:8px 10px">Articoli</th>'
+      + '</tr></thead><tbody>';
+    names.forEach(function(nome) {
+      var rev = revMap[nome];
+      var nAcc  = rev.inviti.filter(function(i){ return i.stato.indexOf('accettato') >= 0; }).length;
+      var nComp = rev.inviti.filter(function(i){ return i.stato.indexOf('completato') >= 0; }).length;
+      var nAtt  = rev.inviti.filter(function(i){ return i.stato==='' || i.stato==='in attesa'; }).length;
+      var nRif  = rev.inviti.filter(function(i){ return i.stato.indexOf('rifiutato') >= 0; }).length;
+      var artLinks = rev.inviti.map(function(i){
+        return '<span style="font-size:11px;color:var(--purple-tx)">#'+esc(i.artId)+'</span>';
+      }).join(' ');
+      html += '<tr style="border-bottom:1px solid var(--brd);vertical-align:top">'
+        + '<td style="padding:7px 10px;font-weight:600">'+esc(nome)+'</td>'
+        + '<td style="padding:7px 10px;color:#666">'+esc(rev.affiliazione)+'</td>'
+        + '<td style="padding:7px 10px;text-align:center;font-weight:700">'+rev.inviti.length+'</td>'
+        + '<td style="padding:7px 10px;text-align:center">'+(!nAcc?'&mdash;':nAcc)+'</td>'
+        + '<td style="padding:7px 10px;text-align:center">'+(!nComp?'&mdash;':nComp)+'</td>'
+        + '<td style="padding:7px 10px;text-align:center">'+(!nAtt?'&mdash;':nAtt)+'</td>'
+        + '<td style="padding:7px 10px;text-align:center">'+(!nRif?'&mdash;':nRif)+'</td>'
+        + '<td style="padding:7px 10px">'+artLinks+'</td>'
+        + '</tr>';
+    });
+    html += '</tbody></table>';
+    html += '<p style="color:#888;font-size:11px;margin-top:8px">'+names.length+' revisori trovati</p>';
+  }
+  document.getElementById('revEl').innerHTML = html;
+}
+
 function renderRifRef() {
   var q = (document.getElementById('srchRifRef').value||'').toLowerCase();
   var f = articles.filter(function(a) {
@@ -2675,7 +2772,8 @@ function switchTab(name) {
   if (name==='numeri')        renderNumeri();
   if (name==='verbale')       { rebuildIssFilters(); loadDriveText(); }
   if (name==='pubblicati')    { rebuildIssFilters(); renderPub(); }
-  if (name==='rifiutati') { renderRifRef(); renderRifGk(); renderRifTur(); }
+  if (name==='revisori')      renderRevisori();
+    if (name==='rifiutati') { renderRifRef(); renderRifGk(); renderRifTur(); }
 }
 function refresh() {
   renderStats();
