@@ -1566,18 +1566,25 @@ function renderRevisori() {
   // Sort
   names.sort(function(a, b) {
     var ra = revMap[a], rb = revMap[b];
-    var nAccA = ra.inviti.filter(function(i){ return i.stato.indexOf('accettato')>=0; }).length;
-    var nAccB = rb.inviti.filter(function(i){ return i.stato.indexOf('accettato')>=0; }).length;
-    var nCmpA = ra.inviti.filter(function(i){ return i.stato.indexOf('completato')>=0; }).length;
-    var nCmpB = rb.inviti.filter(function(i){ return i.stato.indexOf('completato')>=0; }).length;
-    var nAttA = ra.inviti.filter(function(i){ return i.stato===''||i.stato==='in attesa'; }).length;
-    var nAttB = rb.inviti.filter(function(i){ return i.stato===''||i.stato==='in attesa'; }).length;
-    var nRifA = ra.inviti.filter(function(i){ return i.stato.indexOf('rifiutato')>=0; }).length;
-    var nRifB = rb.inviti.filter(function(i){ return i.stato.indexOf('rifiutato')>=0; }).length;
+    function filtYear(list) { return fAnno ? list.filter(function(i){
+      var d=i.dataConsegna?new Date(i.dataConsegna).getFullYear():null;
+      var p=i.dataProroga?new Date(i.dataProroga).getFullYear():null;
+      return String(d)===fAnno||String(p)===fAnno;
+    }) : list; }
+    var iaA=filtYear(ra.inviti), iaB=filtYear(rb.inviti);
+    var nAccA = iaA.filter(function(i){ return i.stato.indexOf('accettato')>=0; }).length;
+    var nAccB = iaB.filter(function(i){ return i.stato.indexOf('accettato')>=0; }).length;
+    var nCmpA = iaA.filter(function(i){ return i.stato.indexOf('completato')>=0; }).length;
+    var nCmpB = iaB.filter(function(i){ return i.stato.indexOf('completato')>=0; }).length;
+    var nAttA = iaA.filter(function(i){ return i.stato===''||i.stato==='in attesa'; }).length;
+    var nAttB = iaB.filter(function(i){ return i.stato===''||i.stato==='in attesa'; }).length;
+    var nRifA = iaA.filter(function(i){ return i.stato.indexOf('rifiutato')>=0; }).length;
+    var nRifB = iaB.filter(function(i){ return i.stato.indexOf('rifiutato')>=0; }).length;
+    if (sort.col==='tot') return (iaA.length - iaB.length) * sort.dir;
     var v;
     if (sort.col==='nome') v = a.localeCompare(b);
     else if (sort.col==='aff') v = ra.affiliazione.localeCompare(rb.affiliazione);
-    else if (sort.col==='tot') v = ra.inviti.length - rb.inviti.length;
+    /*tot handled above*/
     else if (sort.col==='acc') v = nAccA - nAccB;
     else if (sort.col==='comp') v = nCmpA - nCmpB;
     else if (sort.col==='att') v = nAttA - nAttB;
@@ -1613,27 +1620,35 @@ function renderRevisori() {
 
     names.forEach(function(nome) {
       var rev = revMap[nome];
-      var nAcc  = rev.inviti.filter(function(i){ return i.stato.indexOf('accettato')>=0; }).length;
-      var nComp = rev.inviti.filter(function(i){ return i.stato.indexOf('completato')>=0; }).length;
-      var nAtt  = rev.inviti.filter(function(i){ return i.stato===''||i.stato==='in attesa'; }).length;
-      var nRif  = rev.inviti.filter(function(i){ return i.stato.indexOf('rifiutato')>=0; }).length;
+      // Filter inviti by year if fAnno is set
+      var invitiFiltered = fAnno ? rev.inviti.filter(function(i){
+        var d = i.dataConsegna ? new Date(i.dataConsegna).getFullYear() : null;
+        var p = i.dataProroga  ? new Date(i.dataProroga).getFullYear()  : null;
+        return String(d)===fAnno || String(p)===fAnno;
+      }) : rev.inviti;
+
+      var nAcc  = invitiFiltered.filter(function(i){ return i.stato.indexOf('accettato')>=0; }).length;
+      var nComp = invitiFiltered.filter(function(i){ return i.stato.indexOf('completato')>=0; }).length;
+      var nAtt  = invitiFiltered.filter(function(i){ return i.stato===''||i.stato==='in attesa'; }).length;
+      var nRif  = invitiFiltered.filter(function(i){ return i.stato.indexOf('rifiutato')>=0; }).length;
+      var nTot  = invitiFiltered.length;
 
       // Articoli: dropdown <details>/<summary>
       var uid = 'rev_'+nome.replace(/\W/g,'_');
-      var artItems = rev.inviti.map(function(i){
+      var artItems = invitiFiltered.map(function(i){
         return '<div style="padding:3px 0;font-size:13px">'
           + '<span style="color:var(--purple-tx);font-weight:600">#'+esc(i.artId)+'</span>'
           + ' '+esc(i.artTitle.length>50?i.artTitle.slice(0,48)+'…':i.artTitle)
           + (i.stato?' <em style="color:#888">('+esc(i.stato)+')</em>':'')
           + '</div>';
       }).join('');
-      var artCell = '<details><summary style="cursor:pointer;font-size:13px;color:var(--purple-tx)">'+rev.inviti.length+' articol'+(rev.inviti.length===1?'o':'i')+'</summary>'
+      var artCell = '<details><summary style="cursor:pointer;font-size:13px;color:var(--purple-tx)">'+nTot+' articol'+(rev.inviti.length===1?'o':'i')+'</summary>'
         + '<div style="margin-top:4px;padding:4px 8px;background:var(--sur);border-radius:4px">'+artItems+'</div></details>';
 
       html += '<tr style="border-bottom:1px solid var(--brd);vertical-align:middle">'
         + '<td style="padding:6px 8px;font-weight:600;font-size:14px">'+esc(nome)+'</td>'
         + '<td style="padding:6px 8px;color:#666;font-size:13px">'+esc(rev.affiliazione)+'</td>'
-        + '<td style="padding:6px 8px;text-align:center;font-weight:700">'+rev.inviti.length+'</td>'
+        + '<td style="padding:6px 8px;text-align:center;font-weight:700">'+nTot+'</td>'
         + '<td style="padding:6px 8px;text-align:center">'+(!nAcc?'&mdash;':nAcc)+'</td>'
         + '<td style="padding:6px 8px;text-align:center">'+(!nComp?'&mdash;':nComp)+'</td>'
         + '<td style="padding:6px 8px;text-align:center">'+(!nAtt?'&mdash;':nAtt)+'</td>'
