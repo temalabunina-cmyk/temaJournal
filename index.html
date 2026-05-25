@@ -1669,9 +1669,6 @@ function renderRifRef() {
     if (!isDeclined && a.step !== '14') return false;
     if (a.status !== 'Rifiutato') return false;
     if (q       && (a.id+' '+a.title+' '+a.authors).toLowerCase().indexOf(q) < 0) return false;
-    if (fGkStep && a.step !== fGkStep) return false;
-    if (fGkSec  && a.section !== fGkSec) return false;
-    if (fGkIntl && a.intl !== fGkIntl) return false;
     return true;
   });
   document.getElementById('rifRefCount').textContent = f.length+' articol'+(f.length===1?'o':'i');
