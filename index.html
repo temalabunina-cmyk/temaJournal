@@ -2471,6 +2471,12 @@ function openEditArt(id) {
   document.getElementById('artModal').classList.add('open');
 }
 function autoStep(a) {
+  // Decline submission: sempre step=14 + Rifiutato (priorità assoluta)
+  if (a.decisioneEditor === 'Decline submission' || a.decisioneEditor2 === 'Decline submission') {
+    a.step = '14';
+    a.status = 'Rifiutato';
+    return a;
+  }
   // Se lo step è stato impostato manualmente, non sovrascrivere
   // St.5a è impostato solo dal pulsante Accettazione GK — non toccare
   if (a.step === '5a') return a;
