@@ -1538,7 +1538,8 @@ function renderRevisori() {
       stato: (r.accettazione||'in attesa').toLowerCase(),
       dataConsegna: r.dataConsegna||'',
       dataProroga: r.dataProroga||'',
-      giudizio: r.giudizio||''
+      giudizio: r.giudizio||'',
+      rating: r.rating||0
     });
   }
   articles.forEach(function(a) {
@@ -1582,6 +1583,8 @@ function renderRevisori() {
     var nRifB = iaB.filter(function(i){ return i.stato.indexOf('rifiutato')>=0; }).length;
     if (sort.col==='tot') return (iaA.length - iaB.length) * sort.dir;
     var v;
+    function avgRat(inv) { var rs=inv.filter(function(i){return i.rating;}).map(function(i){return i.rating;}); return rs.length?rs.reduce(function(a,b){return a+b;},0)/rs.length:0; }
+    if (sort.col==='rat') return (avgRat(iaA)-avgRat(iaB))*sort.dir;
     if (sort.col==='nome') v = a.localeCompare(b);
     else if (sort.col==='aff') v = ra.affiliazione.localeCompare(rb.affiliazione);
     /*tot handled above*/
@@ -1609,6 +1612,7 @@ function renderRevisori() {
     html += '<table style="width:100%;border-collapse:collapse;font-size:14px">';
     html += '<thead><tr style="background:var(--sur);border-bottom:2px solid var(--brd)">'
       + '<th '+thClick('nome')+' style="text-align:left;padding:6px 8px">Revisore'+arrow('nome')+'</th>'
+      + '<th '+thClick('rat')+' style="text-align:center;padding:6px 8px">Rating'+arrow('rat')+'</th>'
       + '<th '+thClick('aff')+' style="text-align:left;padding:6px 8px">Affiliazione'+arrow('aff')+'</th>'
       + '<th '+thClick('tot')+' style="text-align:center;padding:6px 8px">Inviti'+arrow('tot')+'</th>'
       + '<th '+thClick('acc')+' style="text-align:center;padding:6px 8px">Accettato'+arrow('acc')+'</th>'
@@ -1647,6 +1651,13 @@ function renderRevisori() {
 
       html += '<tr style="border-bottom:1px solid var(--brd);vertical-align:middle">'
         + '<td style="padding:6px 8px;font-weight:600;font-size:14px">'+esc(nome)+'</td>'
+        + (function(){
+            var rts=rev.inviti.filter(function(i){return i.rating;}).map(function(i){return i.rating;});
+            if (!rts.length) return '<td style="padding:6px 8px;text-align:center;color:#ccc">—</td>';
+            var avg=rts.reduce(function(a,b){return a+b;},0)/rts.length;
+            var stars=''; for(var s=1;s<=5;s++) stars+=(avg>=s?'★':'☆');
+            return '<td style="padding:6px 8px;text-align:center;color:#f5a623;white-space:nowrap">'+stars+'<span style="color:#888;font-size:11px"> '+avg.toFixed(1)+'</span></td>';
+          })()
         + '<td style="padding:6px 8px;color:#666;font-size:13px">'+esc(rev.affiliazione)+'</td>'
         + '<td style="padding:6px 8px;text-align:center;font-weight:700">'+nTot+'</td>'
         + '<td style="padding:6px 8px;text-align:center">'+(!nAcc?'&mdash;':nAcc)+'</td>'
@@ -2201,6 +2212,15 @@ function renderRevList2() {
             '<option value="rifiutato"'+(r.accettazione==='rifiutato'?' selected':'')+'>Rifiutato</option>' +
             '<option value="completato"'+(r.accettazione==='completato'?' selected':'')+'>Completato</option>' +
           '</select></div>' +
+        (r.accettazione==='completato' ?
+          '<div class="fr" style="margin-bottom:6px"><label>Rating revisore</label>' +
+          '<div style="display:flex;gap:4px;align-items:center">' +
+          [1,2,3,4,5].map(function(n){
+            var f=(r.rating||0)>=n;
+            return '<span onclick="currentRevisori['+i+'].rating='+n+';renderRevList()" style="cursor:pointer;font-size:24px;color:'+(f?'#f5a623':'#ddd')+'" title="'+n+' stelle">'+(f?'★':'☆')+'</span>';
+          }).join('')+
+          (r.rating?'<span style="margin-left:6px;font-size:13px;color:#888">'+r.rating+'/5</span>':'')+
+          '</div></div>' : '') +
         '<div class="fr" style="margin-bottom:6px"><label>Data proroga</label>' +
           '<input type="date" value="'+esc(r.dataProroga||'')+'" oninput="currentRevisori2['+i+'].dataProroga=this.value"></div>' +
       '</div>' +
@@ -2247,6 +2267,15 @@ function renderRevList() {
             '<option value="rifiutato"'+(r.accettazione==='rifiutato'?' selected':'')+'>Rifiutato</option>' +
             '<option value="completato"'+(r.accettazione==='completato'?' selected':'')+'>Completato</option>' +
           '</select></div>' +
+        (r.accettazione==='completato' ?
+          '<div class="fr" style="margin-bottom:6px"><label>Rating revisore</label>' +
+          '<div style="display:flex;gap:4px;align-items:center">' +
+          [1,2,3,4,5].map(function(n){
+            var f=(r.rating||0)>=n;
+            return '<span onclick="currentRevisori2['+i+'].rating='+n+';renderRevList2()" style="cursor:pointer;font-size:24px;color:'+(f?'#f5a623':'#ddd')+'" title="'+n+' stelle">'+(f?'★':'☆')+'</span>';
+          }).join('')+
+          (r.rating?'<span style="margin-left:6px;font-size:13px;color:#888">'+r.rating+'/5</span>':'')+
+          '</div></div>' : '') +
         '<div class="fr" style="margin-bottom:6px"><label>Data proroga</label>' +
           '<input type="date" value="'+esc(r.dataProroga||'')+'" oninput="currentRevisori['+i+'].dataProroga=this.value"></div>' +
       '</div>' +
