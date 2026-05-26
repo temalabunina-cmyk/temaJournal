@@ -2272,7 +2272,7 @@ function renderRevList() {
           '<div style="display:flex;gap:4px;align-items:center">' +
           [1,2,3,4,5].map(function(n){
             var f=(r.rating||0)>=n;
-            return '<span onclick="currentRevisori2['+i+'].rating='+n+';renderRevList2()" style="cursor:pointer;font-size:24px;color:'+(f?'#f5a623':'#ddd')+'" title="'+n+' stelle">'+(f?'★':'☆')+'</span>';
+            return '<span onclick="currentRevisori['+i+'].rating='+n+';renderRevList()" style="cursor:pointer;font-size:24px;color:'+(f?'#f5a623':'#ddd')+'" title="'+n+' stelle">'+(f?'★':'☆')+'</span>';
           }).join('')+
           (r.rating?'<span style="margin-left:6px;font-size:13px;color:#888">'+r.rating+'/5</span>':'')+
           '</div></div>' : '') +
