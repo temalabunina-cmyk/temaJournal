@@ -1682,6 +1682,7 @@ function renderRifRef() {
     if (q       && (a.id+' '+a.title+' '+a.authors).toLowerCase().indexOf(q) < 0) return false;
     return true;
   });
+ f.sort(function(a,b){ return parseInt(b.id) - parseInt(a.id); });
   document.getElementById('rifRefCount').textContent = f.length+' articol'+(f.length===1?'o':'i');
   document.getElementById('rifRefEl').innerHTML = f.length ? f.map(function(a){ return artCard(a,true); }).join('') :
     '<div style="text-align:center;padding:3rem;color:var(--tx2)">Nessun articolo.</div>';
@@ -1694,6 +1695,7 @@ function renderRifGk() {
     if (q && (a.id+' '+a.title+' '+a.authors).toLowerCase().indexOf(q) < 0) return false;
     return true;
   });
+ f.sort(function(a,b){ return parseInt(b.id) - parseInt(a.id); });
   document.getElementById('rifGkCount').textContent = f.length+' articol'+(f.length===1?'o':'i');
   document.getElementById('rifGkEl').innerHTML = f.length ? f.map(function(a){ return artCard(a,true); }).join('') :
     '<div style="text-align:center;padding:3rem;color:var(--tx2)">Nessun articolo.</div>';
@@ -2852,6 +2854,7 @@ function renderRifTur() {
     if (q && (a.id+' '+a.title+' '+a.authors).toLowerCase().indexOf(q) < 0) return false;
     return true;
   });
+ f.sort(function(a,b){ return parseInt(b.id) - parseInt(a.id); });
   document.getElementById('rifTurCount').textContent = f.length+' articol'+(f.length===1?'o':'i');
   document.getElementById('rifTurEl').innerHTML = f.length ? f.map(function(a){ return artCard(a,true); }).join('') :
     '<div style="text-align:center;padding:3rem;color:var(--tx2)">Nessun articolo.</div>';
