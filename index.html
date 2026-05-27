@@ -267,10 +267,10 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
       <span style="font-size:20px;font-weight:700;font-family:sans-serif">Rifiutato dal referaggio</span>
       <div style="display:flex;align-items:center;gap:10px">
         <span id="rifRefCount" style="font-size:20px;color:var(--tx2);font-family:sans-serif"></span>
-        <span id="acc-ref-icon" style="font-size:20px;color:var(--tx2)">&#9660;</span>
+        <span id="acc-ref-icon" style="font-size:20px;color:var(--tx2)">&#9658;</span>
       </div>
     </div>
-    <div id="acc-ref" style="padding:12px;display:block">
+    <div id="acc-ref" style="padding:12px;display:none">
       <div class="toolbar" style="margin-bottom:10px"><input class="srch" type="text" id="srchRifRef" placeholder="Cerca..." oninput="renderRifRef()"></div>
       <div id="rifRefEl"></div>
     </div>
@@ -281,7 +281,7 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
       <span style="font-size:20px;font-weight:700;font-family:sans-serif">Rifiutato dal GateKeeper</span>
       <div style="display:flex;align-items:center;gap:10px">
         <span id="rifGkCount" style="font-size:20px;color:var(--tx2);font-family:sans-serif"></span>
-        <span id="acc-gk-icon" style="font-size:20px;color:var(--tx2)">&#9660;</span>
+        <span id="acc-gk-icon" style="font-size:20px;color:var(--tx2)">&#9658;</span>
       </div>
     </div>
     <div id="acc-gk" style="padding:12px;display:none">
@@ -295,7 +295,7 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
       <span style="font-size:20px;font-weight:700;font-family:sans-serif">Rifiutati dal controllo Turnitin</span>
       <div style="display:flex;align-items:center;gap:10px">
         <span id="rifTurCount" style="font-size:20px;color:var(--tx2);font-family:sans-serif"></span>
-        <span id="acc-tur-icon" style="font-size:20px;color:var(--tx2)">&#9660;</span>
+        <span id="acc-tur-icon" style="font-size:20px;color:var(--tx2)">&#9658;</span>
       </div>
     </div>
     <div id="acc-tur" style="padding:12px;display:none">
@@ -1682,6 +1682,7 @@ function renderRifRef() {
     if (q       && (a.id+' '+a.title+' '+a.authors).toLowerCase().indexOf(q) < 0) return false;
     return true;
   });
+  f.sort(function(a,b){ return parseInt(b.id) - parseInt(a.id); });
   document.getElementById('rifRefCount').textContent = f.length+' articol'+(f.length===1?'o':'i');
   document.getElementById('rifRefEl').innerHTML = f.length ? f.map(function(a){ return artCard(a,true); }).join('') :
     '<div style="text-align:center;padding:3rem;color:var(--tx2)">Nessun articolo.</div>';
@@ -1694,6 +1695,7 @@ function renderRifGk() {
     if (q && (a.id+' '+a.title+' '+a.authors).toLowerCase().indexOf(q) < 0) return false;
     return true;
   });
+  f.sort(function(a,b){ return parseInt(b.id) - parseInt(a.id); });
   document.getElementById('rifGkCount').textContent = f.length+' articol'+(f.length===1?'o':'i');
   document.getElementById('rifGkEl').innerHTML = f.length ? f.map(function(a){ return artCard(a,true); }).join('') :
     '<div style="text-align:center;padding:3rem;color:var(--tx2)">Nessun articolo.</div>';
@@ -2852,6 +2854,7 @@ function renderRifTur() {
     if (q && (a.id+' '+a.title+' '+a.authors).toLowerCase().indexOf(q) < 0) return false;
     return true;
   });
+  f.sort(function(a,b){ return parseInt(b.id) - parseInt(a.id); });
   document.getElementById('rifTurCount').textContent = f.length+' articol'+(f.length===1?'o':'i');
   document.getElementById('rifTurEl').innerHTML = f.length ? f.map(function(a){ return artCard(a,true); }).join('') :
     '<div style="text-align:center;padding:3rem;color:var(--tx2)">Nessun articolo.</div>';
