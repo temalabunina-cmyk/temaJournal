@@ -161,7 +161,7 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
   <button class="tab" data-tab="lista">Articoli in lavorazione</button>
   <button class="tab" data-tab="editori">Assegnazioni</button>
   <button class="tab" data-tab="revisori">Revisori</button>
-  <button class="tab" data-tab="numeri">Prossimi numeri</button>
+  <button class="tab" data-tab="numeri">Fascicoli</button>
   <button class="tab" data-tab="verbale">Verbale PDF</button>
   <button class="tab" data-tab="pubblicati">Articoli pubblicati</button>
   <button class="tab" data-tab="rifiutati">Rifiutati</button>
@@ -223,7 +223,7 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
 
 <div class="sec" id="sec-numeri">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
-    <div style="font-size:16px;font-weight:700">Prossimi numeri</div>
+    <div style="font-size:16px;font-weight:700">Fascicoli</div>
     <button class="btn" id="btnNuovoFasc">+ Nuovo fascicolo</button>
   </div>
   <div id="numeriEl"></div>
@@ -267,10 +267,10 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
       <span style="font-size:20px;font-weight:700;font-family:sans-serif">Rifiutato dal referaggio</span>
       <div style="display:flex;align-items:center;gap:10px">
         <span id="rifRefCount" style="font-size:20px;color:var(--tx2);font-family:sans-serif"></span>
-        <span id="acc-ref-icon" style="font-size:20px;color:var(--tx2)">&#9658;</span>
+        <span id="acc-ref-icon" style="font-size:20px;color:var(--tx2)">&#9660;</span>
       </div>
     </div>
-    <div id="acc-ref" style="padding:12px;display:none">
+    <div id="acc-ref" style="padding:12px;display:block">
       <div class="toolbar" style="margin-bottom:10px"><input class="srch" type="text" id="srchRifRef" placeholder="Cerca..." oninput="renderRifRef()"></div>
       <div id="rifRefEl"></div>
     </div>
@@ -281,7 +281,7 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
       <span style="font-size:20px;font-weight:700;font-family:sans-serif">Rifiutato dal GateKeeper</span>
       <div style="display:flex;align-items:center;gap:10px">
         <span id="rifGkCount" style="font-size:20px;color:var(--tx2);font-family:sans-serif"></span>
-        <span id="acc-gk-icon" style="font-size:20px;color:var(--tx2)">&#9658;</span>
+        <span id="acc-gk-icon" style="font-size:20px;color:var(--tx2)">&#9660;</span>
       </div>
     </div>
     <div id="acc-gk" style="padding:12px;display:none">
@@ -295,7 +295,7 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
       <span style="font-size:20px;font-weight:700;font-family:sans-serif">Rifiutati dal controllo Turnitin</span>
       <div style="display:flex;align-items:center;gap:10px">
         <span id="rifTurCount" style="font-size:20px;color:var(--tx2);font-family:sans-serif"></span>
-        <span id="acc-tur-icon" style="font-size:20px;color:var(--tx2)">&#9658;</span>
+        <span id="acc-tur-icon" style="font-size:20px;color:var(--tx2)">&#9660;</span>
       </div>
     </div>
     <div id="acc-tur" style="padding:12px;display:none">
@@ -1682,7 +1682,6 @@ function renderRifRef() {
     if (q       && (a.id+' '+a.title+' '+a.authors).toLowerCase().indexOf(q) < 0) return false;
     return true;
   });
-  f.sort(function(a,b){ return parseInt(b.id) - parseInt(a.id); });
   document.getElementById('rifRefCount').textContent = f.length+' articol'+(f.length===1?'o':'i');
   document.getElementById('rifRefEl').innerHTML = f.length ? f.map(function(a){ return artCard(a,true); }).join('') :
     '<div style="text-align:center;padding:3rem;color:var(--tx2)">Nessun articolo.</div>';
@@ -1695,7 +1694,6 @@ function renderRifGk() {
     if (q && (a.id+' '+a.title+' '+a.authors).toLowerCase().indexOf(q) < 0) return false;
     return true;
   });
-  f.sort(function(a,b){ return parseInt(b.id) - parseInt(a.id); });
   document.getElementById('rifGkCount').textContent = f.length+' articol'+(f.length===1?'o':'i');
   document.getElementById('rifGkEl').innerHTML = f.length ? f.map(function(a){ return artCard(a,true); }).join('') :
     '<div style="text-align:center;padding:3rem;color:var(--tx2)">Nessun articolo.</div>';
@@ -1813,7 +1811,7 @@ function renderNumeri() {
   if (pubIssues.length) {
     pubHtml = '<div style="border:1px solid var(--brd);border-radius:var(--r);margin-top:1.5rem;overflow:hidden">' +
       '<div onclick="toggleAccordion(\'acc-pub-issues\')" style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;cursor:pointer;background:var(--sur2);user-select:none">' +
-        '<span style="font-size:20px;font-weight:700">Prossimi numeri pubblicati</span>' +
+        '<span style="font-size:20px;font-weight:700">Fascicoli pubblicati</span>' +
         '<div style="display:flex;align-items:center;gap:10px">' +
           '<span style="font-size:20px;color:var(--tx2)">'+pubIssues.length+' fascicol'+(pubIssues.length===1?'o':'i')+'</span>' +
           '<span id="acc-pub-issues-icon" style="font-size:20px;color:var(--tx2)">&#9658;</span>' +
@@ -2854,7 +2852,6 @@ function renderRifTur() {
     if (q && (a.id+' '+a.title+' '+a.authors).toLowerCase().indexOf(q) < 0) return false;
     return true;
   });
-  f.sort(function(a,b){ return parseInt(b.id) - parseInt(a.id); });
   document.getElementById('rifTurCount').textContent = f.length+' articol'+(f.length===1?'o':'i');
   document.getElementById('rifTurEl').innerHTML = f.length ? f.map(function(a){ return artCard(a,true); }).join('') :
     '<div style="text-align:center;padding:3rem;color:var(--tx2)">Nessun articolo.</div>';
