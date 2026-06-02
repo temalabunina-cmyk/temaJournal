@@ -151,7 +151,6 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
     <span class="save-dot" id="saveDot"></span>
     <span class="save-lbl" id="saveLbl">Dati salvati</span>
     <button class="btn btn-p" id="btnNuovo">+ Nuovo articolo</button>
-    <button class="btn" onclick="backupData()" title="Scarica backup JSON" style="padding:7px 10px;font-size:13px">&#128229; Backup</button>
   </div>
 </div>
 <input type="file" id="importFile" accept=".json" style="display:none">
@@ -168,8 +167,7 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
   <button class="tab" data-tab="tutti">Tutti gli articoli</button>
 </div>
 <div class="sec" id="sec-gatekeeper">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
-    <div style="font-size:16px;font-weight:700">GateKeeper evaluation</div>
+  <div style="display:flex;align-items:center;justify-content:flex-end;margin-bottom:1rem">
     <span id="gkCount" style="font-size:20px;color:var(--tx2);font-family:sans-serif"></span>
   </div>
   <div style="display:flex;align-items:center;justify-content:flex-end;margin-bottom:10px;gap:8px">
@@ -1008,6 +1006,7 @@ function renderTutti() {
   var fI2 = document.getElementById('fIntlTutti')? document.getElementById('fIntlTutti').value: '';
   var fIs = document.getElementById('fIssTutti') ? document.getElementById('fIssTutti').value : '';
   var f = articles.filter(function(a) {
+    if (!isTuttiPanelArticle(a)) return false;
     if (q && (a.id+' '+a.title+' '+a.authors+' '+a.affiliation).toLowerCase().indexOf(q) < 0) return false;
     if (fE  && a.editor  !== fE)  return false;
     if (fS  && a.step    !== fS)  return false;
@@ -1394,16 +1393,8 @@ function renderGk() {
     var fGkSec  = (document.getElementById('fGkSec') ||{value:''}).value;
     var fGkIntl = (document.getElementById('fGkIntl')||{value:''}).value;
 
-    // ✅ FILTRO CORRETTO PER GK:
     var f = articles.filter(function(a) {
-
-        // Escludi pubblicati e rifiutati
-        if (a.status === 'Pubblicato' || a.status === 'Rifiutato' || a.step === '19') return false;
-
-        // ✅ GK = articoli SENZA EDITOR
-        if (a.editor && a.editor.trim() !== '') return false;
-
-        // Ricerca
+        if (!isGatekeeperPanelArticle(a)) return false;
         if (q && (a.id + ' ' + a.title + ' ' + a.authors).toLowerCase().indexOf(q) < 0) return false;
         if (fGkStep && a.step !== fGkStep) return false;
         if (fGkSec  && a.section !== fGkSec) return false;
@@ -1411,29 +1402,18 @@ function renderGk() {
         return true;
     });
 
-    // ✅ ORDINAMENTO DEFINITIVO:
-    // 1. Prima similarity > 30
-    // 2. Poi gli altri
-    // 3. Dentro ogni gruppo: ID decrescente
     f = f.sort(function (a, b) {
-
         function highSim(x) {
             var s = parseFloat(x.similarity);
             return !isNaN(s) && s > 30;
         }
-
         var aHigh = highSim(a);
         var bHigh = highSim(b);
-
-        // Prima >30%
         if (aHigh && !bHigh) return -1;
         if (!aHigh && bHigh) return 1;
-
-        // Poi ID DECRESCENTE
         return parseInt(b.id) - parseInt(a.id);
     });
 
-    // ✅ RENDER LISTA
     document.getElementById('gkCount').textContent =
         f.length + ' articol' + (f.length === 1 ? 'o' : 'i');
 
@@ -1472,7 +1452,7 @@ function renderPub() {
   var q  = (document.getElementById('srchPub').value||'').toLowerCase();
   var fIs= document.getElementById('fIssPub').value;
   var f = articles.filter(function(a) {
-    if (a.status !== 'Pubblicato' && a.step !== '19') return false;
+    if (!isPublishedArticle(a)) return false;
     if (q && (a.id+' '+a.title+' '+a.authors).toLowerCase().indexOf(q) < 0) return false;
     if (fIs && a.issue !== fIs) return false;
     return true;
@@ -1484,7 +1464,6 @@ function renderPub() {
     var bOk = !isNaN(simB) && simB < 30 && !isNaN(aiB) && aiB < 30;
     if (aOk && !bOk) return -1;
     if (!aOk && bOk) return 1;
-    // Both groups sorted by ID descending
     return parseInt(b.id) - parseInt(a.id);
   });
   document.getElementById('pubCount').textContent = f.length+' articol'+(f.length===1?'o':'i');
@@ -1676,10 +1655,8 @@ function renderRevisori() {
 function renderRifRef() {
   var q = (document.getElementById('srchRifRef').value||'').toLowerCase();
   var f = articles.filter(function(a) {
-    var isDeclined = a.decisioneEditor === 'Decline submission' || a.decisioneEditor2 === 'Decline submission';
-    if (!isDeclined && a.step !== '14') return false;
-    if (a.status !== 'Rifiutato') return false;
-    if (q       && (a.id+' '+a.title+' '+a.authors).toLowerCase().indexOf(q) < 0) return false;
+    if (!isRejectedByReview(a)) return false;
+    if (q && (a.id+' '+a.title+' '+a.authors).toLowerCase().indexOf(q) < 0) return false;
     return true;
   });
   f.sort(function(a,b){ return parseInt(b.id) - parseInt(a.id); });
@@ -1691,7 +1668,7 @@ function renderRifRef() {
 function renderRifGk() {
   var q = (document.getElementById('srchRifGk').value||'').toLowerCase();
   var f = articles.filter(function(a) {
-    if (a.step !== '6') return false;
+    if (!isRejectedByGatekeeper(a)) return false;
     if (q && (a.id+' '+a.title+' '+a.authors).toLowerCase().indexOf(q) < 0) return false;
     return true;
   });
@@ -2848,9 +2825,7 @@ function importData(e) {
 function renderRifTur() {
   var q = (document.getElementById('srchRifTur').value||'').toLowerCase();
   var f = articles.filter(function(a) {
-    if (!a.rispostaAutori || a.rispostaAutori === '') return false;
-    var sim = parseFloat(a.similarity); var ai = parseFloat(a.aiPercent);
-    if (!(sim > 30 || ai > 30)) return false;
+    if (!isRejectedByTurnitin(a)) return false;
     if (q && (a.id+' '+a.title+' '+a.authors).toLowerCase().indexOf(q) < 0) return false;
     return true;
   });
@@ -2860,33 +2835,47 @@ function renderRifTur() {
     '<div style="text-align:center;padding:3rem;color:var(--tx2)">Nessun articolo.</div>';
 }
 
+function isPublishedArticle(a) {
+  return a && (a.status === 'Pubblicato' || a.step === '19');
+}
+function isRejectedByReview(a) {
+  if (!a || a.status !== 'Rifiutato') return false;
+  return a.decisioneEditor === 'Decline submission' || a.decisioneEditor2 === 'Decline submission' || a.step === '14';
+}
+function isRejectedByTurnitin(a) {
+  if (!a || a.status !== 'Rifiutato') return false;
+  var sim = parseFloat(a.similarity), ai = parseFloat(a.aiPercent);
+  var high = (!isNaN(sim) && sim > 30) || (!isNaN(ai) && ai > 30);
+  return a.step === '4' || ((a.rispostaAutori === 'ritirato' || a.comunicazioneInviata) && high && a.step !== '14');
+}
+function isRejectedByGatekeeper(a) {
+  if (!a || a.status !== 'Rifiutato') return false;
+  if (a.step === '6' || a.step === '7b') return true;
+  if (isRejectedByReview(a) || isRejectedByTurnitin(a)) return false;
+  return !a.editor || a.editor === '';
+}
+function isRejectedArticle(a) {
+  return !!a && (isRejectedByReview(a) || isRejectedByGatekeeper(a) || isRejectedByTurnitin(a) || a.status === 'Rifiutato');
+}
+function isGatekeeperPanelArticle(a) {
+  return !!a && !isPublishedArticle(a) && !isRejectedArticle(a) && (!a.editor || a.editor.trim() === '');
+}
+function isListaPanelArticle(a) {
+  return !!a && !isPublishedArticle(a) && !isRejectedArticle(a) && !!a.editor && a.editor.trim() !== '';
+}
+function isTuttiPanelArticle(a) {
+  return !!a && !isPublishedArticle(a) && !isRejectedArticle(a);
+}
+
 function updateTabCounts() {
-  // GK evaluation: no editor, not Rifiutato, not Pubblicato, not step 19
-  var gkCount = articles.filter(function(a){
-    return a.status !== 'Pubblicato' && a.status !== 'Rifiutato' && a.step !== '19' &&
-           (!a.editor || a.editor === '');
-  }).length;
-
-  // Articoli in lavorazione: has editor, not Rifiutato, not Pubblicato, not step 19
-  var listaCount = articles.filter(function(a){
-    return a.status !== 'Pubblicato' && a.status !== 'Rifiutato' && a.step !== '19' &&
-           a.editor && a.editor !== '';
-  }).length;
-
-  // Rifiutati: status Rifiutato
-  var rifCount = articles.filter(function(a){
-    return a.status === 'Rifiutato';
-  }).length;
-
-  // Pubblicati
-  var pubCount = articles.filter(function(a){
-    return a.status === 'Pubblicato';
-  }).length;
-
-  // Tutti: tutti tranne Pubblicato e Rifiutato
-  var tuttiCount = articles.filter(function(a){
-    return a.status !== 'Pubblicato' && a.status !== 'Rifiutato';
-  }).length;
+  var gkCount = articles.filter(isGatekeeperPanelArticle).length;
+  var listaCount = articles.filter(isListaPanelArticle).length;
+  var rifRefCount = articles.filter(isRejectedByReview).length;
+  var rifGkCount = articles.filter(isRejectedByGatekeeper).length;
+  var rifTurCount = articles.filter(isRejectedByTurnitin).length;
+  var rifCount = rifRefCount + rifGkCount + rifTurCount;
+  var pubCount = articles.filter(isPublishedArticle).length;
+  var tuttiCount = articles.filter(isTuttiPanelArticle).length;
 
   document.querySelectorAll('.tab').forEach(function(btn){
     var tab = btn.dataset.tab;
