@@ -1018,6 +1018,7 @@ function renderTutti() {
   });
   f.sort(function(a,b){ return parseInt(b.id) - parseInt(a.id); });
   document.getElementById('tuttiCount').textContent = f.length+' articol'+(f.length===1?'o':'i');
+  updateTuttiTabLabel(f.length);
   document.getElementById('tuttiEl').innerHTML = f.length ? f.map(function(a){ return artCard(a,true); }).join('') :
     '<div style="text-align:center;padding:3rem;color:var(--tx)">Nessun articolo trovato.</div>';
 }
@@ -2860,6 +2861,11 @@ function renderRifTur() {
     '<div style="text-align:center;padding:3rem;color:var(--tx2)">Nessun articolo.</div>';
 }
 
+function updateTuttiTabLabel(count) {
+  var btn = document.querySelector('.tab[data-tab="tutti"]');
+  if (btn) btn.textContent = 'Tutti gli articoli (' + count + ')';
+}
+
 function updateTabCounts() {
   // GK evaluation: no editor, not Rifiutato, not Pubblicato, not step 19
   var gkCount = articles.filter(function(a){
@@ -2883,10 +2889,8 @@ function updateTabCounts() {
     return a.status === 'Pubblicato';
   }).length;
 
-  // Tutti: tutti tranne Pubblicato e Rifiutato
-  var tuttiCount = articles.filter(function(a){
-    return a.status !== 'Pubblicato' && a.status !== 'Rifiutato';
-  }).length;
+  // Tutti: totale reale degli articoli presenti
+  var tuttiCount = articles.length;
 
   document.querySelectorAll('.tab').forEach(function(btn){
     var tab = btn.dataset.tab;
@@ -2894,10 +2898,11 @@ function updateTabCounts() {
     if (tab === 'lista')      btn.textContent = 'Articoli in lavorazione (' + listaCount + ')';
     if (tab === 'rifiutati')  btn.textContent = 'Rifiutati (' + rifCount + ')';
     if (tab === 'pubblicati') btn.textContent = 'Articoli pubblicati (' + pubCount + ')';
-    if (tab === 'tutti')      btn.textContent = 'Tutti gli articoli (' + tuttiCount + ')';
+    if (tab === 'tutti')      updateTuttiTabLabel(tuttiCount);
   });
 }
 function switchTab(name) {
+  updateTabCounts();
   document.querySelectorAll('.tab').forEach(function(t){ t.classList.toggle('active',t.dataset.tab===name); });
   document.querySelectorAll('.sec').forEach(function(s){ s.classList.toggle('active',s.id==='sec-'+name); });
   if (name==='tutti')         renderTutti();
