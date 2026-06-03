@@ -568,26 +568,70 @@ let issues = [], articles = [], editingArtId = null, editingIssKey = null;
 let saveTimer = null, sessionUnlocked = false, pendingAction = null;
 let currentRevisori = [];
 
-var citeScore2024 = '2,3';
-var citeScoreTracker = '3,4';
+var citeScore2024 = '—';
+var citeScoreTracker = '—';
+var citeScoreLastUpdate = '';
 
 function openScopus() {
   window.open('https://www.scopus.com/sourceid/21101185191', '_blank');
 }
 
-function loadCiteScores() {
+async function loadScopusMetrics(forceRefresh) {
   try {
-    var d = JSON.parse(localStorage.getItem('tema-citescores') || '{}');
-    if (d.citeScore2024) citeScore2024 = d.citeScore2024;
-    if (d.citeScoreTracker) citeScoreTracker = d.citeScoreTracker;
-  } catch(e) {}
+    var url = GS_URL + '?action=scopusMetrics&sourceId=21101185191';
+    if (forceRefresh) url += '&_ts=' + Date.now();
+
+    var resp = await fetch(url, { method: 'GET', cache: 'no-store' });
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+
+    var data = await resp.json();
+    if (!data || data.ok === false) {
+      throw new Error(data && data.error ? data.error : 'Dati Scopus non disponibili');
+    }
+
+    if (data.citeScore2024 !== undefined && data.citeScore2024 !== null && data.citeScore2024 !== '') {
+      citeScore2024 = String(data.citeScore2024).replace('.', ',');
+    }
+
+    if (data.citeScoreTracker !== undefined && data.citeScoreTracker !== null && data.citeScoreTracker !== '') {
+      citeScoreTracker = String(data.citeScoreTracker).replace('.', ',');
+    }
+
+    citeScoreLastUpdate = data.updatedAt || '';
+
+    var el1 = document.getElementById('citeScore2024');
+    var el2 = document.getElementById('citeScoreTracker');
+    if (el1) el1.value = citeScore2024;
+    if (el2) el2.value = citeScoreTracker;
+
+    updateCiteScoreSubtitles();
+  } catch (e) {
+    console.warn('Errore aggiornamento metriche Scopus:', e);
+    updateCiteScoreSubtitles('Scopus ↗');
+  }
 }
-function saveCiteScores() {
-  var v1 = document.getElementById('citeScore2024');
-  var v2 = document.getElementById('citeScoreTracker');
-  if (v1) citeScore2024 = v1.value;
-  if (v2) citeScoreTracker = v2.value;
-  try { localStorage.setItem('tema-citescores', JSON.stringify({citeScore2024:citeScore2024, citeScoreTracker:citeScoreTracker})); } catch(e) {}
+
+function updateCiteScoreSubtitles(defaultText) {
+  var txt = defaultText || (citeScoreLastUpdate ? ('Scopus ↗ · aggiornato ' + citeScoreLastUpdate) : 'Scopus ↗');
+
+  var el1 = document.getElementById('citeScore2024');
+  var el2 = document.getElementById('citeScoreTracker');
+
+  if (el1) {
+    var box1 = el1.parentElement;
+    if (box1) {
+      var sub1 = box1.querySelector('.stat-sub');
+      if (sub1) sub1.textContent = txt;
+    }
+  }
+
+  if (el2) {
+    var box2 = el2.parentElement;
+    if (box2) {
+      var sub2 = box2.querySelector('.stat-sub');
+      if (sub2) sub2.textContent = txt;
+    }
+  }
 }
 
 function loadData() {
@@ -924,13 +968,17 @@ function renderStats() {
       '<div style="display:flex;gap:0;border-radius:var(--r);overflow:hidden">' +
         '<div style="flex:1;padding:.75rem .5rem;border-right:1px solid var(--brd);cursor:pointer" onclick="openScopus()">' +
           '<div class="stat-lbl" style="margin-bottom:4px">CiteScore 2024</div>' +
-          '<input class="stat-edit" id="citeScore2024" value="'+citeScore2024+'" onchange="saveCiteScores()" onclick="event.stopPropagation()">' +
+          '<input class="stat-edit" id="citeScore2024" value="'+citeScore2024+'" readonly style="pointer-events:none">' +
           '<div class="stat-sub">Scopus &#8599;</div></div>' +
         '<div style="flex:1;padding:.75rem .5rem;cursor:pointer" onclick="openScopus()">' +
           '<div class="stat-lbl" style="margin-bottom:4px">CiteScoreTracker 2025</div>' +
-          '<input class="stat-edit" id="citeScoreTracker" value="'+citeScoreTracker+'" onchange="saveCiteScores()" style="color:var(--teal)" onclick="event.stopPropagation()">' +
+          '<input class="stat-edit" id="citeScoreTracker" value="'+citeScoreTracker+'" readonly style="color:var(--teal);pointer-events:none">' +
           '<div class="stat-sub">Scopus &#8599;</div></div>' +
       '</div></div>';
+
+  setTimeout(function() {
+    loadScopusMetrics(false);
+  }, 0);
 }
 
 function gkCard(a) {
@@ -2996,7 +3044,7 @@ function bootApp() {
     if (e.key === 'Enter') document.getElementById('loginPass').focus();
   });
 
-  loadCiteScores(); initFilters(); renderStats(); updateTabCounts();
+  initFilters(); renderStats(); updateTabCounts(); loadScopusMetrics(true);
   if (adminMode) {
     setTimeout(unlockAllAdmin, 500);
     renderGk();
