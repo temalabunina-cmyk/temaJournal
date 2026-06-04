@@ -568,8 +568,12 @@ let issues = [], articles = [], editingArtId = null, editingIssKey = null;
 let saveTimer = null, sessionUnlocked = false, pendingAction = null;
 let currentRevisori = [];
 
-var citeScore2024 = '—';
-var citeScoreTracker = '—';
+var citeScoreValue = '—';
+var citeScoreLabel = 'CiteScore';
+var citeScoreSubLabel = 'Scopus ↗';
+var citeScoreTrackerValue = '—';
+var citeScoreTrackerLabel = 'CiteScore Tracker';
+var citeScoreTrackerSubLabel = 'Scopus ↗';
 var citeScoreLastUpdate = '';
 
 function openScopus() {
@@ -589,48 +593,35 @@ async function loadScopusMetrics(forceRefresh) {
       throw new Error(data && data.error ? data.error : 'Dati Scopus non disponibili');
     }
 
-    if (data.citeScore2024 !== undefined && data.citeScore2024 !== null && data.citeScore2024 !== '') {
-      citeScore2024 = String(data.citeScore2024).replace('.', ',');
+    if (data.citeScoreValue !== undefined && data.citeScoreValue !== null && data.citeScoreValue !== '') {
+      citeScoreValue = String(data.citeScoreValue).replace('.', ',');
+    }
+    if (data.citeScoreTrackerValue !== undefined && data.citeScoreTrackerValue !== null && data.citeScoreTrackerValue !== '') {
+      citeScoreTrackerValue = String(data.citeScoreTrackerValue).replace('.', ',');
     }
 
-    if (data.citeScoreTracker !== undefined && data.citeScoreTracker !== null && data.citeScoreTracker !== '') {
-      citeScoreTracker = String(data.citeScoreTracker).replace('.', ',');
-    }
+    if (data.citeScoreLabel) citeScoreLabel = String(data.citeScoreLabel);
+    if (data.citeScoreTrackerLabel) citeScoreTrackerLabel = String(data.citeScoreTrackerLabel);
 
     citeScoreLastUpdate = data.updatedAt || '';
+    citeScoreSubLabel = data.citeScoreSubLabel || (citeScoreLastUpdate ? ('Scopus ↗ · aggiornato ' + citeScoreLastUpdate) : 'Scopus ↗');
+    citeScoreTrackerSubLabel = data.citeScoreTrackerSubLabel || (data.trackerReferenceLabel ? ('Scopus ↗ · riferimento ' + data.trackerReferenceLabel) : citeScoreSubLabel);
 
-    var el1 = document.getElementById('citeScore2024');
-    var el2 = document.getElementById('citeScoreTracker');
-    if (el1) el1.value = citeScore2024;
-    if (el2) el2.value = citeScoreTracker;
+    var title1 = document.getElementById('citeScoreLabel');
+    var title2 = document.getElementById('citeScoreTrackerLabel');
+    var val1 = document.getElementById('citeScoreValue');
+    var val2 = document.getElementById('citeScoreTrackerValue');
+    var sub1 = document.getElementById('citeScoreSub');
+    var sub2 = document.getElementById('citeScoreTrackerSub');
 
-    updateCiteScoreSubtitles();
+    if (title1) title1.textContent = citeScoreLabel;
+    if (title2) title2.textContent = citeScoreTrackerLabel;
+    if (val1) val1.value = citeScoreValue;
+    if (val2) val2.value = citeScoreTrackerValue;
+    if (sub1) sub1.textContent = citeScoreSubLabel;
+    if (sub2) sub2.textContent = citeScoreTrackerSubLabel;
   } catch (e) {
     console.warn('Errore aggiornamento metriche Scopus:', e);
-    updateCiteScoreSubtitles('Scopus ↗');
-  }
-}
-
-function updateCiteScoreSubtitles(defaultText) {
-  var txt = defaultText || (citeScoreLastUpdate ? ('Scopus ↗ · aggiornato ' + citeScoreLastUpdate) : 'Scopus ↗');
-
-  var el1 = document.getElementById('citeScore2024');
-  var el2 = document.getElementById('citeScoreTracker');
-
-  if (el1) {
-    var box1 = el1.parentElement;
-    if (box1) {
-      var sub1 = box1.querySelector('.stat-sub');
-      if (sub1) sub1.textContent = txt;
-    }
-  }
-
-  if (el2) {
-    var box2 = el2.parentElement;
-    if (box2) {
-      var sub2 = box2.querySelector('.stat-sub');
-      if (sub2) sub2.textContent = txt;
-    }
   }
 }
 
@@ -967,13 +958,13 @@ function renderStats() {
     '<div class="stat" style="grid-column:span 2">' +
       '<div style="display:flex;gap:0;border-radius:var(--r);overflow:hidden">' +
         '<div style="flex:1;padding:.75rem .5rem;border-right:1px solid var(--brd);cursor:pointer" onclick="openScopus()">' +
-          '<div class="stat-lbl" style="margin-bottom:4px">CiteScore 2024</div>' +
-          '<input class="stat-edit" id="citeScore2024" value="'+citeScore2024+'" readonly style="pointer-events:none">' +
-          '<div class="stat-sub">Scopus &#8599;</div></div>' +
+          '<div class="stat-lbl" id="citeScoreLabel" style="margin-bottom:4px">'+esc(citeScoreLabel)+'</div>' +
+          '<input class="stat-edit" id="citeScoreValue" value="'+citeScoreValue+'" readonly style="pointer-events:none">' +
+          '<div class="stat-sub" id="citeScoreSub">'+esc(citeScoreSubLabel)+'</div></div>' +
         '<div style="flex:1;padding:.75rem .5rem;cursor:pointer" onclick="openScopus()">' +
-          '<div class="stat-lbl" style="margin-bottom:4px">CiteScoreTracker 2025</div>' +
-          '<input class="stat-edit" id="citeScoreTracker" value="'+citeScoreTracker+'" readonly style="color:var(--teal);pointer-events:none">' +
-          '<div class="stat-sub">Scopus &#8599;</div></div>' +
+          '<div class="stat-lbl" id="citeScoreTrackerLabel" style="margin-bottom:4px">'+esc(citeScoreTrackerLabel)+'</div>' +
+          '<input class="stat-edit" id="citeScoreTrackerValue" value="'+citeScoreTrackerValue+'" readonly style="color:var(--teal);pointer-events:none">' +
+          '<div class="stat-sub" id="citeScoreTrackerSub">'+esc(citeScoreTrackerSubLabel)+'</div></div>' +
       '</div></div>';
 
   setTimeout(function() {
