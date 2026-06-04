@@ -580,6 +580,62 @@ function openScopus() {
   window.open('https://www.scopus.com/sourceid/21101185191', '_blank');
 }
 
+function normalizeMetricValue(v) {
+  if (v === null || v === undefined || v === '') return '—';
+  return String(v).replace('.', ',');
+}
+
+function applyScopusMetricsToUI() {
+  var title1 = document.getElementById('citeScoreLabel');
+  var title2 = document.getElementById('citeScoreTrackerLabel');
+  var val1 = document.getElementById('citeScoreValue');
+  var val2 = document.getElementById('citeScoreTrackerValue');
+  var sub1 = document.getElementById('citeScoreSub');
+  var sub2 = document.getElementById('citeScoreTrackerSub');
+
+  if (title1) title1.textContent = citeScoreLabel;
+  if (title2) title2.textContent = citeScoreTrackerLabel;
+  if (val1) val1.value = citeScoreValue;
+  if (val2) val2.value = citeScoreTrackerValue;
+  if (sub1) sub1.textContent = citeScoreSubLabel;
+  if (sub2) sub2.textContent = citeScoreTrackerSubLabel;
+}
+
+function hydrateScopusMetrics(data) {
+  if (!data) return;
+
+  // Nuovo formato robusto
+  if (data.citeScoreLabel) citeScoreLabel = String(data.citeScoreLabel);
+  if (data.citeScoreTrackerLabel) citeScoreTrackerLabel = String(data.citeScoreTrackerLabel);
+  if (data.citeScoreValue !== undefined) citeScoreValue = normalizeMetricValue(data.citeScoreValue);
+  if (data.citeScoreTrackerValue !== undefined) citeScoreTrackerValue = normalizeMetricValue(data.citeScoreTrackerValue);
+  if (data.citeScoreSubLabel) citeScoreSubLabel = String(data.citeScoreSubLabel);
+  if (data.citeScoreTrackerSubLabel) citeScoreTrackerSubLabel = String(data.citeScoreTrackerSubLabel);
+  if (data.updatedAt) citeScoreLastUpdate = String(data.updatedAt);
+
+  // Compatibilità con il vecchio formato
+  if ((data.citeScore2024 !== undefined) && (!data.citeScoreValue && citeScoreValue === '—')) {
+    citeScoreValue = normalizeMetricValue(data.citeScore2024);
+  }
+  if ((data.citeScoreTracker !== undefined) && (!data.citeScoreTrackerValue && citeScoreTrackerValue === '—')) {
+    citeScoreTrackerValue = normalizeMetricValue(data.citeScoreTracker);
+  }
+
+  // Fallback etichette automatiche se il backend restituisce solo anni/periodi
+  if ((!data.citeScoreLabel || data.citeScoreLabel === 'CiteScore') && data.citeScoreYear) {
+    citeScoreLabel = 'CiteScore ' + data.citeScoreYear;
+  }
+  if ((!data.citeScoreTrackerLabel || data.citeScoreTrackerLabel === 'CiteScore Tracker') && data.trackerYear) {
+    citeScoreTrackerLabel = 'CiteScore Tracker ' + data.trackerYear;
+  }
+  if ((!data.citeScoreTrackerSubLabel || data.citeScoreTrackerSubLabel === 'Scopus ↗') && data.trackerReferenceLabel) {
+    citeScoreTrackerSubLabel = 'Scopus ↗ · riferimento ' + data.trackerReferenceLabel;
+  }
+  if ((!data.citeScoreSubLabel || data.citeScoreSubLabel === 'Scopus ↗') && citeScoreLastUpdate) {
+    citeScoreSubLabel = 'Scopus ↗ · aggiornato ' + citeScoreLastUpdate;
+  }
+}
+
 async function loadScopusMetrics(forceRefresh) {
   try {
     var url = GS_URL + '?action=scopusMetrics&sourceId=21101185191';
@@ -593,35 +649,11 @@ async function loadScopusMetrics(forceRefresh) {
       throw new Error(data && data.error ? data.error : 'Dati Scopus non disponibili');
     }
 
-    if (data.citeScoreValue !== undefined && data.citeScoreValue !== null && data.citeScoreValue !== '') {
-      citeScoreValue = String(data.citeScoreValue).replace('.', ',');
-    }
-    if (data.citeScoreTrackerValue !== undefined && data.citeScoreTrackerValue !== null && data.citeScoreTrackerValue !== '') {
-      citeScoreTrackerValue = String(data.citeScoreTrackerValue).replace('.', ',');
-    }
-
-    if (data.citeScoreLabel) citeScoreLabel = String(data.citeScoreLabel);
-    if (data.citeScoreTrackerLabel) citeScoreTrackerLabel = String(data.citeScoreTrackerLabel);
-
-    citeScoreLastUpdate = data.updatedAt || '';
-    citeScoreSubLabel = data.citeScoreSubLabel || (citeScoreLastUpdate ? ('Scopus ↗ · aggiornato ' + citeScoreLastUpdate) : 'Scopus ↗');
-    citeScoreTrackerSubLabel = data.citeScoreTrackerSubLabel || (data.trackerReferenceLabel ? ('Scopus ↗ · riferimento ' + data.trackerReferenceLabel) : citeScoreSubLabel);
-
-    var title1 = document.getElementById('citeScoreLabel');
-    var title2 = document.getElementById('citeScoreTrackerLabel');
-    var val1 = document.getElementById('citeScoreValue');
-    var val2 = document.getElementById('citeScoreTrackerValue');
-    var sub1 = document.getElementById('citeScoreSub');
-    var sub2 = document.getElementById('citeScoreTrackerSub');
-
-    if (title1) title1.textContent = citeScoreLabel;
-    if (title2) title2.textContent = citeScoreTrackerLabel;
-    if (val1) val1.value = citeScoreValue;
-    if (val2) val2.value = citeScoreTrackerValue;
-    if (sub1) sub1.textContent = citeScoreSubLabel;
-    if (sub2) sub2.textContent = citeScoreTrackerSubLabel;
+    hydrateScopusMetrics(data);
+    applyScopusMetricsToUI();
   } catch (e) {
     console.warn('Errore aggiornamento metriche Scopus:', e);
+    applyScopusMetricsToUI();
   }
 }
 
