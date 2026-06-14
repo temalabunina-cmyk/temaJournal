@@ -576,6 +576,33 @@ var citeScoreTrackerLabel = 'CiteScore Tracker';
 var citeScoreTrackerSubLabel = 'Scopus ↗';
 var citeScoreLastUpdate = '';
 
+async function saveCiteScore() {
+  var cs = document.getElementById('citeScoreValue').value.trim();
+  var tr = document.getElementById('citeScoreTrackerValue').value.trim();
+  var now = new Date().toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'});
+  // Save to Apps Script
+  try {
+    var url = GS_URL + '?action=saveCiteScore';
+    var resp = await fetch(GS_URL, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        _saveCiteScore: true,
+        citeScoreValue: cs,
+        citeScoreTrackerValue: tr,
+        updatedAt: now
+      })
+    });
+    citeScoreValue = cs;
+    citeScoreTrackerValue = tr;
+    document.getElementById('btnSaveCs').style.display='none';
+    document.getElementById('citeScoreSub').textContent = 'Aggiornato: '+now;
+    alert('CiteScore aggiornato.');
+  } catch(e) {
+    alert('Errore nel salvataggio.');
+  }
+}
+
 function openScopus() {
   window.open('https://www.scopus.com/sourceid/21101185191', '_blank');
 }
@@ -996,12 +1023,34 @@ function renderStats() {
         '<div style="flex:1;padding:.75rem .5rem;cursor:pointer" onclick="openScopus()">' +
           '<div class="stat-lbl" id="citeScoreTrackerLabel" style="margin-bottom:4px">'+esc(citeScoreTrackerLabel)+'</div>' +
           '<input class="stat-edit" id="citeScoreTrackerValue" value="'+citeScoreTrackerValue+'" readonly style="color:var(--teal);pointer-events:none">' +
-          '<div class="stat-sub" id="citeScoreTrackerSub">'+esc(citeScoreTrackerSubLabel)+'</div></div>' +
-      '</div></div>';
+          '<div class="stat-sub" id="citeScoreTrackerSub">'+esc(citeScoreTrackerSubLabel)+'</div>' +
+      (adminMode ? '<div style="text-align:right;padding:4px 8px 6px"><button id="btnSaveCs" class="btn btn-ok" style="display:none;font-size:12px;padding:3px 10px" onclick="saveCiteScore()">&#10003; Salva CiteScore</button></div>' : '') +
+    '</div>' +   '</div></div>';
 
   setTimeout(function() {
     loadScopusMetrics(false);
+    applyCiteScorePermissions();
   }, 0);
+}
+
+function applyCiteScorePermissions() {
+  var cs = document.getElementById('citeScoreValue');
+  var tr = document.getElementById('citeScoreTrackerValue');
+  if (!cs || !tr) return;
+  if (adminMode) {
+    cs.removeAttribute('readonly');
+    cs.style.pointerEvents = '';
+    cs.oninput = function() { document.getElementById('btnSaveCs').style.display='inline-block'; };
+    tr.removeAttribute('readonly');
+    tr.style.pointerEvents = '';
+    tr.style.color = '';
+    tr.oninput = function() { document.getElementById('btnSaveCs').style.display='inline-block'; };
+  } else {
+    cs.setAttribute('readonly','');
+    cs.style.pointerEvents = 'none';
+    tr.setAttribute('readonly','');
+    tr.style.pointerEvents = 'none';
+  }
 }
 
 function gkCard(a) {
