@@ -1022,12 +1022,12 @@ function renderStats() {
     '<div class="stat"><div class="stat-lbl">Cit. TeMA 22-26</div><div class="stat-val" style="color:var(--purple)">'+t2226+'</div><div class="stat-sub">'+esc(issLabel)+' &middot; media '+avg+'</div></div>' +
     '<div class="stat" style="grid-column:span 2">' +
       '<div style="display:flex;gap:0;border-radius:var(--r);overflow:hidden">' +
-        '<div style="flex:1;padding:.75rem .5rem;border-right:1px solid var(--brd);cursor:pointer" onclick="openScopus()">' +
-          '<div class="stat-lbl" id="citeScoreLabel" style="margin-bottom:4px">'+esc(citeScoreLabel)+'</div>' +
+        '<div style="flex:1;padding:.75rem .5rem;border-right:1px solid var(--brd)">' +
+          '<div class="stat-lbl" id="citeScoreLabel" style="margin-bottom:4px;cursor:pointer" onclick="openScopus()">'+esc(citeScoreLabel)+'</div>' +
           '<input class="stat-edit" id="citeScoreValue" value="'+citeScoreValue+'" readonly style="pointer-events:none">' +
           '<div class="stat-sub" id="citeScoreSub">'+esc(citeScoreSubLabel)+'</div></div>' +
-        '<div style="flex:1;padding:.75rem .5rem;cursor:pointer" onclick="openScopus()">' +
-          '<div class="stat-lbl" id="citeScoreTrackerLabel" style="margin-bottom:4px">'+esc(citeScoreTrackerLabel)+'</div>' +
+        '<div style="flex:1;padding:.75rem .5rem">' +
+          '<div class="stat-lbl" id="citeScoreTrackerLabel" style="margin-bottom:4px;cursor:pointer" onclick="openScopus()">'+esc(citeScoreTrackerLabel)+'</div>' +
           '<input class="stat-edit" id="citeScoreTrackerValue" value="'+citeScoreTrackerValue+'" readonly style="color:var(--teal);pointer-events:none">' +
           '<div class="stat-sub" id="citeScoreTrackerSub">'+esc(citeScoreTrackerSubLabel)+'</div>' +
       (adminMode ? '<div style="text-align:right;padding:4px 8px 6px"><button id="btnSaveCs" class="btn btn-ok" style="display:none;font-size:12px;padding:3px 10px" onclick="saveCiteScore()">&#10003; Salva CiteScore</button></div>' : '') +
