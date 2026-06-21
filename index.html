@@ -586,12 +586,9 @@ async function saveCiteScore() {
   var cs = document.getElementById('citeScoreValue').value.trim();
   var tr = document.getElementById('citeScoreTrackerValue').value.trim();
   var now = new Date().toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'});
-  // Save to Apps Script
   try {
-    var url = GS_URL + '?action=saveCiteScore';
     var resp = await fetch(GS_URL, {
       method:'POST',
-      headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
         _saveCiteScore: true,
         citeScoreValue: cs,
@@ -599,13 +596,17 @@ async function saveCiteScore() {
         updatedAt: now
       })
     });
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    var txt = await resp.text();
+    if (txt.trim() !== 'OK') throw new Error(txt);
     citeScoreValue = cs;
     citeScoreTrackerValue = tr;
     document.getElementById('btnSaveCs').style.display='none';
     document.getElementById('citeScoreSub').textContent = 'Aggiornato: '+now;
     alert('CiteScore aggiornato.');
   } catch(e) {
-    alert('Errore nel salvataggio.');
+    console.error('saveCiteScore error:', e);
+    alert('Errore nel salvataggio: ' + (e.message || 'rete'));
   }
 }
 
