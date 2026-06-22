@@ -582,32 +582,15 @@ var citeScoreTrackerLabel = 'CiteScore Tracker 2026';
 var citeScoreTrackerSubLabel = 'Scopus ↗ · riferimento maggio 2026';
 var citeScoreLastUpdate = '';
 
-async function saveCiteScore() {
+function saveCiteScore() {
   var cs = document.getElementById('citeScoreValue').value.trim();
   var tr = document.getElementById('citeScoreTrackerValue').value.trim();
+  if (cs) citeScoreValue = cs;
+  if (tr) citeScoreTrackerValue = tr;
+  document.getElementById('btnSaveCs').style.display='none';
   var now = new Date().toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'});
-  try {
-    var resp = await fetch(GS_URL, {
-      method:'POST',
-      body: JSON.stringify({
-        _saveCiteScore: true,
-        citeScoreValue: cs,
-        citeScoreTrackerValue: tr,
-        updatedAt: now
-      })
-    });
-    if (!resp.ok) throw new Error('HTTP ' + resp.status);
-    var txt = await resp.text();
-    if (txt.trim() !== 'OK') throw new Error(txt);
-    citeScoreValue = cs;
-    citeScoreTrackerValue = tr;
-    document.getElementById('btnSaveCs').style.display='none';
-    document.getElementById('citeScoreSub').textContent = 'Aggiornato: '+now;
-    alert('CiteScore aggiornato.');
-  } catch(e) {
-    console.error('saveCiteScore error:', e);
-    alert('Errore nel salvataggio: ' + (e.message || 'rete'));
-  }
+  var sub = document.getElementById('citeScoreSub');
+  if (sub) sub.textContent = 'Scopus ↗ · aggiornato ' + now;
 }
 
 function openScopus() {
@@ -1031,33 +1014,23 @@ function renderStats() {
           '<div class="stat-lbl" id="citeScoreTrackerLabel" style="margin-bottom:4px;cursor:pointer" onclick="openScopus()">'+esc(citeScoreTrackerLabel)+'</div>' +
           '<input class="stat-edit" id="citeScoreTrackerValue" value="'+citeScoreTrackerValue+'" readonly style="color:var(--teal);pointer-events:none">' +
           '<div class="stat-sub" id="citeScoreTrackerSub">'+esc(citeScoreTrackerSubLabel)+'</div>' +
-      (adminMode ? '<div style="text-align:right;padding:4px 8px 6px"><button id="btnSaveCs" class="btn btn-ok" style="display:none;font-size:12px;padding:3px 10px" onclick="saveCiteScore()">&#10003; Salva CiteScore</button></div>' : '') +
+      
     '</div>' +   '</div></div>';
 
   setTimeout(function() {
-    loadScopusMetrics(false);
     applyCiteScorePermissions();
   }, 0);
 }
 
 function applyCiteScorePermissions() {
+  // CiteScore è ora un valore fisso (no scrittura su Google Sheets)
   var cs = document.getElementById('citeScoreValue');
   var tr = document.getElementById('citeScoreTrackerValue');
   if (!cs || !tr) return;
-  if (adminMode) {
-    cs.removeAttribute('readonly');
-    cs.style.pointerEvents = '';
-    cs.oninput = function() { document.getElementById('btnSaveCs').style.display='inline-block'; };
-    tr.removeAttribute('readonly');
-    tr.style.pointerEvents = '';
-    tr.style.color = '';
-    tr.oninput = function() { document.getElementById('btnSaveCs').style.display='inline-block'; };
-  } else {
-    cs.setAttribute('readonly','');
-    cs.style.pointerEvents = 'none';
-    tr.setAttribute('readonly','');
-    tr.style.pointerEvents = 'none';
-  }
+  cs.setAttribute('readonly','');
+  cs.style.pointerEvents = 'none';
+  tr.setAttribute('readonly','');
+  tr.style.pointerEvents = 'none';
 }
 
 function gkCard(a) {
@@ -3126,7 +3099,7 @@ function bootApp() {
     if (e.key === 'Enter') document.getElementById('loginPass').focus();
   });
 
-  initFilters(); renderStats(); updateTabCounts(); loadScopusMetrics(true);
+  initFilters(); renderStats(); updateTabCounts(); 
   if (adminMode) {
     setTimeout(unlockAllAdmin, 500);
     renderGk();
