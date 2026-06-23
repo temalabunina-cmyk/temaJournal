@@ -103,6 +103,7 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
 .drive-doc{font-size:inherit;line-height:inherit}
 .drive-doc p{margin:.3rem 0}
 .drive-doc *{font-family:Roboto,Arial,sans-serif}
+.ae.hl{background:#fff9c4!important;padding:.4rem .6rem;border-radius:4px}
 .sim-ok{background:var(--green-bg);color:var(--green-tx)}
 .sim-warn{background:var(--amber-bg);color:var(--amber-tx)}
 .sim-danger{background:var(--red-bg);color:var(--red-tx)}
@@ -3015,7 +3016,7 @@ function switchTab(name) {
   if (name==='lista')         renderLista();
   if (name==='editori')       renderTeam();
   if (name==='numeri')        renderNumeri();
-  if (name==='verbale')       { rebuildIssFilters(); loadDriveText(); }
+  if (name==='verbale')       { rebuildIssFilters(); loadDriveText(); renderVerbale(); }
   if (name==='pubblicati')    { rebuildIssFilters(); renderPub(); }
   if (name==='revisori')      renderRevisori();
     if (name==='rifiutati') { renderRifRef(); renderRifGk(); renderRifTur(); }
