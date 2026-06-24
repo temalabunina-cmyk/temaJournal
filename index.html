@@ -574,6 +574,7 @@ const GS_URL = 'https://script.google.com/macros/s/AKfycbxaZyn_Ddmbyioh39tlPlmtC
 
 let issues = [], articles = [], editingArtId = null, editingIssKey = null;
 let saveTimer = null, sessionUnlocked = false, pendingAction = null;
+let hasBootstrappedFromRemote = false, isApplyingRemoteData = false, lastLoadSource = 'none';
 let currentRevisori = [];
 
 var citeScoreValue = '3.4';
@@ -676,42 +677,116 @@ async function loadScopusMetrics(forceRefresh) {
   }
 }
 
+function getSnapshotKey() { return LS_KEY + ':snapshot'; }
+function cloneDefaults() {
+  return {
+    issues: JSON.parse(JSON.stringify(DEF_ISSUES)),
+    articles: JSON.parse(JSON.stringify(DEF_ARTICLES)),
+    _ts: Date.now()
+  };
+}
+function isValidPayload(data) {
+  return !!(data && Array.isArray(data.issues) && Array.isArray(data.articles));
+}
+function readLocalSnapshot() {
+  try {
+    var raw = localStorage.getItem(getSnapshotKey());
+    if (!raw) return null;
+    var data = JSON.parse(raw);
+    return isValidPayload(data) ? data : null;
+  } catch (e) {
+    console.warn('Snapshot locale non leggibile:', e);
+    return null;
+  }
+}
+function writeLocalSnapshot(extra) {
+  try {
+    localStorage.setItem(getSnapshotKey(), JSON.stringify({
+      issues: issues,
+      articles: articles,
+      _ts: Date.now(),
+      meta: extra || {}
+    }));
+  } catch (e) {
+    console.warn('Impossibile salvare snapshot locale:', e);
+  }
+}
+function applyLoadedData(data, sourceLabel) {
+  if (!isValidPayload(data)) throw new Error('Payload non valido');
+  isApplyingRemoteData = true;
+  issues = data.issues.length ? data.issues : JSON.parse(JSON.stringify(DEF_ISSUES));
+  articles = data.articles;
+  lastLoadSource = sourceLabel || 'unknown';
+  rebuildIssFilters();
+  refresh();
+  writeLocalSnapshot({ source: lastLoadSource });
+  isApplyingRemoteData = false;
+}
+
 function loadData() {
   setSaving(true);
   document.getElementById('saveLbl').textContent = 'Caricamento da Google Sheets...';
 
-  fetch(GS_URL)
-    .then(function(r){ return r.text(); })
+  var localData = readLocalSnapshot();
+  if (localData && localData.articles && localData.articles.length) {
+    try {
+      applyLoadedData(localData, 'cache-locale');
+      document.getElementById('saveLbl').textContent = 'Cache locale caricata — sincronizzazione in corso...';
+    } catch (e) {
+      console.warn('Errore applicazione cache locale:', e);
+    }
+  }
+
+  fetch(GS_URL + '?_ts=' + Date.now(), {
+    method: 'GET',
+    cache: 'no-store',
+    headers: { 'Accept': 'application/json,text/plain,*/*' }
+  })
+    .then(function(r){
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.text();
+    })
     .then(function(text) {
       var gsData = null;
-      try { gsData = JSON.parse(text); } catch(e) {}
-
-      if (gsData && gsData.articles && gsData.articles.length) {
-        issues   = gsData.issues && gsData.issues.length ? gsData.issues : JSON.parse(JSON.stringify(DEF_ISSUES));
-        articles = gsData.articles;
-        setSaving(false);
-        document.getElementById('saveLbl').textContent = 'Dati sincronizzati';
-        rebuildIssFilters();
-        refresh();
-      } else {
-        // GS vuoto — carica i dati di default e li salva su GS
-        issues   = JSON.parse(JSON.stringify(DEF_ISSUES));
-        articles = JSON.parse(JSON.stringify(DEF_ARTICLES));
-        setSaving(false);
-        document.getElementById('saveLbl').textContent = 'Dati predefiniti caricati';
-        rebuildIssFilters();
-        refresh();
-        schedSave(); // spinge i default su GS
+      try {
+        gsData = JSON.parse(text);
+      } catch(e) {
+        throw new Error('Risposta Google Sheets non valida');
       }
-    })
-    .catch(function() {
-      // Rete non disponibile — carica i default
-      issues   = JSON.parse(JSON.stringify(DEF_ISSUES));
-      articles = JSON.parse(JSON.stringify(DEF_ARTICLES));
+
+      if (!isValidPayload(gsData)) {
+        throw new Error('Struttura dati Google Sheets non valida');
+      }
+
+      if (!gsData.articles.length && localData && localData.articles && localData.articles.length) {
+        console.warn('Google Sheets ha restituito 0 articoli: mantengo la cache locale per evitare sovrascritture distruttive.');
+        setSaving(false);
+        document.getElementById('saveLbl').textContent = 'Google Sheets vuoto — mantenuta la cache locale';
+        return;
+      }
+
+      if (!gsData.articles.length && !localData) {
+        applyLoadedData(cloneDefaults(), 'default-locale');
+        setSaving(false);
+        document.getElementById('saveLbl').textContent = 'Archivio remoto vuoto — caricati dati locali di base';
+        return;
+      }
+
+      applyLoadedData(gsData, 'google-sheets');
+      hasBootstrappedFromRemote = true;
       setSaving(false);
-      document.getElementById('saveLbl').textContent = 'Rete non disponibile';
-      rebuildIssFilters();
-      refresh();
+      document.getElementById('saveLbl').textContent = 'Dati sincronizzati';
+    })
+    .catch(function(err) {
+      console.warn('Errore caricamento da Google Sheets:', err);
+      if (localData && localData.articles && localData.articles.length) {
+        setSaving(false);
+        document.getElementById('saveLbl').textContent = 'Offline / errore remoto — uso cache locale';
+      } else {
+        applyLoadedData(cloneDefaults(), 'default-locale');
+        setSaving(false);
+        document.getElementById('saveLbl').textContent = 'Errore rete — caricati dati locali di base';
+      }
     });
 }
 
@@ -728,9 +803,12 @@ function sendNotification(action, artId, artTitle) {
 }
 
 function persist() {
+  if (isApplyingRemoteData) return;
+
   setSaving(true);
   document.getElementById('saveLbl').textContent = 'Salvataggio...';
 
+  writeLocalSnapshot({ source: 'pre-save' });
   var payload = JSON.stringify({issues:issues, articles:articles, _ts: Date.now()});
 
   var attempt = 0;
@@ -738,14 +816,27 @@ function persist() {
     attempt++;
     fetch(GS_URL, {
       method: 'POST',
-      body: payload
+      headers: { 'Content-Type': 'application/json;charset=utf-8' },
+      body: payload,
+      cache: 'no-store'
     })
     .then(function(r){
       if (!r.ok) throw new Error('HTTP ' + r.status);
       return r.text();
     })
     .then(function(txt) {
-      if (txt && txt.trim() === 'OK') {
+      var clean = (txt || '').trim();
+      var ok = clean === 'OK';
+      if (!ok) {
+        try {
+          var parsed = JSON.parse(clean);
+          ok = !!(parsed && (parsed.ok === true || parsed.status === 'ok'));
+        } catch (e) {}
+      }
+
+      if (ok) {
+        hasBootstrappedFromRemote = true;
+        writeLocalSnapshot({ source: 'post-save-ok' });
         setSaving(false);
         document.getElementById('saveLbl').textContent = 'Salvato ✓';
         setTimeout(function(){ document.getElementById('saveLbl').textContent = 'Dati salvati'; }, 2000);
@@ -754,7 +845,7 @@ function persist() {
         setTimeout(tryPost, 2000);
       } else {
         setSaving(false);
-        document.getElementById('saveLbl').textContent = 'GS non risponde — riprova';
+        document.getElementById('saveLbl').textContent = 'GS non risponde — dati conservati in cache locale';
       }
     })
     .catch(function(err) {
@@ -763,7 +854,8 @@ function persist() {
         setTimeout(tryPost, 3000);
       } else {
         setSaving(false);
-        document.getElementById('saveLbl').textContent = 'Errore: ' + (err.message || 'rete');
+        document.getElementById('saveLbl').textContent = 'Errore rete — dati conservati in cache locale';
+        console.warn('Persist failed:', err);
       }
     });
   }
@@ -804,7 +896,7 @@ function toggleSortLista() {
   renderLista();
 }
 
-function schedSave() { setSaving(true); clearTimeout(saveTimer); saveTimer = setTimeout(persist, 600); }
+function schedSave() { setSaving(true); clearTimeout(saveTimer); saveTimer = setTimeout(persist, 1200); }
 
 function requirePwd(action) {
   pendingAction = action;
@@ -3112,7 +3204,7 @@ function bootApp() {
     if (e.key === 'Enter') document.getElementById('loginPass').focus();
   });
 
-  initFilters(); renderStats(); updateTabCounts(); 
+  initFilters(); 
   if (adminMode) {
     setTimeout(unlockAllAdmin, 500);
     renderGk();
