@@ -570,7 +570,7 @@ const SC = {
 const EDITORS = ['Carmen Guida','Floriana Zucaro','Gerardo Carpentieri','Peppe Mazzeo','Romano Fistola','Rosa Anna La Rocca','Rosaria Battarra','Stefano Franco'];
 const COPYEDITORS = ['Gerardo Carpentieri','Laura Ascione',"Nunzia D'Amico",'Stella Pennino','Tonia Stiuso','Valerio Martinelli'];
 const LS_KEY = 'tema-journal-v2';
-const GS_URL = 'https://script.google.com/macros/s/AKfycbxaZyn_Ddmbyioh39tlPlmtCiQag7XwnIfJNbDy8Cb3XkB7HWX6fzGSlTnA4bu_eCgv/exec';
+const GS_URL = 'https://script.google.com/macros/s/AKfycby7PjWvVEsAy1QrAkfQvtHPPYJhtTxjde0T6J-DHcSDq1V-5lY6N4ad-6gLmyRja_wq/exec';
 
 let issues = [], articles = [], editingArtId = null, editingIssKey = null;
 let saveTimer = null, sessionUnlocked = false, pendingAction = null;
@@ -904,7 +904,7 @@ async function loadDriveText(forceRefresh) {
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
     var data = await resp.json();
     var html = (data.html || data.text || '').trim();
-    if (!html) throw new Error('Nessun contenuto restituito da Google Docs');
+    if (!html) throw new Error(data && data.error ? data.error : 'Nessun contenuto restituito da Google Docs');
     vDriveText = html;
     writeDriveTextCache(vDriveText);
     renderVerbale();
