@@ -235,7 +235,7 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
     <div style="font-size:16px;font-weight:700">Generatore verbale</div>
     <div style="display:flex;gap:8px">
       <button class="btn" id="btnRefreshVerbale" onclick="renderVerbale()">Aggiorna anteprima</button>
-      <button class="btn" onclick="loadDriveText()">&#8635; Aggiorna note editoriali</button>
+      <button class="btn" onclick="loadDriveText(true)">&#8635; Aggiorna note editoriali</button>
       <button class="btn btn-p" id="btnPrintVerbale" onclick="printVerbale()">Stampa / Salva PDF</button>
     </div>
   </div>
@@ -678,6 +678,7 @@ async function loadScopusMetrics(forceRefresh) {
 }
 
 function getSnapshotKey() { return LS_KEY + ':snapshot'; }
+function getDriveCacheKey() { return LS_KEY + ':driveText'; }
 function cloneDefaults() {
   return {
     issues: JSON.parse(JSON.stringify(DEF_ISSUES)),
@@ -709,6 +710,24 @@ function writeLocalSnapshot(extra) {
     }));
   } catch (e) {
     console.warn('Impossibile salvare snapshot locale:', e);
+  }
+}
+function readDriveTextCache() {
+  try {
+    var raw = localStorage.getItem(getDriveCacheKey());
+    if (!raw) return '';
+    var data = JSON.parse(raw);
+    return data && data.html ? String(data.html) : '';
+  } catch (e) {
+    console.warn('Cache note editoriali non leggibile:', e);
+    return '';
+  }
+}
+function writeDriveTextCache(html) {
+  try {
+    localStorage.setItem(getDriveCacheKey(), JSON.stringify({ html: html || '', _ts: Date.now() }));
+  } catch (e) {
+    console.warn('Impossibile salvare cache note editoriali:', e);
   }
 }
 function applyLoadedData(data, sourceLabel) {
@@ -874,16 +893,30 @@ function backupData() {
 
 var vDriveText = '';
 
-async function loadDriveText() {
+async function loadDriveText(forceRefresh) {
+  var cached = readDriveTextCache();
+  if (!forceRefresh && cached && !vDriveText) {
+    vDriveText = cached;
+    renderVerbale();
+  }
   try {
-    var resp = await fetch(GS_URL + '?action=gdoc&fileId=1BizhUtvLCFm5g4fB3pscfBp483rBoXr7Q4QAETesEhI');
+    var resp = await fetch(GS_URL + '?action=gdoc&fileId=1BizhUtvLCFm5g4fB3pscfBp483rBoXr7Q4QAETesEhI&_ts=' + Date.now(), { method: 'GET', cache: 'no-store' });
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
     var data = await resp.json();
-    vDriveText = (data.html || data.text || '').trim();
+    var html = (data.html || data.text || '').trim();
+    if (!html) throw new Error('Nessun contenuto restituito da Google Docs');
+    vDriveText = html;
+    writeDriveTextCache(vDriveText);
     renderVerbale();
   } catch(e) {
     console.warn('Drive text load failed:', e);
-    vDriveText = '';
+    if (cached) {
+      vDriveText = cached;
+      renderVerbale();
+    } else {
+      vDriveText = '<p style="color:#b45309"><em>Note editoriali non disponibili al momento. Usa il pulsante “Aggiorna note editoriali” oppure verifica il backend Google Apps Script.</em></p>';
+      renderVerbale();
+    }
   }
 }
 var _listaSortDir = 1; // 1 = crescente, -1 = decrescente
@@ -3229,6 +3262,7 @@ function bootApp() {
     switchTab('lista');
   }
   loadData();
+  loadDriveText();
   document.getElementById('vDate').value=new Date().toISOString().slice(0,10);
 
   document.querySelectorAll('.tab').forEach(function(btn){
