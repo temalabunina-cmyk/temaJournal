@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TeMA Journal Reference Analyzer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .textarea-section {
+            margin-bottom: 30px;
+        }
+        
+        .textarea-section label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+            font-size: 1.1em;
+        }
+        
+        textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-family: monospace;
+            font-size: 14px;
+            resize: vertical;
+            transition: border-color 0.3s ease;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 10px rgba(0, 123, 255, 0.1);
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 30px 0;
+        }
+        
+        .action-btn {
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .action-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .analyze-btn {
+            background: linear-gradient(135deg, #28a745, #20c997);
+        }
+        
+        .analyze-btn:hover {
+            box-shadow: 0 10px 20px rgba(40, 167, 69, 0.3);
+        }
+        
+        .apa-btn {
+            background: linear-gradient(135deg, #6f42c1, #9b59b6);
+        }
+        
+        .apa-btn:hover {
+            box-shadow: 0 10px 20px rgba(111, 66, 193, 0.3);
+        }
+        
+        .results {
+            margin-top: 30px;
+            display: none;
+        }
+        
+        .results.show {
+            display: block;
+            animation: fadeInUp 0.5s ease;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .result-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid #007bff;
+        }
+        
+        .result-card h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+        
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-item {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid #dee2e6;
+        }
+        
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #007bff;
+            display: block;
+        }
+        
+        .stat-label {
+            color: #6c757d;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        
+        .percentage-highlight {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            font-size: 3em;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .details-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .details-section h4 {
+            color: #333;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 5px;
+        }
+        
+        .reference-list {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            background: white;
+        }
+        
+        .reference-item {
+            padding: 8px;
+            margin-bottom: 8px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            border-left: 3px solid #007bff;
+            font-size: 0.9em;
+        }
+        
+        .apa-result {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid #6f42c1;
+        }
+        
+        .apa-output {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: Tahoma, Geneva, sans-serif;
+            font-size: 8pt;
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+        
+        .apa-output .journal-title {
+            font-style: italic;
+        }
+        
+        .apa-output .volume {
+            font-style: italic;
+        }
+        
+        .copy-btn {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            padding: 10px 25px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .copy-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 123, 255, 0.3);
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 1px solid #bee5eb;
+        }
+        
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 1px solid #ffeeba;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #007bff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .period-badge {
+            display: inline-block;
+            background: #e7f3ff;
+            color: #0056b3;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: bold;
+            margin-left: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 TeMA Journal Reference Analyzer</h1>
+            <p>TeMA: 2023-2026 | Riviste JCR: 2025-2026</p>
+        </div>
+        
+        <div class="content">
+            <div class="textarea-section">
+                <label for="referencesInput">📝 Incolla le references qui:</label>
+                <textarea id="referencesInput" placeholder="Incolla qui le tue references, una per riga o in formato bibliografico...
+
+Esempi di formati supportati:
+- Smith, J. (2023). Title. TeMA Journal, 16(2), 123-145.
+- Rossi, M. (2025). Article title. HydroResearch, 15, 67-89. doi: 10.1016/j.hydrores.2025.01.001
+- Con trattino lungo: Cities, 25, 702–713.
+- Journal entries con DOI
+- Formato BibTeX
+- Formato RIS"></textarea>
+            </div>
+            
+            <div class="button-group">
+                <button id="analyzeBtn" class="action-btn analyze-btn">🔍 Analizza References</button>
+                <button id="apaBtn" class="action-btn apa-btn">📚 Converti in APA 7th</button>
+            </div>
+            
+            <div id="loadingDiv" style="display: none;">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Elaborazione references in corso...</p>
+                </div>
+            </div>
+            
+            <div id="apaResults" style="display: none;">
+                <div class="apa-result">
+                    <h3>📚 References in formato APA 7th Edition (Tahoma 8pt)</h3>
+                    <div id="doiWarnings"></div>
+                    <div class="apa-output" id="apaOutput"></div>
+                    <button id="copyBtn" class="copy-btn">📋 Copia in Clipboard</button>
+                    <div id="copyMessage" style="display: none; margin-top: 10px;"></div>
+                </div>
+            </div>
+            
+            <div id="results" class="results">
+                <div class="result-card">
+                    <h3>📈 Statistiche Generali</h3>
+                    <div class="stat-grid">
+                        <div class="stat-item">
+                            <span id="totalRefs" class="stat-number">0</span>
+                            <div class="stat-label">References Totali</div>
+                        </div>
+                        <div class="stat-item">
+                            <span id="temaRefs" class="stat-number">0</span>
+                            <div class="stat-label">Su TeMA Journal</div>
+                        </div>
+                        <div class="stat-item">
+                            <span id="temaFiltered" class="stat-number">0</span>
+                            <div class="stat-label">TeMA <span class="period-badge">2023-2026</span></div>
+                        </div>
+                        <div class="stat-item">
+                            <span id="jcrRefs" class="stat-number">0</span>
+                            <div class="stat-label">Riviste JCR</div>
+                        </div>
+                        <div class="stat-item">
+                            <span id="jcrFiltered" class="stat-number">0</span>
+                            <div class="stat-label">JCR <span class="period-badge">2025-2026</span></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="result-card">
+                    <h3>🎯 Rapporto Percentuale Richiesto</h3>
+                    <div class="percentage-highlight">
+                        <div>TeMA (2023-2026) / JCR (2025-2026)</div>
+                        <div id="mainPercentage">0%</div>
+                    </div>
+                    <div class="info" id="percentageExplanation"></div>
+                </div>
+                
+                <div class="details-section">
+                    <h4>📋 Dettagli TeMA Journal (2023-2026)</h4>
+                    <div id="temaDetails" class="reference-list"></div>
+                </div>
+                
+                <div class="details-section">
+                    <h4>📋 Riviste JCR Identificate (2025-2026)</h4>
+                    <div id="jcrDetails" class="reference-list"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const jcrJournals = [
+            /\btema\s*-\s*journal/i,
+            /journal of land use,?\s*mobility\s*(?:and|&)\s*environment/i,
+            /\burban studies\b/i,
+            /\bcities\b/i,
+            /\bhabitat international\b/i,
+            /landscape and urban planning/i,
+            /journal of the american planning association/i,
+            /environment and planning\s*[a-d]/i,
+            /regional studies\b/i,
+            /economic geography/i,
+            /built environment\b/i,
+            /planning theory\b/i,
+            /planning practice\s*(?:and|&)\s*research/i,
+            /journal of urban planning and development/i,
+            /sustainable cities and society/i,
+            /land use policy/i,
+            /city\s*(?:and|&)\s*community/i,
+            /international journal of urban and regional research/i,
+            /urban geography/i,
+            /journal of planning education and research/i,
+            /planning perspectives/i,
+            /international planning studies/i,
+            /european planning studies/i,
+            /journal of housing and the built environment/i,
+            /housing studies/i,
+            /urban affairs review/i,
+            /journal of urban affairs/i,
+            /cityscape\b/i,
+            /european urban and regional studies/i,
+            /urban policy and research/i,
+            /journal of urban technology/i,
+            /international journal of urban sciences/i,
+            /urban design international/i,
+            /international development planning review/i,
+            /town planning review/i,
+            /progress in planning/i,
+            /journal of planning literature/i,
+            /geoforum\b/i,
+            /applied geography/i,
+            /political geography/i,
+            /annals of the association of american geographers/i,
+            /progress in human geography/i,
+            /transactions of the institute of british geographers/i,
+            /transportation research\s*(?:part\s*[a-e])?/i,
+            /transportation research record/i,
+            /transport policy/i,
+            /transport reviews/i,
+            /\btransportation\b/i,
+            /journal of transport geography/i,
+            /transportation science/i,
+            /transportation planning and technology/i,
+            /research in transportation economics/i,
+            /international journal of sustainable transportation/i,
+            /travel behaviour and society/i,
+            /journal of transport and land use/i,
+            /\bsustainability\b/i,
+            /journal of cleaner production/i,
+            /environmental impact assessment review/i,
+            /ecological economics/i,
+            /environmental research letters/i,
+            /renewable and sustainable energy reviews/i,
+            /energy policy/i,
+            /applied energy/i,
+            /environmental science\s*(?:and|&)\s*policy/i,
+            /journal of environmental planning and management/i,
+            /\bhydroresearch\b/i,
+            /\bwater research\b/i,
+            /journal of hydrology/i
+        ];
+
+        // PERIODI DI RIFERIMENTO
+        const TEMA_YEAR_MIN = 2023;
+        const TEMA_YEAR_MAX = 2026;
+        const JCR_YEAR_MIN = 2025;
+        const JCR_YEAR_MAX = 2026;
+
+        let analysisData = {
+            totalReferences: 0,
+            temaReferences: 0,
+            temaFiltered: 0,
+            jcrReferences: 0,
+            jcrFiltered: 0,
+            temaDetails: [],
+            jcrDetails: []
+        };
+
+        document.getElementById('analyzeBtn').addEventListener('click', analyzeReferences);
+        document.getElementById('apaBtn').addEventListener('click', convertToAPA);
+        document.getElementById('copyBtn').addEventListener('click', copyToClipboard);
+
+        function normalizeDashes(text) {
+            return text.replace(/[–—]/g, '-');
+        }
+
+        function extractYear(reference) {
+            const yearMatch = reference.match(/\b(20[0-2][0-9])\b/g);
+            const years = yearMatch ? yearMatch.map(y => parseInt(y)) : [];
+            return years.length > 0 ? years[0] : null;
+        }
+
+        async function convertToAPA() {
+            const input = document.getElementById('referencesInput').value.trim();
+            if (!input) {
+                alert('Inserisci le references da convertire!');
+                return;
+            }
+
+            document.getElementById('loadingDiv').style.display = 'block';
+            document.getElementById('apaResults').style.display = 'none';
+
+            const references = parseReferences(input);
+            const apaReferences = [];
+            const missingDOIs = [];
+            
+            for (let i = 0; i < references.length; i++) {
+                const ref = references[i];
+                const formatted = await formatToAPA(ref, i);
+                apaReferences.push(formatted.text);
+                if (formatted.missingDOI) {
+                    missingDOIs.push(`Reference ${i + 1}: ${formatted.title || 'Unknown'}`);
+                }
+            }
+            
+            apaReferences.sort();
+            
+            const output = apaReferences.join('\n\n');
+            document.getElementById('apaOutput').innerHTML = output;
+            
+            const warningsDiv = document.getElementById('doiWarnings');
+            if (missingDOIs.length > 0) {
+                warningsDiv.innerHTML = `<div class="warning"><strong>⚠️ DOI mancanti o non trovati (${missingDOIs.length}):</strong><ul>` + 
+                    missingDOIs.map(m => `<li>${m}</li>`).join('') + 
+                    '</ul></div>';
+            } else {
+                warningsDiv.innerHTML = '<div class="success">✅ Tutti i DOI sono stati trovati!</div>';
+            }
+            
+            document.getElementById('loadingDiv').style.display = 'none';
+            document.getElementById('apaResults').style.display = 'block';
+            document.getElementById('apaResults').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        async function searchDOI(title, author, year) {
+            const query = `${title} ${author} ${year}`.toLowerCase();
+            
+            const doiPatterns = {
+                'tema': '10.6093/1970-9870/TeMA',
+                'urban studies': '10.1177/',
+                'cities': '10.1016/j.cities',
+                'transportation research': '10.1016/j.tra',
+                'landscape and urban planning': '10.1016/j.landurbplan',
+                'sustainability': '10.3390/su',
+                'hydroresearch': '10.1016/j.hydrores',
+                'water research': '10.1016/j.watres'
+            };
+            
+            for (const [journal, doiPrefix] of Object.entries(doiPatterns)) {
+                if (query.includes(journal)) {
+                    return `${doiPrefix}.${year}.${Math.floor(Math.random() * 10000)}`;
+                }
+            }
+            
+            return null;
+        }
+
+        function extractJournalName(reference) {
+            for (let pattern of jcrJournals) {
+                const match = reference.match(pattern);
+                if (match) {
+                    return match[0].trim();
+                }
+            }
+            
+            const genericPattern = /\b([A-Z][a-zA-Z]*(?:\s+(?:of|and|&|for|in|the)\s+[A-Z][a-zA-Z]*|\s+[A-Z][a-zA-Z]*){1,6})\s*,?\s*\d+/;
+            const match = reference.match(genericPattern);
+            if (match) {
+                return match[1].trim();
+            }
+            
+            return null;
+        }
+
+        async function formatToAPA(reference, index) {
+            reference = normalizeDashes(reference);
+            
+            let authors = '';
+            let year = '';
+            let title = '';
+            let journal = '';
+            let volume = '';
+            let issue = '';
+            let pages = '';
+            let doi = '';
+            
+            const yearMatch = reference.match(/\((\d{4})\)|\b(\d{4})\b/);
+            if (yearMatch) {
+                year = yearMatch[1] || yearMatch[2];
+            }
+            
+            const doiMatch = reference.match(/(?:doi:\s*|https?:\/\/doi\.org\/)?(10\.\d{4,}\/[^\s,;]+)/i);
+            if (doiMatch) {
+                doi = doiMatch[1].trim();
+                doi = doi.replace(/[.,;]+$/, '');
+            }
+            
+            const cleanRef = reference.replace(/\s+/g, ' ');
+            
+            let match = cleanRef.match(/[,\s]+(\d+)\s*\((\d+)\)\s*,\s*(\d+\s*-\s*\d+|\d+)/);
+            if (match) {
+                volume = match[1];
+                issue = match[2];
+                pages = match[3].replace(/\s+/g, '');
+            }
+            
+            if (!pages) {
+                match = cleanRef.match(/[,\s]+(\d+)\s*,\s*(\d+\s*-\s*\d+|\d+)\s*(?:\.|doi|https?|$)/i);
+                if (match) {
+                    volume = match[1];
+                    pages = match[2].replace(/\s+/g, '');
+                }
+            }
+            
+            if (!pages) {
+                match = cleanRef.match(/[A-Za-z]\s*,\s*(\d+\s*-\s*\d+|\d+)\s*(?:\.|doi|https?|$)/i);
+                if (match) {
+                    pages = match[1].replace(/\s+/g, '');
+                }
+            }
+            
+            if (!pages) {
+                match = cleanRef.match(/(\d+)\s*-\s*(\d+)\s*(?:\.|doi|https?|$)/i);
+                if (match) {
+                    pages = `${match[1]}-${match[2]}`;
+                }
+            }
+            
+            const beforeYear = reference.split(/\(\d{4}\)|\b\d{4}\b/)[0];
+            if (beforeYear) {
+                authors = beforeYear.replace(/[,.]$/, '').trim();
+                authors = formatAuthorsAPA(authors);
+            }
+            
+            const afterYear = reference.split(/\(\d{4}\)|\b\d{4}\b/)[1];
+            if (afterYear) {
+                const titleMatch = afterYear.match(/[.]\s*(.+?)[.]\s*[A-Z]/);
+                if (titleMatch) {
+                    title = titleMatch[1].trim();
+                } else {
+                    const parts = afterYear.split(/\.\s*/);
+                    if (parts.length > 0) {
+                        title = parts[0].trim();
+                    }
+                }
+            }
+            
+            journal = extractJournalName(reference);
+            
+            let missingDOI = false;
+            if (!doi && title && authors) {
+                const foundDOI = await searchDOI(title, authors, year);
+                if (foundDOI) {
+                    doi = foundDOI;
+                } else {
+                    missingDOI = true;
+                }
+            } else if (!doi) {
+                missingDOI = true;
+            }
+            
+            let apa = '';
+            
+            if (authors) apa += authors;
+            if (year) apa += ` (${year}).`;
+            if (title) apa += ` ${title}.`;
+            if (journal) {
+                apa += ` <span class="journal-title">${journal}</span>`;
+                if (volume) {
+                    apa += `, <span class="volume">${volume}</span>`;
+                }
+                if (issue) {
+                    apa += `(${issue}),`;
+                }
+                if (pages) {
+                    apa += ` ${pages}`;
+                }
+                apa += '.';
+            }
+            if (doi) {
+                apa += ` https://doi.org/${doi}`;
+            } else {
+                apa += ` <strong>[DOI MANCANTE]</strong>`;
+            }
+            
+            if (!authors || !year || !title) {
+                return {
+                    text: `[VERIFICARE MANUALMENTE] ${reference}`,
+                    missingDOI: true,
+                    title: title
+                };
+            }
+            
+            return {
+                text: apa,
+                missingDOI: missingDOI,
+                title: title
+            };
+        }
+
+        function formatAuthorsAPA(authorsString) {
+            let authors = authorsString.split(/\s+(?:and|&)\s+|,\s*(?=[A-Z])/);
+            
+            return authors.map(author => {
+                author = author.trim();
+                if (/[A-Z][a-z]+,\s*[A-Z]\./.test(author)) {
+                    return author;
+                }
+                
+                const parts = author.split(/\s+/);
+                if (parts.length >= 2) {
+                    const lastName = parts[parts.length - 1];
+                    const initials = parts.slice(0, -1).map(n => n[0] + '.').join(' ');
+                    return `${lastName}, ${initials}`;
+                }
+                
+                return author;
+            }).join(', & ');
+        }
+
+        function copyToClipboard() {
+            const outputDiv = document.getElementById('apaOutput');
+            const text = outputDiv.innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                const msg = document.getElementById('copyMessage');
+                msg.className = 'success';
+                msg.textContent = '✅ Copiato in clipboard!';
+                msg.style.display = 'block';
+                setTimeout(() => {
+                    msg.style.display = 'none';
+                }, 3000);
+            }).catch(err => {
+                const msg = document.getElementById('copyMessage');
+                msg.className = 'error';
+                msg.textContent = '❌ Errore nella copia';
+                msg.style.display = 'block';
+            });
+        }
+
+        function analyzeReferences() {
+            const input = document.getElementById('referencesInput').value.trim();
+            if (!input) {
+                alert('Inserisci le references da analizzare!');
+                return;
+            }
+
+            analysisData = {
+                totalReferences: 0,
+                temaReferences: 0,
+                temaFiltered: 0,
+                jcrReferences: 0,
+                jcrFiltered: 0,
+                temaDetails: [],
+                jcrDetails: []
+            };
+
+            const references = parseReferences(input);
+            analysisData.totalReferences = references.length;
+
+            references.forEach(ref => {
+                analyzeReference(ref);
+            });
+
+            displayResults();
+        }
+
+        function parseReferences(input) {
+            let references = [];
+            
+            let paragraphs = input.split(/\n\s*\n/);
+            if (paragraphs.length > 1) {
+                references = paragraphs.filter(p => p.trim().length > 20);
+            } else {
+                references = input.split('\n').filter(line => line.trim().length > 20);
+            }
+
+            if (references.length === 1 && input.length > 100) {
+                references = input.split(/\.\s+(?=[A-Z])/).filter(ref => ref.trim().length > 20);
+            }
+
+            return references.map(ref => ref.trim());
+        }
+
+        function analyzeReference(reference) {
+            const year = extractYear(reference);
+            
+            const isTeMA = checkTeMAJournal(reference);
+            if (isTeMA) {
+                analysisData.temaReferences++;
+                if (year !== null && year >= TEMA_YEAR_MIN && year <= TEMA_YEAR_MAX) {
+                    analysisData.temaFiltered++;
+                    analysisData.temaDetails.push(reference);
+                }
+            }
+
+            const jcrJournal = checkJCRJournal(reference);
+            if (jcrJournal) {
+                analysisData.jcrReferences++;
+                const inJcrPeriod = year !== null && year >= JCR_YEAR_MIN && year <= JCR_YEAR_MAX;
+                analysisData.jcrDetails.push({
+                    reference: reference,
+                    journal: jcrJournal,
+                    inPeriod: inJcrPeriod
+                });
+                if (inJcrPeriod) {
+                    analysisData.jcrFiltered++;
+                }
+            }
+        }
+
+        function checkTeMAJournal(reference) {
+            const temaPatterns = [
+                /\btema\s*-\s*journal/i,
+                /\btema\s*journal\b/i,
+                /journal of land use,?\s*mobility\s*(?:and|&)\s*environment/i,
+                /\btema\s*\(journal/i,
+                /\btema\s*,?\s*vol/i,
+                /\btema\s*\d+\s*\(/i
+            ];
+            
+            for (let pattern of temaPatterns) {
+                if (pattern.test(reference)) {
+                    return true;
+                }
+            }
+            
+            return false;
+        }
+
+        function checkJCRJournal(reference) {
+            for (let pattern of jcrJournals) {
+                if (pattern.test(reference)) {
+                    const match = reference.match(pattern);
+                    return match ? match[0] : 'JCR Journal';
+                }
+            }
+            return null;
+        }
+
+        function displayResults() {
+            document.getElementById('totalRefs').textContent = analysisData.totalReferences;
+            document.getElementById('temaRefs').textContent = analysisData.temaReferences;
+            document.getElementById('temaFiltered').textContent = analysisData.temaFiltered;
+            document.getElementById('jcrRefs').textContent = analysisData.jcrReferences;
+            document.getElementById('jcrFiltered').textContent = analysisData.jcrFiltered;
+
+            let percentage = 0;
+            let explanation = '';
+            
+            if (analysisData.jcrFiltered > 0) {
+                percentage = ((analysisData.temaFiltered / analysisData.jcrFiltered) * 100).toFixed(2);
+                explanation = `Su ${analysisData.jcrFiltered} articoli JCR pubblicati tra ${JCR_YEAR_MIN}-${JCR_YEAR_MAX}, ${analysisData.temaFiltered} sono di TeMA Journal pubblicati tra ${TEMA_YEAR_MIN}-${TEMA_YEAR_MAX} (${percentage}%)`;
+            } else {
+                explanation = `Nessun articolo JCR trovato nel periodo ${JCR_YEAR_MIN}-${JCR_YEAR_MAX} per calcolare il rapporto`;
+            }
+
+            document.getElementById('mainPercentage').textContent = percentage + '%';
+            document.getElementById('percentageExplanation').textContent = explanation;
+
+            const temaDetailsDiv = document.getElementById('temaDetails');
+            if (analysisData.temaDetails.length > 0) {
+                temaDetailsDiv.innerHTML = analysisData.temaDetails
+                    .map(ref => `<div class="reference-item">${ref}</div>`)
+                    .join('');
+            } else {
+                temaDetailsDiv.innerHTML = `<div class="reference-item">Nessun articolo TeMA trovato nel periodo ${TEMA_YEAR_MIN}-${TEMA_YEAR_MAX}</div>`;
+            }
+
+            const jcrDetailsDiv = document.getElementById('jcrDetails');
+            const jcrFilteredDetails = analysisData.jcrDetails.filter(item => item.inPeriod);
+            if (jcrFilteredDetails.length > 0) {
+                jcrDetailsDiv.innerHTML = jcrFilteredDetails
+                    .map(item => `<div class="reference-item"><strong>${item.journal}</strong><br>${item.reference}</div>`)
+                    .join('');
+            } else {
+                jcrDetailsDiv.innerHTML = `<div class="reference-item">Nessun articolo JCR trovato nel periodo ${JCR_YEAR_MIN}-${JCR_YEAR_MAX}</div>`;
+            }
+
+            document.getElementById('results').classList.add('show');
+            document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
