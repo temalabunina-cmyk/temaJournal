@@ -787,7 +787,7 @@ async function loadDriveText() {
   var btn = document.querySelector('[onclick="loadDriveText()"]');
   if (btn) { btn.textContent = '⏳ Caricamento...'; btn.disabled = true; }
   try {
-    var resp = await fetch(GS_URL + '?action=gdoc&fileId=' + DOC_ID, { cache: 'no-store' });
+    var resp = await fetch('https://script.google.com/macros/s/AKfycbwXJ3X8v7ol0xRfzSPuiife5RHIbYJFIFYTAAMoipMPMRhtss8YtKLDx6pUgvZLUGXM/exec?action=gdoc&fileId=' + DOC_ID, { cache: 'no-store' });
     if (!resp.ok) throw new Error('HTTP ' + resp.status);
     var data = await resp.json();
     var txt = (data.html || data.text || '').trim();
