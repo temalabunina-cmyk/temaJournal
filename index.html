@@ -577,10 +577,10 @@ let currentRevisori = [];
 
 var citeScoreValue = '3.4';
 var citeScoreLabel = 'CiteScore 2025';
-var citeScoreSubLabel = 'Scopus ↗';
-var citeScoreTrackerValue = '3.8';
+var citeScoreSubLabel = '';
+var citeScoreTrackerValue = '3.9';
 var citeScoreTrackerLabel = 'CiteScore Tracker 2026';
-var citeScoreTrackerSubLabel = 'Scopus ↗ · riferimento maggio 2026';
+var citeScoreTrackerSubLabel = '';
 var citeScoreLastUpdate = '';
 
 function saveCiteScore() {
@@ -647,7 +647,7 @@ function hydrateScopusMetrics(data) {
     citeScoreTrackerLabel = 'CiteScore Tracker ' + data.trackerYear;
   }
   if ((!data.citeScoreTrackerSubLabel || data.citeScoreTrackerSubLabel === 'Scopus ↗') && data.trackerReferenceLabel) {
-    citeScoreTrackerSubLabel = 'Scopus ↗ · riferimento ' + data.trackerReferenceLabel;
+    citeScoreTrackerSubLabel = 'riferimento ' + data.trackerReferenceLabel;
   }
   if ((!data.citeScoreSubLabel || data.citeScoreSubLabel === 'Scopus ↗') && citeScoreLastUpdate) {
     citeScoreSubLabel = 'Scopus ↗ · aggiornato ' + citeScoreLastUpdate;
