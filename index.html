@@ -862,6 +862,41 @@ function renderNotesLog(log) {
   }).join('');
 }
 
+function migrateNotes() {
+  var changed = false;
+  var reDateIT = /\b(\d{1,2})\/(\d{1,2})\/(\d{2,4})\b/g;
+  articles.forEach(function(a) {
+    if (a.notesLog && a.notesLog.length) return;
+    a.notesLog = a.notesLog || [];
+    if (!a.notes || !a.notes.trim()) { changed = true; return; }
+    var text = a.notes.trim();
+    // Try to split by lines that start with a date dd/mm/yyyy
+    var lines = text.split('\n');
+    var entries = [];
+    var current = null;
+    lines.forEach(function(line) {
+      var m = line.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})(.*)/);
+      if (m) {
+        if (current) entries.push(current);
+        var yr = parseInt(m[3]); if (yr < 100) yr += 2000;
+        var d = new Date(yr, parseInt(m[2])-1, parseInt(m[1]));
+        current = { date: isNaN(d.getTime()) ? new Date().toISOString() : d.toISOString(), text: m[4].trim(), author: 'Migrato' };
+      } else if (current) {
+        current.text += (current.text ? '\n' : '') + line;
+      } else {
+        current = { date: new Date().toISOString(), text: line, author: 'Migrato' };
+      }
+    });
+    if (current) entries.push(current);
+    if (!entries.length) entries = [{ text: text, date: new Date().toISOString(), author: 'Migrato' }];
+    entries.sort(function(a,b){ return new Date(b.date)-new Date(a.date); });
+    a.notesLog = entries;
+    a.notes = '';
+    changed = true;
+  });
+  if (changed) { schedSave(); console.log('[TeMA] Note migrate:', articles.filter(function(a){return a.notesLog&&a.notesLog.length;}).length); }
+}
+
 function schedSave() { setSaving(true); clearTimeout(saveTimer); saveTimer = setTimeout(persist, 600); }
 
 function requirePwd(action) {
@@ -2658,7 +2693,6 @@ function openEditArt(id) {
   document.getElementById('fCTeMA2226').value=a.citeTeMA2226||'';
   document.getElementById('fCJCR').value=a.citeJCR||'';
   document.getElementById('fCJCR2y').value=a.citeJCR2y||'';
-  document.getElementById('fNotes').value=a.notes||'';
   document.getElementById('fComunicazioneInviata').checked=!!(a.comunicazioneInviata);
   document.getElementById('fDataComunicazione').value=a.dataComunicazione||'';
   document.getElementById('fRispostaAutori').value=a.rispostaAutori||'';
@@ -2828,8 +2862,6 @@ function saveArt() {
     citeTeMA2226:parseInt(document.getElementById('fCTeMA2226').value)||0,
     citeJCR:parseInt(document.getElementById('fCJCR').value)||0,
     citeJCR2y:parseInt(document.getElementById('fCJCR2y').value)||0,
-    notes:document.getElementById('fNotes').value.trim(),
-
     comunicazioneInviata:document.getElementById('fComunicazioneInviata').checked,
     dataComunicazione:document.getElementById('fDataComunicazione').value,
     rispostaAutori:document.getElementById('fRispostaAutori').value,
@@ -3156,6 +3188,11 @@ function doLogin() {
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('mainApp').style.display = 'block';
     bootApp();
+  } else if (u === 'DirettoreTeMA' && p === '#Tecchio80TeMA') {
+    adminMode = false; currentUser = 'GateKeeper'; // same permissions as GateKeeper
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'block';
+    bootApp();
   } else if (u === 'EditorTeMA' && p === 'tEMA8009') {
     adminMode = false; currentUser = 'EditorTeMA';
     document.getElementById('loginScreen').style.display = 'none';
@@ -3182,6 +3219,7 @@ function bootApp() {
     if (e.key === 'Enter') document.getElementById('loginPass').focus();
   });
 
+  migrateNotes();
   initFilters(); renderStats(); updateTabCounts(); 
   if (adminMode) {
     setTimeout(unlockAllAdmin, 500);
