@@ -474,7 +474,15 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
     </div>
   </div>
   <div class="fsl">Note</div>
-  <div class="fr"><textarea id="fNotes" rows="3"></textarea></div>
+  <div class="fr">
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <div style="display:flex;gap:6px">
+        <textarea id="fNewNote" rows="2" class="autoresize" oninput="autoResize(this)" placeholder="Inserisci una nuova nota..." style="flex:1"></textarea>
+        <button class="btn btn-ok" onclick="addNote()" style="white-space:nowrap;align-self:flex-start;padding:6px 12px">+ Aggiungi</button>
+      </div>
+      <div id="fNotesLog" style="max-height:280px;overflow-y:auto;display:flex;flex-direction:column;gap:4px"></div>
+    </div>
+  </div>
   <div class="fsl" style="display:flex;align-items:center;justify-content:space-between">Pubblicazione<button type="button" class="btn" id="btnUnlockPub" style="font-size:20px;padding:2px 8px">&#128274; Sblocca</button></div>
   <div class="field-locked" id="pubGroup">
   <div class="g3">
@@ -812,6 +820,48 @@ function toggleSortLista() {
   renderLista();
 }
 
+function addNote() {
+  var txt = document.getElementById('fNewNote').value.trim();
+  if (!txt) return;
+  if (!editingArtId) return;
+  var idx = articles.findIndex(function(a){ return a.id === editingArtId; });
+  if (idx < 0) return;
+  if (!articles[idx].notesLog) articles[idx].notesLog = [];
+  articles[idx].notesLog.unshift({
+    text: txt,
+    date: new Date().toISOString(),
+    author: currentUser || 'RedazioneTeMA'
+  });
+  document.getElementById('fNewNote').value = '';
+  renderNotesLog(articles[idx].notesLog);
+  schedSave();
+}
+
+function deleteNote(artId, noteIdx) {
+  var idx = articles.findIndex(function(a){ return a.id === artId; });
+  if (idx < 0) return;
+  articles[idx].notesLog.splice(noteIdx, 1);
+  renderNotesLog(articles[idx].notesLog);
+  schedSave();
+}
+
+function renderNotesLog(log) {
+  var el = document.getElementById('fNotesLog');
+  if (!el) return;
+  if (!log || !log.length) { el.innerHTML = '<p style="color:#aaa;font-size:13px">Nessuna nota inserita.</p>'; return; }
+  el.innerHTML = log.map(function(n, i) {
+    var d = n.date ? new Date(n.date).toLocaleString('it-IT',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '';
+    var canDel = adminMode || currentUser === n.author;
+    return '<div style="background:var(--sur);border:1px solid var(--brd);border-radius:var(--r);padding:8px 10px;font-size:14px">'
+      + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">'
+      + '<span style="font-size:12px;color:#888"><strong>'+esc(n.author||'')+'</strong> &middot; '+d+'</span>'
+      + (canDel ? '<button onclick="deleteNote(\''+editingArtId+'\','+i+')" style="background:none;border:none;color:#e53e3e;cursor:pointer;font-size:14px" title="Elimina nota">✕</button>' : '')
+      + '</div>'
+      + '<div style="white-space:pre-wrap">'+esc(n.text)+'</div>'
+      + '</div>';
+  }).join('');
+}
+
 function schedSave() { setSaving(true); clearTimeout(saveTimer); saveTimer = setTimeout(persist, 600); }
 
 function requirePwd(action) {
@@ -960,7 +1010,7 @@ function artCard(a, showEdit) {
       editBtn +
     '</div>' +
     metaHtml + revHtml +
-    (a.notes ? '<div class="note-box">'+esc(a.notes).replace(/\n/g,'<br>')+'</div>' : '') +
+    (a.notesLog && a.notesLog.length ? '<div class="note-box">'+esc(a.notesLog[0].text).replace(/\n/g,'<br>')+'</div>' : '') +
     (function(){
       var info = [];
       if (a.decisioneEditor && a.decisioneEditor !== '') info.push('<strong>Decisione:</strong> '+esc(a.decisioneEditor));
@@ -2093,7 +2143,14 @@ function renderVerbale() {
         return '<p><strong>Comunicazione Turnitin inviata il:</strong> '+sent.toLocaleDateString('it-IT')+cdStr+'</p>';
       })():'') +
       (a.rispostaAutori&&a.rispostaAutori!==''?'<p><strong>Risposta autori:</strong> '+esc(a.rispostaAutori)+'</p>':'') +
-      (a.notes?'<p style="font-style:italic;color:#555"><strong>Note:</strong> '+esc(a.notes).replace(/\n/g,'<br>')+'</p>':'') +
+      (function(){
+        if (!a.notesLog || !a.notesLog.length) return '';
+        var last3 = a.notesLog.slice(0,3);
+        return last3.map(function(n){
+          var d = n.date ? new Date(n.date).toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit',year:'numeric'}) : '';
+          return '<p style="font-size:inherit"><strong>'+esc(n.author||'')+' ('+d+'):</strong> '+esc(n.text).replace(/\n/g,'<br>')+'</p>';
+        }).join('');
+      })() +
     '</div>';
   };
 
@@ -2508,6 +2565,8 @@ function openNewArt() {
   ['fLen','fArtNum','fRefs','fCTeMA','fCTeMA2226','fCJCR','fCJCR2y','fSim','fAi'].forEach(function(id){ document.getElementById(id).value=''; });
   document.getElementById('fDataSottomissione').value='';
   document.getElementById('fImpaginato').checked=false;
+  document.getElementById('fNewNote').value='';
+  renderNotesLog([]);
   document.getElementById('fHighlight').checked=false;
   document.getElementById('fOneDrive').value='';
   document.getElementById('fOneDriveBtn').style.display='none';
@@ -2557,6 +2616,8 @@ function openEditArt(id) {
   setTimeout(function(){ autoResize(document.getElementById('fAbstract')); }, 0);
   document.getElementById('fLen').value=a.length||'';
   document.getElementById('fImpaginato').checked=!!(a.impaginato);
+  renderNotesLog(a.notesLog||[]);
+  document.getElementById('fNewNote').value='';
   document.getElementById('fHighlight').checked=!!(a.highlight);
   // OneDrive link
   var _od = a.oneDrive||'';
@@ -2746,6 +2807,7 @@ function saveArt() {
     abstract:document.getElementById('fAbstract').value.trim(),
     length:parseInt(document.getElementById('fLen').value)||0,
     impaginato:document.getElementById('fImpaginato').checked,
+    notesLog: (_origIdx>=0 && articles[_origIdx].notesLog) ? articles[_origIdx].notesLog : [],
     highlight:document.getElementById('fHighlight').checked,
     oneDrive:document.getElementById('fOneDrive').value||'',
     section:document.getElementById('fSecArt').value,
