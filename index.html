@@ -2597,7 +2597,7 @@ function checkAntiplagio() {
 function openNewArt() {
   editingArtId = null;
   document.getElementById('artModalTitle').textContent = 'Nuovo articolo';
-  ['fId','fTitle','fAuthors','fAffil','fNat','fAbstract','fNotes'].forEach(function(id){ document.getElementById(id).value=''; });
+  ['fId','fTitle','fAuthors','fAffil','fNat','fAbstract'].forEach(function(id){ document.getElementById(id).value=''; });
   ['fLen','fArtNum','fRefs','fCTeMA','fCTeMA2226','fCJCR','fCJCR2y','fSim','fAi'].forEach(function(id){ document.getElementById(id).value=''; });
   document.getElementById('fDataSottomissione').value='';
   document.getElementById('fImpaginato').checked=false;
