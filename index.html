@@ -696,6 +696,7 @@ function loadData() {
       if (gsData && gsData.articles && gsData.articles.length) {
         issues   = gsData.issues && gsData.issues.length ? gsData.issues : JSON.parse(JSON.stringify(DEF_ISSUES));
         articles = gsData.articles;
+        migrateNotes();
         setSaving(false);
         document.getElementById('saveLbl').textContent = 'Dati sincronizzati';
         rebuildIssFilters();
@@ -868,7 +869,7 @@ function migrateNotes() {
   articles.forEach(function(a) {
     if (a.notesLog && a.notesLog.length) return;
     a.notesLog = a.notesLog || [];
-    if (!a.notes || !a.notes.trim()) { changed = true; return; }
+    if (!a.notes || !a.notes.trim()) { return; } // no notes to migrate
     var text = a.notes.trim();
     // Try to split by lines that start with a date dd/mm/yyyy
     var lines = text.split('\n');
@@ -3219,7 +3220,6 @@ function bootApp() {
     if (e.key === 'Enter') document.getElementById('loginPass').focus();
   });
 
-  migrateNotes();
   initFilters(); renderStats(); updateTabCounts(); 
   if (adminMode) {
     setTimeout(unlockAllAdmin, 500);
