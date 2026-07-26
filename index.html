@@ -2149,7 +2149,14 @@ function renderVerbale() {
           return '<li style="margin-bottom:2px">'+parts.join(' &middot; ')+'</li>';
         }).join('') + '</ul>' : '') +
       (info.length ? '<p>'+info.join(' &middot; ')+'</p>' : '') +
-      (a.notes ? '<p style="font-style:italic;color:#555"><strong>Note:</strong> '+esc(a.notes).replace(/\n/g,'<br>')+'</p>' : '') +
+      (function(){
+        if (!a.notesLog || !a.notesLog.length) return '';
+        var last3 = a.notesLog.slice(0,3);
+        return last3.map(function(n){
+          var d = n.date ? new Date(n.date).toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit',year:'numeric'}) : '';
+          return '<p style="font-size:inherit"><strong>'+esc(n.author||'')+' ('+d+'):</strong> '+esc(n.text).replace(/\n/g,'<br>')+'</p>';
+        }).join('');
+      })() +
     '</div>';
   };
 
