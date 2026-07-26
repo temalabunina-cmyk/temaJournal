@@ -1046,7 +1046,14 @@ function artCard(a, showEdit) {
       editBtn +
     '</div>' +
     metaHtml + revHtml +
-    (a.notesLog && a.notesLog.length ? '<div class="note-box">'+esc(a.notesLog[0].text).replace(/\n/g,'<br>')+'</div>' : '') +
+    (a.notesLog && a.notesLog.length ?
+      '<div class="note-box">' +
+      a.notesLog.map(function(n) {
+        var d = n.date ? new Date(n.date).toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit',year:'numeric'}) : '';
+        return '<div style="margin-bottom:4px"><span style="font-size:11px;color:#888"><strong>' + esc(n.author||'') + '</strong>'
+             + (d ? ' &middot; ' + d : '') + '</span><br>' + esc(n.text).replace(/\n/g,'<br>') + '</div>';
+      }).join('<hr style="border:none;border-top:1px solid var(--brd);margin:4px 0">')
+      + '</div>' : '') +
     (function(){
       var info = [];
       if (a.decisioneEditor && a.decisioneEditor !== '') info.push('<strong>Decisione:</strong> '+esc(a.decisioneEditor));
