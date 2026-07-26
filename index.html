@@ -2680,7 +2680,7 @@ function openEditArt(id) {
     document.getElementById('fOneDrive').disabled = false;
     _odBtn.href = _od;
     _odBtn.style.display = _od ? 'inline-flex' : 'none';
-  } else if (currentUser === 'GateKeeper') {
+  } else if ((currentUser === 'GateKeeper' || currentUser === 'DirettoreTeMA')) {
     _odWrap.style.display = _od ? '' : 'none';
     document.getElementById('fOneDrive').style.display = 'none';
     _odBtn.href = _od;
@@ -3194,7 +3194,7 @@ function doLogin() {
     document.getElementById('mainApp').style.display = 'block';
     bootApp();
   } else if (u === 'DirettoreTeMA' && p === '#Tecchio80TeMA') {
-    adminMode = false; currentUser = 'GateKeeper'; // same permissions as GateKeeper
+    adminMode = false; currentUser = 'DirettoreTeMA'; // same permissions as GateKeeper
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('mainApp').style.display = 'block';
     bootApp();
@@ -3228,7 +3228,7 @@ function bootApp() {
   if (adminMode) {
     setTimeout(unlockAllAdmin, 500);
     renderGk();
-  } else if (currentUser === 'GateKeeper') {
+  } else if ((currentUser === 'GateKeeper' || currentUser === 'DirettoreTeMA')) {
     // GateKeeper: come EditorTeMA ma con accesso al pannello GateKeeper evaluation
     var bkpBtn = document.querySelector('[onclick="backupData()"]');
     if (bkpBtn) bkpBtn.style.display = 'none';
