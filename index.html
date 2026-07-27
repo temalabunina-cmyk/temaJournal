@@ -167,6 +167,7 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
   <button class="tab" data-tab="rifiutati">Rifiutati</button>
   <button class="tab" data-tab="tutti">Tutti gli articoli</button>
   <button class="tab" data-tab="verbale">Verbale PDF</button>
+  <button class="tab" data-tab="noteeditoriali" style="display:none">Note Editoriali</button>
 </div>
 <div class="sec" id="sec-gatekeeper">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
@@ -230,6 +231,14 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
   </div>
   <div id="numeriEl"></div>
 </div>
+<div class="sec" id="sec-noteeditoriali">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+    <div style="font-size:16px;font-weight:700">Note Editoriali</div>
+  </div>
+  <p style="margin-bottom:1rem;color:#666">Il documento Google Doc con le note editoriali si apre in una nuova finestra.</p>
+  <button class="btn btn-ok" onclick="window.open('https://docs.google.com/document/d/1BizhUtvLCFm5g4fB3pscfBp483rBoQr7Q4QAETesEhI/edit','_blank')" style="font-size:18px;padding:10px 20px">&#128196; Apri Note Editoriali in Google Doc</button>
+</div>
+
 <div class="sec" id="sec-verbale">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:10px">
     <div style="font-size:16px;font-weight:700">Generatore verbale</div>
@@ -3134,6 +3143,7 @@ function switchTab(name) {
   if (name==='editori')       renderTeam();
   if (name==='numeri')        renderNumeri();
   if (name==='verbale')       { rebuildIssFilters(); loadDriveText(); renderVerbale(); }
+    if (name==='noteeditoriali') { /* opens in new window via button */ }
   if (name==='pubblicati')    { rebuildIssFilters(); renderPub(); }
   if (name==='revisori')      renderRevisori();
     if (name==='rifiutati') { renderRifRef(); renderRifGk(); renderRifTur(); }
@@ -3229,15 +3239,18 @@ function bootApp() {
     setTimeout(unlockAllAdmin, 500);
     renderGk();
   } else if ((currentUser === 'GateKeeper' || currentUser === 'DirettoreTeMA')) {
-    // GateKeeper: come EditorTeMA ma con accesso al pannello GateKeeper evaluation
     var bkpBtn = document.querySelector('[onclick="backupData()"]');
     if (bkpBtn) bkpBtn.style.display = 'none';
-    var tabsToHide = ['verbale'];
-    tabsToHide.forEach(function(tab) {
-      var btn = document.querySelector('.tab[data-tab="'+tab+'"]');
-      if (btn) btn.style.display = 'none';
-    });
+    // DirettoreTeMA vede anche il verbale; GateKeeper no
+    if (currentUser === 'GateKeeper') {
+      var verbaleBtn = document.querySelector('.tab[data-tab="verbale"]');
+      if (verbaleBtn) verbaleBtn.style.display = 'none';
+    }
     renderGk();
+    if (currentUser === 'DirettoreTeMA') {
+      var neBtn = document.querySelector('.tab[data-tab="noteeditoriali"]');
+      if (neBtn) neBtn.style.display = '';
+    }
   } else {
     // EditorTeMA: hide GateKeeper evaluation, Verbale PDF and Backup button
     var bkpBtn2 = document.querySelector('[onclick="backupData()"]');
