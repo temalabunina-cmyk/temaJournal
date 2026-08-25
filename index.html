@@ -2250,21 +2250,32 @@ function renderVerbale() {
     (function(){
       var cutoff = new Date();
       cutoff.setDate(cutoff.getDate() - 10);
+      // Usa lastModified OPPURE la data dell'ultima nota come riferimento
+      function rifDate(a) {
+        var d = a.lastModified ? new Date(a.lastModified) : null;
+        if (a.notesLog && a.notesLog.length) {
+          var nd = new Date(a.notesLog[0].date);
+          if (!d || nd > d) d = nd;
+        }
+        return d;
+      }
       var rifAll = articles.filter(function(a){ return a.status==='Rifiutato'; });
 
-      // Categoria 1: rifiutati dal referaggio (step=14)
+      // Categoria 1: rifiutati dal referaggio (Decline submission o step=14)
       var rifRef = rifAll.filter(function(a){
-        var d = a.lastModified ? new Date(a.lastModified) : null;
-        return a.step==='14' && d && d >= cutoff;
+        var d = rifDate(a);
+        var isDeclined = a.decisioneEditor==='Decline submission' || a.decisioneEditor2==='Decline submission';
+        return (isDeclined || a.step==='14') && d && d >= cutoff;
       });
-      // Categoria 2: rifiutati dal GK (step=6)
+      // Categoria 2: rifiutati dal GK
       var rifGk = rifAll.filter(function(a){
-        var d = a.lastModified ? new Date(a.lastModified) : null;
-        return a.step==='6' && d && d >= cutoff;
+        var d = rifDate(a);
+        return a.step==='6' && d && d >= cutoff &&
+               a.decisioneEditor!=='Decline submission' && a.decisioneEditor2!=='Decline submission';
       });
       // Categoria 3: rifiutati Turnitin (step=4)
       var rifTur = rifAll.filter(function(a){
-        var d = a.lastModified ? new Date(a.lastModified) : null;
+        var d = rifDate(a);
         return a.step==='4' && d && d >= cutoff;
       });
 
@@ -2274,7 +2285,7 @@ function renderVerbale() {
       function rifCard(a) {
         return '<div class="ae"><p><strong>#'+esc(a.id)+'</strong> &mdash; <em>'+esc(a.title)+'</em></p>'+
           (a.authors?'<p>'+esc(a.authors)+(a.affiliation?' &middot; '+esc(a.affiliation):'')+(a.nationality?' &middot; '+esc(a.nationality):'')+'</p>':'')+
-          (a.notes?'<p><em>Note: '+esc(a.notes).replace(/\n/g,'<br>')+'</em></p>':'')+
+          (a.notesLog && a.notesLog.length ? '<p><em>'+esc(a.notesLog[0].text).replace(/\n/g,'<br>')+'</em></p>' : '')+
           '</div>';
       }
 
