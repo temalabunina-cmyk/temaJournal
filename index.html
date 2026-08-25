@@ -706,6 +706,15 @@ function loadData() {
         issues   = gsData.issues && gsData.issues.length ? gsData.issues : JSON.parse(JSON.stringify(DEF_ISSUES));
         articles = gsData.articles;
         migrateNotes();
+        // Set dataRifiuto for existing rejected articles without it
+        var rifiutatoChanged = false;
+        articles.forEach(function(a) {
+          if (a.status === 'Rifiutato' && !a.dataRifiuto) {
+            a.dataRifiuto = a.lastModified || new Date().toISOString();
+            rifiutatoChanged = true;
+          }
+        });
+        if (rifiutatoChanged) schedSave();
         setSaving(false);
         document.getElementById('saveLbl').textContent = 'Dati sincronizzati';
         rebuildIssFilters();
@@ -2252,6 +2261,8 @@ function renderVerbale() {
       cutoff.setDate(cutoff.getDate() - 10);
       // Usa lastModified OPPURE la data dell'ultima nota come riferimento
       function rifDate(a) {
+        // Priority: dataRifiuto > lastModified > latest note date
+        if (a.dataRifiuto) return new Date(a.dataRifiuto);
         var d = a.lastModified ? new Date(a.lastModified) : null;
         if (a.notesLog && a.notesLog.length) {
           var nd = new Date(a.notesLog[0].date);
@@ -2752,6 +2763,7 @@ function autoStep(a) {
   // Decline submission: sempre step=14 + Rifiutato (priorità assoluta)
   if (a.decisioneEditor === 'Decline submission' || a.decisioneEditor2 === 'Decline submission') {
     a.step = '14';
+    if (a.status !== 'Rifiutato') a.dataRifiuto = new Date().toISOString();
     a.status = 'Rifiutato';
     return a;
   }
@@ -2872,6 +2884,9 @@ function saveArt() {
     oneDrive:document.getElementById('fOneDrive').value||'',
     section:document.getElementById('fSecArt').value,
     status:document.getElementById('fStatus').value,
+    dataRifiuto: (document.getElementById('fStatus').value === 'Rifiutato' && (_origIdx<0 || articles[_origIdx].status !== 'Rifiutato'))
+      ? new Date().toISOString()
+      : (_origIdx>=0 ? (articles[_origIdx].dataRifiuto || '') : ''),
     step:document.getElementById('fStep').value,
     lastModified: new Date().toISOString(),
     issue:document.getElementById('fIssArt').value,
