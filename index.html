@@ -586,7 +586,7 @@ const SC = {
 const EDITORS = ['Carmen Guida','Floriana Zucaro','Gerardo Carpentieri','Peppe Mazzeo','Romano Fistola','Rosa Anna La Rocca','Rosaria Battarra','Stefano Franco'];
 const COPYEDITORS = ['Gerardo Carpentieri','Laura Ascione',"Nunzia D'Amico",'Stella Pennino','Tonia Stiuso','Valerio Martinelli'];
 const LS_KEY = 'tema-journal-v2';
-const GS_URL = 'https://script.google.com/macros/s/AKfycbzwEsSPGoynLBuvreM2NV5_9yLX4ZFhkO1MRgHYyWWQwuy5YH_O8lOvszbTnG4g78Ke/exec';
+const GS_URL = 'https://script.google.com/macros/s/AKfycbwPiRX265hNGFsaOSV-whQY-xB9G7Igw7BtSfnaeJ1ophHGocJM6qi7KAlUt9Z01uc3/exec';
 
 let issues = [], articles = [], editingArtId = null, editingIssKey = null;
 let saveTimer = null, sessionUnlocked = false, pendingAction = null;
@@ -600,15 +600,33 @@ var citeScoreTrackerLabel = 'CiteScore Tracker 2026';
 var citeScoreTrackerSubLabel = '';
 var citeScoreLastUpdate = '';
 
-function saveCiteScore() {
+async function saveCiteScore() {
   var cs = document.getElementById('citeScoreValue').value.trim();
   var tr = document.getElementById('citeScoreTrackerValue').value.trim();
   if (cs) citeScoreValue = cs;
   if (tr) citeScoreTrackerValue = tr;
-  document.getElementById('btnSaveCs').style.display='none';
+  document.getElementById('btnSaveCs').style.display = 'none';
   var now = new Date().toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'});
   var sub = document.getElementById('citeScoreSub');
-  if (sub) sub.textContent = 'Scopus ↗ · aggiornato ' + now;
+  if (sub) sub.textContent = 'aggiornato ' + now;
+  try {
+    await fetch(GS_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        citeScore: {
+          value: citeScoreValue,
+          trackerValue: citeScoreTrackerValue,
+          label: citeScoreLabel,
+          trackerLabel: citeScoreTrackerLabel,
+          subLabel: 'aggiornato ' + now,
+          trackerSubLabel: citeScoreTrackerSubLabel
+        }
+      })
+    });
+    alert('CiteScore salvato per tutti gli utenti.');
+  } catch(e) {
+    alert('Aggiornato localmente. Errore di rete: ' + (e.message||''));
+  }
 }
 
 function openScopus() {
@@ -704,6 +722,15 @@ function loadData() {
 
       if (gsData && gsData.articles && gsData.articles.length) {
         issues   = gsData.issues && gsData.issues.length ? gsData.issues : JSON.parse(JSON.stringify(DEF_ISSUES));
+        // Load CiteScore from issues metadata
+        if (gsData.citeScore) {
+          citeScoreValue          = gsData.citeScore.value          || citeScoreValue;
+          citeScoreTrackerValue   = gsData.citeScore.trackerValue   || citeScoreTrackerValue;
+          citeScoreLabel          = gsData.citeScore.label          || citeScoreLabel;
+          citeScoreTrackerLabel   = gsData.citeScore.trackerLabel   || citeScoreTrackerLabel;
+          citeScoreSubLabel       = gsData.citeScore.subLabel       || citeScoreSubLabel;
+          citeScoreTrackerSubLabel= gsData.citeScore.trackerSubLabel|| citeScoreTrackerSubLabel;
+        }
         articles = gsData.articles;
         migrateNotes();
         // Set dataRifiuto for existing rejected articles without it
