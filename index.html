@@ -1180,14 +1180,31 @@ function renderStats() {
 }
 
 function applyCiteScorePermissions() {
-  // CiteScore è ora un valore fisso (no scrittura su Google Sheets)
   var cs = document.getElementById('citeScoreValue');
   var tr = document.getElementById('citeScoreTrackerValue');
-  if (!cs || !tr) return;
-  cs.setAttribute('readonly','');
-  cs.style.pointerEvents = 'none';
-  tr.setAttribute('readonly','');
-  tr.style.pointerEvents = 'none';
+  if (!cs || !tr) { setTimeout(applyCiteScorePermissions, 300); return; }
+  if (adminMode) {
+    cs.removeAttribute('readonly');
+    cs.style.pointerEvents = 'auto';
+    cs.style.cursor = 'text';
+    cs.oninput = function() {
+      var btn = document.getElementById('btnSaveCs');
+      if (btn) btn.style.display = 'inline-block';
+    };
+    tr.removeAttribute('readonly');
+    tr.style.pointerEvents = 'auto';
+    tr.style.cursor = 'text';
+    tr.style.color = '';
+    tr.oninput = function() {
+      var btn = document.getElementById('btnSaveCs');
+      if (btn) btn.style.display = 'inline-block';
+    };
+  } else {
+    cs.setAttribute('readonly', '');
+    cs.style.pointerEvents = 'none';
+    tr.setAttribute('readonly', '');
+    tr.style.pointerEvents = 'none';
+  }
 }
 
 function gkCard(a) {
