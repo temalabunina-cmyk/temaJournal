@@ -610,7 +610,7 @@ async function saveCiteScore() {
   var sub = document.getElementById('citeScoreSub');
   if (sub) sub.textContent = 'aggiornato ' + now;
   try {
-    await fetch(GS_URL, {
+    var resp = await fetch(GS_URL, {
       method: 'POST',
       body: JSON.stringify({
         citeScore: {
@@ -623,9 +623,16 @@ async function saveCiteScore() {
         }
       })
     });
-    alert('CiteScore salvato per tutti gli utenti.');
+    var txt = await resp.text();
+    console.log('[CiteScore] Server response:', txt);
+    if (txt && txt.trim() === 'OK') {
+      alert('CiteScore salvato per tutti gli utenti.');
+    } else {
+      alert('Risposta inattesa dal server: ' + txt.slice(0,100));
+    }
   } catch(e) {
-    alert('Aggiornato localmente. Errore di rete: ' + (e.message||''));
+    console.error('[CiteScore] Errore:', e);
+    alert('Errore di rete: ' + (e.message||''));
   }
 }
 
