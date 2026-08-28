@@ -600,18 +600,6 @@ var citeScoreTrackerLabel = 'CiteScore Tracker 2026';
 var citeScoreTrackerSubLabel = '';
 var citeScoreLastUpdate = '';
 
-function saveCiteScore() {
-  var cs = document.getElementById('citeScoreValue').value.trim();
-  var tr = document.getElementById('citeScoreTrackerValue').value.trim();
-  if (cs) citeScoreValue = cs;
-  if (tr) citeScoreTrackerValue = tr;
-  var now = new Date().toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'});
-  citeScoreSubLabel = 'aggiornato ' + now;
-  var sub = document.getElementById('citeScoreSub');
-  if (sub) sub.textContent = citeScoreSubLabel;
-  document.getElementById('btnSaveCs').style.display = 'none';
-  persist(); // saves everything including citeScore
-}
 
 function openScopus() {
   window.open('https://www.scopus.com/sourceid/21101185191', '_blank');
@@ -768,10 +756,7 @@ function persist() {
   setSaving(true);
   document.getElementById('saveLbl').textContent = 'Salvataggio...';
 
-  var payload = JSON.stringify({issues:issues, articles:articles, _ts: Date.now(),
-    citeScore: { value:citeScoreValue, trackerValue:citeScoreTrackerValue,
-      label:citeScoreLabel, trackerLabel:citeScoreTrackerLabel,
-      subLabel:citeScoreSubLabel, trackerSubLabel:citeScoreTrackerSubLabel }});
+  var payload = JSON.stringify({issues:issues, articles:articles, _ts: Date.now()});
 
   var attempt = 0;
   function tryPost() {
@@ -1162,36 +1147,7 @@ function renderStats() {
     '</div>' +   '</div></div>';
 
   setTimeout(function() {
-    applyCiteScorePermissions();
   }, 0);
-}
-
-function applyCiteScorePermissions() {
-  var cs = document.getElementById('citeScoreValue');
-  var tr = document.getElementById('citeScoreTrackerValue');
-  if (!cs || !tr) { setTimeout(applyCiteScorePermissions, 300); return; }
-  if (adminMode) {
-    cs.removeAttribute('readonly');
-    cs.style.pointerEvents = 'auto';
-    cs.style.cursor = 'text';
-    cs.oninput = function() {
-      var btn = document.getElementById('btnSaveCs');
-      if (btn) btn.style.display = 'inline-block';
-    };
-    tr.removeAttribute('readonly');
-    tr.style.pointerEvents = 'auto';
-    tr.style.cursor = 'text';
-    tr.style.color = '';
-    tr.oninput = function() {
-      var btn = document.getElementById('btnSaveCs');
-      if (btn) btn.style.display = 'inline-block';
-    };
-  } else {
-    cs.setAttribute('readonly', '');
-    cs.style.pointerEvents = 'none';
-    tr.setAttribute('readonly', '');
-    tr.style.pointerEvents = 'none';
-  }
 }
 
 function gkCard(a) {
