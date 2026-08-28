@@ -600,40 +600,17 @@ var citeScoreTrackerLabel = 'CiteScore Tracker 2026';
 var citeScoreTrackerSubLabel = '';
 var citeScoreLastUpdate = '';
 
-async function saveCiteScore() {
+function saveCiteScore() {
   var cs = document.getElementById('citeScoreValue').value.trim();
   var tr = document.getElementById('citeScoreTrackerValue').value.trim();
   if (cs) citeScoreValue = cs;
   if (tr) citeScoreTrackerValue = tr;
-  document.getElementById('btnSaveCs').style.display = 'none';
   var now = new Date().toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'});
+  citeScoreSubLabel = 'aggiornato ' + now;
   var sub = document.getElementById('citeScoreSub');
-  if (sub) sub.textContent = 'aggiornato ' + now;
-  try {
-    var resp = await fetch(GS_URL, {
-      method: 'POST',
-      body: JSON.stringify({
-        citeScore: {
-          value: citeScoreValue,
-          trackerValue: citeScoreTrackerValue,
-          label: citeScoreLabel,
-          trackerLabel: citeScoreTrackerLabel,
-          subLabel: 'aggiornato ' + now,
-          trackerSubLabel: citeScoreTrackerSubLabel
-        }
-      })
-    });
-    var txt = await resp.text();
-    console.log('[CiteScore] Server response:', txt);
-    if (txt && txt.trim() === 'OK') {
-      alert('CiteScore salvato per tutti gli utenti.');
-    } else {
-      alert('Risposta inattesa dal server: ' + txt.slice(0,100));
-    }
-  } catch(e) {
-    console.error('[CiteScore] Errore:', e);
-    alert('Errore di rete: ' + (e.message||''));
-  }
+  if (sub) sub.textContent = citeScoreSubLabel;
+  document.getElementById('btnSaveCs').style.display = 'none';
+  persist(); // saves everything including citeScore
 }
 
 function openScopus() {
@@ -791,7 +768,10 @@ function persist() {
   setSaving(true);
   document.getElementById('saveLbl').textContent = 'Salvataggio...';
 
-  var payload = JSON.stringify({issues:issues, articles:articles, _ts: Date.now()});
+  var payload = JSON.stringify({issues:issues, articles:articles, _ts: Date.now(),
+    citeScore: { value:citeScoreValue, trackerValue:citeScoreTrackerValue,
+      label:citeScoreLabel, trackerLabel:citeScoreTrackerLabel,
+      subLabel:citeScoreSubLabel, trackerSubLabel:citeScoreTrackerSubLabel }});
 
   var attempt = 0;
   function tryPost() {
