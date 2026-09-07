@@ -1724,7 +1724,7 @@ function renderLista() {
     return true;
   });
   f.sort(function(a,b){ var sa=parseInt(a.step)||0,sb=parseInt(b.step)||0; return sa!==sb?(sa-sb)*_listaSortDir:parseInt(b.id)-parseInt(a.id); });
-  document.getElementById('listaEl').innerHTML = f.length ? f.map(function(a){ return artCard(a,true); }).join('') :
+  document.getElementById('listaEl').innerHTML = f.length ? f.map(function(a){ return artCard(a, true, false); }).join('') :
     '<div style="text-align:center;padding:3rem;color:var(--tx2)">Nessun articolo trovato.</div>';
 }
 
@@ -1748,7 +1748,7 @@ function renderPub() {
     return parseInt(b.id) - parseInt(a.id);
   });
   document.getElementById('pubCount').textContent = f.length+' articol'+(f.length===1?'o':'i');
-  document.getElementById('pubEl').innerHTML = f.length ? f.map(function(a){ return artCard(a,true); }).join('') :
+  document.getElementById('pubEl').innerHTML = f.length ? f.map(function(a){ return artCard(a, true, false); }).join('') :
     '<div style="text-align:center;padding:3rem;color:var(--tx2)">Nessun articolo pubblicato.</div>';
 }
 
