@@ -179,7 +179,7 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
   </div>
   <div class="toolbar"><input class="srch" type="text" id="srchGk" placeholder="Cerca..."></div>
   <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
-    <select id="fGkStep" onchange="renderGk()" style="font-size:20px;padding:6px 10px;border:1px solid var(--brd);border-radius:var(--r);background:var(--sur)"><option value="">Tutti gli step</option><option value="1">St.1</option><option value="2">St.2</option><option value="3">St.3</option><option value="5">St.5</option><option value="5a">St.5a · Approvato GK</option></select>
+    <select id="fGkStep" onchange="renderGk()" style="font-size:20px;padding:6px 10px;border:1px solid var(--brd);border-radius:var(--r);background:var(--sur)"><option value="">Tutti gli step</option><option value="1">St.1</option><option value="2">St.2</option><option value="4">St.3</option><option value="6">St.5</option><option value="5a">St.5a · Approvato GK</option></select>
     <select id="fGkSec" onchange="renderGk()" style="font-size:20px;padding:6px 10px;border:1px solid var(--brd);border-radius:var(--r);background:var(--sur)"><option value="">Tutte le sezioni</option><option>Focus</option><option>LUME</option><option>RNs</option><option>SI</option></select>
     <select id="fGkIntl" onchange="renderGk()" style="font-size:20px;padding:6px 10px;border:1px solid var(--brd);border-radius:var(--r);background:var(--sur)"><option value="">Tutti</option><option value="si">Internazionale</option><option value="no">Italia</option></select>
   </div>
@@ -215,7 +215,7 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
     <select id="fRevMin" onchange="renderRevisori()" style="font-size:20px;padding:6px 10px;border:1px solid var(--brd);border-radius:var(--r);background:var(--sur)">
       <option value="1">Tutti (≥1 invito)</option>
       <option value="2">≥2 inviti</option>
-      <option value="3">≥3 inviti</option>
+      <option value="4">≥3 inviti</option>
     </select>
     <select id="fRevAnno" onchange="renderRevisori()" style="font-size:20px;padding:6px 10px;border:1px solid var(--brd);border-radius:var(--r);background:var(--sur)">
       <option value="">Tutti gli anni</option>
@@ -347,25 +347,24 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
       <option value="">—</option>
       <option value="1">St 1 · Ricevimento dell'articolo</option>
       <option value="2">St 2 · Assegnazione al GateKeeper</option>
-      <option value="2a">St 2a · Approvazione GateKeeper</option>
-      <option value="3">St 3 · Rifiuto GateKeeper</option>
-      <option value="4">St 4 · Verifica con Turnitin</option>
-      <option value="5">St 5 · Invio comunicazione Turnitin agli autori</option>
-      <option value="6">St 6 · Rifiuto Turnitin</option>
-      <option value="7">St 7 · Assegnazione all'editor</option>
-      <option value="8">St 8 · L'Editor invita gli autori a modificare l'articolo</option>
-      <option value="9">St 9 · Individuazione dei revisori</option>
-      <option value="10">St 10 · Accettazione incarico di 1 revisore</option>
-      <option value="11">St 11 · Accettazione incarico di 2 revisori</option>
-      <option value="12">St 12 · Invio agli autori per le modifiche</option>
-      <option value="13">St 13 · Comunicazione rifiuto articolo</option>
-      <option value="14">St 14 · Ricevimento articolo revisionato</option>
-      <option value="15">St 15 · Eventuale riassegnazione ai revisori</option>
-      <option value="16">St 16 · Verifica metadati e citazioni</option>
-      <option value="17">St 17 · Impaginazione</option>
-      <option value="18">St 18 · Pubblicazione</option>
-    </select>
-    </div>
+      <option value="3">St 3 · Approvazione GateKeeper</option>
+      <option value="4">St 4 · Rifiuto GateKeeper</option>
+      <option value="5">St 5 · Verifica con Turnitin</option>
+      <option value="6">St 6 · Invio comunicazione Turnitin agli autori</option>
+      <option value="7">St 7 · Rifiuto Turnitin</option>
+      <option value="8">St 8 · Assegnazione all'editor</option>
+      <option value="9">St 9 · L'Editor invita gli autori a modificare l'articolo</option>
+      <option value="10">St 10 · Individuazione dei revisori</option>
+      <option value="11">St 11 · Accettazione incarico di 1 revisore</option>
+      <option value="12">St 12 · Accettazione incarico di 2 revisori</option>
+      <option value="13">St 13 · Invio agli autori per le modifiche</option>
+      <option value="14">St 14 · Comunicazione rifiuto articolo</option>
+      <option value="15">St 15 · Ricevimento articolo revisionato</option>
+      <option value="16">St 16 · Eventuale riassegnazione ai revisori</option>
+      <option value="17">St 17 · Verifica metadati e citazioni</option>
+      <option value="18">St 18 · Impaginazione</option>
+      <option value="19">St 19 · Pubblicazione</option>
+    </select>    </div>
   </div>
   <div class="fr" style="display:flex;align-items:center;gap:8px">
     <label style="display:flex;align-items:center;gap:6px;cursor:pointer;margin:0">
@@ -382,7 +381,7 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
     <div class="fr"><label>Internazionale</label><select id="fIntlArt"><option value="">—</option><option value="si">S&igrave;</option><option value="no">No</option></select></div>
   </div>
   <div class="fsl">Contenuto</div>
-  <div class="fr"><label>Abstract</label><textarea id="fAbstract" rows="3" class="autoresize" oninput="autoResize(this)"></textarea></div>
+  <div class="fr"><label>Abstract</label><textarea id="fAbstract" rows="4" class="autoresize" oninput="autoResize(this)"></textarea></div>
   <div class="g2">
     <div class="fr"><label>Lunghezza (parole)</label><input id="fLen" type="number"></div>
     <div class="fr" style="display:flex;align-items:center;padding-top:22px">
@@ -520,7 +519,7 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
   </div>
   <div class="fr" id="iYearRow"><label>Anno</label><input id="iYear" type="number" value="2026" min="2020" max="2040"></div>
   <div class="fr" id="iNumRow"><label>Numero (1&ndash;3)</label>
-    <select id="iNum"><option value="1">01</option><option value="2">02</option><option value="3">03</option></select>
+    <select id="iNum"><option value="1">01</option><option value="2">02</option><option value="4">03</option></select>
   </div>
   <div class="fr"><label>Tema / Titolo</label><input id="iTheme"></div>
   <div class="fr"><label>Data prevista pubblicazione</label><input id="iDeadline" type="date"></div>
@@ -554,29 +553,28 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
 
 <script>
 const DEF_ISSUES=[{"key":"01/2026","label":"TeMA 01/2026","type":"ordinario","year":2026,"num":1,"theme":"The city challenges and external agents","deadline":"2026-04-30","note":"Pubblicazione prevista 30/04/2026"}];
-const DEF_ARTICLES=[{"id":"11322","dataSottomissione":"","title":"Biodiversity and Ecological Network: GeoAI for Modica Green city","authors":"Chiara Spadaro, Celestina Fazia","affiliation":"Università Kore","nationality":"Italia","intl":"no","abstract":"","length":0,"impaginato":false,"section":"LUME","status":"Concluso","step":"12","issue":"01/2026","articleNum":6,"deadline":"","editor":"Romano Fistola","copyeditor":"Valerio Martinelli","gatekeeper":"","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[],"revisori2":[],"decisioneEditor":"","decisioneEditor2":"","dataRevisione":"","dataRevisione2":""},{"id":"11343","dataSottomissione":"2024-12-10","title":"Monitoring Urban Dynamics Using Google Earth and GeoAI","authors":"Francesco Lamonaca","affiliation":"University of Calabria","nationality":"Italia","intl":"no","abstract":"Urban areas face mounting pressure from increased space demand, degrading key environmental services. Thus, understanding Land Use/Land Cover (LULC) changes is vital. In order to offer a robust decision-support framework for urban planning and environmental conservation, this study presents an innovative measurement method based on Google Earth Engine and Unsupervised K-means Clustering of multispectral satellite images to map urban and vegetation shifts. The proposed method was applied in 15 southern Italian cities and the results were validated with ESA Land Cover dataset. Results show 167 hectares consumed from 2005 to 2021. Since the F1 score harmonizes the balance between precision and recall into a single metric, it can be used as evaluation metric for the proposal. In particular, F1 scores were 0.64 for urban areas and 0.92 for vegetation areas. Given that the classification was unsupervised, an F1-score of 0.64 can be considered a favorable result, particularly considering the challenges of accurately classifying the diverse land cover types in Landsat imagery with a 30-meter resolution. For these reasons, these results show the potential to make the proposed method a useful tool for aiding policymakers and urban planners in making informed decisions to mitigate the adverse effects of urban growth on the environment.","length":39898,"impaginato":true,"section":"LUME","status":"Sottomesso","step":"12","issue":"01/2026","articleNum":10,"deadline":"","editor":"Gerardo Carpentieri","copyeditor":"Gerardo Carpentieri","gatekeeper":"","similarity":null,"aiPercent":null,"refsTotal":39,"citeTeMA":4,"citeTeMA2226":3,"citeJCR":8,"citeJCR2y":6,"notes":"Ex special Issue GeoAI (Francini) sono stati svolti due cicli di referaggio\nIn data 24/03/2026 ha sottomesso la versione revisionata del paper","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[],"revisori2":[],"decisioneEditor":"","decisioneEditor2":"","dataRevisione":"","dataRevisione2":""},{"id":"11344","dataSottomissione":"","title":"Evaluating Urban Fabric Transformations Using GeoAI","authors":"Alessandro Vitale","affiliation":"Università della Calabria","nationality":"Italia","intl":"no","abstract":"","length":0,"impaginato":false,"section":"LUME","status":"Concluso","step":"12","issue":"01/2026","articleNum":8,"deadline":"","editor":"Rosa Anna La Rocca","copyeditor":"Nunzia D'Amico","gatekeeper":"","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[],"revisori2":[],"decisioneEditor":"","decisioneEditor2":"","dataRevisione":"","dataRevisione2":""},{"id":"11378","title":"AI as a Tool for Urban Regeneration Processes","authors":"Carlo Adornetto","affiliation":"Università della Calabria","nationality":"Italia","intl":"no","abstract":"","length":0,"section":"LUME","status":"Copyediting","step":"12","issue":"","articleNum":null,"deadline":"","editor":"Romano Fistola","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"SI Francini. In attesa di secondo referee."},{"id":"11551","dataSottomissione":"","title":"CITISENSE. Enhancing Urban Well-being through Smart Design, Data and AI","authors":"Pierfrancesco Celani, Daniel Enrique Sardo, Massimo Zupi, Margherita Tufarelli, Adriano Bisello","affiliation":"Università della Calabria; Università di Firenze; ITESO Guadalajara","nationality":"Italia / Messico","intl":"si","abstract":"","length":0,"impaginato":false,"section":"LUME","status":"Concluso","step":"12","issue":"01/2026","articleNum":9,"deadline":"","editor":"Gerardo Carpentieri","copyeditor":"Gerardo Carpentieri","gatekeeper":"","similarity":null,"aiPercent":null,"refsTotal":53,"citeTeMA":8,"citeTeMA2226":4,"citeJCR":24,"citeJCR2y":7,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[],"revisori2":[],"decisioneEditor":"","decisioneEditor2":"","dataRevisione":"","dataRevisione2":""},{"id":"12394","title":"Assessing Urban Growth and Pollution through Nightlight Data: A Case Study in Thailand","authors":"Chaichana Kulworatit, Phuvis Kerdpramote, Saranya Saetang","affiliation":"KMITL Bangkok","nationality":"Tailandia","intl":"si","abstract":"","length":0,"section":"LUME","status":"Concluso","step":"12","issue":"01/2026","articleNum":3,"deadline":"","editor":"Floriana Zucaro","copyeditor":"Nunzia D'Amico","gatekeeper":"","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[]},{"id":"12458","title":"Exploring Governance Challenges in Coastal and Marine Tourism","authors":"Barbara Gasparini, Emanuel Giannotti, Vittore Negretto, Denis Maragno","affiliation":"IUAV","nationality":"Italia","intl":"no","abstract":"","length":0,"section":"LUME","status":"Concluso","step":"12","issue":"01/2026","articleNum":4,"deadline":"","editor":"Rosa Anna La Rocca","copyeditor":"Stella Pennino","gatekeeper":"","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[]},{"id":"12609","title":"Liberal and deliberative democracy in planning paradigms: reflections on upper-scale planning in Türkiye","authors":"Büşra Durmaz, Cihan Ercetin","affiliation":"KU Leuven, Belgio","nationality":"Belgio / Turchia","intl":"si","abstract":"","length":0,"section":"LUME","status":"In referaggio","step":"8","issue":"","articleNum":null,"deadline":"2026-02-28","editor":"Romano Fistola","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"L'Editor ha inviato (23 febbraio 2026) all'autore alcuni commenti per rivedere il paper prima della selezione del secondo revisore.","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[{"nome":"Lucia Saganeiti ","affiliazione":"CNR","dataConsegna":"","accettazione":"completato","dataProroga":"","giudizio":"Resubmit for Review"}]},{"id":"12621","dataSottomissione":"","title":"The Impact of Land Use and Land Cover (LULC) Changes on Coastal Dynamics Through Landscape Structure","authors":"Makbulenur Onur","affiliation":"Karadeniz Technical University, Turchia","nationality":"Turchia","intl":"si","abstract":"Coastal areas are regions characterized by complex dynamics resulting from the interaction between natural processes and human activities. This study was conducted on two adjacent beach areas in Budva, Montenegro: one that has been affected by land use and land cover (LULC) change, and another that remains unaffected. The research provides a comparative analysis of the impacts of LULC changes on coastal landscape structure, spatial characteristics, and user perception. The Analytic Hierarchy Process (AHP) was employed as the multi-criteria decision-making method, while data related to user perceptions were analyzed using the SPSS statistical software.The study focused on key criteria such as coastal protection, biodiversity, aesthetic value, and public usability. The findings reveal that LULC changes have significant effects on the ecological and visual integrity of coastal areas, as well as on user satisfaction. In this context, the study recommends careful monitoring of LULC changes and adapting landscape planning decisions accordingly to ensure sustainable coastal development. The results quantitatively demonstrate the differences between the two selected areas. Furthermore, the study evaluated how users perceive these changes, based on criteria such as aesthetic value, recreational use, and environmental comfort levels. A user-centered landscape performance analysis was conducted accordingly. In order to clearly reveal the effects of change, a comparative assessment was made between a beach area that experienced LULC change and one that remained unchanged. The findings highlight that preserving natural characteristics in coastal areas plays a critical role in enhancing user satisfaction, aesthetic quality, and ecological sustainability. Therefore, the study emphasizes the importance of nature-based solutions and multi-criteria analyses grounded in user perception in coastal management strategies.","length":0,"impaginato":false,"section":"Focus","status":"Revisione autore","step":"12","issue":"01/2026","articleNum":1,"deadline":"2026-03-25","editor":"Floriana Zucaro","copyeditor":"Tonia Stiuso","gatekeeper":"Lilli Gargiulo","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[{"nome":"Nzuzo Nxumalo ","affiliazione":"","dataConsegna":"","accettazione":"completato","dataProroga":"","giudizio":"Resubmit for Review"},{"nome":"Firdevs KULAK TORUN","affiliazione":"","dataConsegna":"","accettazione":"completato","dataProroga":"","giudizio":"Revisions required"}],"revisori2":[],"decisioneEditor":"Revisions required","decisioneEditor2":"","dataRevisione":"2026-03-09","dataRevisione2":""},{"id":"12634","title":"Beyond the Map Decision Support Systems for Spatial and Mobility Planning","authors":"Mara Ladu, Ginevra Balletto, Tanja Congiu, Gianfranco Fancello, Ernesto Fontes Pupo","affiliation":"Università di Cagliari","nationality":"Italia","intl":"no","abstract":"","length":0,"section":"LUME","status":"Concluso","step":"12","issue":"01/2026","articleNum":5,"deadline":"","editor":"Carmen Guida","copyeditor":"Laura Ascione","gatekeeper":"","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[]},{"id":"12656","dataSottomissione":"","title":"Spatial and temporal evolution of urban reserve available land resources in the karst region of North China from 1990 to 2020","authors":"Shujin Wang, Shanzhong Qi","affiliation":"Shandong Normal University, China","nationality":"Cina","intl":"si","abstract":"","length":0,"impaginato":false,"section":"Focus","status":"In referaggio","step":"12","issue":"01/2026","articleNum":2,"deadline":"2026-03-29","editor":"Floriana Zucaro","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[],"revisori2":[],"decisioneEditor":"","decisioneEditor2":"","dataRevisione":"","dataRevisione2":""},{"id":"12696","dataSottomissione":"","title":"Impact of Renewable Energy Systems on Water Ecosystem Services","authors":"Maria Cristina Marino, Beniamino Murgante","affiliation":"Università della Basilicata","nationality":"Italia","intl":"no","abstract":"","length":0,"impaginato":false,"section":"LUME","status":"Revisione autore","step":"8","issue":"","articleNum":null,"deadline":"2026-03-21","editor":"Gerardo Carpentieri","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"Versione revisionata attesa per il 21 marzo.","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[],"revisori2":[],"decisioneEditor":"","decisioneEditor2":"","dataRevisione":"","dataRevisione2":""},{"id":"12735","dataSottomissione":"","title":"Planning for Sustainable Tourism in Protected Areas","authors":"Rachele Gatto, Francesco Scorza","affiliation":"Università della Basilicata","nationality":"Italia","intl":"no","abstract":"","length":0,"impaginato":false,"section":"—","status":"Revisione autore","step":"12","issue":"","articleNum":null,"deadline":"2026-03-16","editor":"Rosa Anna La Rocca","copyeditor":"Stella Pennino","gatekeeper":"Lilli Gargiulo","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[],"revisori2":[],"decisioneEditor":"","decisioneEditor2":"","dataRevisione":"","dataRevisione2":""},{"id":"12803","dataSottomissione":"","title":"Examining the temporal and spatial change of current land cover types in Demre District using machine learning","authors":"Sibel Akten, Hüseyin Batuhan Dündar, Atila Gül","affiliation":"Suleyman University, Turchia","nationality":"Turchia","intl":"si","abstract":"","length":0,"impaginato":false,"section":"LUME","status":"In referaggio","step":"5","issue":"01/2026","articleNum":7,"deadline":"2026-03-09","editor":"Carmen Guida","copyeditor":"Laura Ascione","gatekeeper":"Lilli Gargiulo","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[],"revisori2":[],"decisioneEditor":"","decisioneEditor2":"","dataRevisione":"","dataRevisione2":""},{"id":"13052","title":"Climate Adaptation and Mitigation. A Multicriteria Decision-Support System for the Basilicata Region","authors":"Alfonso Annunziata, Francesco Scorza","affiliation":"Università della Basilicata","nationality":"Italia","intl":"no","abstract":"","length":0,"section":"Focus","status":"Sottomesso","step":"3","issue":"","articleNum":null,"deadline":"","editor":"Rosaria Battarra","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"L'editor comunica di voler invitare gli autori ad inviare una nuova versione del contributo in linea con il format della rivista.","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[]},{"id":"13106","dataSottomissione":"2026-01-10","title":"Logistics and overtourism: urban system vulnerabilities across Italian cities scales: A comparative multi-scale assessment of overtourism–last-mile conflicts","authors":"Irina Di Ruocco","affiliation":"University of Insubria","nationality":"Italia","intl":"no","abstract":"This paper addresses the problem of urban logistics in the years of overtourism.","length":50834,"impaginato":true,"section":"Focus","status":"Sottomesso","step":"1","issue":"","articleNum":null,"deadline":"","editor":"","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":2,"aiPercent":24,"refsTotal":42,"citeTeMA":2,"citeTeMA2226":0,"citeJCR":15,"citeJCR2y":5,"notes":"Il paper nella prima sottomissione aveva un AI > 30%.","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[],"revisori2":[],"decisioneEditor":"","decisioneEditor2":"","dataRevisione":"","dataRevisione2":""},{"id":"13110","title":"Identification and mapping of traffic congestion hotspots in urban areas","authors":"Frederic Laurent esse esse","affiliation":"University of Douala, Cameroon","nationality":"Camerun","intl":"si","abstract":"","length":0,"section":"Focus","status":"GateKeeper evaluation","step":"8b","issue":"","articleNum":null,"deadline":"","editor":"Gerardo Carpentieri","copyeditor":"","gatekeeper":"","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"L'articolo è stato rifiutato il 16 marzo 2026","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[]},{"id":"13143","title":"Evaluating the efficacy of smart technologies in disseminating transportation systems information during earthquake scenarios","authors":"Izza Anwer, Irfan Yousuf","affiliation":"Susan University of Engineering and Technology, Lahore","nationality":"Pakistan","intl":"si","abstract":"","length":0,"section":"Focus","status":"Sottomesso","step":"3","issue":"","articleNum":null,"deadline":"","editor":"Peppe Mazzeo","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[]},{"id":"13148","dataSottomissione":"2026-01-27","title":"Climate Change and Beach Tourism","authors":"Pathmanandakumar Vyddiyaratnam","affiliation":"Eastern University Sri Lanka","nationality":"Sri Lanka","intl":"si","abstract":"Climate change poses growing challenges to coastal tourism destinations.","length":58497,"impaginato":true,"section":"Focus","status":"Sottomesso","step":"1","issue":"","articleNum":null,"deadline":"","editor":"","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":8,"aiPercent":59,"refsTotal":57,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":7,"citeJCR2y":2,"notes":"","comunicazioneInviata":true,"dataComunicazione":"2026-03-17","rispostaAutori":"","revisori":[],"revisori2":[],"decisioneEditor":"","decisioneEditor2":"","dataRevisione":"","dataRevisione2":""},{"id":"13165","title":"Methodological Approaches for Food Security Mapping","authors":"Silvia Zannin, Denis Maragno","affiliation":"IUAV","nationality":"Italia","intl":"no","abstract":"","length":0,"section":"LUME","status":"Sottomesso","step":"3","issue":"","articleNum":null,"deadline":"","editor":"Rosaria Battarra","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[]},{"id":"13170","dataSottomissione":"2026-01-29","title":"Geospatial Analytics for Public Transport Safety","authors":"Gayathri S., Paulose N Kuriakose","affiliation":"School of Planning and Architecture, Bhopal","nationality":"India","intl":"si","abstract":"Public transport systems in the Global South operate within complex socio-spatial conditions.","length":37339,"impaginato":true,"section":"Focus","status":"Sottomesso","step":"1","issue":"","articleNum":null,"deadline":"","editor":"","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":6,"aiPercent":43,"refsTotal":46,"citeTeMA":1,"citeTeMA2226":1,"citeJCR":16,"citeJCR2y":4,"notes":"","comunicazioneInviata":true,"dataComunicazione":"2026-03-17","rispostaAutori":"","revisori":[],"revisori2":[],"decisioneEditor":"","decisioneEditor2":"","dataRevisione":"","dataRevisione2":""},{"id":"13275","dataSottomissione":"","title":"AI-Driven Public Transport Corridor Design for Sustainable Urban Mobility","authors":"Agus Mansur, Rizal Syarifuddin, Hari Purnomo, Winda Nur Cahyo","affiliation":"Universitas Islam, Indonesia","nationality":"Indonesia","intl":"si","abstract":"","length":0,"impaginato":false,"section":"—","status":"In referaggio","step":"8","issue":"","articleNum":null,"deadline":"2026-03-28","editor":"Gerardo Carpentieri","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"In attesa della risposta degli autori.","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[{"nome":"Ivan Gunawan","affiliazione":"","dataConsegna":"","accettazione":"completato","dataProroga":"","giudizio":"Revisions required"},{"nome":"Rangga Primadasa ","affiliazione":"","dataConsegna":"","accettazione":"completato","dataProroga":"","giudizio":"Revisions required"}],"revisori2":[],"decisioneEditor":"Revisions required","decisioneEditor2":"","dataRevisione":"2026-04-19","dataRevisione2":""},{"id":"13276","title":"Role of tourism in environment sustainability","authors":"Rafaqet Ali, Khuda Bakhsh, Muhammad Asim Yasin","affiliation":"Comsats University Islamabad","nationality":"Pakistan","intl":"si","abstract":"","length":0,"section":"—","status":"Sottomesso","step":"2","issue":"","articleNum":null,"deadline":"","editor":"Rosa Anna La Rocca","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[]},{"id":"13329","title":"Tactical Urbanism in Rome","authors":"Francesca Paola Mondelli, Chiara Amato","affiliation":"Università Roma Tre","nationality":"Italia","intl":"no","abstract":"","length":0,"section":"—","status":"GateKeeper evaluation","step":"8","issue":"","articleNum":null,"deadline":"","editor":"Carmen Guida","copyeditor":"","gatekeeper":"","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[]},{"id":"13350","dataSottomissione":"2026-02-24","title":"Spatial accessibility and daily mobility of residents in the collective housing","authors":"Lyes Tahraoui; Tahar BAOUNI; Mohammed BAKOUR","affiliation":"Polytechnic School of Architecture and Urban Planning (EPAU)","nationality":"Algeria","intl":"si","abstract":"This research analyzes the spatial accessibility and daily mobility practices of the residents of the AADL city.","length":49365,"impaginato":true,"section":"Focus","status":"Sottomesso","step":"1","issue":"","articleNum":null,"deadline":"","editor":"Carmen Guida","copyeditor":"","gatekeeper":"","similarity":7,"aiPercent":28,"refsTotal":48,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":21,"citeJCR2y":3,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[],"revisori2":[],"decisioneEditor":"","decisioneEditor2":"","dataRevisione":"","dataRevisione2":""},{"id":"13353","dataSottomissione":"2026-02-24","title":"Assessing housing affordability via synthetic index","authors":"Emanuele Dell'Oca, Marta Bottero","affiliation":"Polytecnic University of Turin","nationality":"Italia","intl":"no","abstract":"Housing affordability is a critical challenge.","length":50666,"impaginato":false,"section":"Focus","status":"Sottomesso","step":"1","issue":"","articleNum":null,"deadline":"","editor":"","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":8,"aiPercent":59,"refsTotal":50,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":15,"citeJCR2y":3,"notes":"","comunicazioneInviata":true,"dataComunicazione":"2026-02-25","rispostaAutori":"risposto","revisori":[],"revisori2":[],"decisioneEditor":"","decisioneEditor2":"","dataRevisione":"","dataRevisione2":""},{"id":"13357","title":"Geospatial analysis on metro-induced land use change","authors":"Kaviya Asokan, Sudhan Srinivas","affiliation":"Hindustan Institute of Technology and Science, India","nationality":"India","intl":"si","abstract":"","length":0,"section":"—","status":"GateKeeper evaluation","step":"6","issue":"","articleNum":null,"deadline":"","editor":"Carmen Guida","copyeditor":"","gatekeeper":"","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[{"nome":"Caterina Pietra","affiliazione":"University of pavia","dataConsegna":"2026-03-13","accettazione":"accettato","dataProroga":"","giudizio":""},{"nome":"Geoff Boeing","affiliazione":"","dataConsegna":"2026-03-13","accettazione":"in attesa","dataProroga":"","giudizio":""},{"nome":"Massimo Palme","affiliazione":"","dataConsegna":"2026-03-13","accettazione":"in attesa","dataProroga":"","giudizio":""}]},{"id":"13371","title":"Spatial analysis and urban development through the integration of ChatGPT-like large language models and QGIS","authors":"Valerio della Sala","affiliation":"Autonomous University of Barcelona","nationality":"Spagna","intl":"si","abstract":"The rapid convergence of AI and GIS.","length":57892,"impaginato":false,"section":"Focus","status":"Sottomesso","step":"1","issue":"","articleNum":null,"deadline":"","editor":"","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":1,"aiPercent":89,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"","comunicazioneInviata":true,"dataComunicazione":"2026-03-10","rispostaAutori":"","revisori":[]},{"id":"13416","dataSottomissione":"","title":"Detection of Floating Debris Zones in the Chao Phraya River","authors":"Chaichana Kulworatit, Niphat Craypo","affiliation":"King Mongkut's Institute of Technology Ladkrabang","nationality":"Thailandia","intl":"si","abstract":"Floating debris in urban rivers is an increasing environmental concern.","length":49366,"impaginato":false,"section":"Focus","status":"Sottomesso","step":"1","issue":"","articleNum":null,"deadline":"","editor":"","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":8,"aiPercent":77,"refsTotal":64,"citeTeMA":8,"citeTeMA2226":6,"citeJCR":9,"citeJCR2y":7,"notes":"","comunicazioneInviata":true,"dataComunicazione":"2026-03-22","rispostaAutori":"","revisori":[],"revisori2":[],"decisioneEditor":"","decisioneEditor2":"","dataRevisione":"","dataRevisione2":""},{"id":"13421","title":"MULTI-PATHWAY ASSESSMENT OF HEAVY METAL POLLUTION","authors":"Ogunade Josiah Ayodelea, Peter Sanjo Adewale, Emmanuel Elijah Ameh","affiliation":"Centre for Environmental Studies and Sustainable Development (CESSED) Lagos State University","nationality":"Nigeria","intl":"si","abstract":"Electronic waste is an escalating concern.","length":49424,"section":"Focus","status":"Sottomesso","step":"1","issue":"","articleNum":null,"deadline":"","editor":"","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":8,"aiPercent":99,"refsTotal":33,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":3,"citeJCR2y":1,"notes":"","comunicazioneInviata":true,"dataComunicazione":"2026-03-22","rispostaAutori":"","revisori":[]},{"id":"13424","title":"Microclimate-Oriented Generative Design in Astana","authors":"Arslan Barakbayev, Yelena Feoktistova, Oxana Gurskaya, Tatiana Inozemtseva","affiliation":"Seifullin Kazakh Agrotechnical Research University","nationality":"Kazakhstan","intl":"si","abstract":"This article examines the application of a hybrid generative approach.","length":37075,"impaginato":true,"section":"Focus","status":"Sottomesso","step":"2","issue":"","articleNum":null,"deadline":"","editor":"Floriana Zucaro","copyeditor":"","gatekeeper":"","similarity":7,"aiPercent":20,"refsTotal":26,"citeTeMA":3,"citeTeMA2226":2,"citeJCR":15,"citeJCR2y":11,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[],"revisori2":[],"decisioneEditor":"","decisioneEditor2":"","dataRevisione":"","dataRevisione2":""},{"id":"13434","dataSottomissione":"2026-03-24","title":"Estimation of Above-Ground Biomass and Carbon Stock","authors":"R. Alex Immanual Jeyasingh, Suguna Devakumari Malayappan, R. Isaac Manuel","affiliation":"Karunya Institute of Technology and Sciences, Coimbatore","nationality":"India","intl":"si","abstract":"Rapid land-use transformation in southern India.","length":12119,"impaginato":false,"section":"Focus","status":"Rifiutato","step":"7b","issue":"","articleNum":null,"deadline":"","editor":"","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":5,"aiPercent":69,"refsTotal":7,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":1,"citeJCR2y":1,"notes":"Articolo molto breve e con AI alta.","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[],"revisori2":[],"decisioneEditor":"","decisioneEditor2":"","dataRevisione":"","dataRevisione2":""},{"id":"13439","dataSottomissione":"2026-03-27","title":"An Improved PTAL Method Using the Household Survey Data in Accessibility Analysis","authors":"Elia Odabasi, Yalçın Alver","affiliation":"Ege university","nationality":"Turchia","intl":"si","abstract":"Accessibility is a critical factor in the evaluation of public transport systems.","length":48052,"impaginato":false,"section":"Focus","status":"Sottomesso","step":"1","issue":"","articleNum":null,"deadline":"","editor":"Carmen Guida","copyeditor":"","gatekeeper":"","similarity":5,"aiPercent":12,"refsTotal":34,"citeTeMA":1,"citeTeMA2226":1,"citeJCR":25,"citeJCR2y":1,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[],"revisori2":[],"decisioneEditor":"","decisioneEditor2":"","dataRevisione":"","dataRevisione2":""},{"id":"13440","dataSottomissione":"2026-03-27","title":"The difference between refugees and migrants due to climate change","authors":"Anatolii Getman, Volodymyr Steshenko, Volodymyr Shekhovtsov, Oleh Tarasov, Svitlana Kozar","affiliation":"Yaroslav Mudryi National Law University","nationality":"Ucraina","intl":"si","abstract":"The objective of this paper is to draw a legal distinction.","length":54251,"impaginato":false,"section":"Focus","status":"Rifiutato","step":"7b","issue":"","articleNum":null,"deadline":"","editor":"","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":8,"aiPercent":18,"refsTotal":41,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":1,"citeJCR2y":1,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[],"revisori2":[],"decisioneEditor":"","decisioneEditor2":"","dataRevisione":"","dataRevisione2":""},{"id":"13441","dataSottomissione":"2026-03-29","title":"Decoding the Architecture of Informal Land Tenure","authors":"VICTOR OLUTOPE IGE","affiliation":"FEDERAL UNIVERSITY OF TECHNOLOGY, AKURE","nationality":"Nigeria","intl":"si","abstract":"Even though formalisation of land tenure has been acknowledged as central.","length":31034,"impaginato":false,"section":"Focus","status":"Sottomesso","step":"1","issue":"","articleNum":null,"deadline":"","editor":"","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":8,"aiPercent":0,"refsTotal":31,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":2,"citeJCR2y":0,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[],"revisori2":[],"decisioneEditor":"","decisioneEditor2":"","dataRevisione":"","dataRevisione2":""},{"id":"13448","dataSottomissione":"2026-04-02","title":"From Production to Memory: The Spatial and Social Role of Tea Collection Points","authors":"Ece Varol; İlknur Kati","affiliation":"Department of Architecture at Recep Tayyip Erdoğan University","nationality":"Turchia","intl":"si","abstract":"In the rural settlements of the Eastern Black Sea Region, tea collection centers have emerged.","length":48836,"impaginato":true,"section":"Focus","status":"Sottomesso","step":"1","issue":"","articleNum":null,"deadline":"","editor":"","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":7,"aiPercent":95,"refsTotal":13,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":1,"citeJCR2y":1,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[],"revisori2":[],"decisioneEditor":"","decisioneEditor2":"","dataRevisione":"","dataRevisione2":""},{"id":"13452","dataSottomissione":"2026-04-05","title":"AI for 15 Minute City Assessments in Lahore, Pakistan. AI Applications for Urban Mobility and Proximity Planning","authors":"Farrukh Baig, Omer Shujat Bhatti, Fahad Khan, Saddam Hussain, Noman Sahito, Amjad Ali","affiliation":"King Fahd University of Petroleum and Minerals, Dhahran; School of Architecture & Planning, University of Management and Technology, Lahore","nationality":"Saudi Arabia, Pakistan","intl":"si","abstract":"The 15-minute city concept has gained prominence as a post-pandemic planning model for human-centric, low-carbon, and equitable neighborhoods. However, empirical applications remain concentrated in the Global North and East Asian contexts, leaving rapidly urbanizing South Asian metropolises largely unexamined. To address this gap, this study evaluates the proximity readiness of Lahore, Pakistan, using an artificial intelligence-based diagnostic tool.","length":60627,"impaginato":true,"section":"Focus","status":"Sottomesso","step":"1","issue":"","articleNum":null,"deadline":"","editor":"","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":7,"aiPercent":95,"refsTotal":50,"citeTeMA":3,"citeTeMA2226":3,"citeJCR":31,"citeJCR2y":26,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[],"revisori2":[],"decisioneEditor":"","decisioneEditor2":"","dataRevisione":"","dataRevisione2":""}];
+const DEF_ARTICLES=[{"id":"11322","dataSottomissione":"","title":"Biodiversity and Ecological Network: GeoAI for Modica Green city","authors":"Chiara Spadaro, Celestina Fazia","affiliation":"Università Kore","nationality":"Italia","intl":"no","abstract":"","length":0,"impaginato":false,"section":"LUME","status":"Concluso","step":"13","issue":"01/2026","articleNum":6,"deadline":"","editor":"Romano Fistola","copyeditor":"Valerio Martinelli","gatekeeper":"","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[],"revisori2":[],"decisioneEditor":"","decisioneEditor2":"","dataRevisione":"","dataRevisione2":""},{"id":"11343","dataSottomissione":"2024-12-10","title":"Monitoring Urban Dynamics Using Google Earth and GeoAI","authors":"Francesco Lamonaca","affiliation":"University of Calabria","nationality":"Italia","intl":"no","abstract":"Urban areas face mounting pressure from increased space demand, degrading key environmental services. Thus, understanding Land Use/Land Cover (LULC) changes is vital. In order to offer a robust decision-support framework for urban planning and environmental conservation, this study presents an innovative measurement method based on Google Earth Engine and Unsupervised K-means Clustering of multispectral satellite images to map urban and vegetation shifts. The proposed method was applied in 15 southern Italian cities and the results were validated with ESA Land Cover dataset. Results show 167 hectares consumed from 2005 to 2021. Since the F1 score harmonizes the balance between precision and recall into a single metric, it can be used as evaluation metric for the proposal. In particular, F1 scores were 0.64 for urban areas and 0.92 for vegetation areas. Given that the classification was unsupervised, an F1-score of 0.64 can be considered a favorable result, particularly considering the challenges of accurately classifying the diverse land cover types in Landsat imagery with a 30-meter resolution. For these reasons, these results show the potential to make the proposed method a useful tool for aiding policymakers and urban planners in making informed decisions to mitigate the adverse effects of urban growth on the environment.","length":39898,"impaginato":true,"section":"LUME","status":"Sottomesso","step":"13","issue":"01/2026","articleNum":10,"deadline":"","editor":"Gerardo Carpentieri","copyeditor":"Gerardo Carpentieri","gatekeeper":"","similarity":null,"aiPercent":null,"refsTotal":39,"citeTeMA":4,"citeTeMA2226":3,"citeJCR":8,"citeJCR2y":6,"notes":"Ex special Issue GeoAI (Francini) sono stati svolti due cicli di referaggio\nIn data 24/03/2026 ha sottomesso la versione revisionata del paper","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[],"revisori2":[],"decisioneEditor":"","decisioneEditor2":"","dataRevisione":"","dataRevisione2":""},{"id":"11344","dataSottomissione":"","title":"Evaluating Urban Fabric Transformations Using GeoAI","authors":"Alessandro Vitale","affiliation":"Università della Calabria","nationality":"Italia","intl":"no","abstract":"","length":0,"impaginato":false,"section":"LUME","status":"Concluso","step":"13","issue":"01/2026","articleNum":8,"deadline":"","editor":"Rosa Anna La Rocca","copyeditor":"Nunzia D'Amico","gatekeeper":"","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[],"revisori2":[],"decisioneEditor":"","decisioneEditor2":"","dataRevisione":"","dataRevisione2":""},{"id":"11378","title":"AI as a Tool for Urban Regeneration Processes","authors":"Carlo Adornetto","affiliation":"Università della Calabria","nationality":"Italia","intl":"no","abstract":"","length":0,"section":"LUME","status":"Copyediting","step":"13","issue":"","articleNum":null,"deadline":"","editor":"Romano Fistola","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"SI Francini. In attesa di secondo referee."},{"id":"11551","dataSottomissione":"","title":"CITISENSE. Enhancing Urban Well-being through Smart Design, Data and AI","authors":"Pierfrancesco Celani, Daniel Enrique Sardo, Massimo Zupi, Margherita Tufarelli, Adriano Bisello","affiliation":"Università della Calabria; Università di Firenze; ITESO Guadalajara","nationality":"Italia / Messico","intl":"si","abstract":"","length":0,"impaginato":false,"section":"LUME","status":"Concluso","step":"13","issue":"01/2026","articleNum":9,"deadline":"","editor":"Gerardo Carpentieri","copyeditor":"Gerardo Carpentieri","gatekeeper":"","similarity":null,"aiPercent":null,"refsTotal":53,"citeTeMA":8,"citeTeMA2226":4,"citeJCR":24,"citeJCR2y":7,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[],"revisori2":[],"decisioneEditor":"","decisioneEditor2":"","dataRevisione":"","dataRevisione2":""},{"id":"12394","title":"Assessing Urban Growth and Pollution through Nightlight Data: A Case Study in Thailand","authors":"Chaichana Kulworatit, Phuvis Kerdpramote, Saranya Saetang","affiliation":"KMITL Bangkok","nationality":"Tailandia","intl":"si","abstract":"","length":0,"section":"LUME","status":"Concluso","step":"13","issue":"01/2026","articleNum":3,"deadline":"","editor":"Floriana Zucaro","copyeditor":"Nunzia D'Amico","gatekeeper":"","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[]},{"id":"12458","title":"Exploring Governance Challenges in Coastal and Marine Tourism","authors":"Barbara Gasparini, Emanuel Giannotti, Vittore Negretto, Denis Maragno","affiliation":"IUAV","nationality":"Italia","intl":"no","abstract":"","length":0,"section":"LUME","status":"Concluso","step":"13","issue":"01/2026","articleNum":4,"deadline":"","editor":"Rosa Anna La Rocca","copyeditor":"Stella Pennino","gatekeeper":"","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[]},{"id":"12609","title":"Liberal and deliberative democracy in planning paradigms: reflections on upper-scale planning in Türkiye","authors":"Büşra Durmaz, Cihan Ercetin","affiliation":"KU Leuven, Belgio","nationality":"Belgio / Turchia","intl":"si","abstract":"","length":0,"section":"LUME","status":"In referaggio","step":"9","issue":"","articleNum":null,"deadline":"2026-02-28","editor":"Romano Fistola","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"L'Editor ha inviato (23 febbraio 2026) all'autore alcuni commenti per rivedere il paper prima della selezione del secondo revisore.","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[{"nome":"Lucia Saganeiti ","affiliazione":"CNR","dataConsegna":"","accettazione":"completato","dataProroga":"","giudizio":"Resubmit for Review"}]},{"id":"12621","dataSottomissione":"","title":"The Impact of Land Use and Land Cover (LULC) Changes on Coastal Dynamics Through Landscape Structure","authors":"Makbulenur Onur","affiliation":"Karadeniz Technical University, Turchia","nationality":"Turchia","intl":"si","abstract":"Coastal areas are regions characterized by complex dynamics resulting from the interaction between natural processes and human activities. This study was conducted on two adjacent beach areas in Budva, Montenegro: one that has been affected by land use and land cover (LULC) change, and another that remains unaffected. The research provides a comparative analysis of the impacts of LULC changes on coastal landscape structure, spatial characteristics, and user perception. The Analytic Hierarchy Process (AHP) was employed as the multi-criteria decision-making method, while data related to user perceptions were analyzed using the SPSS statistical software.The study focused on key criteria such as coastal protection, biodiversity, aesthetic value, and public usability. The findings reveal that LULC changes have significant effects on the ecological and visual integrity of coastal areas, as well as on user satisfaction. In this context, the study recommends careful monitoring of LULC changes and adapting landscape planning decisions accordingly to ensure sustainable coastal development. The results quantitatively demonstrate the differences between the two selected areas. Furthermore, the study evaluated how users perceive these changes, based on criteria such as aesthetic value, recreational use, and environmental comfort levels. A user-centered landscape performance analysis was conducted accordingly. In order to clearly reveal the effects of change, a comparative assessment was made between a beach area that experienced LULC change and one that remained unchanged. The findings highlight that preserving natural characteristics in coastal areas plays a critical role in enhancing user satisfaction, aesthetic quality, and ecological sustainability. Therefore, the study emphasizes the importance of nature-based solutions and multi-criteria analyses grounded in user perception in coastal management strategies.","length":0,"impaginato":false,"section":"Focus","status":"Revisione autore","step":"13","issue":"01/2026","articleNum":1,"deadline":"2026-03-25","editor":"Floriana Zucaro","copyeditor":"Tonia Stiuso","gatekeeper":"Lilli Gargiulo","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[{"nome":"Nzuzo Nxumalo ","affiliazione":"","dataConsegna":"","accettazione":"completato","dataProroga":"","giudizio":"Resubmit for Review"},{"nome":"Firdevs KULAK TORUN","affiliazione":"","dataConsegna":"","accettazione":"completato","dataProroga":"","giudizio":"Revisions required"}],"revisori2":[],"decisioneEditor":"Revisions required","decisioneEditor2":"","dataRevisione":"2026-03-09","dataRevisione2":""},{"id":"12634","title":"Beyond the Map Decision Support Systems for Spatial and Mobility Planning","authors":"Mara Ladu, Ginevra Balletto, Tanja Congiu, Gianfranco Fancello, Ernesto Fontes Pupo","affiliation":"Università di Cagliari","nationality":"Italia","intl":"no","abstract":"","length":0,"section":"LUME","status":"Concluso","step":"13","issue":"01/2026","articleNum":5,"deadline":"","editor":"Carmen Guida","copyeditor":"Laura Ascione","gatekeeper":"","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[]},{"id":"12656","dataSottomissione":"","title":"Spatial and temporal evolution of urban reserve available land resources in the karst region of North China from 1990 to 2020","authors":"Shujin Wang, Shanzhong Qi","affiliation":"Shandong Normal University, China","nationality":"Cina","intl":"si","abstract":"","length":0,"impaginato":false,"section":"Focus","status":"In referaggio","step":"13","issue":"01/2026","articleNum":2,"deadline":"2026-03-29","editor":"Floriana Zucaro","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[],"revisori2":[],"decisioneEditor":"","decisioneEditor2":"","dataRevisione":"","dataRevisione2":""},{"id":"12696","dataSottomissione":"","title":"Impact of Renewable Energy Systems on Water Ecosystem Services","authors":"Maria Cristina Marino, Beniamino Murgante","affiliation":"Università della Basilicata","nationality":"Italia","intl":"no","abstract":"","length":0,"impaginato":false,"section":"LUME","status":"Revisione autore","step":"9","issue":"","articleNum":null,"deadline":"2026-03-21","editor":"Gerardo Carpentieri","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"Versione revisionata attesa per il 21 marzo.","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[],"revisori2":[],"decisioneEditor":"","decisioneEditor2":"","dataRevisione":"","dataRevisione2":""},{"id":"12735","dataSottomissione":"","title":"Planning for Sustainable Tourism in Protected Areas","authors":"Rachele Gatto, Francesco Scorza","affiliation":"Università della Basilicata","nationality":"Italia","intl":"no","abstract":"","length":0,"impaginato":false,"section":"—","status":"Revisione autore","step":"13","issue":"","articleNum":null,"deadline":"2026-03-16","editor":"Rosa Anna La Rocca","copyeditor":"Stella Pennino","gatekeeper":"Lilli Gargiulo","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[],"revisori2":[],"decisioneEditor":"","decisioneEditor2":"","dataRevisione":"","dataRevisione2":""},{"id":"12803","dataSottomissione":"","title":"Examining the temporal and spatial change of current land cover types in Demre District using machine learning","authors":"Sibel Akten, Hüseyin Batuhan Dündar, Atila Gül","affiliation":"Suleyman University, Turchia","nationality":"Turchia","intl":"si","abstract":"","length":0,"impaginato":false,"section":"LUME","status":"In referaggio","step":"6","issue":"01/2026","articleNum":7,"deadline":"2026-03-09","editor":"Carmen Guida","copyeditor":"Laura Ascione","gatekeeper":"Lilli Gargiulo","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[],"revisori2":[],"decisioneEditor":"","decisioneEditor2":"","dataRevisione":"","dataRevisione2":""},{"id":"13052","title":"Climate Adaptation and Mitigation. A Multicriteria Decision-Support System for the Basilicata Region","authors":"Alfonso Annunziata, Francesco Scorza","affiliation":"Università della Basilicata","nationality":"Italia","intl":"no","abstract":"","length":0,"section":"Focus","status":"Sottomesso","step":"4","issue":"","articleNum":null,"deadline":"","editor":"Rosaria Battarra","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"L'editor comunica di voler invitare gli autori ad inviare una nuova versione del contributo in linea con il format della rivista.","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[]},{"id":"13106","dataSottomissione":"2026-01-10","title":"Logistics and overtourism: urban system vulnerabilities across Italian cities scales: A comparative multi-scale assessment of overtourism–last-mile conflicts","authors":"Irina Di Ruocco","affiliation":"University of Insubria","nationality":"Italia","intl":"no","abstract":"This paper addresses the problem of urban logistics in the years of overtourism.","length":50834,"impaginato":true,"section":"Focus","status":"Sottomesso","step":"1","issue":"","articleNum":null,"deadline":"","editor":"","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":2,"aiPercent":24,"refsTotal":42,"citeTeMA":2,"citeTeMA2226":0,"citeJCR":15,"citeJCR2y":5,"notes":"Il paper nella prima sottomissione aveva un AI > 30%.","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[],"revisori2":[],"decisioneEditor":"","decisioneEditor2":"","dataRevisione":"","dataRevisione2":""},{"id":"13110","title":"Identification and mapping of traffic congestion hotspots in urban areas","authors":"Frederic Laurent esse esse","affiliation":"University of Douala, Cameroon","nationality":"Camerun","intl":"si","abstract":"","length":0,"section":"Focus","status":"GateKeeper evaluation","step":"8b","issue":"","articleNum":null,"deadline":"","editor":"Gerardo Carpentieri","copyeditor":"","gatekeeper":"","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"L'articolo è stato rifiutato il 16 marzo 2026","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[]},{"id":"13143","title":"Evaluating the efficacy of smart technologies in disseminating transportation systems information during earthquake scenarios","authors":"Izza Anwer, Irfan Yousuf","affiliation":"Susan University of Engineering and Technology, Lahore","nationality":"Pakistan","intl":"si","abstract":"","length":0,"section":"Focus","status":"Sottomesso","step":"4","issue":"","articleNum":null,"deadline":"","editor":"Peppe Mazzeo","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[]},{"id":"13148","dataSottomissione":"2026-01-27","title":"Climate Change and Beach Tourism","authors":"Pathmanandakumar Vyddiyaratnam","affiliation":"Eastern University Sri Lanka","nationality":"Sri Lanka","intl":"si","abstract":"Climate change poses growing challenges to coastal tourism destinations.","length":58497,"impaginato":true,"section":"Focus","status":"Sottomesso","step":"1","issue":"","articleNum":null,"deadline":"","editor":"","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":8,"aiPercent":59,"refsTotal":57,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":7,"citeJCR2y":2,"notes":"","comunicazioneInviata":true,"dataComunicazione":"2026-03-17","rispostaAutori":"","revisori":[],"revisori2":[],"decisioneEditor":"","decisioneEditor2":"","dataRevisione":"","dataRevisione2":""},{"id":"13165","title":"Methodological Approaches for Food Security Mapping","authors":"Silvia Zannin, Denis Maragno","affiliation":"IUAV","nationality":"Italia","intl":"no","abstract":"","length":0,"section":"LUME","status":"Sottomesso","step":"4","issue":"","articleNum":null,"deadline":"","editor":"Rosaria Battarra","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[]},{"id":"13170","dataSottomissione":"2026-01-29","title":"Geospatial Analytics for Public Transport Safety","authors":"Gayathri S., Paulose N Kuriakose","affiliation":"School of Planning and Architecture, Bhopal","nationality":"India","intl":"si","abstract":"Public transport systems in the Global South operate within complex socio-spatial conditions.","length":37339,"impaginato":true,"section":"Focus","status":"Sottomesso","step":"1","issue":"","articleNum":null,"deadline":"","editor":"","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":6,"aiPercent":43,"refsTotal":46,"citeTeMA":1,"citeTeMA2226":1,"citeJCR":16,"citeJCR2y":4,"notes":"","comunicazioneInviata":true,"dataComunicazione":"2026-03-17","rispostaAutori":"","revisori":[],"revisori2":[],"decisioneEditor":"","decisioneEditor2":"","dataRevisione":"","dataRevisione2":""},{"id":"13275","dataSottomissione":"","title":"AI-Driven Public Transport Corridor Design for Sustainable Urban Mobility","authors":"Agus Mansur, Rizal Syarifuddin, Hari Purnomo, Winda Nur Cahyo","affiliation":"Universitas Islam, Indonesia","nationality":"Indonesia","intl":"si","abstract":"","length":0,"impaginato":false,"section":"—","status":"In referaggio","step":"9","issue":"","articleNum":null,"deadline":"2026-03-28","editor":"Gerardo Carpentieri","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"In attesa della risposta degli autori.","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[{"nome":"Ivan Gunawan","affiliazione":"","dataConsegna":"","accettazione":"completato","dataProroga":"","giudizio":"Revisions required"},{"nome":"Rangga Primadasa ","affiliazione":"","dataConsegna":"","accettazione":"completato","dataProroga":"","giudizio":"Revisions required"}],"revisori2":[],"decisioneEditor":"Revisions required","decisioneEditor2":"","dataRevisione":"2026-04-19","dataRevisione2":""},{"id":"13276","title":"Role of tourism in environment sustainability","authors":"Rafaqet Ali, Khuda Bakhsh, Muhammad Asim Yasin","affiliation":"Comsats University Islamabad","nationality":"Pakistan","intl":"si","abstract":"","length":0,"section":"—","status":"Sottomesso","step":"2","issue":"","articleNum":null,"deadline":"","editor":"Rosa Anna La Rocca","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[]},{"id":"13329","title":"Tactical Urbanism in Rome","authors":"Francesca Paola Mondelli, Chiara Amato","affiliation":"Università Roma Tre","nationality":"Italia","intl":"no","abstract":"","length":0,"section":"—","status":"GateKeeper evaluation","step":"9","issue":"","articleNum":null,"deadline":"","editor":"Carmen Guida","copyeditor":"","gatekeeper":"","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[]},{"id":"13350","dataSottomissione":"2026-02-24","title":"Spatial accessibility and daily mobility of residents in the collective housing","authors":"Lyes Tahraoui; Tahar BAOUNI; Mohammed BAKOUR","affiliation":"Polytechnic School of Architecture and Urban Planning (EPAU)","nationality":"Algeria","intl":"si","abstract":"This research analyzes the spatial accessibility and daily mobility practices of the residents of the AADL city.","length":49365,"impaginato":true,"section":"Focus","status":"Sottomesso","step":"1","issue":"","articleNum":null,"deadline":"","editor":"Carmen Guida","copyeditor":"","gatekeeper":"","similarity":7,"aiPercent":28,"refsTotal":48,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":21,"citeJCR2y":3,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[],"revisori2":[],"decisioneEditor":"","decisioneEditor2":"","dataRevisione":"","dataRevisione2":""},{"id":"13353","dataSottomissione":"2026-02-24","title":"Assessing housing affordability via synthetic index","authors":"Emanuele Dell'Oca, Marta Bottero","affiliation":"Polytecnic University of Turin","nationality":"Italia","intl":"no","abstract":"Housing affordability is a critical challenge.","length":50666,"impaginato":false,"section":"Focus","status":"Sottomesso","step":"1","issue":"","articleNum":null,"deadline":"","editor":"","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":8,"aiPercent":59,"refsTotal":50,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":15,"citeJCR2y":3,"notes":"","comunicazioneInviata":true,"dataComunicazione":"2026-02-25","rispostaAutori":"risposto","revisori":[],"revisori2":[],"decisioneEditor":"","decisioneEditor2":"","dataRevisione":"","dataRevisione2":""},{"id":"13357","title":"Geospatial analysis on metro-induced land use change","authors":"Kaviya Asokan, Sudhan Srinivas","affiliation":"Hindustan Institute of Technology and Science, India","nationality":"India","intl":"si","abstract":"","length":0,"section":"—","status":"GateKeeper evaluation","step":"7","issue":"","articleNum":null,"deadline":"","editor":"Carmen Guida","copyeditor":"","gatekeeper":"","similarity":null,"aiPercent":null,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[{"nome":"Caterina Pietra","affiliazione":"University of pavia","dataConsegna":"2026-03-13","accettazione":"accettato","dataProroga":"","giudizio":""},{"nome":"Geoff Boeing","affiliazione":"","dataConsegna":"2026-03-13","accettazione":"in attesa","dataProroga":"","giudizio":""},{"nome":"Massimo Palme","affiliazione":"","dataConsegna":"2026-03-13","accettazione":"in attesa","dataProroga":"","giudizio":""}]},{"id":"13371","title":"Spatial analysis and urban development through the integration of ChatGPT-like large language models and QGIS","authors":"Valerio della Sala","affiliation":"Autonomous University of Barcelona","nationality":"Spagna","intl":"si","abstract":"The rapid convergence of AI and GIS.","length":57892,"impaginato":false,"section":"Focus","status":"Sottomesso","step":"1","issue":"","articleNum":null,"deadline":"","editor":"","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":1,"aiPercent":89,"refsTotal":0,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":0,"citeJCR2y":0,"notes":"","comunicazioneInviata":true,"dataComunicazione":"2026-03-10","rispostaAutori":"","revisori":[]},{"id":"13416","dataSottomissione":"","title":"Detection of Floating Debris Zones in the Chao Phraya River","authors":"Chaichana Kulworatit, Niphat Craypo","affiliation":"King Mongkut's Institute of Technology Ladkrabang","nationality":"Thailandia","intl":"si","abstract":"Floating debris in urban rivers is an increasing environmental concern.","length":49366,"impaginato":false,"section":"Focus","status":"Sottomesso","step":"1","issue":"","articleNum":null,"deadline":"","editor":"","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":8,"aiPercent":77,"refsTotal":64,"citeTeMA":8,"citeTeMA2226":6,"citeJCR":9,"citeJCR2y":7,"notes":"","comunicazioneInviata":true,"dataComunicazione":"2026-03-22","rispostaAutori":"","revisori":[],"revisori2":[],"decisioneEditor":"","decisioneEditor2":"","dataRevisione":"","dataRevisione2":""},{"id":"13421","title":"MULTI-PATHWAY ASSESSMENT OF HEAVY METAL POLLUTION","authors":"Ogunade Josiah Ayodelea, Peter Sanjo Adewale, Emmanuel Elijah Ameh","affiliation":"Centre for Environmental Studies and Sustainable Development (CESSED) Lagos State University","nationality":"Nigeria","intl":"si","abstract":"Electronic waste is an escalating concern.","length":49424,"section":"Focus","status":"Sottomesso","step":"1","issue":"","articleNum":null,"deadline":"","editor":"","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":8,"aiPercent":99,"refsTotal":33,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":3,"citeJCR2y":1,"notes":"","comunicazioneInviata":true,"dataComunicazione":"2026-03-22","rispostaAutori":"","revisori":[]},{"id":"13424","title":"Microclimate-Oriented Generative Design in Astana","authors":"Arslan Barakbayev, Yelena Feoktistova, Oxana Gurskaya, Tatiana Inozemtseva","affiliation":"Seifullin Kazakh Agrotechnical Research University","nationality":"Kazakhstan","intl":"si","abstract":"This article examines the application of a hybrid generative approach.","length":37075,"impaginato":true,"section":"Focus","status":"Sottomesso","step":"2","issue":"","articleNum":null,"deadline":"","editor":"Floriana Zucaro","copyeditor":"","gatekeeper":"","similarity":7,"aiPercent":20,"refsTotal":26,"citeTeMA":3,"citeTeMA2226":2,"citeJCR":15,"citeJCR2y":11,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[],"revisori2":[],"decisioneEditor":"","decisioneEditor2":"","dataRevisione":"","dataRevisione2":""},{"id":"13434","dataSottomissione":"2026-03-24","title":"Estimation of Above-Ground Biomass and Carbon Stock","authors":"R. Alex Immanual Jeyasingh, Suguna Devakumari Malayappan, R. Isaac Manuel","affiliation":"Karunya Institute of Technology and Sciences, Coimbatore","nationality":"India","intl":"si","abstract":"Rapid land-use transformation in southern India.","length":12119,"impaginato":false,"section":"Focus","status":"Rifiutato","step":"7b","issue":"","articleNum":null,"deadline":"","editor":"","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":5,"aiPercent":69,"refsTotal":7,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":1,"citeJCR2y":1,"notes":"Articolo molto breve e con AI alta.","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[],"revisori2":[],"decisioneEditor":"","decisioneEditor2":"","dataRevisione":"","dataRevisione2":""},{"id":"13439","dataSottomissione":"2026-03-27","title":"An Improved PTAL Method Using the Household Survey Data in Accessibility Analysis","authors":"Elia Odabasi, Yalçın Alver","affiliation":"Ege university","nationality":"Turchia","intl":"si","abstract":"Accessibility is a critical factor in the evaluation of public transport systems.","length":48052,"impaginato":false,"section":"Focus","status":"Sottomesso","step":"1","issue":"","articleNum":null,"deadline":"","editor":"Carmen Guida","copyeditor":"","gatekeeper":"","similarity":5,"aiPercent":12,"refsTotal":34,"citeTeMA":1,"citeTeMA2226":1,"citeJCR":25,"citeJCR2y":1,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[],"revisori2":[],"decisioneEditor":"","decisioneEditor2":"","dataRevisione":"","dataRevisione2":""},{"id":"13440","dataSottomissione":"2026-03-27","title":"The difference between refugees and migrants due to climate change","authors":"Anatolii Getman, Volodymyr Steshenko, Volodymyr Shekhovtsov, Oleh Tarasov, Svitlana Kozar","affiliation":"Yaroslav Mudryi National Law University","nationality":"Ucraina","intl":"si","abstract":"The objective of this paper is to draw a legal distinction.","length":54251,"impaginato":false,"section":"Focus","status":"Rifiutato","step":"7b","issue":"","articleNum":null,"deadline":"","editor":"","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":8,"aiPercent":18,"refsTotal":41,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":1,"citeJCR2y":1,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[],"revisori2":[],"decisioneEditor":"","decisioneEditor2":"","dataRevisione":"","dataRevisione2":""},{"id":"13441","dataSottomissione":"2026-03-29","title":"Decoding the Architecture of Informal Land Tenure","authors":"VICTOR OLUTOPE IGE","affiliation":"FEDERAL UNIVERSITY OF TECHNOLOGY, AKURE","nationality":"Nigeria","intl":"si","abstract":"Even though formalisation of land tenure has been acknowledged as central.","length":31034,"impaginato":false,"section":"Focus","status":"Sottomesso","step":"1","issue":"","articleNum":null,"deadline":"","editor":"","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":8,"aiPercent":0,"refsTotal":31,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":2,"citeJCR2y":0,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[],"revisori2":[],"decisioneEditor":"","decisioneEditor2":"","dataRevisione":"","dataRevisione2":""},{"id":"13448","dataSottomissione":"2026-04-02","title":"From Production to Memory: The Spatial and Social Role of Tea Collection Points","authors":"Ece Varol; İlknur Kati","affiliation":"Department of Architecture at Recep Tayyip Erdoğan University","nationality":"Turchia","intl":"si","abstract":"In the rural settlements of the Eastern Black Sea Region, tea collection centers have emerged.","length":48836,"impaginato":true,"section":"Focus","status":"Sottomesso","step":"1","issue":"","articleNum":null,"deadline":"","editor":"","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":7,"aiPercent":95,"refsTotal":13,"citeTeMA":0,"citeTeMA2226":0,"citeJCR":1,"citeJCR2y":1,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[],"revisori2":[],"decisioneEditor":"","decisioneEditor2":"","dataRevisione":"","dataRevisione2":""},{"id":"13452","dataSottomissione":"2026-04-05","title":"AI for 15 Minute City Assessments in Lahore, Pakistan. AI Applications for Urban Mobility and Proximity Planning","authors":"Farrukh Baig, Omer Shujat Bhatti, Fahad Khan, Saddam Hussain, Noman Sahito, Amjad Ali","affiliation":"King Fahd University of Petroleum and Minerals, Dhahran; School of Architecture & Planning, University of Management and Technology, Lahore","nationality":"Saudi Arabia, Pakistan","intl":"si","abstract":"The 15-minute city concept has gained prominence as a post-pandemic planning model for human-centric, low-carbon, and equitable neighborhoods. However, empirical applications remain concentrated in the Global North and East Asian contexts, leaving rapidly urbanizing South Asian metropolises largely unexamined. To address this gap, this study evaluates the proximity readiness of Lahore, Pakistan, using an artificial intelligence-based diagnostic tool.","length":60627,"impaginato":true,"section":"Focus","status":"Sottomesso","step":"1","issue":"","articleNum":null,"deadline":"","editor":"","copyeditor":"","gatekeeper":"Lilli Gargiulo","similarity":7,"aiPercent":95,"refsTotal":50,"citeTeMA":3,"citeTeMA2226":3,"citeJCR":31,"citeJCR2y":26,"notes":"","comunicazioneInviata":false,"dataComunicazione":"","rispostaAutori":"","revisori":[],"revisori2":[],"decisioneEditor":"","decisioneEditor2":"","dataRevisione":"","dataRevisione2":""}];
 
 const STEPS = {
-  '1':'St.1 · Ricevimento dell\'articolo',
-  '2':'St.2 · Verifica con Turnitin',
-  '3':'St.3 · Invio comunicazione Turnitin agli autori',
-  '4':'St.4 · Rifiuto Turnitin',
-  '5':'St.5 · Assegnazione al GateKeeper',
-  '5a':'St.5a · Approvato dal GateKeeper',
-  '6':'St.6 · Rifiuto GateKeeper',
-  '7':'St.7 · Assegnazione all\'editor',
-  '8':'St.8 · L\'Editor invita gli autori a modificare l\'articolo prima dell\'avvio del processo di revisione',
-  '9':'St.9 · Individuazione dei revisori',
-  '10':'St.10 · Accettazione incarico di 1 revisore',
-  '11':'St.11 · Accettazione incarico di 2 revisori',
-  '12':'St.12 · Invio agli autori per le modifiche',
-  '13':'St.13 · Comunicazione rifiuto articolo',
-  '14':'St.14 · Ricevimento articolo revisionato',
-  '15':'St.15 · Eventuale riassegnazione ai revisori',
-  '16':'St.16 · Verifica metadati e citazioni',
-  '17':'St.17 · Impaginazione',
-  '18':'St.18 · Pubblicazione',
-  '18':'St.18 · Pubblicazione'
+  '1': 'St.1 · Ricevimento dell\'articolo',
+  '2': 'St.2 · Assegnazione al GateKeeper',
+  '3': 'St.3 · Approvazione GateKeeper',
+  '4': 'St.4 · Rifiuto GateKeeper',
+  '5': 'St.5 · Verifica con Turnitin',
+  '6': 'St.6 · Invio comunicazione Turnitin agli autori',
+  '7': 'St.7 · Rifiuto Turnitin',
+  '8': 'St.8 · Assegnazione all\'editor',
+  '9': 'St.9 · L\'Editor invita gli autori a modificare l\'articolo prima dell\'avvio del processo di revisione',
+  '10': 'St.10 · Individuazione dei revisori',
+  '11': 'St.11 · Accettazione incarico di 1 revisore',
+  '12': 'St.12 · Accettazione incarico di 2 revisori',
+  '13': 'St.13 · Invio agli autori per le modifiche',
+  '14': 'St.14 · Comunicazione rifiuto articolo',
+  '15': 'St.15 · Ricevimento articolo revisionato',
+  '16': 'St.16 · Eventuale riassegnazione ai revisori',
+  '17': 'St.17 · Verifica metadati e citazioni',
+  '18': 'St.18 · Impaginazione',
+  '19': 'St.19 · Pubblicazione'
 };
 const SC = {
   'GateKeeper evaluation':'b-gk','Sottomesso':'b-sub','In referaggio':'b-ref',
@@ -898,23 +896,30 @@ function renderNotesLog(log) {
 
 
 function migrateSteps() {
-  var stepMap = {'1':'1','5':'2','6':'3','2':'4','3':'5','4':'6',
-    '7':'7','8':'8','9':'9','10':null,'11':'10','12':'11',
-    '13':'12','14':'13','15':'14','16':'15','17':'16','18':'17',
-    '5a':'2a'};
-  var changed = false;
+  // Maps old step values (before 2026-09 reorganisation) to new 1-19 scheme
+  // Old: 1=Ricev, 2=Turnitin, 3=ComunicTurnitin, 4=RifTurnitin,
+  //      5=GKAssegn, 5a=GKApprov, 6=RifGK, 7=Editor, 8..19
+  // New: 1=Ricev, 2=GKAssegn, 3=GKApprov, 4=RifGK, 5=Turnitin,
+  //      6=ComunicTurnitin, 7=RifTurnitin, 8=Editor, 9..19
+  var stepMap = {
+    '1':'1',
+    '5':'2',   // GK assegnato
+    '5a':'3',  // GK approvato
+    '6':'4',   // Rifiuto GK
+    '2':'5',   // Turnitin
+    '3':'6',   // Comunicazione Turnitin
+    '4':'7',   // Rifiuto Turnitin
+    '7':'8',   // Editor
+    '8':'9',   '9':'10',  '10':'11', '11':'12',
+    '12':'13', '13':'14', '14':'15', '15':'16',
+    '16':'17', '17':'18', '18':'19'
+  };
   articles.forEach(function(a) {
-    if (a._stepMigrated) return;
-    var newStep = stepMap[String(a.step)];
-    if (newStep === undefined) return; // unknown step, leave as is
-    if (newStep === null) newStep = '9'; // St.10 deleted → set to St.9
-    if (String(a.step) !== newStep) {
-      a.step = newStep;
-      changed = true;
-    }
-    a._stepMigrated = true;
+    if (a._stepMigrated2) return;
+    var mapped = stepMap[String(a.step)];
+    if (mapped !== undefined) a.step = mapped;
+    a._stepMigrated2 = true;
   });
-  if (changed) { schedSave(); console.log('[TeMA] Step migrati.'); }
 }
 
 function migrateNotes() {
@@ -984,10 +989,10 @@ function stAbbr(s) {
 }
 
 function sl(s) {
-  var m = {'1':'St.1','2':'St.2','3':'St.3','4':'St.4','5':'St.5',
-           '6':'St.6','7':'St.7','8':'St.8','9':'St.9','10':'St.10',
-           '11':'St.11','12':'St.12','13':'St.13','14':'St.14','15':'St.15',
-           '16':'St.16','17':'St.17','18':'St.18'};
+  var m = {'1':'St.1','2':'St.2','4':'St.3','5':'St.4','6':'St.5',
+           '7':'St.6','8':'St.7','9':'St.8','10':'St.9','11':'St.10',
+           '12':'St.11','13':'St.12','14':'St.13','15':'St.14','16':'St.15',
+           '17':'St.16','18':'St.17','19':'St.18'};
   return m[s] || ('St.'+s);
 }
 function stepFull(s) {
@@ -1135,13 +1140,13 @@ function artCard(a, showEdit, showAllNotes) {
 function renderStats() {
   // Articoli in lavorazione (hanno editor assegnato, non rifiutati/pubblicati)
   var listaArts = articles.filter(function(a) {
-    if (a.status === 'Pubblicato' || a.status === 'Rifiutato' || a.step === '18') return false;
+    if (a.status === 'Pubblicato' || a.status === 'Rifiutato' || a.step === '19') return false;
     if (!a.editor || a.editor === '') return false;
     return true;
   });
   // Articoli GK che hanno superato Turnitin (sim<30 E ai<30, entrambi valorizzati)
   var gkOkArts = articles.filter(function(a) {
-    if (a.status === 'Pubblicato' || a.step === '18') return false;
+    if (a.status === 'Pubblicato' || a.step === '19') return false;
     if (a.step === '8b' || a.step === '7b') return false;
     if (a.editor && a.editor !== '') return false; // già in lavorazione
     var sim = parseFloat(a.similarity), ai = parseFloat(a.aiPercent);
@@ -1199,7 +1204,7 @@ function gkCard(a) {
   var aiHigh  = aiVal  && parseFloat(a.aiPercent)  > 30;
   var bothLow = simVal && aiVal && parseFloat(a.similarity) < 30 && parseFloat(a.aiPercent) < 30;
   var card = artCard(a, true);
-  var gkApproved = a.step === '5a';
+  var gkApproved = a.step === '3';
   if (simHigh || aiHigh) {
     // Rosso: non supera Turnitin
     card = card.replace('<div class="card">', '<div class="card" style="background:#ffe0e0;border-color:#e53e3e;border-width:2px;">');
@@ -1293,7 +1298,7 @@ function toggleAccordion(id) {
 
 async function printGkPDF() {
   var gkArts = articles.filter(function(a) {
-    if (a.status === 'Pubblicato' || a.step === '18') return false;
+    if (a.status === 'Pubblicato' || a.step === '19') return false;
     var _sim=parseFloat(a.similarity),_ai=parseFloat(a.aiPercent);
     if (a.rispostaAutori && a.rispostaAutori!=='' && (_sim>30||_ai>30)) return false;
     if (a.step === '8b' || a.step === '7b') return false;
@@ -1423,7 +1428,7 @@ async function printGkPDF() {
 
 function renderTurnitin() {
   var gkArts = articles.filter(function(a) {
-    if (a.status === 'Pubblicato' || a.step === '18') return false;
+    if (a.status === 'Pubblicato' || a.step === '19') return false;
     var _sim=parseFloat(a.similarity),_ai=parseFloat(a.aiPercent);
     if (a.rispostaAutori && a.rispostaAutori!=='' && (_sim>30||_ai>30)) return false;
     if (a.step === '8b' || a.step === '7b') return false;
@@ -1495,7 +1500,7 @@ async function printTurnitin() {
   if (btn) { btn.innerHTML = '&#8987; Traduzione in corso...'; btn.disabled = true; }
 
   var gkArts = articles.filter(function(a) {
-    if (a.status === 'Pubblicato' || a.step === '18') return false;
+    if (a.status === 'Pubblicato' || a.step === '19') return false;
     var _sim=parseFloat(a.similarity),_ai=parseFloat(a.aiPercent);
     if (a.rispostaAutori && a.rispostaAutori!=='' && (_sim>30||_ai>30)) return false;
     if (a.step === '8b' || a.step === '7b') return false;
@@ -1503,7 +1508,7 @@ async function printTurnitin() {
     var simOk = !isNaN(_sim) && a.similarity!==null && a.similarity!=='' && _sim < 30;
     var aiOk  = !isNaN(_ai)  && a.aiPercent!==null  && a.aiPercent!==''  && _ai  < 30;
     if (a.step === '1') return true; // St.1: ricevuto, da verificare
-    if (a.step === '5a') return true; // St.5a: approvato dal GK
+    if (a.step === '3') return true; // St.5a: approvato dal GK
     if (!(simOk && aiOk)) return false;
     return true;
   }).sort(function(a,b){ return parseInt(b.id)-parseInt(a.id); });
@@ -1605,8 +1610,8 @@ async function printTurnitin() {
 
   // Group articles by category
   var gkSt1   = gkArts.filter(function(a){ return a.step==='1'; });
-  var gkOther = gkArts.filter(function(a){ return a.step!=='1'&&a.step!=='5'; });
-  var gkSt5   = gkArts.filter(function(a){ return a.step==='5a'; });
+  var gkOther = gkArts.filter(function(a){ return a.step!=='1'&&a.step!=='6'; });
+  var gkSt5   = gkArts.filter(function(a){ return a.step==='3'; });
 
   function sectionHdr(label, count, color) {
     return '<div style="background:'+color+';color:#fff;font-weight:bold;font-size:12pt;padding:6px 12px;margin:16px 0 6px;border-radius:3px">'+label+' ('+count+')</div>';
@@ -1658,7 +1663,7 @@ function renderGk() {
     var f = articles.filter(function(a) {
 
         // Escludi pubblicati e rifiutati
-        if (a.status === 'Pubblicato' || a.status === 'Rifiutato' || a.step === '18') return false;
+        if (a.status === 'Pubblicato' || a.status === 'Rifiutato' || a.step === '19') return false;
 
         // ✅ GK = articoli SENZA EDITOR
         if (a.editor && a.editor.trim() !== '') return false;
@@ -1713,7 +1718,7 @@ function renderLista() {
   var fI2= document.getElementById('fIntl').value;
   var fIs= document.getElementById('fIss').value;
   var f = articles.filter(function(a) {
-    if (a.status === 'Pubblicato' || a.status === 'Rifiutato' || a.step === '18') return false;
+    if (a.status === 'Pubblicato' || a.status === 'Rifiutato' || a.step === '19') return false;
     if (!a.editor || a.editor === '') return false;
     if (q && (a.id+' '+a.title+' '+a.authors+' '+a.affiliation).toLowerCase().indexOf(q) < 0) return false;
     if (fE  && a.editor  !== fE)  return false;
@@ -1732,7 +1737,7 @@ function renderPub() {
   var q  = (document.getElementById('srchPub').value||'').toLowerCase();
   var fIs= document.getElementById('fIssPub').value;
   var f = articles.filter(function(a) {
-    if (a.status !== 'Pubblicato' && a.step !== '18') return false;
+    if (a.status !== 'Pubblicato' && a.step !== '19') return false;
     if (q && (a.id+' '+a.title+' '+a.authors).toLowerCase().indexOf(q) < 0) return false;
     if (fIs && a.issue !== fIs) return false;
     return true;
@@ -1937,7 +1942,7 @@ function renderRifRef() {
   var q = (document.getElementById('srchRifRef').value||'').toLowerCase();
   var f = articles.filter(function(a) {
     var isDeclined = a.decisioneEditor === 'Decline submission' || a.decisioneEditor2 === 'Decline submission';
-    if (!isDeclined && a.step !== '13') return false;
+    if (!isDeclined && a.step !== '14') return false;
     if (a.status !== 'Rifiutato') return false;
     if (q       && (a.id+' '+a.title+' '+a.authors).toLowerCase().indexOf(q) < 0) return false;
     return true;
@@ -1951,7 +1956,7 @@ function renderRifRef() {
 function renderRifGk() {
   var q = (document.getElementById('srchRifGk').value||'').toLowerCase();
   var f = articles.filter(function(a) {
-    if (a.step !== '6') return false;
+    if (a.step !== '4') return false;
     if (q && (a.id+' '+a.title+' '+a.authors).toLowerCase().indexOf(q) < 0) return false;
     return true;
   });
@@ -1964,8 +1969,8 @@ function renderRifGk() {
 function renderTeam() {
   var h = '<div style="font-size:16px;font-weight:700;margin-bottom:1rem">GateKeeper</div>';
   var gk = articles.filter(function(a){ return a.gatekeeper==='Lilli Gargiulo' && (!a.editor||a.editor==='') &&
-    a.status !== 'Rifiutato' && a.status !== 'Pubblicato' && a.step !== '18' &&
-    a.step==='5'; });
+    a.status !== 'Rifiutato' && a.status !== 'Pubblicato' && a.step !== '19' &&
+    a.step==='6'; });
   h += '<div class="card"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:'+(gk.length?'10px':'0')+'">' +
     '<div style="font-size:20px;font-weight:700">Lilli Gargiulo</div>' +
     '<span style="font-size:20px;font-weight:600;color:var(--orange)">'+gk.length+' articoli in valutazione</span>' +
@@ -1980,7 +1985,7 @@ function renderTeam() {
 
   h += '<div style="font-size:16px;font-weight:700;margin:1.5rem 0 1rem">Editor</div>';
   EDITORS.forEach(function(ed) {
-    var mine = articles.filter(function(a){ return a.editor===ed && a.status !== 'Pubblicato' && a.step !== '18' && a.step !== '8b' && a.step !== '7b' && a.status !== 'Rifiutato'; }).sort(function(a,b){
+    var mine = articles.filter(function(a){ return a.editor===ed && a.status !== 'Pubblicato' && a.step !== '19' && a.step !== '8b' && a.step !== '7b' && a.status !== 'Rifiutato'; }).sort(function(a,b){
       var sa = parseFloat(a.step)||0, sb = parseFloat(b.step)||0;
       return sb - sa;
     });
@@ -2164,7 +2169,7 @@ function renderVerbale() {
       (a.authors ? '<p>'+esc(a.authors)+(a.affiliation?' &middot; '+esc(a.affiliation):'')+(a.nationality?' &middot; '+esc(a.nationality):'')+'</p>' : '') +
       '<p>'+vStep(a.step)+
         (a.editor?' &middot; Editor: <strong>'+esc(a.editor)+'</strong>':'')+
-        (a.step==='18'&&a.copyeditor?' &middot; Copyeditor: <strong>'+esc(a.copyeditor)+'</strong>':'')+
+        (a.step==='19'&&a.copyeditor?' &middot; Copyeditor: <strong>'+esc(a.copyeditor)+'</strong>':'')+
         (isslbl?' &middot; Fascicolo: '+esc(isslbl.label)+(a.articleNum?' n.'+a.articleNum:''):'')+'</p>' +
       (a.section?'<p>Sezione: <strong>'+esc(a.section)+'</strong>'+(a.intl==='si'?' &middot; Contributo internazionale':'')+'</p>':'') +
       (function(){
@@ -2233,7 +2238,7 @@ function renderVerbale() {
       (a.gatekeeper?'<p>GK: '+esc(a.gatekeeper)+'</p>':'') +
       (metrics.length?'<p>'+metrics.join(' &middot; ')+'</p>':'') +
       (a.dataSottomissione?'<p><strong>Sottomissione:</strong> '+new Date(a.dataSottomissione).toLocaleDateString('it-IT')+'</p>':'') +
-      (a.step==='3'&&a.dataComunicazione?(function(){
+      (a.step==='4'&&a.dataComunicazione?(function(){
         var sent = new Date(a.dataComunicazione);
         var scad = new Date(sent); scad.setDate(scad.getDate()+30);
         var giorni = Math.ceil((scad - new Date()) / 86400000);
@@ -2307,18 +2312,18 @@ function renderVerbale() {
       var rifRef = rifAll.filter(function(a){
         var d = rifDate(a);
         var isDeclined = a.decisioneEditor==='Decline submission' || a.decisioneEditor2==='Decline submission';
-        return (isDeclined || a.step==='13') && d && d >= cutoff;
+        return (isDeclined || a.step==='14') && d && d >= cutoff;
       });
       // Categoria 2: rifiutati dal GK
       var rifGk = rifAll.filter(function(a){
         var d = rifDate(a);
-        return a.step==='3' && d && d >= cutoff &&
+        return a.step==='4' && d && d >= cutoff &&
                a.decisioneEditor!=='Decline submission' && a.decisioneEditor2!=='Decline submission';
       });
       // Categoria 3: rifiutati Turnitin (step=4)
       var rifTur = rifAll.filter(function(a){
         var d = rifDate(a);
-        return a.step==='6' && d && d >= cutoff;
+        return a.step==='7' && d && d >= cutoff;
       });
 
       var total = rifRef.length + rifGk.length + rifTur.length;
@@ -2353,7 +2358,7 @@ function renderVerbale() {
       // GateKeeper: totale articoli + lista ID (senza St.)
       var gkA = articles.filter(function(a){
         return a.gatekeeper==='Lilli Gargiulo'&&(!a.editor||a.editor==='')&&
-          a.status!=='Pubblicato'&&a.status!=='Rifiutato'&&a.step!=='18'&&
+          a.status!=='Pubblicato'&&a.status!=='Rifiutato'&&a.step!=='19'&&
           !isNaN(parseFloat(a.similarity))&&parseFloat(a.similarity)<30&&
           !isNaN(parseFloat(a.aiPercent))&&parseFloat(a.aiPercent)<30;
       });
@@ -2368,7 +2373,7 @@ function renderVerbale() {
       h += '<table style="width:100%;border-collapse:collapse;font-size:10pt;margin-top:1rem">';
       h += '<tr style="background:#f0f0f0"><th style="text-align:left;padding:4px 6px;border:1px solid #ccc;width:22%">Editor</th><th style="text-align:left;padding:4px 6px;border:1px solid #ccc">Articoli per Step</th></tr>';
       EDS.forEach(function(ed){
-        var arts = articles.filter(function(a){ return a.editor===ed&&a.status!=='Pubblicato'&&a.status!=='Rifiutato'&&a.step!=='18'; });
+        var arts = articles.filter(function(a){ return a.editor===ed&&a.status!=='Pubblicato'&&a.status!=='Rifiutato'&&a.step!=='19'; });
         if (!arts.length) return;
         // Group by step
         var byStep = {};
@@ -2773,7 +2778,7 @@ function openEditArt(id) {
   document.getElementById('gkRow').style.display=(a.editor&&a.editor!=='')?'none':'block';
   document.getElementById('btnDel').style.display='inline-block';
   document.getElementById('btnRifiutoGK').style.display=(adminMode||currentUser==='GateKeeper')?'inline-block':'none';
-  var _showAccGk = (adminMode||currentUser==='GateKeeper') && (!a.editor || a.editor==='') && a.step !== '5a';
+  var _showAccGk = (adminMode||currentUser==='GateKeeper') && (!a.editor || a.editor==='') && a.step !== '3';
   document.getElementById('btnAccettazioneGK').style.display=_showAccGk?'inline-block':'none';
   document.getElementById('btnRifiutoTur').style.display=adminMode?'inline-block':'none';
   document.getElementById('stepHint').textContent=a.step&&STEPS[a.step]?STEPS[a.step]:'';
@@ -2793,179 +2798,87 @@ function openEditArt(id) {
 function autoStep(a) {
   // Decline submission: sempre step=14 + Rifiutato (priorità assoluta)
   if (a.decisioneEditor === 'Decline submission' || a.decisioneEditor2 === 'Decline submission') {
-    a.step = '13';
     if (a.status !== 'Rifiutato') a.dataRifiuto = new Date().toISOString();
+    a.step = '14';
     a.status = 'Rifiutato';
     return a;
   }
-  // St.5a è impostato solo dal pulsante Accettazione GK — non toccare
-  if (a.step === '5a') return a;
-  var sim = parseFloat(a.similarity);
-  var ai  = parseFloat(a.aiPercent);
+  // St.3 (Approvazione GK) è impostato solo dal pulsante — non toccare
+  if (a.step === '3') return a;
+
+  var sim  = parseFloat(a.similarity);
+  var ai   = parseFloat(a.aiPercent);
   var simOk = !isNaN(sim) && a.similarity !== null && a.similarity !== '';
   var aiOk  = !isNaN(ai)  && a.aiPercent  !== null && a.aiPercent  !== '';
   var step  = parseInt(a.step) || 0;
 
-  // St.1 → St.2: valori Turnitin inseriti
-  if (step <= 1 && simOk && aiOk) {
+  // St.1 → St.2: GateKeeper assegnato
+  if (step <= 1 && a.gatekeeper && a.gatekeeper !== '') {
     a.step = '2';
   }
 
-  // St.2 → St.3: comunicazione inviata (valori >30)
-  if (step <= 2 && simOk && aiOk && (sim > 30 || ai > 30) && a.comunicazioneInviata) {
-    a.step = '3';
+  // St.3 → St.5: Turnitin inserito dopo approvazione GK (St.3)
+  // St.5 → St.6: comunicazione Turnitin inviata (valori >30)
+  if (step <= 5 && simOk && aiOk && (sim > 30 || ai > 30) && a.comunicazioneInviata) {
+    a.step = '6';
   }
 
-  // St.2/3 → St.4: rifiuto Turnitin (rispostaAutori = ritirato)
-  if (step <= 3 && (sim > 30 || ai > 30) && a.rispostaAutori === 'ritirato') {
-    a.step = '4';
-  }
-
-  // St.5 viene impostato solo dal pulsante 'Accettazione GateKeeper' — non in automatico
-  // Turnitin ok (sim<30 e AI<30) porta a St.2, non St.5
-
-  // St.5 → St.6: rifiuto GateKeeper (già gestito da rifiutoGK → step 7b)
-
-  // St.5 → St.7: editor assegnato
-  if (step <= 5 && a.editor && a.editor !== '') {
+  // St.5/6 → St.7: rifiuto Turnitin
+  if (step <= 6 && (sim > 30 || ai > 30) && a.rispostaAutori === 'ritirato') {
     a.step = '7';
+    a.status = 'Rifiutato';
+    if (!a.dataRifiuto) a.dataRifiuto = new Date().toISOString();
   }
 
-  // St.7 → St.8: editor ha inviato integrazione (campo note compilato dopo st.7)
-  // Non automatizzabile senza campo dedicato — skip
-
-  // St.7/8 → St.9: almeno un revisore individuato
-  if (step <= 8 && a.revisori && a.revisori.length > 0) {
-    a.step = '9';
+  // St.3/5 → St.8: editor assegnato (Turnitin ok)
+  if (a.editor && a.editor !== '' && parseInt(a.step) < 8) {
+    a.step = '8';
   }
 
-  // St.9 → St.10: almeno un revisore con accettazione != ''
-  if (step <= 9 && a.revisori && a.revisori.some(function(r){ return r.accettazione && r.accettazione !== ''; })) {
-    a.step = '9';
+  // St.8/9 → St.10: almeno un revisore individuato
+  if (step <= 9 && a.revisori && a.revisori.length > 0) {
+    a.step = '10';
   }
 
-  // St.9 → St.10: esattamente 1 revisore ha accettato/completato
-  if (step <= 10 && a.revisori) {
-    var accettati = a.revisori.filter(function(r){ return r.accettazione === 'accettato' || r.accettazione === 'completato'; }).length;
-    if (accettati === 1) a.step = '10';
-    // St.10 → St.11: entrambi accettati/completati
-    if (accettati >= 2) a.step = '11';
-  }
-
-  // St.11 → St.12: almeno un revisore ha giudizio negativo (Decline/Resubmit Elsewhere)
+  // St.10 → St.11: esattamente 1 revisore ha accettato/completato
+  // St.10 → St.12: 2+ revisori accettati/completati
   if (step <= 12 && a.revisori) {
-    var negativi = a.revisori.filter(function(r){
-      return r.giudizio === 'Decline submission' || r.giudizio === 'Resubmit Elsewhere';
+    var accettati = a.revisori.filter(function(r){
+      return r.accettazione === 'accettato' || r.accettazione === 'completato';
     }).length;
-    if (negativi > 0) a.step = '12';
+    if (accettati === 1) a.step = '11';
+    if (accettati >= 2) a.step = '12';
   }
 
-  // St.→ St.7: editor assegnato
-  if (a.editor && a.editor !== '' && parseInt(a.step) < 7) {
-    a.step = '7';
-  }
-
-  // St.→ St.13: Decisione editor = Revisions required o Resubmit for Review
+  // St.12 → St.13: Revisions required o Resubmit for Review
   var dec1 = a.decisioneEditor || '';
   var dec2 = a.decisioneEditor2 || '';
   if (dec1 === 'Revisions required' || dec1 === 'Resubmit for Review' ||
       dec2 === 'Revisions required' || dec2 === 'Resubmit for Review') {
-    if (parseInt(a.step) < 13) a.step = '12';
+    if (parseInt(a.step) < 13) a.step = '13';
   }
 
-  // St.→ St.14: Decisione editor = Decline submission
-  if (dec1 === 'Decline submission' || dec2 === 'Decline submission') {
-    a.step = '13';
-    a.status = 'Rifiutato';
+  // St. → St.16: secondo round revisori (Resubmit for Review)
+  if ((dec1 === 'Resubmit for Review' || dec2 === 'Resubmit for Review') &&
+      a.revisori2 && a.revisori2.length > 0) {
+    if (parseInt(a.step) < 16) a.step = '16';
   }
 
-  // St.→ St.16: Decisione editor = Resubmit for Review
-  if (dec1 === 'Resubmit for Review' || dec2 === 'Resubmit for Review') {
-    if (parseInt(a.step) < 15) a.step = '15';
-  }
-
-  // St.→ St.18: copyeditor assegnato
-  if (a.copyeditor && a.copyeditor !== '' && parseInt(a.step) < 17) {
-    a.step = '17';
+  // St. → St.18: copyeditor assegnato
+  if (a.copyeditor && a.copyeditor !== '' && parseInt(a.step) < 18) {
+    a.step = '18';
   }
 
   return a;
 }
 
-function saveArt() {
-  // Detect manual step change
-  var _origIdx = articles.findIndex(function(x){ return x.id===editingArtId; });
-  var _origStep = _origIdx>=0 ? (articles[_origIdx].step||'') : '';
-  var _newStep = document.getElementById('fStep').value;
 
-  var sim=document.getElementById('fSim').value, ai=document.getElementById('fAi').value;
-  var data={
-    id:document.getElementById('fId').value.trim(),
-    dataSottomissione:document.getElementById('fDataSottomissione').value,
-    title:document.getElementById('fTitle').value.trim(),
-    authors:document.getElementById('fAuthors').value.trim(),
-    affiliation:document.getElementById('fAffil').value.trim(),
-    nationality:document.getElementById('fNat').value.trim(),
-    intl:document.getElementById('fIntlArt').value,
-    abstract:document.getElementById('fAbstract').value.trim(),
-    length:parseInt(document.getElementById('fLen').value)||0,
-    impaginato:document.getElementById('fImpaginato').checked,
-    notesLog: (_origIdx>=0 && articles[_origIdx].notesLog) ? articles[_origIdx].notesLog : [],
-    highlight:document.getElementById('fHighlight').checked,
-    oneDrive:document.getElementById('fOneDrive').value||'',
-    section:document.getElementById('fSecArt').value,
-    status:document.getElementById('fStatus').value,
-    dataRifiuto: (document.getElementById('fStatus').value === 'Rifiutato' && (_origIdx<0 || articles[_origIdx].status !== 'Rifiutato'))
-      ? new Date().toISOString()
-      : (_origIdx>=0 ? (articles[_origIdx].dataRifiuto || '') : ''),
-    step:document.getElementById('fStep').value,
-    lastModified: new Date().toISOString(),
-    issue:document.getElementById('fIssArt').value,
-    articleNum:parseInt(document.getElementById('fArtNum').value)||null,
-    deadline:document.getElementById('fDead').value,
-    editor:document.getElementById('fEd2').value,
-    copyeditor:document.getElementById('fCopy').value,
-    gatekeeper:document.getElementById('fGk').value,
-    similarity:sim!==''?parseFloat(sim):null,
-    aiPercent:ai!==''?parseFloat(ai):null,
-    refsTotal:parseInt(document.getElementById('fRefs').value)||0,
-    citeTeMA:parseInt(document.getElementById('fCTeMA').value)||0,
-    citeTeMA2226:parseInt(document.getElementById('fCTeMA2226').value)||0,
-    citeJCR:parseInt(document.getElementById('fCJCR').value)||0,
-    citeJCR2y:parseInt(document.getElementById('fCJCR2y').value)||0,
-    comunicazioneInviata:document.getElementById('fComunicazioneInviata').checked,
-    dataComunicazione:document.getElementById('fDataComunicazione').value,
-    rispostaAutori:document.getElementById('fRispostaAutori').value,
-    revisori:JSON.parse(JSON.stringify(currentRevisori)),
-    revisori2:JSON.parse(JSON.stringify(currentRevisori2)),
-    decisioneEditor:document.getElementById('fDecisioneEditor').value,
-    decisioneEditor2:document.getElementById('fDecisioneEditor2').value,
-    dataRevisione:document.getElementById('fDataRevisione').value,
-    dataRevisione2:document.getElementById('fDataRevisione2').value,
-    dataAccettazione:document.getElementById('fDataAccettazione').value,
-    dataAccettazione2:document.getElementById('fDataAccettazione2').value
-  };
-  if (!data.id||!data.title){ alert('ID e Titolo sono obbligatori.'); return; }
-  data = autoStep(data);
-  if (editingArtId) {
-    var idx=articles.findIndex(function(a){ return a.id===editingArtId; });
-    if (idx>=0) articles[idx]=data;
-  } else {
-    if (articles.find(function(a){ return a.id===data.id; })){ alert('ID gi\u00e0 esistente.'); return; }
-    if (!data.step || data.step === '') data.step = '1';
-    articles.push(data);
-    sendNotification('insert', data.id, data.title);
-  }
-
-  document.getElementById('artModal').classList.remove('open');
-  schedSave(); refresh();
-}
 function accettazioneGK() {
   if (!editingArtId) return;
   var capturedId = editingArtId;
   var idx = articles.findIndex(function(a){ return a.id === capturedId; });
   if (idx >= 0) {
-    articles[idx].step = '5a';
+    articles[idx].step = '3';
     articles[idx].status = 'Sottomesso';
   }
   document.getElementById('artModal').classList.remove('open');
@@ -2980,7 +2893,7 @@ function rifiutoGK() {
   requirePwd(function() {
     var idx = articles.findIndex(function(a){ return a.id === capturedId; });
     if (idx >= 0) {
-      articles[idx].step = '6';
+      articles[idx].step = '4';
       articles[idx].status = 'Rifiutato';
     }
     document.getElementById('artModal').classList.remove('open');
@@ -2998,7 +2911,7 @@ function rifiutoTurnitin() {
     if (idx >= 0) {
       articles[idx].comunicazioneInviata = true;
       articles[idx].rispostaAutori = 'ritirato';
-      articles[idx].step = '4';
+      articles[idx].step = '5';
       articles[idx].status = 'Rifiutato';
       if (!articles[idx].dataComunicazione) {
         articles[idx].dataComunicazione = new Date().toISOString().slice(0,10);
@@ -3087,7 +3000,7 @@ function doSaveIss(type,year,num,theme,deadline,note,pub,unpublishing) {
   }
   if (pub) {
     var issKey=editingIssKey||key;
-    articles.forEach(function(a){ if (a.issue===issKey && a.status!=='Rifiutato') { a.status='Pubblicato'; a.step='18'; } });
+    articles.forEach(function(a){ if (a.issue===issKey && a.status!=='Rifiutato') { a.status='Pubblicato'; a.step='19'; } });
   }
   if (unpublishing) {
     var issKey2=editingIssKey||key;
@@ -3158,13 +3071,13 @@ function updateTuttiTabLabel(count) {
 function updateTabCounts() {
   // GK evaluation: no editor, not Rifiutato, not Pubblicato, not step 19
   var gkCount = articles.filter(function(a){
-    return a.status !== 'Pubblicato' && a.status !== 'Rifiutato' && a.step !== '18' &&
+    return a.status !== 'Pubblicato' && a.status !== 'Rifiutato' && a.step !== '19' &&
            (!a.editor || a.editor === '');
   }).length;
 
   // Articoli in lavorazione: has editor, not Rifiutato, not Pubblicato, not step 19
   var listaCount = articles.filter(function(a){
-    return a.status !== 'Pubblicato' && a.status !== 'Rifiutato' && a.step !== '18' &&
+    return a.status !== 'Pubblicato' && a.status !== 'Rifiutato' && a.step !== '19' &&
            a.editor && a.editor !== '';
   }).length;
 
@@ -3217,8 +3130,9 @@ function initFilters() {
   edSel.innerHTML='<option value="">Tutti gli editor</option>';
   EDITORS.forEach(function(e){ var o=document.createElement('option');o.value=e;o.textContent=e;edSel.appendChild(o); });
   var stSel=document.getElementById('fSt');
-  Object.keys(STEPS).forEach(function(k){
-    var o=document.createElement('option'); o.value=k; o.textContent=STEPS[k].slice(0,40);
+  ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19'].forEach(function(k){
+    if (!STEPS[k]) return;
+    var o=document.createElement('option'); o.value=k; o.textContent=STEPS[k].slice(0,45);
     stSel.appendChild(o);
   });
   rebuildIssFilters();
@@ -3237,8 +3151,9 @@ function initFilters() {
   var stSelT = document.getElementById('fStTutti');
   if (stSelT) {
     stSelT.innerHTML = '<option value="">Tutti gli step</option>';
-    Object.keys(STEPS).forEach(function(k){
-      stSelT.innerHTML += '<option value="'+k+'">'+STEPS[k]+'</option>';
+    ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19'].forEach(function(k){
+      if (!STEPS[k]) return;
+      stSelT.innerHTML += '<option value="'+k+'">'+STEPS[k].slice(0,45)+'</option>';
     });
   }
 }
