@@ -346,24 +346,24 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
       <select id="fStep">
       <option value="">—</option>
       <option value="1">St 1 · Ricevimento dell'articolo</option>
-      <option value="2">St 2 · Verifica con Turnitin</option>
-      <option value="3">St 3 · Invio comunicazione Turnitin agli autori</option>
-      <option value="4">St 4 · Rifiuto Turnitin</option>
-      <option value="5">St 5 · Assegnazione al GateKeeper</option>
-      <option value="6">St 6 · Rifiuto GateKeeper</option>
+      <option value="2">St 2 · Assegnazione al GateKeeper</option>
+      <option value="2a">St 2a · Approvazione GateKeeper</option>
+      <option value="3">St 3 · Rifiuto GateKeeper</option>
+      <option value="4">St 4 · Verifica con Turnitin</option>
+      <option value="5">St 5 · Invio comunicazione Turnitin agli autori</option>
+      <option value="6">St 6 · Rifiuto Turnitin</option>
       <option value="7">St 7 · Assegnazione all'editor</option>
       <option value="8">St 8 · L'Editor invita gli autori a modificare l'articolo</option>
       <option value="9">St 9 · Individuazione dei revisori</option>
-      <option value="10">St 10 · Invio ai revisori</option>
-      <option value="11">St 11 · Accettazione incarico di 1 revisore</option>
-      <option value="12">St 12 · Accettazione incarico di 2 revisori</option>
-      <option value="13">St 13 · Invio agli autori per le modifiche</option>
-      <option value="14">St 14 · Comunicazione rifiuto articolo</option>
-      <option value="15">St 15 · Ricevimento articolo revisionato</option>
-      <option value="16">St 16 · Eventuale riassegnazione ai revisori</option>
-      <option value="17">St 17 · Verifica metadati e citazioni</option>
-      <option value="18">St 18 · Impaginazione</option>
-      <option value="19">St 19 · Pubblicazione</option>
+      <option value="10">St 10 · Accettazione incarico di 1 revisore</option>
+      <option value="11">St 11 · Accettazione incarico di 2 revisori</option>
+      <option value="12">St 12 · Invio agli autori per le modifiche</option>
+      <option value="13">St 13 · Comunicazione rifiuto articolo</option>
+      <option value="14">St 14 · Ricevimento articolo revisionato</option>
+      <option value="15">St 15 · Eventuale riassegnazione ai revisori</option>
+      <option value="16">St 16 · Verifica metadati e citazioni</option>
+      <option value="17">St 17 · Impaginazione</option>
+      <option value="18">St 18 · Pubblicazione</option>
     </select>
     </div>
   </div>
@@ -576,7 +576,7 @@ const STEPS = {
   '16':'St.16 · Eventuale riassegnazione ai revisori',
   '17':'St.17 · Verifica metadati e citazioni',
   '18':'St.18 · Impaginazione',
-  '19':'St.19 · Pubblicazione'
+  '18':'St.18 · Pubblicazione'
 };
 const SC = {
   'GateKeeper evaluation':'b-gk','Sottomesso':'b-sub','In referaggio':'b-ref',
@@ -704,6 +704,7 @@ function loadData() {
           citeScoreTrackerSubLabel= gsData.citeScore.trackerSubLabel|| citeScoreTrackerSubLabel;
         }
         articles = gsData.articles;
+        migrateSteps();
         migrateNotes();
         // Set dataRifiuto for existing rejected articles without it
         var rifiutatoChanged = false;
@@ -855,6 +856,16 @@ function addNote() {
   schedSave();
 }
 
+function toggleDiscuss(artId, noteIdx) {
+  var idx = articles.findIndex(function(a){ return a.id === artId; });
+  if (idx < 0) return;
+  var note = articles[idx].notesLog[noteIdx];
+  if (!note) return;
+  note.discuss = !note.discuss;
+  renderNotesLog(articles[idx].notesLog);
+  schedSave();
+}
+
 function deleteNote(artId, noteIdx) {
   var idx = articles.findIndex(function(a){ return a.id === artId; });
   if (idx < 0) return;
@@ -870,14 +881,40 @@ function renderNotesLog(log) {
   el.innerHTML = log.map(function(n, i) {
     var d = n.date ? new Date(n.date).toLocaleString('it-IT',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '';
     var canDel = adminMode || currentUser === n.author;
-    return '<div style="background:var(--sur);border:1px solid var(--brd);border-radius:var(--r);padding:8px 10px;font-size:14px">'
+    var canDiscuss = currentUser === 'DirettoreTeMA' || adminMode;
+    var discussBg = n.discuss ? 'background:#e3f2fd;border-left:3px solid #1976d2;' : 'background:var(--sur);';
+    return '<div style="'+discussBg+'border:1px solid var(--brd);border-radius:var(--r);padding:8px 10px;font-size:14px">'
       + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">'
       + '<span style="font-size:12px;color:#888"><strong>'+esc(n.author||'')+'</strong> &middot; '+d+'</span>'
+      + '<div style="display:flex;gap:6px;align-items:center">'
+      + (canDiscuss ? '<button onclick="toggleDiscuss(\''+editingArtId+'\','+i+')" style="background:none;border:1px solid #1976d2;border-radius:4px;color:#1976d2;cursor:pointer;font-size:12px;padding:2px 6px" title="Segna da discutere">'+(n.discuss?'📌 Da discutere':'📌')+'</button>' : '')
       + (canDel ? '<button onclick="deleteNote(\''+editingArtId+'\','+i+')" style="background:none;border:none;color:#e53e3e;cursor:pointer;font-size:14px" title="Elimina nota">✕</button>' : '')
+      + '</div>'
       + '</div>'
       + '<div style="white-space:pre-wrap">'+esc(n.text)+'</div>'
       + '</div>';
   }).join('');
+}
+
+
+function migrateSteps() {
+  var stepMap = {'1':'1','5':'2','6':'3','2':'4','3':'5','4':'6',
+    '7':'7','8':'8','9':'9','10':null,'11':'10','12':'11',
+    '13':'12','14':'13','15':'14','16':'15','17':'16','18':'17',
+    '5a':'2a'};
+  var changed = false;
+  articles.forEach(function(a) {
+    if (a._stepMigrated) return;
+    var newStep = stepMap[String(a.step)];
+    if (newStep === undefined) return; // unknown step, leave as is
+    if (newStep === null) newStep = '9'; // St.10 deleted → set to St.9
+    if (String(a.step) !== newStep) {
+      a.step = newStep;
+      changed = true;
+    }
+    a._stepMigrated = true;
+  });
+  if (changed) { schedSave(); console.log('[TeMA] Step migrati.'); }
 }
 
 function migrateNotes() {
@@ -950,7 +987,7 @@ function sl(s) {
   var m = {'1':'St.1','2':'St.2','3':'St.3','4':'St.4','5':'St.5',
            '6':'St.6','7':'St.7','8':'St.8','9':'St.9','10':'St.10',
            '11':'St.11','12':'St.12','13':'St.13','14':'St.14','15':'St.15',
-           '16':'St.16','17':'St.17','18':'St.18','19':'St.19'};
+           '16':'St.16','17':'St.17','18':'St.18'};
   return m[s] || ('St.'+s);
 }
 function stepFull(s) {
@@ -1002,7 +1039,7 @@ function antiplagiCountdown(a) {
     return "";
 }
 
-function artCard(a, showEdit) {
+function artCard(a, showEdit, showAllNotes) {
   var isslbl = issues.find(function(i){ return i.key === a.issue; });
   var dl = fmtDl(a.deadline);
   var hasCite = a.refsTotal || a.citeTeMA || a.citeTeMA2226 || a.citeJCR || a.citeJCR2y;
@@ -1064,13 +1101,18 @@ function artCard(a, showEdit) {
     '</div>' +
     metaHtml + revHtml +
     (a.notesLog && a.notesLog.length ?
-      '<div class="note-box">' +
-      a.notesLog.map(function(n) {
-        var d = n.date ? new Date(n.date).toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit',year:'numeric'}) : '';
-        return '<div style="margin-bottom:4px"><span style="font-size:11px;color:#888"><strong>' + esc(n.author||'') + '</strong>'
-             + (d ? ' &middot; ' + d : '') + '</span><br>' + esc(n.text).replace(/\n/g,'<br>') + '</div>';
-      }).join('<hr style="border:none;border-top:1px solid var(--brd);margin:4px 0">')
-      + '</div>' : '') +
+      (function(){
+        var log = showAllNotes ? a.notesLog : (a.notesLog.length ? [a.notesLog[0]] : []);
+        var items = log.map(function(n){
+          var d = n.date ? new Date(n.date).toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit',year:'numeric'}) : '';
+          var bg = n.discuss ? 'background:#e3f2fd;border-left:3px solid #1976d2;' : '';
+          return '<div style="'+bg+'padding:4px 6px;margin-bottom:4px">'
+            + '<span style="font-size:11px;color:#888"><strong>'+esc(n.author||'')+'</strong>'
+            + (d?' &middot; '+d:'')+'</span><br>'+esc(n.text).replace(/\n/g,'<br>')+'</div>';
+        }).join('<hr style="border:none;border-top:1px solid var(--brd);margin:2px 0">');
+        var more = (!showAllNotes && a.notesLog.length>1) ? '<div style="font-size:11px;color:#aaa;margin-top:4px">+'+(a.notesLog.length-1)+' nota/e precedenti</div>' : '';
+        return '<div class="note-box">'+items+more+'</div>';
+      })() : '') +
     (function(){
       var info = [];
       if (a.decisioneEditor && a.decisioneEditor !== '') info.push('<strong>Decisione:</strong> '+esc(a.decisioneEditor));
@@ -1093,13 +1135,13 @@ function artCard(a, showEdit) {
 function renderStats() {
   // Articoli in lavorazione (hanno editor assegnato, non rifiutati/pubblicati)
   var listaArts = articles.filter(function(a) {
-    if (a.status === 'Pubblicato' || a.status === 'Rifiutato' || a.step === '19') return false;
+    if (a.status === 'Pubblicato' || a.status === 'Rifiutato' || a.step === '18') return false;
     if (!a.editor || a.editor === '') return false;
     return true;
   });
   // Articoli GK che hanno superato Turnitin (sim<30 E ai<30, entrambi valorizzati)
   var gkOkArts = articles.filter(function(a) {
-    if (a.status === 'Pubblicato' || a.step === '19') return false;
+    if (a.status === 'Pubblicato' || a.step === '18') return false;
     if (a.step === '8b' || a.step === '7b') return false;
     if (a.editor && a.editor !== '') return false; // già in lavorazione
     var sim = parseFloat(a.similarity), ai = parseFloat(a.aiPercent);
@@ -1236,7 +1278,7 @@ function renderTutti() {
   f.sort(function(a,b){ return parseInt(b.id) - parseInt(a.id); });
   document.getElementById('tuttiCount').textContent = f.length+' articol'+(f.length===1?'o':'i');
   updateTuttiTabLabel(f.length);
-  document.getElementById('tuttiEl').innerHTML = f.length ? f.map(function(a){ return artCard(a,true); }).join('') :
+  document.getElementById('tuttiEl').innerHTML = f.length ? f.map(function(a){ return artCard(a, true, true); }).join('') :
     '<div style="text-align:center;padding:3rem;color:var(--tx)">Nessun articolo trovato.</div>';
 }
 
@@ -1251,7 +1293,7 @@ function toggleAccordion(id) {
 
 async function printGkPDF() {
   var gkArts = articles.filter(function(a) {
-    if (a.status === 'Pubblicato' || a.step === '19') return false;
+    if (a.status === 'Pubblicato' || a.step === '18') return false;
     var _sim=parseFloat(a.similarity),_ai=parseFloat(a.aiPercent);
     if (a.rispostaAutori && a.rispostaAutori!=='' && (_sim>30||_ai>30)) return false;
     if (a.step === '8b' || a.step === '7b') return false;
@@ -1381,7 +1423,7 @@ async function printGkPDF() {
 
 function renderTurnitin() {
   var gkArts = articles.filter(function(a) {
-    if (a.status === 'Pubblicato' || a.step === '19') return false;
+    if (a.status === 'Pubblicato' || a.step === '18') return false;
     var _sim=parseFloat(a.similarity),_ai=parseFloat(a.aiPercent);
     if (a.rispostaAutori && a.rispostaAutori!=='' && (_sim>30||_ai>30)) return false;
     if (a.step === '8b' || a.step === '7b') return false;
@@ -1453,7 +1495,7 @@ async function printTurnitin() {
   if (btn) { btn.innerHTML = '&#8987; Traduzione in corso...'; btn.disabled = true; }
 
   var gkArts = articles.filter(function(a) {
-    if (a.status === 'Pubblicato' || a.step === '19') return false;
+    if (a.status === 'Pubblicato' || a.step === '18') return false;
     var _sim=parseFloat(a.similarity),_ai=parseFloat(a.aiPercent);
     if (a.rispostaAutori && a.rispostaAutori!=='' && (_sim>30||_ai>30)) return false;
     if (a.step === '8b' || a.step === '7b') return false;
@@ -1616,7 +1658,7 @@ function renderGk() {
     var f = articles.filter(function(a) {
 
         // Escludi pubblicati e rifiutati
-        if (a.status === 'Pubblicato' || a.status === 'Rifiutato' || a.step === '19') return false;
+        if (a.status === 'Pubblicato' || a.status === 'Rifiutato' || a.step === '18') return false;
 
         // ✅ GK = articoli SENZA EDITOR
         if (a.editor && a.editor.trim() !== '') return false;
@@ -1671,7 +1713,7 @@ function renderLista() {
   var fI2= document.getElementById('fIntl').value;
   var fIs= document.getElementById('fIss').value;
   var f = articles.filter(function(a) {
-    if (a.status === 'Pubblicato' || a.status === 'Rifiutato' || a.step === '19') return false;
+    if (a.status === 'Pubblicato' || a.status === 'Rifiutato' || a.step === '18') return false;
     if (!a.editor || a.editor === '') return false;
     if (q && (a.id+' '+a.title+' '+a.authors+' '+a.affiliation).toLowerCase().indexOf(q) < 0) return false;
     if (fE  && a.editor  !== fE)  return false;
@@ -1690,7 +1732,7 @@ function renderPub() {
   var q  = (document.getElementById('srchPub').value||'').toLowerCase();
   var fIs= document.getElementById('fIssPub').value;
   var f = articles.filter(function(a) {
-    if (a.status !== 'Pubblicato' && a.step !== '19') return false;
+    if (a.status !== 'Pubblicato' && a.step !== '18') return false;
     if (q && (a.id+' '+a.title+' '+a.authors).toLowerCase().indexOf(q) < 0) return false;
     if (fIs && a.issue !== fIs) return false;
     return true;
@@ -1895,7 +1937,7 @@ function renderRifRef() {
   var q = (document.getElementById('srchRifRef').value||'').toLowerCase();
   var f = articles.filter(function(a) {
     var isDeclined = a.decisioneEditor === 'Decline submission' || a.decisioneEditor2 === 'Decline submission';
-    if (!isDeclined && a.step !== '14') return false;
+    if (!isDeclined && a.step !== '13') return false;
     if (a.status !== 'Rifiutato') return false;
     if (q       && (a.id+' '+a.title+' '+a.authors).toLowerCase().indexOf(q) < 0) return false;
     return true;
@@ -1922,7 +1964,7 @@ function renderRifGk() {
 function renderTeam() {
   var h = '<div style="font-size:16px;font-weight:700;margin-bottom:1rem">GateKeeper</div>';
   var gk = articles.filter(function(a){ return a.gatekeeper==='Lilli Gargiulo' && (!a.editor||a.editor==='') &&
-    a.status !== 'Rifiutato' && a.status !== 'Pubblicato' && a.step !== '19' &&
+    a.status !== 'Rifiutato' && a.status !== 'Pubblicato' && a.step !== '18' &&
     a.step==='5'; });
   h += '<div class="card"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:'+(gk.length?'10px':'0')+'">' +
     '<div style="font-size:20px;font-weight:700">Lilli Gargiulo</div>' +
@@ -1938,7 +1980,7 @@ function renderTeam() {
 
   h += '<div style="font-size:16px;font-weight:700;margin:1.5rem 0 1rem">Editor</div>';
   EDITORS.forEach(function(ed) {
-    var mine = articles.filter(function(a){ return a.editor===ed && a.status !== 'Pubblicato' && a.step !== '19' && a.step !== '8b' && a.step !== '7b' && a.status !== 'Rifiutato'; }).sort(function(a,b){
+    var mine = articles.filter(function(a){ return a.editor===ed && a.status !== 'Pubblicato' && a.step !== '18' && a.step !== '8b' && a.step !== '7b' && a.status !== 'Rifiutato'; }).sort(function(a,b){
       var sa = parseFloat(a.step)||0, sb = parseFloat(b.step)||0;
       return sb - sa;
     });
@@ -2166,7 +2208,8 @@ function renderVerbale() {
         var last3 = a.notesLog.slice(0,3);
         return last3.map(function(n){
           var d = n.date ? new Date(n.date).toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit',year:'numeric'}) : '';
-          return '<p style="font-size:inherit"><strong>'+esc(n.author||'')+' ('+d+'):</strong> '+esc(n.text).replace(/\n/g,'<br>')+'</p>';
+          var bg = n.discuss ? 'background:#e3f2fd;border-left:3px solid #1976d2;padding:2px 6px;display:block;' : '';
+          return '<p style="'+bg+'font-size:inherit"><strong>'+esc(n.author||'')+' ('+d+'):</strong> '+esc(n.text).replace(/\n/g,'<br>')+'</p>';
         }).join('');
       })() +
     '</div>';
@@ -2203,7 +2246,8 @@ function renderVerbale() {
         var last3 = a.notesLog.slice(0,3);
         return last3.map(function(n){
           var d = n.date ? new Date(n.date).toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit',year:'numeric'}) : '';
-          return '<p style="font-size:inherit"><strong>'+esc(n.author||'')+' ('+d+'):</strong> '+esc(n.text).replace(/\n/g,'<br>')+'</p>';
+          var bg = n.discuss ? 'background:#e3f2fd;border-left:3px solid #1976d2;padding:2px 6px;display:block;' : '';
+          return '<p style="'+bg+'font-size:inherit"><strong>'+esc(n.author||'')+' ('+d+'):</strong> '+esc(n.text).replace(/\n/g,'<br>')+'</p>';
         }).join('');
       })() +
     '</div>';
@@ -2263,18 +2307,18 @@ function renderVerbale() {
       var rifRef = rifAll.filter(function(a){
         var d = rifDate(a);
         var isDeclined = a.decisioneEditor==='Decline submission' || a.decisioneEditor2==='Decline submission';
-        return (isDeclined || a.step==='14') && d && d >= cutoff;
+        return (isDeclined || a.step==='13') && d && d >= cutoff;
       });
       // Categoria 2: rifiutati dal GK
       var rifGk = rifAll.filter(function(a){
         var d = rifDate(a);
-        return a.step==='6' && d && d >= cutoff &&
+        return a.step==='3' && d && d >= cutoff &&
                a.decisioneEditor!=='Decline submission' && a.decisioneEditor2!=='Decline submission';
       });
       // Categoria 3: rifiutati Turnitin (step=4)
       var rifTur = rifAll.filter(function(a){
         var d = rifDate(a);
-        return a.step==='4' && d && d >= cutoff;
+        return a.step==='6' && d && d >= cutoff;
       });
 
       var total = rifRef.length + rifGk.length + rifTur.length;
@@ -2309,7 +2353,7 @@ function renderVerbale() {
       // GateKeeper: totale articoli + lista ID (senza St.)
       var gkA = articles.filter(function(a){
         return a.gatekeeper==='Lilli Gargiulo'&&(!a.editor||a.editor==='')&&
-          a.status!=='Pubblicato'&&a.status!=='Rifiutato'&&a.step!=='19'&&
+          a.status!=='Pubblicato'&&a.status!=='Rifiutato'&&a.step!=='18'&&
           !isNaN(parseFloat(a.similarity))&&parseFloat(a.similarity)<30&&
           !isNaN(parseFloat(a.aiPercent))&&parseFloat(a.aiPercent)<30;
       });
@@ -2324,7 +2368,7 @@ function renderVerbale() {
       h += '<table style="width:100%;border-collapse:collapse;font-size:10pt;margin-top:1rem">';
       h += '<tr style="background:#f0f0f0"><th style="text-align:left;padding:4px 6px;border:1px solid #ccc;width:22%">Editor</th><th style="text-align:left;padding:4px 6px;border:1px solid #ccc">Articoli per Step</th></tr>';
       EDS.forEach(function(ed){
-        var arts = articles.filter(function(a){ return a.editor===ed&&a.status!=='Pubblicato'&&a.status!=='Rifiutato'&&a.step!=='19'; });
+        var arts = articles.filter(function(a){ return a.editor===ed&&a.status!=='Pubblicato'&&a.status!=='Rifiutato'&&a.step!=='18'; });
         if (!arts.length) return;
         // Group by step
         var byStep = {};
@@ -2749,7 +2793,7 @@ function openEditArt(id) {
 function autoStep(a) {
   // Decline submission: sempre step=14 + Rifiutato (priorità assoluta)
   if (a.decisioneEditor === 'Decline submission' || a.decisioneEditor2 === 'Decline submission') {
-    a.step = '14';
+    a.step = '13';
     if (a.status !== 'Rifiutato') a.dataRifiuto = new Date().toISOString();
     a.status = 'Rifiutato';
     return a;
@@ -2797,23 +2841,23 @@ function autoStep(a) {
 
   // St.9 → St.10: almeno un revisore con accettazione != ''
   if (step <= 9 && a.revisori && a.revisori.some(function(r){ return r.accettazione && r.accettazione !== ''; })) {
-    a.step = '10';
+    a.step = '9';
   }
 
-  // St.10 → St.11: esattamente 1 revisore ha accettato/completato
+  // St.9 → St.10: esattamente 1 revisore ha accettato/completato
   if (step <= 10 && a.revisori) {
     var accettati = a.revisori.filter(function(r){ return r.accettazione === 'accettato' || r.accettazione === 'completato'; }).length;
-    if (accettati === 1) a.step = '11';
-    // St.11 → St.12: entrambi accettati/completati
-    if (accettati >= 2) a.step = '12';
+    if (accettati === 1) a.step = '10';
+    // St.10 → St.11: entrambi accettati/completati
+    if (accettati >= 2) a.step = '11';
   }
 
-  // St.12 → St.13: almeno un revisore ha giudizio negativo (Decline/Resubmit Elsewhere)
+  // St.11 → St.12: almeno un revisore ha giudizio negativo (Decline/Resubmit Elsewhere)
   if (step <= 12 && a.revisori) {
     var negativi = a.revisori.filter(function(r){
       return r.giudizio === 'Decline submission' || r.giudizio === 'Resubmit Elsewhere';
     }).length;
-    if (negativi > 0) a.step = '13';
+    if (negativi > 0) a.step = '12';
   }
 
   // St.→ St.7: editor assegnato
@@ -2826,23 +2870,23 @@ function autoStep(a) {
   var dec2 = a.decisioneEditor2 || '';
   if (dec1 === 'Revisions required' || dec1 === 'Resubmit for Review' ||
       dec2 === 'Revisions required' || dec2 === 'Resubmit for Review') {
-    if (parseInt(a.step) < 13) a.step = '13';
+    if (parseInt(a.step) < 13) a.step = '12';
   }
 
   // St.→ St.14: Decisione editor = Decline submission
   if (dec1 === 'Decline submission' || dec2 === 'Decline submission') {
-    a.step = '14';
+    a.step = '13';
     a.status = 'Rifiutato';
   }
 
   // St.→ St.16: Decisione editor = Resubmit for Review
   if (dec1 === 'Resubmit for Review' || dec2 === 'Resubmit for Review') {
-    if (parseInt(a.step) < 16) a.step = '16';
+    if (parseInt(a.step) < 15) a.step = '15';
   }
 
   // St.→ St.18: copyeditor assegnato
-  if (a.copyeditor && a.copyeditor !== '' && parseInt(a.step) < 18) {
-    a.step = '18';
+  if (a.copyeditor && a.copyeditor !== '' && parseInt(a.step) < 17) {
+    a.step = '17';
   }
 
   return a;
@@ -3043,7 +3087,7 @@ function doSaveIss(type,year,num,theme,deadline,note,pub,unpublishing) {
   }
   if (pub) {
     var issKey=editingIssKey||key;
-    articles.forEach(function(a){ if (a.issue===issKey && a.status!=='Rifiutato') { a.status='Pubblicato'; a.step='19'; } });
+    articles.forEach(function(a){ if (a.issue===issKey && a.status!=='Rifiutato') { a.status='Pubblicato'; a.step='18'; } });
   }
   if (unpublishing) {
     var issKey2=editingIssKey||key;
@@ -3114,13 +3158,13 @@ function updateTuttiTabLabel(count) {
 function updateTabCounts() {
   // GK evaluation: no editor, not Rifiutato, not Pubblicato, not step 19
   var gkCount = articles.filter(function(a){
-    return a.status !== 'Pubblicato' && a.status !== 'Rifiutato' && a.step !== '19' &&
+    return a.status !== 'Pubblicato' && a.status !== 'Rifiutato' && a.step !== '18' &&
            (!a.editor || a.editor === '');
   }).length;
 
   // Articoli in lavorazione: has editor, not Rifiutato, not Pubblicato, not step 19
   var listaCount = articles.filter(function(a){
-    return a.status !== 'Pubblicato' && a.status !== 'Rifiutato' && a.step !== '19' &&
+    return a.status !== 'Pubblicato' && a.status !== 'Rifiutato' && a.step !== '18' &&
            a.editor && a.editor !== '';
   }).length;
 
