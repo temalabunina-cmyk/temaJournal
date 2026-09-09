@@ -2911,7 +2911,7 @@ function rifiutoTurnitin() {
     if (idx >= 0) {
       articles[idx].comunicazioneInviata = true;
       articles[idx].rispostaAutori = 'ritirato';
-      articles[idx].step = '5';
+      articles[idx].step = '7';
       articles[idx].status = 'Rifiutato';
       if (!articles[idx].dataComunicazione) {
         articles[idx].dataComunicazione = new Date().toISOString().slice(0,10);
@@ -3326,4 +3326,136 @@ function bootApp() {
 
 </script>
 </body>
-</html>
+</html>function saveArt() {
+  // Detect manual step change
+  var _origIdx = articles.findIndex(function(x){ return x.id===editingArtId; });
+  var _origStep = _origIdx>=0 ? (articles[_origIdx].step||'') : '';
+  var _newStep = document.getElementById('fStep').value;
+
+  var sim=document.getElementById('fSim').value, ai=document.getElementById('fAi').value;
+  var data={
+    id:document.getElementById('fId').value.trim(),
+    dataSottomissione:document.getElementById('fDataSottomissione').value,
+    title:document.getElementById('fTitle').value.trim(),
+    authors:document.getElementById('fAuthors').value.trim(),
+    affiliation:document.getElementById('fAffil').value.trim(),
+    nationality:document.getElementById('fNat').value.trim(),
+    intl:document.getElementById('fIntlArt').value,
+    abstract:document.getElementById('fAbstract').value.trim(),
+    length:parseInt(document.getElementById('fLen').value)||0,
+    impaginato:document.getElementById('fImpaginato').checked,
+    notesLog: (_origIdx>=0 && articles[_origIdx].notesLog) ? articles[_origIdx].notesLog : [],
+    highlight:document.getElementById('fHighlight').checked,
+    oneDrive:document.getElementById('fOneDrive').value||'',
+    section:document.getElementById('fSecArt').value,
+    status:document.getElementById('fStatus').value,
+    dataRifiuto: (document.getElementById('fStatus').value === 'Rifiutato' && (_origIdx<0 || articles[_origIdx].status !== 'Rifiutato'))
+      ? new Date().toISOString()
+      : (_origIdx>=0 ? (articles[_origIdx].dataRifiuto || '') : ''),
+    step:document.getElementById('fStep').value,
+    lastModified: new Date().toISOString(),
+    issue:document.getElementById('fIssArt').value,
+    articleNum:parseInt(document.getElementById('fArtNum').value)||null,
+    deadline:document.getElementById('fDead').value,
+    editor:document.getElementById('fEd2').value,
+    copyeditor:document.getElementById('fCopy').value,
+    gatekeeper:document.getElementById('fGk').value,
+    similarity:sim!==''?parseFloat(sim):null,
+    aiPercent:ai!==''?parseFloat(ai):null,
+    refsTotal:parseInt(document.getElementById('fRefs').value)||0,
+    citeTeMA:parseInt(document.getElementById('fCTeMA').value)||0,
+    citeTeMA2226:parseInt(document.getElementById('fCTeMA2226').value)||0,
+    citeJCR:parseInt(document.getElementById('fCJCR').value)||0,
+    citeJCR2y:parseInt(document.getElementById('fCJCR2y').value)||0,
+    comunicazioneInviata:document.getElementById('fComunicazioneInviata').checked,
+    dataComunicazione:document.getElementById('fDataComunicazione').value,
+    rispostaAutori:document.getElementById('fRispostaAutori').value,
+    revisori:JSON.parse(JSON.stringify(currentRevisori)),
+    revisori2:JSON.parse(JSON.stringify(currentRevisori2)),
+    decisioneEditor:document.getElementById('fDecisioneEditor').value,
+    decisioneEditor2:document.getElementById('fDecisioneEditor2').value,
+    dataRevisione:document.getElementById('fDataRevisione').value,
+    dataRevisione2:document.getElementById('fDataRevisione2').value,
+    dataAccettazione:document.getElementById('fDataAccettazione').value,
+    dataAccettazione2:document.getElementById('fDataAccettazione2').value
+  };
+  if (!data.id||!data.title){ alert('ID e Titolo sono obbligatori.'); return; }
+  data = autoStep(data);
+  if (editingArtId) {
+    var idx=articles.findIndex(function(a){ return a.id===editingArtId; });
+    if (idx>=0) articles[idx]=data;
+  } else {
+    if (articles.find(function(a){ return a.id===data.id; })){ alert('ID gi\u00e0 esistente.'); return; }
+    if (!data.step || data.step === '') data.step = '1';
+    articles.push(data);
+    sendNotification('insert', data.id, data.title);
+  }
+
+  document.getElementById('artModal').classList.remove('open');
+  schedSave(); refresh();
+}
+function accettazioneGK() {
+  if (!editingArtId) return;
+  var capturedId = editingArtId;
+  var idx = articles.findIndex(function(a){ return a.id === capturedId; });
+  if (idx >= 0) {
+    articles[idx].step = '3';
+    articles[idx].status = 'Sottomesso';
+  }
+  document.getElementById('artModal').classList.remove('open');
+  editingArtId = null;
+  schedSave();
+  refresh();
+}
+
+function rifiutoGK() {
+  if (!editingArtId) return;
+  var capturedId = editingArtId;
+  requirePwd(function() {
+    var idx = articles.findIndex(function(a){ return a.id === capturedId; });
+    if (idx >= 0) {
+      articles[idx].step = '7';
+      articles[idx].status = 'Rifiutato';
+    }
+    document.getElementById('artModal').classList.remove('open');
+    editingArtId = null;
+    schedSave();
+    refresh();
+  });
+}
+
+function rifiutoTurnitin() {
+  if (!editingArtId) return;
+  var capturedId = editingArtId;
+  requirePwd(function() {
+    var idx = articles.findIndex(function(a){ return a.id === capturedId; });
+    if (idx >= 0) {
+      articles[idx].comunicazioneInviata = true;
+      articles[idx].rispostaAutori = 'ritirato';
+      articles[idx].step = '7';
+      articles[idx].status = 'Rifiutato';
+      if (!articles[idx].dataComunicazione) {
+        articles[idx].dataComunicazione = new Date().toISOString().slice(0,10);
+      }
+    }
+    document.getElementById('artModal').classList.remove('open');
+    editingArtId = null;
+    schedSave();
+    refresh();
+  });
+}
+
+function deleteArt() {
+  if (!editingArtId) return;
+  var capturedId = editingArtId;
+  requirePwd(function() {
+    var delArt = articles.find(function(a){ return a.id === capturedId; });
+    articles = articles.filter(function(a){ return a.id !== capturedId; });
+    if (delArt) sendNotification('delete', delArt.id, delArt.title);
+    document.getElementById('artModal').classList.remove('open');
+    editingArtId = null;
+    schedSave();
+    refresh();
+  });
+}
+
