@@ -691,8 +691,8 @@ function loadData() {
       try { gsData = JSON.parse(text); } catch(e) {}
 
       if (gsData && gsData.articles && gsData.articles.length) {
+        // Dati reali ricevuti — carica normalmente
         issues   = gsData.issues && gsData.issues.length ? gsData.issues : JSON.parse(JSON.stringify(DEF_ISSUES));
-        // Load CiteScore from issues metadata
         if (gsData.citeScore) {
           citeScoreValue          = gsData.citeScore.value          || citeScoreValue;
           citeScoreTrackerValue   = gsData.citeScore.trackerValue   || citeScoreTrackerValue;
@@ -704,7 +704,6 @@ function loadData() {
         articles = gsData.articles;
         migrateSteps();
         migrateNotes();
-        // Set dataRifiuto for existing rejected articles without it
         var rifiutatoChanged = false;
         articles.forEach(function(a) {
           if (a.status === 'Rifiutato' && !a.dataRifiuto) {
@@ -714,28 +713,27 @@ function loadData() {
         });
         if (rifiutatoChanged) schedSave();
         setSaving(false);
-        document.getElementById('saveLbl').textContent = 'Dati sincronizzati';
+        document.getElementById('saveLbl').textContent = 'Dati sincronizzati (' + articles.length + ' articoli)';
         rebuildIssFilters();
         refresh();
-      } else {
-        // GS vuoto — carica i dati di default e li salva su GS
-        issues   = JSON.parse(JSON.stringify(DEF_ISSUES));
-        articles = JSON.parse(JSON.stringify(DEF_ARTICLES));
+      } else if (gsData && gsData.articles && gsData.articles.length === 0) {
+        // GS vuoto — non sovrascrivere nulla automaticamente
         setSaving(false);
-        document.getElementById('saveLbl').textContent = 'Dati predefiniti caricati';
-        rebuildIssFilters();
-        refresh();
-        schedSave(); // spinge i default su GS
+        document.getElementById('saveLbl').textContent = 'GS vuoto — nessun dato caricato';
+        console.warn('[TeMA] loadData: GS vuoto, dati non modificati');
+
+      } else {
+        // Risposta non valida o GS non raggiungibile — NON sovrascrivere nulla
+        setSaving(false);
+        document.getElementById('saveLbl').textContent = '⚠ Risposta GS non valida — dati NON modificati';
+        console.warn('[TeMA] loadData: risposta GS non valida', text && text.slice(0,200));
       }
     })
-    .catch(function() {
-      // Rete non disponibile — carica i default
-      issues   = JSON.parse(JSON.stringify(DEF_ISSUES));
-      articles = JSON.parse(JSON.stringify(DEF_ARTICLES));
+    .catch(function(err) {
+      // Errore di rete — NON caricare i default, NON salvare nulla
       setSaving(false);
-      document.getElementById('saveLbl').textContent = 'Rete non disponibile';
-      rebuildIssFilters();
-      refresh();
+      document.getElementById('saveLbl').textContent = '⚠ Rete non disponibile — ricarica la pagina';
+      console.warn('[TeMA] loadData catch:', err && err.message);
     });
 }
 
