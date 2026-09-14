@@ -682,63 +682,78 @@ function loadData() {
   setSaving(true);
   document.getElementById('saveLbl').textContent = 'Caricamento da Google Sheets...';
 
-  fetch(GS_URL)
-    .then(function(r){ return r.text(); })
-    .then(function(text) {
-      var gsData = null;
-      try { gsData = JSON.parse(text); } catch(e) {}
+  // Rimuovi eventuale script JSONP precedente
+  var old = document.getElementById('_gsJsonpScript');
+  if (old) old.parentNode.removeChild(old);
 
-      // Log raw response for debugging
-      console.log('[TeMA] GS raw response:', text && text.slice(0,300));
+  var cbName = '_temaGSCb_' + Date.now();
+  var timeout = setTimeout(function() {
+    delete window[cbName];
+    var s = document.getElementById('_gsJsonpScript');
+    if (s) s.parentNode.removeChild(s);
+    setSaving(false);
+    document.getElementById('saveLbl').textContent = '⚠ Timeout GS — ricarica la pagina';
+    console.warn('[TeMA] JSONP timeout');
+  }, 10000);
 
-      if (gsData && gsData.articles && gsData.articles.length) {
-        // Dati reali ricevuti — carica normalmente
-        issues   = gsData.issues && gsData.issues.length ? gsData.issues : JSON.parse(JSON.stringify(DEF_ISSUES));
-        if (gsData.citeScore) {
-          citeScoreValue          = gsData.citeScore.value          || citeScoreValue;
-          citeScoreTrackerValue   = gsData.citeScore.trackerValue   || citeScoreTrackerValue;
-          citeScoreLabel          = gsData.citeScore.label          || citeScoreLabel;
-          citeScoreTrackerLabel   = gsData.citeScore.trackerLabel   || citeScoreTrackerLabel;
-          citeScoreSubLabel       = gsData.citeScore.subLabel       || citeScoreSubLabel;
-          citeScoreTrackerSubLabel= gsData.citeScore.trackerSubLabel|| citeScoreTrackerSubLabel;
-        }
-        articles = gsData.articles;
-        migrateSteps();
-        migrateNotes();
-        var rifiutatoChanged = false;
-        articles.forEach(function(a) {
-          if (a.status === 'Rifiutato' && !a.dataRifiuto) {
-            a.dataRifiuto = a.lastModified || new Date().toISOString();
-            rifiutatoChanged = true;
-          }
-        });
-        if (rifiutatoChanged) schedSave();
-        setSaving(false);
-        document.getElementById('saveLbl').textContent = 'Dati sincronizzati (' + articles.length + ' articoli)';
-        rebuildIssFilters();
-        refresh();
-      } else if (gsData && gsData.articles && gsData.articles.length === 0) {
-        // GS vuoto — non sovrascrivere nulla automaticamente
-        setSaving(false);
-        document.getElementById('saveLbl').textContent = 'GS vuoto — nessun dato caricato';
-        console.warn('[TeMA] loadData: GS vuoto, dati non modificati');
+  window[cbName] = function(gsData) {
+    clearTimeout(timeout);
+    delete window[cbName];
+    var s = document.getElementById('_gsJsonpScript');
+    if (s) s.parentNode.removeChild(s);
 
-      } else {
-        // Risposta non valida o GS non raggiungibile — NON sovrascrivere nulla
-        setSaving(false);
-        var preview = text ? text.slice(0,80).replace(/[\r\n]/g,' ') : '(vuota)';
-        document.getElementById('saveLbl').textContent = '⚠ GS: ' + preview;
-        console.warn('[TeMA] loadData: risposta GS non valida. Raw:', text && text.slice(0,500));
-      }
-    })
-    .catch(function(err) {
-      // Errore di rete — NON caricare i default, NON salvare nulla
+    if (!gsData || !gsData.articles) {
       setSaving(false);
-      document.getElementById('saveLbl').textContent = '⚠ Rete non disponibile — ricarica la pagina';
-      console.warn('[TeMA] loadData catch:', err && err.message);
-    });
-}
+      document.getElementById('saveLbl').textContent = '⚠ GS: risposta non valida';
+      console.warn('[TeMA] JSONP: gsData non valido', gsData);
+      return;
+    }
 
+    if (gsData.articles.length === 0) {
+      setSaving(false);
+      document.getElementById('saveLbl').textContent = 'GS vuoto — nessun dato caricato';
+      console.warn('[TeMA] GS vuoto');
+      return;
+    }
+
+    issues = gsData.issues && gsData.issues.length ? gsData.issues : JSON.parse(JSON.stringify(DEF_ISSUES));
+    if (gsData.citeScore) {
+      citeScoreValue           = gsData.citeScore.value           || citeScoreValue;
+      citeScoreTrackerValue    = gsData.citeScore.trackerValue    || citeScoreTrackerValue;
+      citeScoreLabel           = gsData.citeScore.label           || citeScoreLabel;
+      citeScoreTrackerLabel    = gsData.citeScore.trackerLabel    || citeScoreTrackerLabel;
+      citeScoreSubLabel        = gsData.citeScore.subLabel        || citeScoreSubLabel;
+      citeScoreTrackerSubLabel = gsData.citeScore.trackerSubLabel || citeScoreTrackerSubLabel;
+    }
+    articles = gsData.articles;
+    migrateSteps();
+    migrateNotes();
+    var rifiutatoChanged = false;
+    articles.forEach(function(a) {
+      if (a.status === 'Rifiutato' && !a.dataRifiuto) {
+        a.dataRifiuto = a.lastModified || new Date().toISOString();
+        rifiutatoChanged = true;
+      }
+    });
+    if (rifiutatoChanged) schedSave();
+    setSaving(false);
+    document.getElementById('saveLbl').textContent = 'Dati sincronizzati (' + articles.length + ' articoli)';
+    rebuildIssFilters();
+    refresh();
+  };
+
+  var script = document.createElement('script');
+  script.id = '_gsJsonpScript';
+  script.src = GS_URL + '?callback=' + cbName + '&_t=' + Date.now();
+  script.onerror = function() {
+    clearTimeout(timeout);
+    delete window[cbName];
+    setSaving(false);
+    document.getElementById('saveLbl').textContent = '⚠ Errore caricamento GS';
+    console.warn('[TeMA] JSONP script error');
+  };
+  document.head.appendChild(script);
+}
 
 function setSaving(s) {
   var dot = document.getElementById('saveDot'), lbl = document.getElementById('saveLbl');
@@ -762,6 +777,7 @@ function persist() {
     attempt++;
     fetch(GS_URL, {
       method: 'POST',
+      redirect: 'follow',
       body: payload
     })
     .then(function(r){
