@@ -582,7 +582,7 @@ const SC = {
 const EDITORS = ['Carmen Guida','Floriana Zucaro','Gerardo Carpentieri','Peppe Mazzeo','Romano Fistola','Rosa Anna La Rocca','Rosaria Battarra','Stefano Franco'];
 const COPYEDITORS = ['Gerardo Carpentieri','Laura Ascione',"Nunzia D'Amico",'Stella Pennino','Tonia Stiuso','Valerio Martinelli'];
 const LS_KEY = 'tema-journal-v2';
-const GS_URL = 'https://script.google.com/macros/s/AKfycbwPiRX265hNGFsaOSV-whQY-xB9G7Igw7BtSfnaeJ1ophHGocJM6qi7KAlUt9Z01uc3/exec';
+const GS_URL = 'https://script.google.com/macros/s/AKfycbyJmvV_nITNocxRpo9gKeJ1xVvxHiSdzF2HGHXr40RKprez4eZuS9x_jZs8CuWFsSu-/exec';
 
 let issues = [], articles = [], editingArtId = null, editingIssKey = null;
 let saveTimer = null, sessionUnlocked = false, pendingAction = null;
@@ -688,6 +688,9 @@ function loadData() {
       var gsData = null;
       try { gsData = JSON.parse(text); } catch(e) {}
 
+      // Log raw response for debugging
+      console.log('[TeMA] GS raw response:', text && text.slice(0,300));
+
       if (gsData && gsData.articles && gsData.articles.length) {
         // Dati reali ricevuti — carica normalmente
         issues   = gsData.issues && gsData.issues.length ? gsData.issues : JSON.parse(JSON.stringify(DEF_ISSUES));
@@ -723,8 +726,9 @@ function loadData() {
       } else {
         // Risposta non valida o GS non raggiungibile — NON sovrascrivere nulla
         setSaving(false);
-        document.getElementById('saveLbl').textContent = '⚠ Risposta GS non valida — dati NON modificati';
-        console.warn('[TeMA] loadData: risposta GS non valida', text && text.slice(0,200));
+        var preview = text ? text.slice(0,80).replace(/[\r\n]/g,' ') : '(vuota)';
+        document.getElementById('saveLbl').textContent = '⚠ GS: ' + preview;
+        console.warn('[TeMA] loadData: risposta GS non valida. Raw:', text && text.slice(0,500));
       }
     })
     .catch(function(err) {
