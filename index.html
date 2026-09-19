@@ -2809,79 +2809,74 @@ function openEditArt(id) {
   document.getElementById('artModal').classList.add('open');
 }
 function autoStep(a) {
-  // Decline submission: sempre step=13 + Rifiutato (priorità assoluta)
+  // Decline submission: priorità assoluta
   if (a.decisioneEditor === 'Decline submission' || a.decisioneEditor2 === 'Decline submission') {
     if (a.status !== 'Rifiutato') a.dataRifiuto = new Date().toISOString();
     a.step = '13';
     a.status = 'Rifiutato';
     return a;
   }
-  // St.3 (Approvazione GK) è impostato solo dal pulsante — non toccare
+  // St.3 (Approvazione GK) impostato solo dal pulsante — non toccare
   if (a.step === '3') return a;
 
-  var sim  = parseFloat(a.similarity);
-  var ai   = parseFloat(a.aiPercent);
+  var sim   = parseFloat(a.similarity);
+  var ai    = parseFloat(a.aiPercent);
   var simOk = !isNaN(sim) && a.similarity !== null && a.similarity !== '';
   var aiOk  = !isNaN(ai)  && a.aiPercent  !== null && a.aiPercent  !== '';
-  var step  = parseInt(a.step) || 0;
+
+  // Funzione helper: avanza lo step solo se il nuovo è maggiore dell'attuale
+  function advance(newStep) {
+    if (parseInt(newStep) > parseInt(a.step)) a.step = newStep;
+  }
 
   // St.1 → St.2: GateKeeper assegnato
-  if (step <= 1 && a.gatekeeper && a.gatekeeper !== '') {
-    a.step = '2';
-  }
+  if (a.gatekeeper && a.gatekeeper !== '') advance('2');
 
   // St.3/4 → St.5: comunicazione Turnitin inviata (valori >30)
-  if (step <= 4 && simOk && aiOk && (sim > 30 || ai > 30) && a.comunicazioneInviata) {
-    a.step = '5';
-  }
+  if (simOk && aiOk && (sim > 30 || ai > 30) && a.comunicazioneInviata) advance('5');
 
   // St.5 → St.6: rifiuto Turnitin
-  if (step <= 5 && (sim > 30 || ai > 30) && a.rispostaAutori === 'ritirato') {
-    a.step = '6';
+  if ((sim > 30 || ai > 30) && a.rispostaAutori === 'ritirato') {
+    advance('6');
     a.status = 'Rifiutato';
     if (!a.dataRifiuto) a.dataRifiuto = new Date().toISOString();
   }
 
-  // St.3/4 → St.7: editor assegnato
-  if (a.editor && a.editor !== '' && parseInt(a.step) < 7) {
-    a.step = '7';
-  }
+  // → St.7: editor assegnato
+  if (a.editor && a.editor !== '') advance('7');
 
-  // St.7/8 → St.9: almeno un revisore individuato
-  if (step <= 8 && a.revisori && a.revisori.length > 0) {
-    a.step = '9';
-  }
+  // → St.9: almeno un revisore individuato
+  if (a.revisori && a.revisori.length > 0) advance('9');
 
-  // St.9 → St.10/11: revisori accettati
-  if (step <= 11 && a.revisori) {
+  // → St.10/11: revisori accettati
+  if (a.revisori) {
     var accettati = a.revisori.filter(function(r){
       return r.accettazione === 'accettato' || r.accettazione === 'completato';
     }).length;
-    if (accettati === 1) a.step = '10';
-    if (accettati >= 2) a.step = '11';
+    if (accettati >= 1) advance('10');
+    if (accettati >= 2) advance('11');
   }
 
-  // St.11 → St.12: Revisions required o Resubmit for Review
+  // → St.12: decisione editor
   var dec1 = a.decisioneEditor || '';
   var dec2 = a.decisioneEditor2 || '';
   if (dec1 === 'Revisions required' || dec1 === 'Resubmit for Review' ||
       dec2 === 'Revisions required' || dec2 === 'Resubmit for Review') {
-    if (parseInt(a.step) < 12) a.step = '12';
+    advance('12');
   }
 
-  // St. → St.15: secondo round revisori
+  // → St.15: secondo round revisori
   if ((dec1 === 'Resubmit for Review' || dec2 === 'Resubmit for Review') &&
       a.revisori2 && a.revisori2.length > 0) {
-    if (parseInt(a.step) < 15) a.step = '15';
+    advance('15');
   }
 
-  // St. → St.17: copyeditor assegnato
-  if (a.copyeditor && a.copyeditor !== '' && parseInt(a.step) < 17) {
-    a.step = '17';
-  }
+  // → St.17: copyeditor assegnato
+  if (a.copyeditor && a.copyeditor !== '') advance('17');
 
   return a;
 }
+
 
 function saveArt() {
   // Detect manual step change
