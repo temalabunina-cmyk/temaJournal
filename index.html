@@ -772,26 +772,31 @@ function persist() {
   var attempt = 0;
   function tryPost() {
     attempt++;
-    fetch(GS_URL, {
+    fetch(GS_URL + '?_t=' + Date.now(), {
       method: 'POST',
       redirect: 'follow',
+      headers: { 'Content-Type': 'text/plain' },
       body: payload
     })
-    .then(function(r){
-      if (!r.ok) throw new Error('HTTP ' + r.status);
-      return r.text();
-    })
+    .then(function(r){ return r.text(); })
     .then(function(txt) {
-      if (txt && txt.trim() === 'OK') {
+      console.log('[TeMA] persist risposta (tentativo ' + attempt + '):', txt && txt.slice(0,80));
+      var clean = txt ? txt.trim() : '';
+      if (clean === 'OK' || clean.indexOf('OK') === 0) {
         setSaving(false);
         document.getElementById('saveLbl').textContent = 'Salvato ✓';
         setTimeout(function(){ document.getElementById('saveLbl').textContent = 'Dati salvati'; }, 2000);
+      } else if (clean.startsWith('<') && attempt < 3) {
+        // Redirect HTML — riprova
+        document.getElementById('saveLbl').textContent = 'Riprovo (' + attempt + '/3)...';
+        setTimeout(tryPost, 2500);
       } else if (attempt < 3) {
         document.getElementById('saveLbl').textContent = 'Riprovo (' + attempt + '/3)...';
         setTimeout(tryPost, 2000);
       } else {
         setSaving(false);
-        document.getElementById('saveLbl').textContent = 'GS non risponde — riprova';
+        document.getElementById('saveLbl').textContent = '⚠ GS non risponde — riprova manualmente';
+        console.warn('[TeMA] persist fallito. Ultima risposta:', txt && txt.slice(0,200));
       }
     })
     .catch(function(err) {
@@ -800,7 +805,8 @@ function persist() {
         setTimeout(tryPost, 3000);
       } else {
         setSaving(false);
-        document.getElementById('saveLbl').textContent = 'Errore: ' + (err.message || 'rete');
+        document.getElementById('saveLbl').textContent = '⚠ Errore rete: ' + (err.message || 'sconosciuto');
+        console.warn('[TeMA] persist catch:', err && err.message);
       }
     });
   }
