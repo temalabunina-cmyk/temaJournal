@@ -2984,7 +2984,16 @@ function doSaveIss(type,year,num,theme,deadline,note,pub,unpublishing) {
   else { key=editingIssKey||('SI-'+Date.now()); label='SI '+theme.slice(0,40); }
   if (editingIssKey) {
     var idx=issues.findIndex(function(i){ return i.key===editingIssKey; });
-    if (idx>=0) issues[idx]=Object.assign({},issues[idx],{type:type,year:year,num:num,theme:theme,deadline:deadline,note:note,label:label,pubblicato:pub});
+    if (idx>=0) {
+      // Also update key and label if number/year changed
+      var newKey = type==='ordinario' ? String(num).padStart(2,'0')+'/'+year : editingIssKey;
+      var newLabel = type==='ordinario' ? 'TeMA '+newKey : label;
+      // If key changed, update all articles referencing the old key
+      if (newKey !== editingIssKey) {
+        articles.forEach(function(a){ if (a.issue===editingIssKey) a.issue=newKey; });
+      }
+      issues[idx]=Object.assign({},issues[idx],{key:newKey,type:type,year:year,num:num,theme:theme,deadline:deadline,note:note,label:newLabel,pubblicato:pub});
+    }
   } else {
     if (issues.find(function(i){ return i.key===key; })){ alert('Fascicolo gi\u00e0 esistente.'); return; }
     issues.push({key:key,label:label,type:type,year:year,num:num,theme:theme,deadline:deadline,note:note,pubblicato:pub});
