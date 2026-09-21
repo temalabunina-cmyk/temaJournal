@@ -770,59 +770,62 @@ function persist() {
   document.getElementById('saveLbl').textContent = 'Salvataggio...';
 
   var payload = JSON.stringify({issues:issues, articles:articles, _ts: Date.now()});
-
   var attempt = 0;
+
   function tryPost() {
     attempt++;
-    // Encode payload for GET request to avoid POST redirect issues
-    var encodedPayload = encodeURIComponent(payload);
-    var getUrl = GS_URL + '?_t=' + Date.now() + '&action=save&data=' + encodedPayload;
-    
-    // If URL too long (>7500 chars), fall back to POST
-    var useFetch = getUrl.length <= 7500;
-    var fetchOpts = useFetch
-      ? { method: 'GET', redirect: 'follow' }
-      : { method: 'POST', redirect: 'follow', headers: { 'Content-Type': 'text/plain' }, body: payload };
-    var fetchUrl = useFetch ? getUrl : (GS_URL + '?_t=' + Date.now());
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', GS_URL, true);
+    xhr.setRequestHeader('Content-Type', 'text/plain');
+    xhr.timeout = 15000;
 
-    fetch(fetchUrl, fetchOpts)
-    .then(function(r){ return r.text(); })
-    .then(function(txt) {
-      console.log('[TeMA] persist risposta (tentativo ' + attempt + '):', txt && txt.slice(0,80));
-      var clean = txt ? txt.trim() : '';
-      // Handle both 'OK' (POST) and JSON {result:'OK'} (GET)
+    xhr.onload = function() {
+      var txt = xhr.responseText || '';
+      console.log('[TeMA] persist risposta (tentativo ' + attempt + '):', txt.slice(0,80));
+      var clean = txt.trim();
       var isOk = clean === 'OK' || clean.indexOf('OK') === 0;
       if (!isOk) { try { var r=JSON.parse(clean); isOk = r.result === 'OK'; } catch(e){} }
+
       if (isOk) {
         setSaving(false);
         document.getElementById('saveLbl').textContent = 'Salvato ✓';
         setTimeout(function(){ document.getElementById('saveLbl').textContent = 'Dati salvati'; }, 2000);
-      } else if (attempt < 3 && (clean.startsWith('<') || clean === '')) {
-        // Redirect HTML — riprova
-        document.getElementById('saveLbl').textContent = 'Riprovo (' + attempt + '/3)...';
-        setTimeout(tryPost, 2500);
       } else if (attempt < 3) {
         document.getElementById('saveLbl').textContent = 'Riprovo (' + attempt + '/3)...';
-        setTimeout(tryPost, 2000);
+        setTimeout(tryPost, 2500);
       } else {
         setSaving(false);
-        document.getElementById('saveLbl').textContent = '⚠ GS non risponde — riprova manualmente';
-        console.warn('[TeMA] persist fallito. Ultima risposta:', txt && txt.slice(0,200));
+        document.getElementById('saveLbl').textContent = '⚠ GS non risponde — riprova';
+        console.warn('[TeMA] persist fallito. Risposta:', txt.slice(0,200));
       }
-    })
-    .catch(function(err) {
+    };
+
+    xhr.onerror = function() {
       if (attempt < 3) {
         document.getElementById('saveLbl').textContent = 'Riprovo (' + attempt + '/3)...';
         setTimeout(tryPost, 3000);
       } else {
         setSaving(false);
-        document.getElementById('saveLbl').textContent = '⚠ Errore rete: ' + (err.message || 'sconosciuto');
-        console.warn('[TeMA] persist catch:', err && err.message);
+        document.getElementById('saveLbl').textContent = '⚠ Errore di rete';
+        console.warn('[TeMA] persist XHR error');
       }
-    });
+    };
+
+    xhr.ontimeout = function() {
+      if (attempt < 3) {
+        document.getElementById('saveLbl').textContent = 'Timeout, riprovo (' + attempt + '/3)...';
+        setTimeout(tryPost, 3000);
+      } else {
+        setSaving(false);
+        document.getElementById('saveLbl').textContent = '⚠ Timeout GS — riprova';
+      }
+    };
+
+    xhr.send(payload);
   }
   tryPost();
 }
+
 function backupData() {
   var payload = JSON.stringify({issues:issues, articles:articles, _backup: new Date().toISOString()}, null, 2);
   var blob = new Blob([payload], {type:'application/json;charset=utf-8'});
