@@ -1160,7 +1160,7 @@ function renderStats() {
   // Articoli GK che hanno superato Turnitin (sim<30 E ai<30, entrambi valorizzati)
   var gkOkArts = articles.filter(function(a) {
     if (a.status === 'Pubblicato' || a.step === '18') return false;
-    if (a.step === '8b' || a.step === '7b') return false;
+    if (false) return false;
     if (a.editor && a.editor !== '') return false; // già in lavorazione
     var sim = parseFloat(a.similarity), ai = parseFloat(a.aiPercent);
     return !isNaN(sim) && sim < 30 && !isNaN(ai) && ai < 30;
@@ -1314,7 +1314,7 @@ async function printGkPDF() {
     if (a.status === 'Pubblicato' || a.step === '18') return false;
     var _sim=parseFloat(a.similarity),_ai=parseFloat(a.aiPercent);
     if (a.rispostaAutori && a.rispostaAutori!=='' && (_sim>30||_ai>30)) return false;
-    if (a.step === '8b' || a.step === '7b') return false;
+    if (false) return false;
     if (a.editor && a.editor !== '') return false;
     // Solo articoli con sim>30 O ai>30, oppure senza valori ancora inseriti
     var simMissing = isNaN(_sim) || a.similarity === null || a.similarity === '';
@@ -1338,113 +1338,16 @@ async function printGkPDF() {
   var origText = btn ? btn.innerHTML : '';
   if (btn) { btn.innerHTML = '&#8987; Traduzione abstract in corso...'; btn.disabled = true; }
 
-  // Translate abstracts via Claude API
-  async function translateAbstract(text) {
-    if (!text || !text.trim()) return '';
-    try {
-      var resp = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 1000,
-          messages: [{
-            role: 'user',
-            content: 'Traduci in italiano questo abstract scientifico. Rispondi solo con la traduzione: ' + text
-          }]
-        })
-      });
-      var data = await resp.json();
-      return data.content && data.content[0] ? data.content[0].text : '';
-    } catch(e) { return ''; }
-  }
-
-  // Translate only articles with non-empty abstracts
-  var translations = {};
-  for (var i = 0; i < gkArts.length; i++) {
-    var a = gkArts[i];
-    if (a.abstract && a.abstract.trim()) {
-      translations[a.id] = await translateAbstract(a.abstract);
-    }
-  }
-
-  if (btn) { btn.innerHTML = origText; btn.disabled = false; }
-
-  var today = new Date().toLocaleDateString('it-IT');
-
-  var cards = gkArts.map(function(a) {
-    var sim = (a.similarity!==null&&a.similarity!=='')?a.similarity+'%':'—';
-    var ai  = (a.aiPercent!==null&&a.aiPercent!=='')?a.aiPercent+'%':'—';
-    var simRed = parseFloat(a.similarity)>30;
-    var aiRed  = parseFloat(a.aiPercent)>30;
-    var commHtml = '';
-    if (a.comunicazioneInviata && a.dataComunicazione) {
-      var dataInvio = new Date(a.dataComunicazione);
-      var scad = new Date(dataInvio); scad.setDate(scad.getDate()+30);
-      var giorni = Math.ceil((scad-new Date())/86400000);
-      commHtml = '<p style="font-size:9px;color:#b71c1c;margin:4px 0">&#9993; Comunicazione inviata il '+dataInvio.toLocaleDateString('it-IT')+
-        (giorni>0?' &middot; Countdown: '+giorni+' giorni rimanenti':' &middot; Scaduto')+'</p>';
-    }
-    var metricStyle = 'display:inline-block;margin-right:8px;font-size:9px;font-weight:bold';
-    var absHtml = '<div style="font-size:9px;margin-top:6px;border-top:1px solid #eee;padding-top:5px;line-height:1.5">';
-    if (a.abstract && a.abstract.trim()) {
-      absHtml += '<b>Abstract (originale):</b> '+esc(a.abstract);
-      if (translations[a.id]) {
-        absHtml += '<br><br><b>Abstract (italiano):</b> '+esc(translations[a.id]);
-      }
-    } else {
-      absHtml += '<b>Abstract:</b> <i style="color:#999">Non disponibile</i>';
-    }
-    absHtml += '</div>';
-
-    return '<div style="border:1px solid #bbb;padding:10px 12px;margin-bottom:12px;page-break-inside:avoid">'+
-      '<div style="font-size:9px;font-weight:bold;color:#555;margin-bottom:3px;font-family:monospace">#'+esc(a.id)+(a.section?' &middot; '+esc(a.section):'')+(a.nationality?' &middot; '+esc(a.nationality):'')+'</div>'+
-      '<div style="font-size:12px;font-weight:bold;line-height:1.35;margin-bottom:3px">'+esc(a.title)+'</div>'+
-      '<div style="font-size:9px;color:#444;margin-bottom:5px">'+esc(a.authors||'')+(a.affiliation?' &middot; '+esc(a.affiliation):'')+'</div>'+
-      '<div style="margin:5px 0">'+
-        '<span style="'+metricStyle+';color:'+(simRed?'#b71c1c':'#1b5e20')+'">Sim. '+sim+'</span>'+
-        '<span style="'+metricStyle+';color:'+(aiRed?'#b71c1c':'#1b5e20')+'">AI '+ai+'</span>'+
-        '<span style="'+metricStyle+'">Refs: '+(a.refsTotal||0)+'</span>'+
-        '<span style="'+metricStyle+'">TeMA: '+(a.citeTeMA||0)+'</span>'+
-        '<span style="'+metricStyle+'">22-26: '+(a.citeTeMA2226||0)+'</span>'+
-        '<span style="'+metricStyle+'">JCR: '+(a.citeJCR||0)+'</span>'+
-        '<span style="'+metricStyle+'">JCR 2y: '+(a.citeJCR2y||0)+'</span>'+
-      '</div>'+
-      commHtml+
-      absHtml+
-      (a.notes?'<p style="font-size:9px;color:#666;font-style:italic;margin-top:3px">Note: '+esc(a.notes)+'</p>':'')+
-    '</div>';
-  }).join('');
-
-  var html = '<!DOCTYPE html><html lang="it"><head><meta charset="utf-8">'+
-    '<title>GateKeeper Evaluation TeMA '+today+'</title>'+
-    '<style>'+
-    'body{font-family:Arial,sans-serif;font-size:11px;color:#111;margin:1.5cm;padding:0}'+
-    'h1{font-size:15px;margin:0 0 4px 0;border-bottom:2px solid #222;padding-bottom:8px}'+
-    '.sub{font-size:9px;color:#555;margin:4px 0 18px 0}'+
-    '@media print{@page{size:A4 portrait;margin:1.5cm} body{margin:0}}'+
-    '</style></head><body>'+
-    '<h1>TeMA Journal &mdash; GateKeeper Evaluation</h1>'+
-    '<p class="sub">Generato il '+today+' &middot; '+gkArts.length+' articol'+(gkArts.length===1?'o':'i')+' in valutazione</p>'+
-    cards+'</body></html>';
-
-  var blob = new Blob([html], {type: 'text/html;charset=utf-8'});
-  var url = URL.createObjectURL(blob);
-  var link = document.createElement('a');
-  link.href = url;
-  link.download = 'GateKeeper_Evaluation_' + new Date().toISOString().slice(0,10) + '.html';
-  document.body.appendChild(link);
-  link.click();
-  setTimeout(function(){ URL.revokeObjectURL(url); link.remove(); }, 500);
+  // Traduzione non disponibile — usa if (btn) { btn.innerHTML = origText; btn.disabled = false; }
+  printTurnitin();
 }
-
 
 function renderTurnitin() {
   var gkArts = articles.filter(function(a) {
     if (a.status === 'Pubblicato' || a.step === '18') return false;
     var _sim=parseFloat(a.similarity),_ai=parseFloat(a.aiPercent);
     if (a.rispostaAutori && a.rispostaAutori!=='' && (_sim>30||_ai>30)) return false;
-    if (a.step === '8b' || a.step === '7b') return false;
+    if (false) return false;
     if (a.editor && a.editor !== '') return false;
     // Solo articoli che hanno superato la verifica Turnitin: entrambi i valori presenti e < 30
     var simOk = !isNaN(_sim) && a.similarity!==null && a.similarity!=='' && _sim < 30;
@@ -1516,7 +1419,7 @@ async function printTurnitin() {
     if (a.status === 'Pubblicato' || a.step === '18') return false;
     var _sim=parseFloat(a.similarity),_ai=parseFloat(a.aiPercent);
     if (a.rispostaAutori && a.rispostaAutori!=='' && (_sim>30||_ai>30)) return false;
-    if (a.step === '8b' || a.step === '7b') return false;
+    if (false) return false;
     if (a.editor && a.editor !== '') return false;
     var simOk = !isNaN(_sim) && a.similarity!==null && a.similarity!=='' && _sim < 30;
     var aiOk  = !isNaN(_ai)  && a.aiPercent!==null  && a.aiPercent!==''  && _ai  < 30;
@@ -1983,7 +1886,7 @@ function renderTeam() {
   var h = '<div style="font-size:16px;font-weight:700;margin-bottom:1rem">GateKeeper</div>';
   var gk = articles.filter(function(a){ return a.gatekeeper==='Lilli Gargiulo' && (!a.editor||a.editor==='') &&
     a.status !== 'Rifiutato' && a.status !== 'Pubblicato' && a.step !== '18' &&
-    a.step==='5'; });
+    a.step==='3'; });
   h += '<div class="card"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:'+(gk.length?'10px':'0')+'">' +
     '<div style="font-size:20px;font-weight:700">Lilli Gargiulo</div>' +
     '<span style="font-size:20px;font-weight:600;color:var(--orange)">'+gk.length+' articoli in valutazione</span>' +
@@ -2641,15 +2544,12 @@ function unlockAllAdmin() {
 }
 
 function lockAllGroups() {
-  // Lock fId individually
+  // Lock fId
   var fId = document.getElementById('fId');
   var btnId = document.getElementById('btnUnlockId');
   if (fId) fId.disabled = true;
   if (btnId) { btnId.textContent = '\u{1F512}'; btnId.disabled = false; }
-  var fDs = document.getElementById('fDataSottomissione');
-  var btnDs = document.getElementById('btnUnlockDataSott');
-  if (fDs) fDs.disabled = true;
-  if (btnDs) { btnDs.textContent = '\u{1F512}'; btnDs.disabled = false; }
+  // Lock fDataSottomissione
   var fDs = document.getElementById('fDataSottomissione');
   var btnDs = document.getElementById('btnUnlockDataSott');
   if (fDs) fDs.disabled = true;
@@ -2888,51 +2788,60 @@ function saveArt() {
   var _newStep = document.getElementById('fStep').value;
 
   var sim=document.getElementById('fSim').value, ai=document.getElementById('fAi').value;
+  // Helper: read field value, falling back to original if disabled
+  function fVal(id, orig) {
+    var el = document.getElementById(id);
+    if (!el) return orig !== undefined ? orig : '';
+    if (el.disabled) return orig !== undefined ? orig : el.value;
+    return el.value;
+  }
+  var _orig = _origIdx >= 0 ? articles[_origIdx] : {};
+
   var data={
-    id:document.getElementById('fId').value.trim(),
-    dataSottomissione:document.getElementById('fDataSottomissione').value,
-    title:document.getElementById('fTitle').value.trim(),
-    authors:document.getElementById('fAuthors').value.trim(),
-    affiliation:document.getElementById('fAffil').value.trim(),
-    nationality:document.getElementById('fNat').value.trim(),
-    intl:document.getElementById('fIntlArt').value,
-    abstract:document.getElementById('fAbstract').value.trim(),
-    length:parseInt(document.getElementById('fLen').value)||0,
+    id: fVal('fId', _orig.id || '').trim(),
+    dataSottomissione: fVal('fDataSottomissione', _orig.dataSottomissione || ''),
+    title:fVal('fTitle', _orig.title || '').trim(),
+    authors:fVal('fAuthors', _orig.authors || '').trim(),
+    affiliation:fVal('fAffil', _orig.affiliation || '').trim(),
+    nationality:fVal('fNat', _orig.nationality || '').trim(),
+    intl:fVal('fIntlArt', _orig.intl || 'no'),
+    abstract:fVal('fAbstract', _orig.abstract || '').trim(),
+    length:parseInt(fVal('fLen', _orig.length || 0))||0,
     impaginato:document.getElementById('fImpaginato').checked,
     notesLog: (_origIdx>=0 && articles[_origIdx].notesLog) ? articles[_origIdx].notesLog : [],
     highlight:document.getElementById('fHighlight').checked,
-    oneDrive:document.getElementById('fOneDrive').value||'',
-    section:document.getElementById('fSecArt').value,
-    status:document.getElementById('fStatus').value,
-    dataRifiuto: (document.getElementById('fStatus').value === 'Rifiutato' && (_origIdx<0 || articles[_origIdx].status !== 'Rifiutato'))
+    oneDrive:fVal('fOneDrive', _orig.oneDrive || ''),
+    section:fVal('fSecArt', _orig.section || 'Focus'),
+    status:fVal('fStatus', _orig.status || 'Sottomesso'),
+    dataRifiuto: (fVal('fStatus', _orig.status || 'Sottomesso') === 'Rifiutato' && (_origIdx<0 || articles[_origIdx].status !== 'Rifiutato'))
       ? new Date().toISOString()
       : (_origIdx>=0 ? (articles[_origIdx].dataRifiuto || '') : ''),
-    step:document.getElementById('fStep').value,
+    step:fVal('fStep', _orig.step || '1'),
     lastModified: new Date().toISOString(),
-    issue:document.getElementById('fIssArt').value,
-    articleNum:parseInt(document.getElementById('fArtNum').value)||null,
-    deadline:document.getElementById('fDead').value,
-    editor:document.getElementById('fEd2').value,
-    copyeditor:document.getElementById('fCopy').value,
-    gatekeeper:document.getElementById('fGk').value,
+    issue:fVal('fIssArt', _orig.issue || ''),
+    articleNum:parseInt(fVal('fArtNum', _orig.articleNum || ''))||null,
+    deadline:fVal('fDead', _orig.deadline || ''),
+    editor:fVal('fEd2', _orig.editor || ''),
+    copyeditor:fVal('fCopy', _orig.copyeditor || ''),
+    gatekeeper:fVal('fGk', _orig.gatekeeper || ''),
     similarity:sim!==''?parseFloat(sim):null,
     aiPercent:ai!==''?parseFloat(ai):null,
-    refsTotal:parseInt(document.getElementById('fRefs').value)||0,
-    citeTeMA:parseInt(document.getElementById('fCTeMA').value)||0,
-    citeTeMA2226:parseInt(document.getElementById('fCTeMA2226').value)||0,
-    citeJCR:parseInt(document.getElementById('fCJCR').value)||0,
-    citeJCR2y:parseInt(document.getElementById('fCJCR2y').value)||0,
+    refsTotal:parseInt(fVal('fRefs', _orig.refsTotal || 0))||0,
+    citeTeMA:parseInt(fVal('fCTeMA', _orig.citeTeMA || 0))||0,
+    citeTeMA2226:parseInt(fVal('fCTeMA2226', _orig.citeTeMA2226 || 0))||0,
+    citeJCR:parseInt(fVal('fCJCR', _orig.citeJCR || 0))||0,
+    citeJCR2y:parseInt(fVal('fCJCR2y', _orig.citeJCR2y || 0))||0,
     comunicazioneInviata:document.getElementById('fComunicazioneInviata').checked,
-    dataComunicazione:document.getElementById('fDataComunicazione').value,
-    rispostaAutori:document.getElementById('fRispostaAutori').value,
+    dataComunicazione:fVal('fDataComunicazione', _orig.dataComunicazione || ''),
+    rispostaAutori:fVal('fRispostaAutori', _orig.rispostaAutori || ''),
     revisori:JSON.parse(JSON.stringify(currentRevisori)),
     revisori2:JSON.parse(JSON.stringify(currentRevisori2)),
-    decisioneEditor:document.getElementById('fDecisioneEditor').value,
-    decisioneEditor2:document.getElementById('fDecisioneEditor2').value,
-    dataRevisione:document.getElementById('fDataRevisione').value,
-    dataRevisione2:document.getElementById('fDataRevisione2').value,
-    dataAccettazione:document.getElementById('fDataAccettazione').value,
-    dataAccettazione2:document.getElementById('fDataAccettazione2').value
+    decisioneEditor:fVal('fDecisioneEditor', _orig.decisioneEditor || ''),
+    decisioneEditor2:fVal('fDecisioneEditor2', _orig.decisioneEditor2 || ''),
+    dataRevisione:fVal('fDataRevisione', _orig.dataRevisione || ''),
+    dataRevisione2:fVal('fDataRevisione2', _orig.dataRevisione2 || ''),
+    dataAccettazione:fVal('fDataAccettazione', _orig.dataAccettazione || ''),
+    dataAccettazione2:fVal('fDataAccettazione2', _orig.dataAccettazione2 || '')
   };
   if (!data.id||!data.title){ alert('ID e Titolo sono obbligatori.'); return; }
   // Se l'utente ha cambiato lo step manualmente, proteggilo da autoStep
@@ -3333,13 +3242,6 @@ function bootApp() {
   document.getElementById('btnUnlockId').addEventListener('click',function(){
     requirePwd(function(){
       var f=document.getElementById('fId'), b=document.getElementById('btnUnlockId');
-      if(f){f.disabled=false; f.focus();}
-      if(b){b.textContent='\u{1F513}'; b.disabled=true;}
-    });
-  });
-  document.getElementById('btnUnlockDataSott').addEventListener('click',function(){
-    requirePwd(function(){
-      var f=document.getElementById('fDataSottomissione'), b=document.getElementById('btnUnlockDataSott');
       if(f){f.disabled=false; f.focus();}
       if(b){b.textContent='\u{1F513}'; b.disabled=true;}
     });
