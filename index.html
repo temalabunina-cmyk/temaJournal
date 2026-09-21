@@ -2639,7 +2639,28 @@ function openNewArt() {
   document.getElementById('fDataAccettazione2').value='';
   checkDecisioneEditor(); checkDecisioneEditor2();
   buildIssOpts('fIssArt','');
-  if (!adminMode) lockAllGroups();
+  if (!adminMode) {
+    lockAllGroups();
+    // Editor accounts can change step and editorial decisions
+    if (isEditorAccount()) {
+      ['fStep','fDecisioneEditor','fDecisioneEditor2',
+       'fDataRevisione','fDataRevisione2','fDataAccettazione','fDataAccettazione2',
+       'fDataComunicazione','fRispostaAutori','fComunicazioneInviata','fNewNote'].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) el.disabled = false;
+      });
+      // Re-enable procGroup pointer-events for step select only
+      var proc = document.getElementById('procGroup');
+      if (proc) {
+        // Remove lock from procGroup but keep fGk, fEd2, fCopy still disabled
+        proc.classList.remove('field-locked');
+        ['fGk','fEd2','fCopy'].forEach(function(id) {
+          var el = document.getElementById(id);
+          if (el) el.disabled = true;
+        });
+      }
+    }
+  }
   document.getElementById('artModal').classList.add('open');
 }
 function openEditArt(id) {
@@ -2719,7 +2740,25 @@ function openEditArt(id) {
   document.getElementById('fDataAccettazione2').value=a.dataAccettazione2||'';
   checkDecisioneEditor(); checkDecisioneEditor2();
   buildIssOpts('fIssArt',a.issue||'');
-  if (!adminMode) lockAllGroups();
+  if (!adminMode) {
+    lockAllGroups();
+    if (isEditorAccount()) {
+      ['fStep','fDecisioneEditor','fDecisioneEditor2',
+       'fDataRevisione','fDataRevisione2','fDataAccettazione','fDataAccettazione2',
+       'fDataComunicazione','fRispostaAutori','fComunicazioneInviata','fNewNote'].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) el.disabled = false;
+      });
+      var proc = document.getElementById('procGroup');
+      if (proc) {
+        proc.classList.remove('field-locked');
+        ['fGk','fEd2','fCopy'].forEach(function(id) {
+          var el = document.getElementById(id);
+          if (el) el.disabled = true;
+        });
+      }
+    }
+  }
   document.getElementById('artModal').classList.add('open');
 }
 function autoStep(a) {
