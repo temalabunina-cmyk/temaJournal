@@ -582,10 +582,11 @@ const SC = {
 const EDITORS = ['Carmen Guida','Floriana Zucaro','Gerardo Carpentieri','Peppe Mazzeo','Romano Fistola','Rosa Anna La Rocca','Rosaria Battarra','Stefano Franco'];
 const COPYEDITORS = ['Gerardo Carpentieri','Laura Ascione',"Nunzia D'Amico",'Stella Pennino','Tonia Stiuso','Valerio Martinelli'];
 const LS_KEY = 'tema-journal-v2';
-const GS_URL = 'https://script.google.com/macros/s/AKfycbyJmvV_nITNocxRpo9gKeJ1xVvxHiSdzF2HGHXr40RKprez4eZuS9x_jZs8CuWFsSu-/exec';
+const GS_URL = 'https://script.google.com/macros/s/AKfycbyc7XUn3DYhWnPDNxgvT2ts0vqJ8c0gkG7O9kmYUnmqY_UDA8E3VUXp0sPWxBj5fVKX/exec';
 
 let issues = [], articles = [], editingArtId = null, editingIssKey = null;
 let saveTimer = null, sessionUnlocked = false, pendingAction = null;
+let _gsVersion = 0; // timestamp of the GS data version we loaded
 let currentRevisori = [];
 
 var citeScoreValue = '3.4';
@@ -723,6 +724,7 @@ function loadData() {
           citeScoreTrackerSubLabel = gsData.citeScore.trackerSubLabel || citeScoreTrackerSubLabel;
         }
         articles = gsData.articles;
+        _gsVersion = gsData._version || gsData._ts || Date.now();
         migrateSteps();
         migrateNotes();
         var rifiutatoChanged = false;
@@ -767,7 +769,7 @@ function persist() {
   setSaving(true);
   document.getElementById('saveLbl').textContent = 'Salvataggio...';
 
-  var payload = JSON.stringify({issues:issues, articles:articles, _ts: Date.now()});
+  var payload = JSON.stringify({issues:issues, articles:articles, _ts: Date.now(), _version: _gsVersion});
 
   var attempt = 0;
   function tryPost() {
@@ -782,7 +784,19 @@ function persist() {
     .then(function(txt) {
       console.log('[TeMA] persist risposta (tentativo ' + attempt + '):', txt && txt.slice(0,80));
       var clean = txt ? txt.trim() : '';
-      if (clean === 'OK' || clean.indexOf('OK') === 0) {
+      if (clean === 'CONFLICT') {
+        // Another user saved after we loaded — reload and warn
+        setSaving(false);
+        document.getElementById('saveLbl').textContent = '⚠ Conflitto: dati aggiornati da un altro utente. Ricarico...';
+        console.warn('[TeMA] Conflitto di versione — ricarico da GS');
+        setTimeout(function(){
+          if (confirm('Un altro utente ha modificato i dati. Vuoi ricaricare la versione aggiornata?\n(Le tue ultime modifiche non salvate andranno perse.)')) {
+            loadData();
+          }
+        }, 500);
+        return;
+      } else if (clean === 'OK' || clean.indexOf('OK') === 0) {
+        _gsVersion = Date.now(); // update version after successful save
         setSaving(false);
         document.getElementById('saveLbl').textContent = 'Salvato ✓';
         setTimeout(function(){ document.getElementById('saveLbl').textContent = 'Dati salvati'; }, 2000);
@@ -3149,6 +3163,9 @@ function initFilters() {
 
 var adminMode = false;
 var currentUser = '';
+var EDITOR_ACCOUNTS = ['EditorTeMA','Carmen Guida','Floriana Zucaro','Gerardo Carpentieri',
+  'Peppe Mazzeo','Romano Fistola','Rosa Anna La Rocca','Rosaria Battarra','Stefano Franco'];
+function isEditorAccount() { return EDITOR_ACCOUNTS.indexOf(currentUser) >= 0; }
 
 function doLogin() {
   var u = document.getElementById('loginUser').value.trim();
@@ -3170,6 +3187,46 @@ function doLogin() {
     bootApp();
   } else if (u === 'EditorTeMA' && p === 'tEMA8009') {
     adminMode = false; currentUser = 'EditorTeMA';
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'block';
+    bootApp();
+  } else if (u === 'Carmen Guida' && p === 'CG@TeMA#2026!') {
+    adminMode = false; currentUser = 'Carmen Guida';
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'block';
+    bootApp();
+  } else if (u === 'Floriana Zucaro' && p === 'FZ@TeMA#2026!') {
+    adminMode = false; currentUser = 'Floriana Zucaro';
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'block';
+    bootApp();
+  } else if (u === 'Gerardo Carpentieri' && p === 'GCarp@TeMA#2026!') {
+    adminMode = false; currentUser = 'Gerardo Carpentieri';
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'block';
+    bootApp();
+  } else if (u === 'Peppe Mazzeo' && p === 'PM@TeMA#2026!') {
+    adminMode = false; currentUser = 'Peppe Mazzeo';
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'block';
+    bootApp();
+  } else if (u === 'Romano Fistola' && p === 'RF@TeMA#2026!') {
+    adminMode = false; currentUser = 'Romano Fistola';
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'block';
+    bootApp();
+  } else if (u === 'Rosa Anna La Rocca' && p === 'RALR@TeMA#2026!') {
+    adminMode = false; currentUser = 'Rosa Anna La Rocca';
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'block';
+    bootApp();
+  } else if (u === 'Rosaria Battarra' && p === 'RB@TeMA#2026!') {
+    adminMode = false; currentUser = 'Rosaria Battarra';
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'block';
+    bootApp();
+  } else if (u === 'Stefano Franco' && p === 'SF@TeMA#2026!') {
+    adminMode = false; currentUser = 'Stefano Franco';
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('mainApp').style.display = 'block';
     bootApp();
@@ -3212,18 +3269,43 @@ function bootApp() {
       if (neBtn) neBtn.style.display = '';
     }
   } else {
-    // EditorTeMA: hide GateKeeper evaluation, Verbale PDF and Backup button
+    // Editor accounts: hide GateKeeper evaluation, Verbale PDF, Note Editoriali and Backup
     var bkpBtn2 = document.querySelector('[onclick="backupData()"]');
     if (bkpBtn2) bkpBtn2.style.display = 'none';
-    var tabsToHide2 = ['gatekeeper', 'verbale'];
+    var tabsToHide2 = ['gatekeeper', 'verbale', 'noteeditoriali'];
     tabsToHide2.forEach(function(tab) {
       var btn = document.querySelector('.tab[data-tab="'+tab+'"]');
       if (btn) btn.style.display = 'none';
     });
+    // Show username in header
+    var userLbl = document.getElementById('currentUserLbl');
+    if (userLbl) userLbl.textContent = currentUser;
     switchTab('lista');
   }
   loadData();
   document.getElementById('vDate').value=new Date().toISOString().slice(0,10);
+
+  // Poll GS every 90s to detect version changes from other users
+  setInterval(function() {
+    if (saveTimer) return; // skip if a save is pending
+    fetch(GS_URL + '?_t=' + Date.now() + '&action=version', { redirect: 'follow' })
+      .then(function(r){ return r.text(); })
+      .then(function(txt) {
+        if (!txt || txt.trim().startsWith('<')) return;
+        try {
+          var d = JSON.parse(txt);
+          if (d._version && d._version !== _gsVersion) {
+            document.getElementById('saveLbl').textContent = '⚠ Dati aggiornati da un altro utente — clicca per ricaricare';
+            document.getElementById('saveLbl').style.cursor = 'pointer';
+            document.getElementById('saveLbl').onclick = function() {
+              document.getElementById('saveLbl').onclick = null;
+              document.getElementById('saveLbl').style.cursor = '';
+              loadData();
+            };
+          }
+        } catch(e) {}
+      }).catch(function(){});
+  }, 90000);
 
   document.querySelectorAll('.tab').forEach(function(btn){
     btn.addEventListener('click',function(){ switchTab(btn.dataset.tab); });
