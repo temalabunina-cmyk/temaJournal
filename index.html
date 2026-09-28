@@ -907,16 +907,53 @@ function addNote() {
   if (!editingArtId) return;
   var idx = articles.findIndex(function(a){ return a.id === editingArtId; });
   if (idx < 0) return;
+  var note = { text: txt, date: new Date().toISOString(), author: currentUser || 'RedazioneTeMA' };
   if (!articles[idx].notesLog) articles[idx].notesLog = [];
-  articles[idx].notesLog.unshift({
-    text: txt,
-    date: new Date().toISOString(),
-    author: currentUser || 'RedazioneTeMA'
-  });
+  articles[idx].notesLog.unshift(note);
   document.getElementById('fNewNote').value = '';
   renderNotesLog(articles[idx].notesLog);
-  schedSave();
+  // Save note via append — does NOT overwrite other concurrent notes
+  persistNote(editingArtId, note);
 }
+
+function persistNote(artId, note) {
+  setSaving(true);
+  document.getElementById('saveLbl').textContent = 'Salvataggio nota...';
+  ssShow('', 'Salvataggio nota…', 'Aggiunta nota a Google Sheets…', false, '#2563eb');
+  var saveData = JSON.stringify({ action: 'appendNote', artId: artId, note: note });
+  var url = GS_URL + '?m=save&d=' + encodeURIComponent(saveData) + '&_t=' + Date.now();
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', url, true);
+  xhr.timeout = 15000;
+  xhr.onload = function() {
+    setSaving(false);
+    try {
+      var j = JSON.parse(xhr.responseText);
+      if (j.result === 'OK') {
+        document.getElementById('saveLbl').textContent = 'Nota salvata ✓';
+        ssShow('✅', 'Nota salvata!', 'La nota e stata aggiunta correttamente.', true, '#16a34a');
+        // Sync notesLog from GS response
+        if (j.notesLog) {
+          var i2 = articles.findIndex(function(a){ return a.id === artId; });
+          if (i2 >= 0) { articles[i2].notesLog = j.notesLog; renderNotesLog(j.notesLog); }
+        }
+      } else {
+        document.getElementById('saveLbl').textContent = '⚠ Errore nota';
+        ssShow('❌', 'Errore salvataggio nota', 'La nota non e stata salvata. Riprova.', true, '#dc2626');
+      }
+    } catch(e) {
+      document.getElementById('saveLbl').textContent = 'Nota salvata ✓';
+      ssShow('✅', 'Nota salvata', 'Nota inviata correttamente.', true, '#16a34a');
+    }
+  };
+  xhr.onerror = xhr.ontimeout = function() {
+    setSaving(false);
+    document.getElementById('saveLbl').textContent = '⚠ Errore rete';
+    ssShow('❌', 'Errore di rete', 'Impossibile salvare la nota. Riprova.', true, '#dc2626');
+  };
+  xhr.send();
+}
+
 
 function toggleDiscuss(artId, noteIdx) {
   var idx = articles.findIndex(function(a){ return a.id === artId; });
