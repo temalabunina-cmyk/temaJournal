@@ -806,6 +806,7 @@ function persist() {
     if (!snap) {
       // Salvataggio completo — nessuna verifica per articolo
       setSaving(false);
+      refresh();
       document.getElementById('saveLbl').textContent = 'Salvato ✓';
       ssShow('✅', 'Salvato!', 'Dati aggiornati correttamente su Google Sheets.', true, '#16a34a');
       return;
@@ -822,6 +823,11 @@ function persist() {
         try {
           var r = JSON.parse(vxhr.responseText), s = r.article;
           if (s && String(s.step) === String(snap.step) && String(s.status) === String(snap.status)) {
+            // Update article in memory with data confirmed by GS
+            var confirmedIdx = articles.findIndex(function(a){ return a.id === s.id; });
+            if (confirmedIdx >= 0) articles[confirmedIdx] = s;
+            // Refresh the UI panels that show this article
+            refresh();
             document.getElementById('saveLbl').textContent = 'Salvato e verificato ✓';
             ssShow('✅', 'Salvato e verificato!', 'Articolo #' + snap.id + ' aggiornato correttamente su Google Sheets.', true, '#16a34a');
           } else {
