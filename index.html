@@ -587,6 +587,7 @@ const GS_URL = 'https://script.google.com/macros/s/AKfycbyc7XUn3DYhWnPDNxgvT2ts0
 let issues = [], articles = [], editingArtId = null, editingIssKey = null;
 let saveTimer = null, sessionUnlocked = false, pendingAction = null;
 let _gsVersion = 0; // timestamp of the GS data version we loaded
+let _lastSavedArtId = null; // track which article to save
 let currentRevisori = [];
 
 var citeScoreValue = '3.4';
@@ -768,21 +769,32 @@ function sendNotification(action, artId, artTitle) {
 function persist() {
   setSaving(true);
   document.getElementById('saveLbl').textContent = 'Salvataggio...';
-  var payload = JSON.stringify({issues:issues, articles:articles, _ts: Date.now()});
 
-  // Try 1: fetch with no-cors (POST reaches GS even through redirect, can't read response)
+  // Save only the modified article if known, otherwise save all issues+articles
+  var payload;
+  if (_lastSavedArtId) {
+    var artToSave = articles.find(function(a){ return a.id === _lastSavedArtId; });
+    if (artToSave) {
+      payload = JSON.stringify({ action: 'saveArticle', article: artToSave, _ts: Date.now() });
+    }
+  }
+  if (!payload) {
+    // Fallback: save everything (for issues changes, deletions, etc.)
+    payload = JSON.stringify({ issues: issues, articles: articles, _ts: Date.now() });
+  }
+  _lastSavedArtId = null;
+
   fetch(GS_URL, {
     method: 'POST',
     mode: 'no-cors',
     headers: { 'Content-Type': 'text/plain' },
     body: payload
   }).then(function() {
-    // no-cors always returns opaque response — assume success after 2s
     setTimeout(function() {
       setSaving(false);
       document.getElementById('saveLbl').textContent = 'Salvato ✓';
       setTimeout(function(){ document.getElementById('saveLbl').textContent = 'Dati salvati'; }, 2000);
-    }, 2000);
+    }, 1500);
   }).catch(function(err) {
     setSaving(false);
     document.getElementById('saveLbl').textContent = '⚠ Errore: ' + (err.message||'rete');
@@ -2864,6 +2876,7 @@ function accettazioneGK() {
   var capturedId = editingArtId;
   var idx = articles.findIndex(function(a){ return a.id === capturedId; });
   if (idx >= 0) {
+    _lastSavedArtId = capturedId;
     articles[idx].step = '3';
     articles[idx].status = 'Sottomesso';
   }
@@ -2879,7 +2892,8 @@ function rifiutoGK() {
   requirePwd(function() {
     var idx = articles.findIndex(function(a){ return a.id === capturedId; });
     if (idx >= 0) {
-      articles[idx].step = '4';
+      _lastSavedArtId = capturedId;
+    articles[idx].step = '4';
       articles[idx].status = 'Rifiutato';
     }
     document.getElementById('artModal').classList.remove('open');
@@ -2897,7 +2911,8 @@ function rifiutoTurnitin() {
     if (idx >= 0) {
       articles[idx].comunicazioneInviata = true;
       articles[idx].rispostaAutori = 'ritirato';
-      articles[idx].step = '6';
+      _lastSavedArtId = capturedId;
+    articles[idx].step = '6';
       articles[idx].status = 'Rifiutato';
       if (!articles[idx].dataComunicazione) {
         articles[idx].dataComunicazione = new Date().toISOString().slice(0,10);
@@ -2929,12 +2944,7 @@ function openNewIss() {
   document.getElementById('issModalTitle').textContent='Nuovo fascicolo';
   document.getElementById('iType').value='ordinario';
   document.getElementById('iYear').value=2026;
-  // Auto-suggest next available number (only ordinary issues)
-  var ordinaryNums = issues
-    .filter(function(i){ return i.type === 'ordinario'; })
-    .map(function(i){ return parseInt(i.num) || 0; });
-  var nextNum = ordinaryNums.length > 0 ? Math.max.apply(null, ordinaryNums) + 1 : 1;
-  document.getElementById('iNum').value = String(nextNum);
+  document.getElementById('iNum').value='1';
   document.getElementById('iTheme').value='';
   document.getElementById('iDeadline').value='';
   document.getElementById('iNotes').value='';
@@ -2985,10 +2995,8 @@ function doSaveIss(type,year,num,theme,deadline,note,pub,unpublishing) {
   if (editingIssKey) {
     var idx=issues.findIndex(function(i){ return i.key===editingIssKey; });
     if (idx>=0) {
-      // Also update key and label if number/year changed
       var newKey = type==='ordinario' ? String(num).padStart(2,'0')+'/'+year : editingIssKey;
       var newLabel = type==='ordinario' ? 'TeMA '+newKey : label;
-      // If key changed, update all articles referencing the old key
       if (newKey !== editingIssKey) {
         articles.forEach(function(a){ if (a.issue===editingIssKey) a.issue=newKey; });
       }
@@ -3009,7 +3017,7 @@ function doSaveIss(type,year,num,theme,deadline,note,pub,unpublishing) {
     });
   }
   document.getElementById('issModal').classList.remove('open');
-  schedSave(); rebuildIssFilters(); renderNumeri();
+  _lastSavedArtId = null; schedSave(); rebuildIssFilters(); renderNumeri();
 }
 function deleteIss() {
   if (!editingIssKey) return;
