@@ -128,7 +128,6 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
   <div id="loginBox">
     <div style="font-size:22px;font-weight:700;margin-bottom:.25rem">TeMA Journal</div>
     <div style="font-size:16px;color:var(--tx);margin-bottom:1.75rem">Gestione editoriale &mdash; Accesso riservato</div>
-    <div style="font-size:13px;color:var(--tx2,#64748b);margin-bottom:1.5rem;font-style:italic;">Grazie per il tuo prezioso contributo alla redazione di TeMA Journal 🎓</div>
     <div class="fr">
       <label>Username</label>
       <input type="text" id="loginUser" placeholder="Username" autocomplete="username">
@@ -139,16 +138,6 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
     </div>
     <div id="loginErr" style="font-size:16px;color:var(--red);margin-bottom:12px;display:none">Username o password errati.</div>
     <button class="btn btn-p" onclick="doLogin()" style="width:100%;padding:10px;font-size:16px">Accedi</button>
-  </div>
-  <!-- TIPS PANEL -->
-  <div id="tipPanel" style="margin-top:24px;background:var(--sur,#f8fafc);border:1px solid var(--brd,#e2e8f0);border-radius:12px;padding:18px 22px;max-width:380px;text-align:left;">
-    <div style="font-size:11px;font-weight:700;color:var(--tx2,#94a3b8);letter-spacing:.8px;text-transform:uppercase;margin-bottom:10px;">💡 Suggerimento del giorno</div>
-    <div id="tipText" style="font-size:14px;color:var(--tx,#1e293b);line-height:1.6;min-height:44px;transition:opacity 0.4s ease;"></div>
-    <div style="margin-top:12px;display:flex;gap:6px;justify-content:flex-end;align-items:center;">
-      <button onclick="prevTip()" title="Precedente" style="background:none;border:1px solid var(--brd,#e2e8f0);border-radius:6px;padding:4px 12px;cursor:pointer;font-size:14px;color:var(--tx2,#94a3b8);">‹</button>
-      <button onclick="nextTip()" title="Successivo" style="background:none;border:1px solid var(--brd,#e2e8f0);border-radius:6px;padding:4px 12px;cursor:pointer;font-size:14px;color:var(--tx2,#94a3b8);">›</button>
-      <span id="tipCounter" style="font-size:11px;color:var(--tx2,#94a3b8);margin-left:4px;"></span>
-    </div>
   </div>
 </div>
 
@@ -781,91 +770,61 @@ function persist() {
   setSaving(true);
   document.getElementById('saveLbl').textContent = 'Salvataggio...';
 
-  // Prendi snapshot dell'articolo da salvare
-  var artId = _lastSavedArtId, snap = null;
-  if (artId) {
-    var a0 = articles.find(function(a) { return a.id === artId; });
-    if (a0) snap = JSON.parse(JSON.stringify(a0));
+  var payload = JSON.stringify({issues:issues, articles:articles, _ts: Date.now()});
+  var attempt = 0;
+
+  function tryPost() {
+    attempt++;
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', GS_URL, true);
+    xhr.setRequestHeader('Content-Type', 'text/plain');
+    xhr.timeout = 15000;
+
+    xhr.onload = function() {
+      var txt = xhr.responseText || '';
+      console.log('[TeMA] persist risposta (tentativo ' + attempt + '):', txt.slice(0,80));
+      var clean = txt.trim();
+      var isOk = clean === 'OK' || clean.indexOf('OK') === 0;
+      if (!isOk) { try { var r=JSON.parse(clean); isOk = r.result === 'OK'; } catch(e){} }
+
+      if (isOk) {
+        setSaving(false);
+        document.getElementById('saveLbl').textContent = 'Salvato ✓';
+        setTimeout(function(){ document.getElementById('saveLbl').textContent = 'Dati salvati'; }, 2000);
+      } else if (attempt < 3) {
+        document.getElementById('saveLbl').textContent = 'Riprovo (' + attempt + '/3)...';
+        setTimeout(tryPost, 2500);
+      } else {
+        setSaving(false);
+        document.getElementById('saveLbl').textContent = '⚠ GS non risponde — riprova';
+        console.warn('[TeMA] persist fallito. Risposta:', txt.slice(0,200));
+      }
+    };
+
+    xhr.onerror = function() {
+      if (attempt < 3) {
+        document.getElementById('saveLbl').textContent = 'Riprovo (' + attempt + '/3)...';
+        setTimeout(tryPost, 3000);
+      } else {
+        setSaving(false);
+        document.getElementById('saveLbl').textContent = '⚠ Errore di rete';
+        console.warn('[TeMA] persist XHR error');
+      }
+    };
+
+    xhr.ontimeout = function() {
+      if (attempt < 3) {
+        document.getElementById('saveLbl').textContent = 'Timeout, riprovo (' + attempt + '/3)...';
+        setTimeout(tryPost, 3000);
+      } else {
+        setSaving(false);
+        document.getElementById('saveLbl').textContent = '⚠ Timeout GS — riprova';
+      }
+    };
+
+    xhr.send(payload);
   }
-  _lastSavedArtId = null;
-
-  var saveData = snap
-    ? JSON.stringify({ action: 'saveArticle', article: snap })
-    : JSON.stringify({ action: 'saveAll', issues: issues, articles: articles });
-
-  var url = GS_URL + '?m=save&d=' + encodeURIComponent(saveData) + '&_t=' + Date.now();
-  var useGet = url.length < 7000;
-
-  ssShow('', 'Salvataggio in corso…', 'Invio dati a Google Sheets…', false, '#2563eb');
-
-  var xhr = new XMLHttpRequest();
-  xhr.timeout = 15000;
-  if (useGet) { xhr.open('GET', url, true); }
-  else { xhr.open('POST', GS_URL, true); xhr.setRequestHeader('Content-Type', 'text/plain'); }
-
-  xhr.onload = function() {
-    var txt = xhr.responseText || '', ok = false;
-    try { var j = JSON.parse(txt); ok = j.result === 'OK' || j.saved >= 0; } catch(e) { ok = txt.trim() === 'OK'; }
-
-    if (!ok) {
-      setSaving(false);
-      document.getElementById('saveLbl').textContent = '⚠ Errore';
-      ssShow('❌', 'Errore di salvataggio', 'Google Sheets non ha risposto correttamente. Riprova.', true, '#dc2626');
-      return;
-    }
-
-    if (!snap) {
-      // Salvataggio completo — nessuna verifica per articolo
-      setSaving(false);
-      refresh();
-      document.getElementById('saveLbl').textContent = 'Salvato ✓';
-      ssShow('✅', 'Salvato!', 'Dati aggiornati correttamente su Google Sheets.', true, '#16a34a');
-      return;
-    }
-
-    // Verifica singolo articolo
-    ssShow('🔍', 'Verifica in corso…', 'Controllo che le modifiche siano state registrate…', false, '#2563eb');
-    setTimeout(function() {
-      var vxhr = new XMLHttpRequest();
-      vxhr.open('GET', GS_URL + '?action=getArticle&artId=' + encodeURIComponent(snap.id) + '&_t=' + Date.now(), true);
-      vxhr.timeout = 10000;
-      vxhr.onload = function() {
-        setSaving(false);
-        try {
-          var r = JSON.parse(vxhr.responseText), s = r.article;
-          if (s && String(s.step) === String(snap.step) && String(s.status) === String(snap.status)) {
-            // Update article in memory with data confirmed by GS
-            var confirmedIdx = articles.findIndex(function(a){ return a.id === s.id; });
-            if (confirmedIdx >= 0) articles[confirmedIdx] = s;
-            // Refresh the UI panels that show this article
-            refresh();
-            document.getElementById('saveLbl').textContent = 'Salvato e verificato ✓';
-            ssShow('✅', 'Salvato e verificato!', 'Articolo #' + snap.id + ' aggiornato correttamente su Google Sheets.', true, '#16a34a');
-          } else {
-            document.getElementById('saveLbl').textContent = '❌ Verifica fallita';
-            ssShow('❌', 'Verifica fallita', 'I dati su Google Sheets non corrispondono. Riprova a salvare.', true, '#dc2626');
-          }
-        } catch(e) {
-          document.getElementById('saveLbl').textContent = 'Salvato ✓';
-          ssShow('✅', 'Salvato', 'Dati inviati correttamente. Verifica non disponibile.', true, '#16a34a');
-        }
-      };
-      vxhr.onerror = vxhr.ontimeout = function() {
-        setSaving(false);
-        document.getElementById('saveLbl').textContent = '⚠ Non verificato';
-        ssShow('⚠️', 'Salvato (non verificato)', 'Dati inviati ma verifica non riuscita. Ricarica per confermare.', true, '#d97706');
-      };
-      vxhr.send();
-    }, 2000);
-  };
-
-  xhr.onerror = xhr.ontimeout = function() {
-    setSaving(false);
-    document.getElementById('saveLbl').textContent = '⚠ Errore rete';
-    ssShow('❌', 'Errore di rete', 'Impossibile raggiungere Google Sheets. Controlla la connessione e riprova.', true, '#dc2626');
-  };
-
-  xhr.send(useGet ? null : saveData);
+  tryPost();
 }
 
 function backupData() {
@@ -923,48 +882,8 @@ function addNote() {
   articles[idx].notesLog.unshift(note);
   document.getElementById('fNewNote').value = '';
   renderNotesLog(articles[idx].notesLog);
-  // Save note via append — does NOT overwrite other concurrent notes
   persistNote(editingArtId, note);
 }
-
-function persistNote(artId, note) {
-  setSaving(true);
-  document.getElementById('saveLbl').textContent = 'Salvataggio nota...';
-  ssShow('', 'Salvataggio nota…', 'Aggiunta nota a Google Sheets…', false, '#2563eb');
-  var saveData = JSON.stringify({ action: 'appendNote', artId: artId, note: note });
-  var url = GS_URL + '?m=save&d=' + encodeURIComponent(saveData) + '&_t=' + Date.now();
-  var xhr = new XMLHttpRequest();
-  xhr.open('GET', url, true);
-  xhr.timeout = 15000;
-  xhr.onload = function() {
-    setSaving(false);
-    try {
-      var j = JSON.parse(xhr.responseText);
-      if (j.result === 'OK') {
-        document.getElementById('saveLbl').textContent = 'Nota salvata ✓';
-        ssShow('✅', 'Nota salvata!', 'La nota e stata aggiunta correttamente.', true, '#16a34a');
-        // Sync notesLog from GS response
-        if (j.notesLog) {
-          var i2 = articles.findIndex(function(a){ return a.id === artId; });
-          if (i2 >= 0) { articles[i2].notesLog = j.notesLog; renderNotesLog(j.notesLog); }
-        }
-      } else {
-        document.getElementById('saveLbl').textContent = '⚠ Errore nota';
-        ssShow('❌', 'Errore salvataggio nota', 'La nota non e stata salvata. Riprova.', true, '#dc2626');
-      }
-    } catch(e) {
-      document.getElementById('saveLbl').textContent = 'Nota salvata ✓';
-      ssShow('✅', 'Nota salvata', 'Nota inviata correttamente.', true, '#16a34a');
-    }
-  };
-  xhr.onerror = xhr.ontimeout = function() {
-    setSaving(false);
-    document.getElementById('saveLbl').textContent = '⚠ Errore rete';
-    ssShow('❌', 'Errore di rete', 'Impossibile salvare la nota. Riprova.', true, '#dc2626');
-  };
-  xhr.send();
-}
-
 
 function toggleDiscuss(artId, noteIdx) {
   var idx = articles.findIndex(function(a){ return a.id === artId; });
@@ -2440,4 +2359,1148 @@ function printVerbale() {
     '<meta charset="utf-8">' +
     '<title>'+docTitle+'</title>' +
     '<style>' + css + '</style>' +
-    '</head><body>' + bodyHtml + '</body></html>
+    '</head><body>' + bodyHtml + '</body></html>';
+
+  var w = window.open('', '_blank');
+  if (!w) { alert('Consenti i popup per questo sito e riprova.'); return; }
+  w.document.open();
+  w.document.write(fullHtml);
+  w.document.close();
+  setTimeout(function(){ w.focus(); w.print(); }, 800);
+}
+
+
+var currentRevisori2 = [];
+
+function checkDecisioneEditor() {
+  var val = document.getElementById('fDecisioneEditor').value;
+  var sec = document.getElementById('rev2Section');
+  if (sec) sec.style.display = (val === 'Resubmit for Review') ? 'block' : 'none';
+  var wrap = document.getElementById('fDataRevisioneWrap');
+  if (wrap) wrap.style.display = (val === 'Revisions required') ? 'block' : 'none';
+  var wrapAcc = document.getElementById('fDataAccettazioneWrap');
+  if (wrapAcc) wrapAcc.style.display = (val === 'Accept submission') ? 'block' : 'none';
+}
+
+function checkDecisioneEditor2() {
+  var val = document.getElementById('fDecisioneEditor2').value;
+  var wrap = document.getElementById('fDataRevisione2Wrap');
+  if (wrap) wrap.style.display = (val === 'Revisions required') ? 'block' : 'none';
+  var wrapAcc = document.getElementById('fDataAccettazione2Wrap');
+  if (wrapAcc) wrapAcc.style.display = (val === 'Accept submission') ? 'block' : 'none';
+}
+
+function renderRevList2() {
+  var c = document.getElementById('revList2');
+  if (!c) return;
+  if (!currentRevisori2.length) {
+    c.innerHTML = '<div style="font-size:20px;color:var(--tx3);padding:4px 0">Nessun revisore inserito.</div>';
+    return;
+  }
+  var h = '';
+  currentRevisori2.forEach(function(r, i) {
+    h += '<div class="rev-card">' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">' +
+        '<span style="font-size:20px;font-weight:700">Revisore '+(i+1)+'</span>' +
+        '<button class="btn" style="font-size:20px;padding:2px 8px;color:var(--red)" onclick="removeRev2('+i+')">Rimuovi</button>' +
+      '</div>' +
+      '<div class="g2" style="gap:8px">' +
+        '<div class="fr" style="margin-bottom:6px"><label>Nome e Cognome</label>' +
+          '<input value="'+esc(r.nome||'')+'" oninput="currentRevisori2['+i+'].nome=this.value" placeholder="es. Mario Rossi"></div>' +
+        '<div class="fr" style="margin-bottom:6px"><label>Affiliazione</label>' +
+          '<input value="'+esc(r.affiliazione||'')+'" oninput="currentRevisori2['+i+'].affiliazione=this.value"></div>' +
+        '<div class="fr" style="margin-bottom:6px"><label>Data consegna revisione</label>' +
+          '<input type="date" value="'+esc(r.dataConsegna||'')+'" oninput="currentRevisori2['+i+'].dataConsegna=this.value"></div>' +
+        '<div class="fr" style="margin-bottom:6px"><label>Stato revisione</label>' +
+          '<select onchange="currentRevisori2['+i+'].accettazione=this.value">' +
+            '<option value=""'+((!r.accettazione)?' selected':'')+'>&#8212;</option>' +
+            '<option value="in attesa"'+(r.accettazione==='in attesa'?' selected':'')+'>In attesa</option>' +
+            '<option value="accettato"'+(r.accettazione==='accettato'?' selected':'')+'>Accettato</option>' +
+            '<option value="rifiutato"'+(r.accettazione==='rifiutato'?' selected':'')+'>Rifiutato</option>' +
+            '<option value="completato"'+(r.accettazione==='completato'?' selected':'')+'>Completato</option>' +
+          '</select></div>' +
+        (r.accettazione==='completato' ?
+          '<div class="fr" style="margin-bottom:6px"><label>Rating revisore</label>' +
+          '<div style="display:flex;gap:4px;align-items:center">' +
+          [1,2,3,4,5].map(function(n){
+            var f=(r.rating||0)>=n;
+            return '<span onclick="currentRevisori['+i+'].rating='+n+';renderRevList()" style="cursor:pointer;font-size:24px;color:'+(f?'#f5a623':'#ddd')+'" title="'+n+' stelle">'+(f?'★':'☆')+'</span>';
+          }).join('')+
+          (r.rating?'<span style="margin-left:6px;font-size:13px;color:#888">'+r.rating+'/5</span>':'')+
+          '</div></div>' : '') +
+        '<div class="fr" style="margin-bottom:6px"><label>Data proroga</label>' +
+          '<input type="date" value="'+esc(r.dataProroga||'')+'" oninput="currentRevisori2['+i+'].dataProroga=this.value"></div>' +
+      '</div>' +
+      '<div class="fr" style="margin-top:4px"><label>Giudizio</label>' +
+        '<select onchange="currentRevisori2['+i+'].giudizio=this.value">' +
+          '<option value=""'+((!r.giudizio)?' selected':'')+'>&#8212;</option>' +
+          '<option value="Accept submission"'+(r.giudizio==="Accept submission"?' selected':'')+'>Accept submission</option>' +
+          '<option value="Revisions required"'+(r.giudizio==="Revisions required"?' selected':'')+'>Revisions required</option>' +
+          '<option value="Resubmit for Review"'+(r.giudizio==="Resubmit for Review"?' selected':'')+'>Resubmit for Review</option>' +
+          '<option value="Resubmit Elsewhere"'+(r.giudizio==="Resubmit Elsewhere"?' selected':'')+'>Resubmit Elsewhere</option>' +
+          '<option value="Decline submission"'+(r.giudizio==="Decline submission"?' selected':'')+'>Decline submission</option>' +
+        '</select></div>' +
+    '</div>';
+  });
+  c.innerHTML = h;
+}
+function removeRev2(i) { currentRevisori2.splice(i,1); renderRevList2(); }
+
+function renderRevList() {
+  var c = document.getElementById('revList');
+  if (!currentRevisori.length) {
+    c.innerHTML = '<div style="font-size:20px;color:var(--tx3);padding:4px 0">Nessun revisore inserito.</div>';
+    return;
+  }
+  var h = '';
+  currentRevisori.forEach(function(r, i) {
+    h += '<div class="rev-card">' +
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">' +
+        '<span style="font-size:20px;font-weight:700">Revisore '+(i+1)+'</span>' +
+        '<button class="btn" style="font-size:20px;padding:2px 8px;color:var(--red)" onclick="removeRev('+i+')">Rimuovi</button>' +
+      '</div>' +
+      '<div class="g2" style="gap:8px">' +
+        '<div class="fr" style="margin-bottom:6px"><label>Nome e Cognome</label>' +
+          '<input value="'+esc(r.nome||'')+'" oninput="currentRevisori['+i+'].nome=this.value" placeholder="es. Mario Rossi"></div>' +
+        '<div class="fr" style="margin-bottom:6px"><label>Affiliazione</label>' +
+          '<input value="'+esc(r.affiliazione||'')+'" oninput="currentRevisori['+i+'].affiliazione=this.value"></div>' +
+        '<div class="fr" style="margin-bottom:6px"><label>Data consegna revisione</label>' +
+          '<input type="date" value="'+esc(r.dataConsegna||'')+'" oninput="currentRevisori['+i+'].dataConsegna=this.value"></div>' +
+        '<div class="fr" style="margin-bottom:6px"><label>Stato revisione</label>' +
+          '<select onchange="currentRevisori['+i+'].accettazione=this.value">' +
+            '<option value=""'+((!r.accettazione)?' selected':'')+'>&#8212;</option>' +
+            '<option value="in attesa"'+(r.accettazione==='in attesa'?' selected':'')+'>In attesa</option>' +
+            '<option value="accettato"'+(r.accettazione==='accettato'?' selected':'')+'>Accettato</option>' +
+            '<option value="rifiutato"'+(r.accettazione==='rifiutato'?' selected':'')+'>Rifiutato</option>' +
+            '<option value="completato"'+(r.accettazione==='completato'?' selected':'')+'>Completato</option>' +
+          '</select></div>' +
+        (r.accettazione==='completato' ?
+          '<div class="fr" style="margin-bottom:6px"><label>Rating revisore</label>' +
+          '<div style="display:flex;gap:4px;align-items:center">' +
+          [1,2,3,4,5].map(function(n){
+            var f=(r.rating||0)>=n;
+            return '<span onclick="currentRevisori['+i+'].rating='+n+';renderRevList()" style="cursor:pointer;font-size:24px;color:'+(f?'#f5a623':'#ddd')+'" title="'+n+' stelle">'+(f?'★':'☆')+'</span>';
+          }).join('')+
+          (r.rating?'<span style="margin-left:6px;font-size:13px;color:#888">'+r.rating+'/5</span>':'')+
+          '</div></div>' : '') +
+        '<div class="fr" style="margin-bottom:6px"><label>Data proroga</label>' +
+          '<input type="date" value="'+esc(r.dataProroga||'')+'" oninput="currentRevisori['+i+'].dataProroga=this.value"></div>' +
+      '</div>' +
+      '<div class="fr" style="margin-top:4px"><label>Giudizio</label>' +
+        '<select onchange="currentRevisori['+i+'].giudizio=this.value">' +
+          '<option value=""'+(r.giudizio===''||!r.giudizio?' selected':'')+'>&#8212;</option>' +
+          '<option value="Accept submission"'+(r.giudizio==='Accept submission'?' selected':'')+'>Accept submission</option>' +
+          '<option value="Revisions required"'+(r.giudizio==='Revisions required'?' selected':'')+'>Revisions required</option>' +
+          '<option value="Resubmit for Review"'+(r.giudizio==='Resubmit for Review'?' selected':'')+'>Resubmit for Review</option>' +
+          '<option value="Resubmit Elsewhere"'+(r.giudizio==='Resubmit Elsewhere'?' selected':'')+'>Resubmit Elsewhere</option>' +
+          '<option value="Decline submission"'+(r.giudizio==='Decline submission'?' selected':'')+'>Decline submission</option>' +
+        '</select></div>' +
+    '</div>';
+  });
+  c.innerHTML = h;
+}
+function removeRev(i) { currentRevisori.splice(i,1); renderRevList(); }
+
+function makeUnlocker(groupId, btnId) {
+  return function() {
+    requirePwd(function() {
+      var grp = document.getElementById(groupId);
+      var btn = document.getElementById(btnId);
+      if (grp) grp.classList.remove('field-locked');
+      if (btn) { btn.textContent = '\u{1F513} Sbloccato'; btn.disabled = true; }
+    });
+  };
+}
+
+function unlockAllAdmin() {
+  // Unlock fId
+  var fId = document.getElementById('fId');
+  var btnId = document.getElementById('btnUnlockId');
+  if (fId) fId.disabled = false;
+  if (btnId) { btnId.textContent = '\u{1F513}'; btnId.disabled = true; }
+  // Unlock fDataSottomissione
+  var fDs = document.getElementById('fDataSottomissione');
+  var btnDs = document.getElementById('btnUnlockDataSott');
+  if (fDs) fDs.disabled = false;
+  if (btnDs) { btnDs.textContent = '\u{1F513}'; btnDs.disabled = true; }
+  // Unlock groups
+  ['antiGroup','pubGroup','procGroup'].forEach(function(id) {
+    var grp = document.getElementById(id);
+    if (grp) grp.classList.remove('field-locked');
+  });
+  ['btnUnlockAnti','btnUnlockPub','btnUnlockProc'].forEach(function(id) {
+    var btn = document.getElementById(id);
+    if (btn) { btn.textContent = '\u{1F513} Sbloccato'; btn.disabled = true; }
+  });
+  // Mark session as unlocked so requirePwd is bypassed
+  sessionUnlocked = true;
+}
+
+function lockAllGroups() {
+  // Lock fId
+  var fId = document.getElementById('fId');
+  var btnId = document.getElementById('btnUnlockId');
+  if (fId) fId.disabled = true;
+  if (btnId) { btnId.textContent = '\u{1F512}'; btnId.disabled = false; }
+  // Lock fDataSottomissione
+  var fDs = document.getElementById('fDataSottomissione');
+  var btnDs = document.getElementById('btnUnlockDataSott');
+  if (fDs) fDs.disabled = true;
+  if (btnDs) { btnDs.textContent = '\u{1F512}'; btnDs.disabled = false; }
+  // Lock groups
+  ['antiGroup','pubGroup','procGroup'].forEach(function(id) {
+    var grp = document.getElementById(id);
+    if (grp) grp.classList.add('field-locked');
+  });
+  ['btnUnlockAnti','btnUnlockPub','btnUnlockProc'].forEach(function(id) {
+    var btn = document.getElementById(id);
+    if (btn) { btn.textContent = '\u{1F512} Sblocca'; btn.disabled = false; }
+  });
+}
+
+function unlockProcGroup() {
+  requirePwd(function() {
+    var grp = document.getElementById('procGroup');
+    var btn = document.getElementById('btnUnlockProc');
+    if (grp) grp.classList.remove('field-locked');
+    if (btn) { btn.textContent = '\u{1F513} Sbloccato'; btn.disabled = true; }
+  });
+}
+
+function lockProcGroup() {
+  var grp = document.getElementById('procGroup');
+  var btn = document.getElementById('btnUnlockProc');
+  if (grp) grp.classList.add('field-locked');
+  if (btn) { btn.textContent = '\u{1F512} Sblocca'; btn.disabled = false; }
+}
+
+function checkAntiplagio() {
+  var sim = parseFloat(document.getElementById('fSim').value) || 0;
+  var ai  = parseFloat(document.getElementById('fAi').value)  || 0;
+  var box = document.getElementById('antiplagioAlert');
+  if (box) box.style.display = (sim > 30 || ai > 30) ? 'block' : 'none';
+}
+
+function openNewArt() {
+  editingArtId = null;
+  document.getElementById('artModalTitle').textContent = 'Nuovo articolo';
+  ['fId','fTitle','fAuthors','fAffil','fNat','fAbstract'].forEach(function(id){ document.getElementById(id).value=''; });
+  ['fLen','fArtNum','fRefs','fCTeMA','fCTeMA2226','fCJCR','fCJCR2y','fSim','fAi'].forEach(function(id){ document.getElementById(id).value=''; });
+  document.getElementById('fDataSottomissione').value='';
+  document.getElementById('fImpaginato').checked=false;
+  document.getElementById('fNewNote').value='';
+  renderNotesLog([]);
+  document.getElementById('fHighlight').checked=false;
+  document.getElementById('fOneDrive').value='';
+  document.getElementById('fOneDriveBtn').style.display='none';
+  document.getElementById('fOneDriveWrap').style.display = adminMode?'':'none';
+  document.getElementById('fEd2').value=''; document.getElementById('fCopy').value='';
+  document.getElementById('fGk').value=''; document.getElementById('fIntlArt').value='';
+  document.getElementById('fComunicazioneInviata').checked=false;
+  document.getElementById('fDataComunicazione').value='';
+  document.getElementById('fRispostaAutori').value='';
+  if(document.getElementById('antiplagioAlert')) document.getElementById('antiplagioAlert').style.display='none';
+  document.getElementById('fStep').value=''; document.getElementById('fSecArt').selectedIndex=0;
+  document.getElementById('fStatus').value='Sottomesso'; document.getElementById('fDead').value='';
+  document.getElementById('gkRow').style.display='block';
+  document.getElementById('btnDel').style.display='none';
+  document.getElementById('btnRifiutoGK').style.display='none';
+  document.getElementById('btnAccettazioneGK').style.display='none';
+  document.getElementById('btnRifiutoTur').style.display='none';
+  document.getElementById('stepHint').textContent='';
+  currentRevisori=[]; renderRevList();
+  currentRevisori2=[]; renderRevList2();
+  document.getElementById('fDecisioneEditor').value='';
+  document.getElementById('fDecisioneEditor2').value='';
+  document.getElementById('fDataRevisione').value='';
+  document.getElementById('fDataRevisione2').value='';
+  document.getElementById('fDataAccettazione').value='';
+  document.getElementById('fDataAccettazione2').value='';
+  checkDecisioneEditor(); checkDecisioneEditor2();
+  buildIssOpts('fIssArt','');
+  if (!adminMode) {
+    lockAllGroups();
+    // Editor accounts can change step and editorial decisions
+    if (isEditorAccount()) {
+      ['fStep','fDecisioneEditor','fDecisioneEditor2',
+       'fDataRevisione','fDataRevisione2','fDataAccettazione','fDataAccettazione2',
+       'fDataComunicazione','fRispostaAutori','fComunicazioneInviata','fNewNote'].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) el.disabled = false;
+      });
+      // Re-enable procGroup pointer-events for step select only
+      var proc = document.getElementById('procGroup');
+      if (proc) {
+        // Remove lock from procGroup but keep fGk, fEd2, fCopy still disabled
+        proc.classList.remove('field-locked');
+        ['fGk','fEd2','fCopy'].forEach(function(id) {
+          var el = document.getElementById(id);
+          if (el) el.disabled = true;
+        });
+      }
+    }
+  }
+  document.getElementById('artModal').classList.add('open');
+}
+function openEditArt(id) {
+  var a = articles.find(function(x){ return x.id===id; });
+  if (!a) return;
+  editingArtId = id;
+  var _lm = a.lastModified ? new Date(a.lastModified).toLocaleString('it-IT',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '';
+  document.getElementById('artModalTitle').innerHTML = 'Modifica articolo #'+esc(id) +
+    (_lm ? '<span style="font-size:13px;font-weight:400;color:#bbb;margin-left:10px">Ultima modifica: '+_lm+'</span>' : '');
+  document.getElementById('fId').value=a.id;
+  document.getElementById('fDataSottomissione').value=a.dataSottomissione||'';
+  document.getElementById('fTitle').value=a.title;
+  document.getElementById('fAuthors').value=a.authors||'';
+  document.getElementById('fAffil').value=a.affiliation||'';
+  document.getElementById('fNat').value=a.nationality||'';
+  document.getElementById('fIntlArt').value=a.intl||'';
+  document.getElementById('fAbstract').value=a.abstract||'';
+  setTimeout(function(){ autoResize(document.getElementById('fAbstract')); }, 0);
+  document.getElementById('fLen').value=a.length||'';
+  document.getElementById('fImpaginato').checked=!!(a.impaginato);
+  renderNotesLog(a.notesLog||[]);
+  document.getElementById('fNewNote').value='';
+  document.getElementById('fHighlight').checked=!!(a.highlight);
+  // OneDrive link
+  var _od = a.oneDrive||'';
+  document.getElementById('fOneDrive').value = _od;
+  var _odBtn = document.getElementById('fOneDriveBtn');
+  var _odWrap = document.getElementById('fOneDriveWrap');
+  if (adminMode) {
+    _odWrap.style.display = '';
+    document.getElementById('fOneDrive').style.display = 'block';
+    document.getElementById('fOneDrive').disabled = false;
+    _odBtn.href = _od;
+    _odBtn.style.display = _od ? 'inline-flex' : 'none';
+  } else if ((currentUser === 'GateKeeper' || currentUser === 'DirettoreTeMA')) {
+    _odWrap.style.display = _od ? '' : 'none';
+    document.getElementById('fOneDrive').style.display = 'none';
+    _odBtn.href = _od;
+    _odBtn.style.display = _od ? 'inline-flex' : 'none';
+  } else {
+    _odWrap.style.display = 'none';
+  }
+  document.getElementById('fSecArt').value=a.section||'Focus';
+  document.getElementById('fStep').value=a.step||'';
+
+  document.getElementById('fStatus').value=a.status||'Sottomesso';
+  document.getElementById('fDead').value=a.deadline||'';
+  document.getElementById('fArtNum').value=a.articleNum||'';
+  document.getElementById('fEd2').value=a.editor||'';
+  document.getElementById('fCopy').value=a.copyeditor||'';
+  document.getElementById('fGk').value=a.gatekeeper||'';
+  document.getElementById('fSim').value=(a.similarity!==null&&a.similarity!==undefined)?a.similarity:'';
+  document.getElementById('fAi').value=(a.aiPercent!==null&&a.aiPercent!==undefined)?a.aiPercent:'';
+  document.getElementById('fRefs').value=a.refsTotal||'';
+  document.getElementById('fCTeMA').value=a.citeTeMA||'';
+  document.getElementById('fCTeMA2226').value=a.citeTeMA2226||'';
+  document.getElementById('fCJCR').value=a.citeJCR||'';
+  document.getElementById('fCJCR2y').value=a.citeJCR2y||'';
+  document.getElementById('fComunicazioneInviata').checked=!!(a.comunicazioneInviata);
+  document.getElementById('fDataComunicazione').value=a.dataComunicazione||'';
+  document.getElementById('fRispostaAutori').value=a.rispostaAutori||'';
+  checkAntiplagio();
+  document.getElementById('gkRow').style.display=(a.editor&&a.editor!=='')?'none':'block';
+  document.getElementById('btnDel').style.display='inline-block';
+  document.getElementById('btnRifiutoGK').style.display=(adminMode||currentUser==='GateKeeper')?'inline-block':'none';
+  var _showAccGk = (adminMode||currentUser==='GateKeeper') && (!a.editor || a.editor==='') && a.step !== '3';
+  document.getElementById('btnAccettazioneGK').style.display=_showAccGk?'inline-block':'none';
+  document.getElementById('btnRifiutoTur').style.display=adminMode?'inline-block':'none';
+  document.getElementById('stepHint').textContent=a.step&&STEPS[a.step]?STEPS[a.step]:'';
+  currentRevisori=JSON.parse(JSON.stringify(a.revisori||[])); renderRevList();
+  currentRevisori2=JSON.parse(JSON.stringify(a.revisori2||[])); renderRevList2();
+  document.getElementById('fDecisioneEditor').value=a.decisioneEditor||'';
+  document.getElementById('fDecisioneEditor2').value=a.decisioneEditor2||'';
+  document.getElementById('fDataRevisione').value=a.dataRevisione||'';
+  document.getElementById('fDataRevisione2').value=a.dataRevisione2||'';
+  document.getElementById('fDataAccettazione').value=a.dataAccettazione||'';
+  document.getElementById('fDataAccettazione2').value=a.dataAccettazione2||'';
+  checkDecisioneEditor(); checkDecisioneEditor2();
+  buildIssOpts('fIssArt',a.issue||'');
+  if (!adminMode) {
+    lockAllGroups();
+    if (isEditorAccount()) {
+      ['fStep','fDecisioneEditor','fDecisioneEditor2',
+       'fDataRevisione','fDataRevisione2','fDataAccettazione','fDataAccettazione2',
+       'fDataComunicazione','fRispostaAutori','fComunicazioneInviata','fNewNote'].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) el.disabled = false;
+      });
+      var proc = document.getElementById('procGroup');
+      if (proc) {
+        proc.classList.remove('field-locked');
+        ['fGk','fEd2','fCopy'].forEach(function(id) {
+          var el = document.getElementById(id);
+          if (el) el.disabled = true;
+        });
+      }
+    }
+  }
+  document.getElementById('artModal').classList.add('open');
+}
+function autoStep(a) {
+  // Decline submission: priorità assoluta
+  if (a.decisioneEditor === 'Decline submission' || a.decisioneEditor2 === 'Decline submission') {
+    if (a.status !== 'Rifiutato') a.dataRifiuto = new Date().toISOString();
+    a.step = '13';
+    a.status = 'Rifiutato';
+    return a;
+  }
+  // St.3 (Approvazione GK) impostato solo dal pulsante — non toccare
+  if (a.step === '3') return a;
+
+  var sim   = parseFloat(a.similarity);
+  var ai    = parseFloat(a.aiPercent);
+  var simOk = !isNaN(sim) && a.similarity !== null && a.similarity !== '';
+  var aiOk  = !isNaN(ai)  && a.aiPercent  !== null && a.aiPercent  !== '';
+
+  // Se lo step è stato cambiato manualmente, non sovrascriverlo mai
+  if (a._stepManuale) return a;
+
+  // Funzione helper: avanza lo step solo se il nuovo è maggiore dell'attuale
+  function advance(newStep) {
+    if (parseInt(newStep) > parseInt(a.step)) a.step = newStep;
+  }
+
+  // St.1 → St.2: GateKeeper assegnato
+  if (a.gatekeeper && a.gatekeeper !== '') advance('2');
+
+  // St.3/4 → St.5: comunicazione Turnitin inviata (valori >30)
+  if (simOk && aiOk && (sim > 30 || ai > 30) && a.comunicazioneInviata) advance('5');
+
+  // St.5 → St.6: rifiuto Turnitin
+  if ((sim > 30 || ai > 30) && a.rispostaAutori === 'ritirato') {
+    advance('6');
+    a.status = 'Rifiutato';
+    if (!a.dataRifiuto) a.dataRifiuto = new Date().toISOString();
+  }
+
+  // → St.7: editor assegnato
+  if (a.editor && a.editor !== '') advance('7');
+
+  // → St.9: almeno un revisore individuato
+  if (a.revisori && a.revisori.length > 0) advance('9');
+
+  // → St.10/11: revisori accettati
+  if (a.revisori) {
+    var accettati = a.revisori.filter(function(r){
+      return r.accettazione === 'accettato' || r.accettazione === 'completato';
+    }).length;
+    if (accettati >= 1) advance('10');
+    if (accettati >= 2) advance('11');
+  }
+
+  // → St.12: decisione editor
+  var dec1 = a.decisioneEditor || '';
+  var dec2 = a.decisioneEditor2 || '';
+  if (dec1 === 'Revisions required' || dec1 === 'Resubmit for Review' ||
+      dec2 === 'Revisions required' || dec2 === 'Resubmit for Review') {
+    advance('12');
+  }
+
+  // → St.15: secondo round revisori
+  if ((dec1 === 'Resubmit for Review' || dec2 === 'Resubmit for Review') &&
+      a.revisori2 && a.revisori2.length > 0) {
+    advance('15');
+  }
+
+  // → St.17: copyeditor assegnato
+  if (a.copyeditor && a.copyeditor !== '') advance('17');
+
+  return a;
+}
+
+
+function saveArt() {
+  // Detect manual step change
+  var _origIdx = articles.findIndex(function(x){ return x.id===editingArtId; });
+  var _origStep = _origIdx>=0 ? (articles[_origIdx].step||'') : '';
+  var _newStep = document.getElementById('fStep').value;
+
+  var sim=document.getElementById('fSim').value, ai=document.getElementById('fAi').value;
+  // Helper: read field value, falling back to original if disabled
+  function fVal(id, orig) {
+    var el = document.getElementById(id);
+    if (!el) return orig !== undefined ? orig : '';
+    if (el.disabled) return orig !== undefined ? orig : el.value;
+    return el.value;
+  }
+  var _orig = _origIdx >= 0 ? articles[_origIdx] : {};
+
+  var data={
+    id: fVal('fId', _orig.id || '').trim(),
+    dataSottomissione: fVal('fDataSottomissione', _orig.dataSottomissione || ''),
+    title:fVal('fTitle', _orig.title || '').trim(),
+    authors:fVal('fAuthors', _orig.authors || '').trim(),
+    affiliation:fVal('fAffil', _orig.affiliation || '').trim(),
+    nationality:fVal('fNat', _orig.nationality || '').trim(),
+    intl:fVal('fIntlArt', _orig.intl || 'no'),
+    abstract:fVal('fAbstract', _orig.abstract || '').trim(),
+    length:parseInt(fVal('fLen', _orig.length || 0))||0,
+    impaginato:document.getElementById('fImpaginato').checked,
+    notesLog: (_origIdx>=0 && articles[_origIdx].notesLog) ? articles[_origIdx].notesLog : [],
+    highlight:document.getElementById('fHighlight').checked,
+    oneDrive:fVal('fOneDrive', _orig.oneDrive || ''),
+    section:fVal('fSecArt', _orig.section || 'Focus'),
+    status:fVal('fStatus', _orig.status || 'Sottomesso'),
+    dataRifiuto: (fVal('fStatus', _orig.status || 'Sottomesso') === 'Rifiutato' && (_origIdx<0 || articles[_origIdx].status !== 'Rifiutato'))
+      ? new Date().toISOString()
+      : (_origIdx>=0 ? (articles[_origIdx].dataRifiuto || '') : ''),
+    step: document.getElementById('fStep').value || _orig.step || '1',
+    lastModified: new Date().toISOString(),
+    issue:fVal('fIssArt', _orig.issue || ''),
+    articleNum:parseInt(fVal('fArtNum', _orig.articleNum || ''))||null,
+    deadline:fVal('fDead', _orig.deadline || ''),
+    editor:fVal('fEd2', _orig.editor || ''),
+    copyeditor:fVal('fCopy', _orig.copyeditor || ''),
+    gatekeeper:fVal('fGk', _orig.gatekeeper || ''),
+    similarity:sim!==''?parseFloat(sim):null,
+    aiPercent:ai!==''?parseFloat(ai):null,
+    refsTotal:parseInt(fVal('fRefs', _orig.refsTotal || 0))||0,
+    citeTeMA:parseInt(fVal('fCTeMA', _orig.citeTeMA || 0))||0,
+    citeTeMA2226:parseInt(fVal('fCTeMA2226', _orig.citeTeMA2226 || 0))||0,
+    citeJCR:parseInt(fVal('fCJCR', _orig.citeJCR || 0))||0,
+    citeJCR2y:parseInt(fVal('fCJCR2y', _orig.citeJCR2y || 0))||0,
+    comunicazioneInviata:document.getElementById('fComunicazioneInviata').checked,
+    dataComunicazione:fVal('fDataComunicazione', _orig.dataComunicazione || ''),
+    rispostaAutori:fVal('fRispostaAutori', _orig.rispostaAutori || ''),
+    revisori:JSON.parse(JSON.stringify(currentRevisori)),
+    revisori2:JSON.parse(JSON.stringify(currentRevisori2)),
+    decisioneEditor: document.getElementById('fDecisioneEditor').value,
+    decisioneEditor2: document.getElementById('fDecisioneEditor2').value,
+    dataRevisione:fVal('fDataRevisione', _orig.dataRevisione || ''),
+    dataRevisione2:fVal('fDataRevisione2', _orig.dataRevisione2 || ''),
+    dataAccettazione:fVal('fDataAccettazione', _orig.dataAccettazione || ''),
+    dataAccettazione2:fVal('fDataAccettazione2', _orig.dataAccettazione2 || '')
+  };
+  if (!data.id||!data.title){ alert('ID e Titolo sono obbligatori.'); return; }
+  console.log('[TeMA] saveArt: id='+data.id+' step='+data.step+' origStep='+_origStep+' stepManuale='+(_newStep!==_origStep));
+  // Se l'utente ha cambiato lo step manualmente, proteggilo da autoStep
+  if (_newStep !== '' && _newStep !== _origStep) data._stepManuale = true;
+  data = autoStep(data);
+  delete data._stepManuale;
+  if (editingArtId) {
+    var idx=articles.findIndex(function(a){ return a.id===editingArtId; });
+    if (idx>=0) articles[idx]=data;
+  } else {
+    if (articles.find(function(a){ return a.id===data.id; })){ alert('ID gi\u00e0 esistente.'); return; }
+    if (!data.step || data.step === '') data.step = '1';
+    articles.push(data);
+    sendNotification('insert', data.id, data.title);
+  }
+
+  document.getElementById('artModal').classList.remove('open');
+  schedSave(); refresh();
+}
+function accettazioneGK() {
+  if (!editingArtId) return;
+  var capturedId = editingArtId;
+  var idx = articles.findIndex(function(a){ return a.id === capturedId; });
+  if (idx >= 0) {
+    _lastSavedArtId = capturedId;
+    articles[idx].step = '3';
+    articles[idx].status = 'Sottomesso';
+  }
+  document.getElementById('artModal').classList.remove('open');
+  editingArtId = null;
+  schedSave();
+  refresh();
+}
+
+function rifiutoGK() {
+  if (!editingArtId) return;
+  var capturedId = editingArtId;
+  requirePwd(function() {
+    var idx = articles.findIndex(function(a){ return a.id === capturedId; });
+    if (idx >= 0) {
+      articles[idx].step = '4';
+      articles[idx].status = 'Rifiutato';
+    }
+    document.getElementById('artModal').classList.remove('open');
+    editingArtId = null;
+    schedSave();
+    refresh();
+  });
+}
+
+function rifiutoTurnitin() {
+  if (!editingArtId) return;
+  var capturedId = editingArtId;
+  requirePwd(function() {
+    var idx = articles.findIndex(function(a){ return a.id === capturedId; });
+    if (idx >= 0) {
+      articles[idx].comunicazioneInviata = true;
+      articles[idx].rispostaAutori = 'ritirato';
+      articles[idx].step = '6';
+      articles[idx].status = 'Rifiutato';
+      if (!articles[idx].dataComunicazione) {
+        articles[idx].dataComunicazione = new Date().toISOString().slice(0,10);
+      }
+    }
+    document.getElementById('artModal').classList.remove('open');
+    editingArtId = null;
+    schedSave();
+    refresh();
+  });
+}
+
+function deleteArt() {
+  if (!editingArtId) return;
+  var capturedId = editingArtId;
+  requirePwd(function() {
+    var delArt = articles.find(function(a){ return a.id === capturedId; });
+    articles = articles.filter(function(a){ return a.id !== capturedId; });
+    if (delArt) sendNotification('delete', delArt.id, delArt.title);
+    document.getElementById('artModal').classList.remove('open');
+    editingArtId = null;
+    schedSave();
+    refresh();
+  });
+}
+
+function openNewIss() {
+  editingIssKey=null;
+  document.getElementById('issModalTitle').textContent='Nuovo fascicolo';
+  document.getElementById('iType').value='ordinario';
+  document.getElementById('iYear').value=2026;
+  var _on=issues.filter(function(i){return i.type==='ordinario';}).map(function(i){return parseInt(i.num)||0;});
+  document.getElementById('iNum').value=String(_on.length>0?Math.max.apply(null,_on)+1:1);
+  document.getElementById('iTheme').value='';
+  document.getElementById('iDeadline').value='';
+  document.getElementById('iNotes').value='';
+  document.getElementById('iPub').checked=false;
+  document.getElementById('iNumRow').style.display='block';
+  document.getElementById('btnDelIss').style.display='none';
+  document.getElementById('issModal').classList.add('open');
+}
+function openEditIss(key) {
+  var iss=issues.find(function(i){ return i.key===key; });
+  if (!iss) return;
+  editingIssKey=key;
+  document.getElementById('issModalTitle').textContent='Modifica fascicolo';
+  document.getElementById('iType').value=iss.type;
+  document.getElementById('iYear').value=iss.year||2026;
+  document.getElementById('iNum').value=iss.num||'1';
+  document.getElementById('iTheme').value=iss.theme||'';
+  document.getElementById('iDeadline').value=iss.deadline||'';
+  document.getElementById('iNotes').value=iss.note||'';
+  document.getElementById('iPub').checked=!!iss.pubblicato;
+  document.getElementById('iNumRow').style.display=iss.type==='ordinario'?'block':'none';
+  document.getElementById('btnDelIss').style.display='inline-block';
+  document.getElementById('issModal').classList.add('open');
+}
+function saveIss() {
+  var type=document.getElementById('iType').value;
+  var year=parseInt(document.getElementById('iYear').value)||2026;
+  var num=parseInt(document.getElementById('iNum').value)||1;
+  var theme=document.getElementById('iTheme').value.trim();
+  var deadline=document.getElementById('iDeadline').value;
+  var note=document.getElementById('iNotes').value.trim();
+  var pub=document.getElementById('iPub').checked;
+  // Check if we are removing publication status
+  var wasPublished = editingIssKey && issues.find(function(i){ return i.key===editingIssKey; }) &&
+                     issues.find(function(i){ return i.key===editingIssKey; }).pubblicato;
+  var unpublishing = wasPublished && !pub;
+  if (pub || unpublishing) {
+    requirePwd(function(){ doSaveIss(type,year,num,theme,deadline,note,pub,unpublishing); });
+  } else {
+    doSaveIss(type,year,num,theme,deadline,note,pub,false);
+  }
+}
+
+function doSaveIss(type,year,num,theme,deadline,note,pub,unpublishing) {
+  var key,label;
+  if (type==='ordinario'){ key=String(num).padStart(2,'0')+'/'+year; label='TeMA '+key; }
+  else { key=editingIssKey||('SI-'+Date.now()); label='SI '+theme.slice(0,40); }
+  if (editingIssKey) {
+    var idx=issues.findIndex(function(i){ return i.key===editingIssKey; });
+    if (idx>=0) {
+      var newKey=type==='ordinario'?String(num).padStart(2,'0')+'/'+year:editingIssKey;
+      var newLabel=type==='ordinario'?'TeMA '+newKey:label;
+      if(newKey!==editingIssKey){articles.forEach(function(a){if(a.issue===editingIssKey)a.issue=newKey;});}
+      issues[idx]=Object.assign({},issues[idx],{key:newKey,type:type,year:year,num:num,theme:theme,deadline:deadline,note:note,label:newLabel,pubblicato:pub});
+    }
+  } else {
+    if (issues.find(function(i){ return i.key===key; })){ alert('Fascicolo gi\u00e0 esistente.'); return; }
+    issues.push({key:key,label:label,type:type,year:year,num:num,theme:theme,deadline:deadline,note:note,pubblicato:pub});
+  }
+  if (pub) {
+    var issKey=editingIssKey||key;
+    articles.forEach(function(a){ if (a.issue===issKey && a.status!=='Rifiutato') { a.status='Pubblicato'; a.step='18'; } });
+  }
+  if (unpublishing) {
+    var issKey2=editingIssKey||key;
+    articles.forEach(function(a){
+      if (a.issue===issKey2 && a.status==='Pubblicato') a.status='Sottomesso';
+    });
+  }
+  document.getElementById('issModal').classList.remove('open');
+  _lastSavedArtId = null; schedSave(); rebuildIssFilters(); renderNumeri();
+}
+function deleteIss() {
+  if (!editingIssKey) return;
+  var capturedKey = editingIssKey;
+  requirePwd(function() {
+    issues = issues.filter(function(i){ return i.key !== capturedKey; });
+    articles.forEach(function(a){ if(a.issue===capturedKey) a.issue=''; });
+    document.getElementById('issModal').classList.remove('open');
+    editingIssKey = null;
+    schedSave();
+    rebuildIssFilters();
+    renderNumeri();
+    refresh();
+  });
+}
+
+function exportData() {
+  var blob=new Blob([JSON.stringify({issues:issues,articles:articles},null,2)],{type:'application/json'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a'); a.href=url; a.download='tema-journal-'+new Date().toISOString().slice(0,10)+'.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(url); },3000);
+}
+function importData(e) {
+  var file=e.target.files[0]; if (!file) return;
+  var reader=new FileReader();
+  reader.onload=function(ev){
+    try {
+      var d=JSON.parse(ev.target.result);
+      if (d.issues) issues=d.issues;
+      if (d.articles) articles=d.articles;
+      schedSave(); rebuildIssFilters(); refresh();
+      alert('Importazione completata: '+articles.length+' articoli.');
+    } catch(err){ alert('Errore nel file JSON.'); }
+  };
+  reader.readAsText(file); e.target.value='';
+}
+
+function renderRifTur() {
+  var q = (document.getElementById('srchRifTur').value||'').toLowerCase();
+  var f = articles.filter(function(a) {
+    if (!a.rispostaAutori || a.rispostaAutori === '') return false;
+    var sim = parseFloat(a.similarity); var ai = parseFloat(a.aiPercent);
+    if (!(sim > 30 || ai > 30)) return false;
+    if (q && (a.id+' '+a.title+' '+a.authors).toLowerCase().indexOf(q) < 0) return false;
+    return true;
+  });
+  f.sort(function(a,b){ return parseInt(b.id) - parseInt(a.id); });
+  document.getElementById('rifTurCount').textContent = f.length+' articol'+(f.length===1?'o':'i');
+  document.getElementById('rifTurEl').innerHTML = f.length ? f.map(function(a){ return artCard(a,true); }).join('') :
+    '<div style="text-align:center;padding:3rem;color:var(--tx2)">Nessun articolo.</div>';
+}
+
+function updateTuttiTabLabel(count) {
+  var btn = document.querySelector('.tab[data-tab="tutti"]');
+  if (btn) btn.textContent = 'Tutti gli articoli (' + count + ')';
+}
+
+function updateTabCounts() {
+  // GK evaluation: no editor, not Rifiutato, not Pubblicato, not step 19
+  var gkCount = articles.filter(function(a){
+    return a.status !== 'Pubblicato' && a.status !== 'Rifiutato' && a.step !== '18' &&
+           (!a.editor || a.editor === '');
+  }).length;
+
+  // Articoli in lavorazione: has editor, not Rifiutato, not Pubblicato, not step 19
+  var listaCount = articles.filter(function(a){
+    return a.status !== 'Pubblicato' && a.status !== 'Rifiutato' && a.step !== '18' &&
+           a.editor && a.editor !== '';
+  }).length;
+
+  // Rifiutati: status Rifiutato
+  var rifCount = articles.filter(function(a){
+    return a.status === 'Rifiutato';
+  }).length;
+
+  // Pubblicati
+  var pubCount = articles.filter(function(a){
+    return a.status === 'Pubblicato';
+  }).length;
+
+  // Tutti: totale reale degli articoli presenti
+  var tuttiCount = articles.length;
+
+  document.querySelectorAll('.tab').forEach(function(btn){
+    var tab = btn.dataset.tab;
+    if (tab === 'gatekeeper') btn.textContent = 'GateKeeper evaluation (' + gkCount + ')';
+    if (tab === 'lista')      btn.textContent = 'Articoli in lavorazione (' + listaCount + ')';
+    if (tab === 'rifiutati')  btn.textContent = 'Rifiutati (' + rifCount + ')';
+    if (tab === 'pubblicati') btn.textContent = 'Articoli pubblicati (' + pubCount + ')';
+    if (tab === 'tutti')      updateTuttiTabLabel(tuttiCount);
+  });
+}
+function switchTab(name) {
+  updateTabCounts();
+  document.querySelectorAll('.tab').forEach(function(t){ t.classList.toggle('active',t.dataset.tab===name); });
+  document.querySelectorAll('.sec').forEach(function(s){ s.classList.toggle('active',s.id==='sec-'+name); });
+  if (name==='tutti')         renderTutti();
+  if (name==='gatekeeper')    renderGk();
+  if (name==='lista')         renderLista();
+  if (name==='editori')       renderTeam();
+  if (name==='numeri')        renderNumeri();
+  if (name==='verbale')       { rebuildIssFilters(); loadDriveText(); renderVerbale(); }
+    if (name==='noteeditoriali') { /* opens in new window via button */ }
+  if (name==='pubblicati')    { rebuildIssFilters(); renderPub(); }
+  if (name==='revisori')      renderRevisori();
+    if (name==='rifiutati') { renderRifRef(); renderRifGk(); renderRifTur(); }
+}
+function refresh() {
+  renderStats();
+  updateTabCounts();
+  var active=document.querySelector('.tab.active');
+  if (active) switchTab(active.dataset.tab);
+}
+
+function initFilters() {
+  var edSel=document.getElementById('fEd');
+  edSel.innerHTML='<option value="">Tutti gli editor</option>';
+  EDITORS.forEach(function(e){ var o=document.createElement('option');o.value=e;o.textContent=e;edSel.appendChild(o); });
+  var stSel=document.getElementById('fSt');
+  ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18'].forEach(function(k){
+    if (!STEPS[k]) return;
+    var o=document.createElement('option'); o.value=k; o.textContent=STEPS[k].slice(0,45);
+    stSel.appendChild(o);
+  });
+  rebuildIssFilters();
+
+  // Populate Tutti editor select (same as Lista)
+  var edSelT = document.getElementById('fEdTutti');
+  if (edSelT) {
+    edSelT.innerHTML = '<option value="">Tutti gli editor</option>';
+    ['Carmen Guida','Floriana Zucaro','Gerardo Carpentieri','Peppe Mazzeo',
+     'Romano Fistola','Rosa Anna La Rocca','Rosaria Battarra','Stefano Franco'].forEach(function(e){
+      edSelT.innerHTML += '<option value="'+e+'">'+e+'</option>';
+    });
+  }
+
+  // Populate Tutti step select (same as Lista)
+  var stSelT = document.getElementById('fStTutti');
+  if (stSelT) {
+    stSelT.innerHTML = '<option value="">Tutti gli step</option>';
+    ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18'].forEach(function(k){
+      if (!STEPS[k]) return;
+      stSelT.innerHTML += '<option value="'+k+'">'+STEPS[k].slice(0,45)+'</option>';
+    });
+  }
+}
+
+
+var adminMode = false;
+var currentUser = '';
+var EDITOR_ACCOUNTS = ['EditorTeMA','Carmen Guida','Floriana Zucaro','Gerardo Carpentieri',
+  'Peppe Mazzeo','Romano Fistola','Rosa Anna La Rocca','Rosaria Battarra','Stefano Franco'];
+function isEditorAccount() { return EDITOR_ACCOUNTS.indexOf(currentUser) >= 0; }
+
+function doLogin() {
+  var u = document.getElementById('loginUser').value.trim();
+  var p = document.getElementById('loginPass').value;
+  if (u === 'RedazioneTeMA' && p === '#ViaSanRocco37@') {
+    adminMode = true; currentUser = 'RedazioneTeMA';
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'block';
+    bootApp();
+  } else if (u === 'GateKeeper' && p === 'GateNapoli03') {
+    adminMode = false; currentUser = 'GateKeeper';
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'block';
+    bootApp();
+  } else if (u === 'DirettoreTeMA' && p === '#Tecchio80TeMA') {
+    adminMode = false; currentUser = 'DirettoreTeMA'; // same permissions as GateKeeper
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'block';
+    bootApp();
+  } else if (u === 'EditorTeMA' && p === 'tEMA8009') {
+    adminMode = false; currentUser = 'EditorTeMA';
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'block';
+    bootApp();
+  } else if (u === 'Carmen Guida' && p === 'CG@TeMA#2026!') {
+    adminMode = false; currentUser = 'Carmen Guida';
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'block';
+    bootApp();
+  } else if (u === 'Floriana Zucaro' && p === 'FZ@TeMA#2026!') {
+    adminMode = false; currentUser = 'Floriana Zucaro';
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'block';
+    bootApp();
+  } else if (u === 'Gerardo Carpentieri' && p === 'GCarp@TeMA#2026!') {
+    adminMode = false; currentUser = 'Gerardo Carpentieri';
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'block';
+    bootApp();
+  } else if (u === 'Peppe Mazzeo' && p === 'PM@TeMA#2026!') {
+    adminMode = false; currentUser = 'Peppe Mazzeo';
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'block';
+    bootApp();
+  } else if (u === 'Romano Fistola' && p === 'RF@TeMA#2026!') {
+    adminMode = false; currentUser = 'Romano Fistola';
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'block';
+    bootApp();
+  } else if (u === 'Rosa Anna La Rocca' && p === 'RALR@TeMA#2026!') {
+    adminMode = false; currentUser = 'Rosa Anna La Rocca';
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'block';
+    bootApp();
+  } else if (u === 'Rosaria Battarra' && p === 'RB@TeMA#2026!') {
+    adminMode = false; currentUser = 'Rosaria Battarra';
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'block';
+    bootApp();
+  } else if (u === 'Stefano Franco' && p === 'SF@TeMA#2026!') {
+    adminMode = false; currentUser = 'Stefano Franco';
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'block';
+    bootApp();
+  } else {
+    document.getElementById('loginErr').style.display = 'block';
+    document.getElementById('loginPass').value = '';
+    document.getElementById('loginPass').focus();
+  }
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = el.scrollHeight + 'px';
+}
+
+function bootApp() {
+
+  document.getElementById('loginPass').addEventListener('keydown', function(e){
+    if (e.key === 'Enter') doLogin();
+  });
+  document.getElementById('loginUser').addEventListener('keydown', function(e){
+    if (e.key === 'Enter') document.getElementById('loginPass').focus();
+  });
+
+  initFilters(); renderStats(); updateTabCounts(); 
+  if (adminMode) {
+    setTimeout(unlockAllAdmin, 500);
+    renderGk();
+  } else if ((currentUser === 'GateKeeper' || currentUser === 'DirettoreTeMA')) {
+    var bkpBtn = document.querySelector('[onclick="backupData()"]');
+    if (bkpBtn) bkpBtn.style.display = 'none';
+    // DirettoreTeMA vede anche il verbale; GateKeeper no
+    if (currentUser === 'GateKeeper') {
+      var verbaleBtn = document.querySelector('.tab[data-tab="verbale"]');
+      if (verbaleBtn) verbaleBtn.style.display = 'none';
+    }
+    renderGk();
+    if (currentUser === 'DirettoreTeMA') {
+      var neBtn = document.querySelector('.tab[data-tab="noteeditoriali"]');
+      if (neBtn) neBtn.style.display = '';
+    }
+  } else {
+    // Editor accounts: hide GateKeeper evaluation, Verbale PDF, Note Editoriali and Backup
+    var bkpBtn2 = document.querySelector('[onclick="backupData()"]');
+    if (bkpBtn2) bkpBtn2.style.display = 'none';
+    var tabsToHide2 = ['gatekeeper', 'verbale', 'noteeditoriali'];
+    tabsToHide2.forEach(function(tab) {
+      var btn = document.querySelector('.tab[data-tab="'+tab+'"]');
+      if (btn) btn.style.display = 'none';
+    });
+    // Show username in header
+    var userLbl = document.getElementById('currentUserLbl');
+    if (userLbl) userLbl.textContent = currentUser;
+    switchTab('lista');
+  }
+  loadData();
+  document.getElementById('vDate').value=new Date().toISOString().slice(0,10);
+
+
+  document.querySelectorAll('.tab').forEach(function(btn){
+    btn.addEventListener('click',function(){ switchTab(btn.dataset.tab); });
+  });
+  document.getElementById('btnNuovo').addEventListener('click',function(){ requirePwd(openNewArt); });
+  document.getElementById('importFile').addEventListener('change',importData);
+  document.getElementById('btnNuovoFasc').addEventListener('click',openNewIss);
+  document.getElementById('btnIssSave').addEventListener('click',saveIss);
+  document.getElementById('btnDelIss').addEventListener('click',deleteIss);
+  document.getElementById('btnIssCancel').addEventListener('click',function(){ document.getElementById('issModal').classList.remove('open'); });
+  document.getElementById('iType').addEventListener('change',function(){
+    document.getElementById('iNumRow').style.display=this.value==='ordinario'?'block':'none';
+  });
+  document.getElementById('btnArtSave').addEventListener('click',saveArt);
+  document.getElementById('btnUnlockProc').addEventListener('click',unlockProcGroup);
+  document.getElementById('btnUnlockId').addEventListener('click',function(){
+    requirePwd(function(){
+      var f=document.getElementById('fId'), b=document.getElementById('btnUnlockId');
+      if(f){f.disabled=false; f.focus();}
+      if(b){b.textContent='\u{1F513}'; b.disabled=true;}
+    });
+  });
+  document.getElementById('btnUnlockDataSott').addEventListener('click',function(){
+    requirePwd(function(){
+      var f=document.getElementById('fDataSottomissione'), b=document.getElementById('btnUnlockDataSott');
+      if(f){f.disabled=false; f.focus();}
+      if(b){b.textContent='\u{1F513}'; b.disabled=true;}
+    });
+  });
+  document.getElementById('btnUnlockAnti').addEventListener('click',makeUnlocker('antiGroup','btnUnlockAnti'));
+  document.getElementById('btnUnlockPub').addEventListener('click',makeUnlocker('pubGroup','btnUnlockPub'));
+  document.getElementById('btnDel').addEventListener('click',deleteArt);
+  document.getElementById('btnAccettazioneGK').addEventListener('click',accettazioneGK);
+  document.getElementById('btnRifiutoGK').addEventListener('click',rifiutoGK);
+  document.getElementById('btnRifiutoTur').addEventListener('click',rifiutoTurnitin);
+  document.getElementById('btnArtCancel').addEventListener('click',function(){ document.getElementById('artModal').classList.remove('open'); });
+  document.getElementById('btnAddRev').addEventListener('click',function(){ currentRevisori.push({nome:'',affiliazione:'',dataConsegna:'',accettazione:'',dataProroga:'',giudizio:''}); renderRevList(); });
+  document.getElementById('btnAddRev2').addEventListener('click',function(){ currentRevisori2.push({nome:'',affiliazione:'',dataConsegna:'',accettazione:'',dataProroga:'',giudizio:''}); renderRevList2(); });
+  document.getElementById('fEd2').addEventListener('change',function(){
+    document.getElementById('gkRow').style.display=(this.value&&this.value!=='')?'none':'block';
+    if (this.value) document.getElementById('fGk').value='';
+  });
+  document.getElementById('fStep').addEventListener('change',function(){
+    document.getElementById('stepHint').textContent=STEPS[this.value]||'';
+  });
+  document.getElementById('btnRefreshVerbale').addEventListener('click',renderVerbale);
+  document.getElementById('btnPrintVerbale').addEventListener('click',printVerbale);
+  document.getElementById('srchTutti').addEventListener('input',renderTutti);
+  document.getElementById('fEdTutti').addEventListener('change',renderTutti);
+  document.getElementById('fStTutti').addEventListener('change',renderTutti);
+  document.getElementById('fSecTutti').addEventListener('change',renderTutti);
+  document.getElementById('fIntlTutti').addEventListener('change',renderTutti);
+  document.getElementById('fIssTutti').addEventListener('change',renderTutti);
+  document.getElementById('srchGk').addEventListener('input',renderGk);
+  document.getElementById('srchLista').addEventListener('input',renderLista);
+  document.getElementById('fEd').addEventListener('change',renderLista);
+  document.getElementById('fSt').addEventListener('change',renderLista);
+  document.getElementById('fSec').addEventListener('change',renderLista);
+  document.getElementById('fIntl').addEventListener('change',renderLista);
+  document.getElementById('fIss').addEventListener('change',renderLista);
+  document.getElementById('srchPub').addEventListener('input',renderPub);
+  document.getElementById('fIssPub').addEventListener('change',renderPub);
+  // rifiutati search handled via oninput in HTML
+  document.getElementById('btnPwdOk').addEventListener('click',checkPwd);
+  document.getElementById('btnPwdCancel').addEventListener('click',function(){ document.getElementById('pwdModal').classList.remove('open'); });
+  document.getElementById('pwdInput').addEventListener('keydown',function(e){ if(e.key==='Enter') checkPwd(); });
+  ['artModal','issModal'].forEach(function(id){
+    document.getElementById(id).addEventListener('click',function(e){
+      if (e.target===this) this.classList.remove('open');
+    });
+  });
+  // pwdModal backdrop does NOT close artModal/issModal
+  document.getElementById('pwdModal').addEventListener('click',function(e){
+    if (e.target===this) {
+      this.classList.remove('open');
+      pendingAction = null;
+    }
+  });
+}
+
+
+var TIPS = [
+  "📋 Ricorda di aggiornare lo step dell'articolo dopo ogni azione editoriale",
+  '📅 Verifica se i revisori hanno completato in tempo il loro lavoro',
+  "✉️ Dopo aver contattato un revisore, aggiorna subito lo stato di accettazione dell'incarico",
+  '📝 Aggiungi sempre una nota quando apporti modifiche importanti a un articolo',
+  '🔍 Prima di assegnare un revisore, verifica che non appartenga alla stessa istituzione',
+  '📊 Inserisci il numero di riferimenti bibliografici presenti nel paper',
+  '⏰ Controlla regolarmente gli articoli con scadenza ravvicinata nel pannello Assegnazioni',
+  '💬 Quando compili una nota, inserisci all\'inizio la data: "Il 29/09/26, ..."',
+  "🔄 Aggiorna la decisione dell'editor dopo aver ricevuto i report dei revisori"
+];
+
+function ssShow(icon,title,msg,done,color){
+  document.getElementById('ts-icon').textContent=icon;
+  document.getElementById('ts-title').textContent=title;
+  document.getElementById('ts-msg').textContent=msg||'';
+  var btn=document.getElementById('ts-btn');
+  var spin=document.getElementById('ts-spin');
+  var tip=document.getElementById('ts-tip');
+  var tipTxt=document.getElementById('ts-tip-text');
+  btn.style.display=done?'inline-block':'none';
+  btn.style.background=color||'#16a34a';
+  spin.style.display=done?'none':'block';
+  if(!done)spin.style.borderTopColor=color||'#2563eb';
+  if(done&&tip&&tipTxt){tipTxt.textContent=TIPS[Math.floor(Math.random()*TIPS.length)];tip.style.display='block';}
+  else if(tip){tip.style.display='none';}
+  document.getElementById('ts-panel').style.display='flex';
+}
+
+function persistNote(artId,note){
+  setSaving(true);
+  document.getElementById('saveLbl').textContent='Salvataggio nota...';
+  ssShow('','Salvataggio nota...','Aggiunta nota a Google Sheets...',false,'#2563eb');
+  var sd=JSON.stringify({action:'appendNote',artId:artId,note:note});
+  var url=GS_URL+'?m=save&d='+encodeURIComponent(sd)+'&_t='+Date.now();
+  var xhr=new XMLHttpRequest();
+  xhr.open('GET',url,true);xhr.timeout=15000;
+  xhr.onload=function(){
+    setSaving(false);
+    try{
+      var j=JSON.parse(xhr.responseText);
+      if(j.result==='OK'){
+        document.getElementById('saveLbl').textContent='Nota salvata \u2713';
+        ssShow('\u2705','Nota salvata!','La nota \u00e8 stata aggiunta correttamente.',true,'#16a34a');
+        if(j.notesLog){var i2=articles.findIndex(function(a){return a.id===artId;});if(i2>=0){articles[i2].notesLog=j.notesLog;renderNotesLog(j.notesLog);}}
+      }else{ssShow('\u274c','Errore salvataggio nota','La nota non \u00e8 stata salvata. Riprova.',true,'#dc2626');}
+    }catch(e){document.getElementById('saveLbl').textContent='Nota salvata \u2713';ssShow('\u2705','Nota salvata','Nota inviata correttamente.',true,'#16a34a');}
+  };
+  xhr.onerror=xhr.ontimeout=function(){setSaving(false);ssShow('\u274c','Errore di rete','Impossibile salvare la nota. Riprova.',true,'#dc2626');};
+  xhr.send();
+}
+
+function persist(){
+  setSaving(true);
+  document.getElementById('saveLbl').textContent='Salvataggio...';
+  var artId=_lastSavedArtId,snap=null;
+  if(artId){var a0=articles.find(function(a){return a.id===artId;});if(a0)snap=JSON.parse(JSON.stringify(a0));}
+  _lastSavedArtId=null;
+  var saveData=snap?JSON.stringify({action:'saveArticle',article:snap}):JSON.stringify({action:'saveAll',issues:issues,articles:articles});
+  var url=GS_URL+'?m=save&d='+encodeURIComponent(saveData)+'&_t='+Date.now();
+  var useGet=url.length<7000;
+  ssShow('','Salvataggio in corso...','Invio dati a Google Sheets...',false,'#2563eb');
+  var xhr=new XMLHttpRequest();
+  xhr.timeout=15000;
+  if(useGet){xhr.open('GET',url,true);}else{xhr.open('POST',GS_URL,true);xhr.setRequestHeader('Content-Type','text/plain');}
+  xhr.onload=function(){
+    var txt=xhr.responseText||'',ok=false;
+    try{var j=JSON.parse(txt);ok=j.result==='OK'||j.saved>=0;}catch(e){ok=txt.trim()==='OK';}
+    if(!ok){setSaving(false);document.getElementById('saveLbl').textContent='\u26a0 Errore';ssShow('\u274c','Errore di salvataggio','Google Sheets non ha risposto correttamente. Riprova.',true,'#dc2626');return;}
+    if(!snap){refresh();setSaving(false);document.getElementById('saveLbl').textContent='Salvato \u2713';ssShow('\u2705','Salvato!','Dati aggiornati correttamente su Google Sheets.',true,'#16a34a');return;}
+    ssShow('\U0001f50d','Verifica in corso...','Controllo che le modifiche siano state registrate...',false,'#2563eb');
+    setTimeout(function(){
+      var vxhr=new XMLHttpRequest();
+      vxhr.open('GET',GS_URL+'?action=getArticle&artId='+encodeURIComponent(snap.id)+'&_t='+Date.now(),true);
+      vxhr.timeout=10000;
+      vxhr.onload=function(){
+        setSaving(false);
+        try{
+          var r=JSON.parse(vxhr.responseText),s=r.article;
+          if(s&&String(s.step)===String(snap.step)&&String(s.status)===String(snap.status)){
+            var ci=articles.findIndex(function(a){return a.id===s.id;});if(ci>=0)articles[ci]=s;
+            refresh();document.getElementById('saveLbl').textContent='Salvato e verificato \u2713';
+            ssShow('\u2705','Salvato e verificato!','Articolo #'+snap.id+' aggiornato correttamente su Google Sheets.',true,'#16a34a');
+          }else{document.getElementById('saveLbl').textContent='\u274c Verifica fallita';ssShow('\u274c','Verifica fallita','I dati su Google Sheets non corrispondono. Riprova a salvare.',true,'#dc2626');}
+        }catch(e){document.getElementById('saveLbl').textContent='Salvato \u2713';ssShow('\u2705','Salvato','Dati inviati correttamente.',true,'#16a34a');}
+      };
+      vxhr.onerror=vxhr.ontimeout=function(){setSaving(false);document.getElementById('saveLbl').textContent='\u26a0 Non verificato';ssShow('\u26a0\ufe0f','Salvato (non verificato)','Dati inviati ma verifica non riuscita. Ricarica per confermare.',true,'#d97706');};
+      vxhr.send();
+    },2000);
+  };
+  xhr.onerror=xhr.ontimeout=function(){setSaving(false);document.getElementById('saveLbl').textContent='\u26a0 Errore rete';ssShow('\u274c','Errore di rete','Impossibile raggiungere Google Sheets. Controlla la connessione.',true,'#dc2626');};
+  xhr.send(useGet?null:saveData);
+}
+</script>
+<style>
+@keyframes ts-spin{to{transform:rotate(360deg)}}
+@keyframes ts-in{from{opacity:0;transform:scale(.93)}to{opacity:1;transform:scale(1)}}
+#ts-panel{display:none;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.52);align-items:center;justify-content:center}
+#ts-box{background:#fff;border-radius:16px;padding:38px 46px;min-width:330px;max-width:450px;text-align:center;box-shadow:0 12px 48px rgba(0,0,0,.3);animation:ts-in .18s ease}
+#ts-icon{font-size:54px;margin-bottom:12px;line-height:1}
+#ts-title{font-size:19px;font-weight:700;color:#111;margin-bottom:7px}
+#ts-msg{font-size:14px;color:#555;line-height:1.6;margin-bottom:20px;min-height:20px}
+#ts-spin{width:38px;height:38px;border:4px solid #e5e7eb;border-top-color:#2563eb;border-radius:50%;animation:ts-spin .75s linear infinite;margin:0 auto 18px}
+#ts-tip{display:none;margin-bottom:18px;padding:11px 14px;background:#f0f9ff;border:1px solid #bae6fd;border-radius:9px;text-align:left}
+#ts-tip b{display:block;font-size:11px;font-weight:700;color:#0369a1;letter-spacing:.6px;text-transform:uppercase;margin-bottom:5px}
+#ts-tip-text{font-size:13px;color:#1e293b;line-height:1.5}
+#ts-btn{display:none;padding:11px 38px;border:none;border-radius:9px;font-size:15px;font-weight:700;cursor:pointer;color:#fff}
+#ts-btn:hover{opacity:.87}
+</style>
+<div id="ts-panel"><div id="ts-box"><div id="ts-icon"></div><div id="ts-title"></div><div id="ts-msg"></div><div id="ts-spin"></div><div id="ts-tip"><b>💡 Lo sapevi?</b><div id="ts-tip-text"></div></div><button id="ts-btn" onclick="document.getElementById('ts-panel').style.display='none'">OK</button></div></div>
+</body>
+</html>
