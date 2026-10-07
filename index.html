@@ -349,15 +349,15 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
       <option value="2">St 2 · Assegnazione al GateKeeper</option>
       <option value="3">St 3 · Approvazione GateKeeper</option>
       <option value="4">St 4 · Rifiuto GateKeeper</option>
-      <option value="5">St 5 · Invio comunicazione Turnitin agli autori</option>
-      <option value="6">St 6 · Rifiuto Turnitin</option>
-      <option value="7">St 7 · Assegnazione all'editor</option>
-      <option value="8">St 8 · L'Editor invita gli autori a modificare l'articolo</option>
-      <option value="9">St 9 · Individuazione dei revisori</option>
-      <option value="10">St 10 · Accettazione incarico di 1 revisore</option>
-      <option value="11">St 11 · Accettazione incarico di 2 revisori</option>
-      <option value="12">St 12 · Invio agli autori per le modifiche</option>
-      <option value="13">St 13 · Comunicazione rifiuto articolo</option>
+      <option value="5">St 5 · Comunicazione Turnitin agli autori</option>
+      <option value="6">St 6 · Comunicazione del rifiuto (&gt;30% Turnitin)</option>
+      <option value="7">St 7 · Assegnazione all'Editor</option>
+      <option value="8">St 8 · Invito agli autori ad integrare l'articolo</option>
+      <option value="9">St 9 · Ricevimento delle modifiche</option>
+      <option value="10">St 10 · Individuazione dei revisori</option>
+      <option value="11">St 11 · Accettazione incarico di 1 revisore</option>
+      <option value="12">St 12 · Accettazione incarico di 2 revisori</option>
+      <option value="13">St 13 · Invio agli autori per le modifiche necessarie</option>
       <option value="14">St 14 · Ricevimento articolo revisionato</option>
       <option value="15">St 15 · Eventuale riassegnazione ai revisori</option>
       <option value="16">St 16 · Verifica metadati e citazioni</option>
@@ -559,15 +559,15 @@ const STEPS = {
   '2': 'St.2 · Assegnazione al GateKeeper',
   '3': 'St.3 · Approvazione GateKeeper',
   '4': 'St.4 · Rifiuto GateKeeper',
-  '5': 'St.5 · Invio comunicazione Turnitin agli autori',
-  '6': 'St.6 · Rifiuto Turnitin',
-  '7': 'St.7 · Assegnazione all\'editor',
-  '8': 'St.8 · L\'Editor invita gli autori a modificare l\'articolo',
-  '9': 'St.9 · Individuazione dei revisori',
-  '10': 'St.10 · Accettazione incarico di 1 revisore',
-  '11': 'St.11 · Accettazione incarico di 2 revisori',
-  '12': 'St.12 · Invio agli autori per le modifiche',
-  '13': 'St.13 · Comunicazione rifiuto articolo',
+  '5': 'St.5 · Comunicazione Turnitin agli autori',
+  '6': 'St.6 · Comunicazione del rifiuto (>30% Turnitin)',
+  '7': 'St.7 · Assegnazione all\'Editor',
+  '8': 'St.8 · Invito agli autori ad integrare l\'articolo',
+  '9': 'St.9 · Ricevimento delle modifiche',
+  '10': 'St.10 · Individuazione dei revisori',
+  '11': 'St.11 · Accettazione incarico di 1 revisore',
+  '12': 'St.12 · Accettazione incarico di 2 revisori',
+  '13': 'St.13 · Invio agli autori per le modifiche necessarie',
   '14': 'St.14 · Ricevimento articolo revisionato',
   '15': 'St.15 · Eventuale riassegnazione ai revisori',
   '16': 'St.16 · Verifica metadati e citazioni',
@@ -727,6 +727,7 @@ function loadData() {
         articles = gsData.articles;
         _gsVersion = gsData._version || gsData._ts || Date.now();
         migrateSteps();
+        migrateSteps4();
         migrateNotes();
         var rifiutatoChanged = false;
         articles.forEach(function(a) {
@@ -867,6 +868,18 @@ function renderNotesLog(log) {
 
 
 function migrateSteps() { /* no-op */ }
+
+function migrateSteps4() {
+  // St.9 'Ricevimento delle modifiche' inserito tra St.8 e vecchio St.9
+  // Rimappatura: vecchio 9→10, 10→11, 11→12, 12→13
+  var stepMap = { '9':'10', '10':'11', '11':'12', '12':'13' };
+  articles.forEach(function(a) {
+    if (a._stepMigrated4) return;
+    var mapped = stepMap[String(a.step)];
+    if (mapped !== undefined) a.step = mapped;
+    a._stepMigrated4 = true;
+  });
+}
 
 function migrateNotes() {
   var changed = false;
