@@ -3088,7 +3088,8 @@ function updateTabCounts() {
   document.querySelectorAll('.tab').forEach(function(btn){
     var tab = btn.dataset.tab;
     if (tab === 'gatekeeper') btn.textContent = 'GateKeeper evaluation (' + gkCount + ')';
-    if (tab === 'lista')      btn.textContent = 'Articoli in lavorazione (' + listaCount + (sommarioCount > 0 ? ' + ' + sommarioCount + ' in sommario' : '') + ')';
+    if (tab === 'lista')      btn.textContent = 'Articoli in lavorazione (' + listaCount + ')';
+    if (tab === 'numeri')      btn.textContent = 'Sommario (' + sommarioCount + ')';
     if (tab === 'rifiutati')  btn.textContent = 'Rifiutati (' + rifCount + ')';
     if (tab === 'pubblicati') btn.textContent = 'Articoli pubblicati (' + pubCount + ')';
     if (tab === 'tutti')      updateTuttiTabLabel(tuttiCount);
