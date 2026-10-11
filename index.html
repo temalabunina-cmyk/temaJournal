@@ -3483,10 +3483,9 @@ function persist(){
 #ts-btn:hover{opacity:.87}
 </style>
 <div id="ts-panel"><div id="ts-box"><div id="ts-icon"></div><div id="ts-title"></div><div id="ts-msg"></div><div id="ts-spin">
-<svg viewBox="0 0 220 180" xmlns="http://www.w3.org/2000/svg" style="width:180px;height:147px;display:block;margin:0 auto">
+<svg viewBox="0 0 220 160" xmlns="http://www.w3.org/2000/svg" style="width:180px;height:131px;display:block;margin:0 auto">
 <defs>
   <style>
-    /* edifici appaiono dal basso verso l'alto */
     .b0{animation:brise .5s .0s ease-out both}
     .b1{animation:brise .5s .15s ease-out both}
     .b2{animation:brise .5s .3s ease-out both}
@@ -3496,336 +3495,273 @@ function persist(){
     .b6{animation:brise .5s .9s ease-out both}
     .b7{animation:brise .5s 1.05s ease-out both}
     .b8{animation:brise .5s 1.2s ease-out both}
-    .b9{animation:brise .5s 1.35s ease-out both}
-    @keyframes brise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
-    /* finestre lampeggianti (accensione progressiva) */
+    @keyframes brise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
     .w{animation:won 4s ease-in-out infinite alternate}
     .w:nth-child(2n){animation-delay:.7s}
     .w:nth-child(3n){animation-delay:1.4s}
     .w:nth-child(4n){animation-delay:2.1s}
-    @keyframes won{0%,60%{opacity:.25}100%{opacity:1}}
-    /* macchine */
-    .car-r{animation:cdrv 2.6s linear infinite}
-    .car-l{animation:cdrv2 3.4s .8s linear infinite}
-    .car-v{animation:cdrv3 3.8s 1.2s linear infinite}
-    @keyframes cdrv {from{transform:translateX(-18px)}to{transform:translateX(228px)}}
-    @keyframes cdrv2{from{transform:translateX(228px)}to{transform:translateX(-18px)}}
-    @keyframes cdrv3{from{transform:translateY(-18px)}to{transform:translateY(188px)}}
-    /* semaforo */
+    @keyframes won{0%,60%{opacity:.2}100%{opacity:1}}
+    .car-r{animation:cdrv 2.8s linear infinite}
+    .car-l{animation:cdrv2 3.6s .9s linear infinite}
+    @keyframes cdrv {from{transform:translateX(-20px)}to{transform:translateX(230px)}}
+    @keyframes cdrv2{from{transform:translateX(230px)}to{transform:translateX(-20px)}}
     .tl{animation:tlfx 4s linear infinite}
     .tl2{animation:tlfx 4s 2s linear infinite}
     @keyframes tlfx{0%,45%{fill:#22c55e}50%,95%{fill:#ef4444}100%{fill:#22c55e}}
-    /* nuvola */
-    .cld{animation:cldmv 12s linear infinite}
-    @keyframes cldmv{from{transform:translateX(240px)}to{transform:translateX(-60px)}}
-    /* gru */
+    .cld{animation:cldmv 14s linear infinite}
+    @keyframes cldmv{from{transform:translateX(240px)}to{transform:translateX(-80px)}}
     .arm{animation:grumv 5s ease-in-out infinite alternate}
-    @keyframes grumv{from{transform:rotate(-18deg)}to{transform:rotate(8deg)}}
+    @keyframes grumv{from{transform:rotate(-15deg)}to{transform:rotate(10deg)}}
   </style>
-  <!-- gradiente cielo -->
-  <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
-    <stop offset="0%" stop-color="#bfdbfe"/>
+  <linearGradient id="sky2" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#93c5fd"/>
     <stop offset="100%" stop-color="#dbeafe"/>
-  </linearGradient>
-  <!-- ombra edificio -->
-  <linearGradient id="shd" x1="0" y1="0" x2="1" y2="0">
-    <stop offset="0%" stop-color="#00000022"/>
-    <stop offset="100%" stop-color="#00000000"/>
   </linearGradient>
 </defs>
 
 <!-- CIELO -->
-<rect width="220" height="180" fill="url(#sky)"/>
+<rect width="220" height="160" fill="url(#sky2)"/>
 
-<!-- NUVOLA -->
-<g class="cld" opacity=".7">
-  <ellipse cx="30" cy="22" rx="18" ry="9" fill="white"/>
-  <ellipse cx="44" cy="18" rx="13" ry="8" fill="white"/>
-  <ellipse cx="18" cy="24" rx="11" ry="7" fill="white"/>
+<!-- NUVOLE -->
+<g class="cld" opacity=".8">
+  <ellipse cx="30" cy="18" rx="20" ry="9" fill="white"/>
+  <ellipse cx="46" cy="14" rx="14" ry="8" fill="white"/>
+  <ellipse cx="16" cy="21" rx="12" ry="7" fill="white"/>
 </g>
-<g class="cld" style="animation-delay:-6s" opacity=".5">
-  <ellipse cx="110" cy="16" rx="14" ry="6" fill="white"/>
-  <ellipse cx="122" cy="13" rx="9" ry="5" fill="white"/>
+<g class="cld" style="animation-delay:-7s" opacity=".6">
+  <ellipse cx="120" cy="13" rx="16" ry="7" fill="white"/>
+  <ellipse cx="134" cy="10" rx="10" ry="6" fill="white"/>
 </g>
 
-<!-- SUOLO -->
-<rect y="138" width="220" height="42" fill="#c8b99a"/>
-<!-- ASFALTO ORIZZONTALE -->
-<rect y="140" width="220" height="14" fill="#64748b"/>
-<!-- linea bianca centrale -->
-<line x1="0" y1="147" x2="220" y2="147" stroke="white" stroke-width=".8" stroke-dasharray="10,6" opacity=".6"/>
-<!-- marciapiedi -->
-<rect y="138" width="220" height="2" fill="#d4c9b8"/>
-<rect y="154" width="220" height="2" fill="#d4c9b8"/>
-<!-- ASFALTO VERTICALE (striscia sinistra) -->
-<rect x="28" y="0" width="12" height="140" fill="#64748b"/>
-<line x1="34" y1="0" x2="34" y2="140" stroke="white" stroke-width=".8" stroke-dasharray="8,6" opacity=".6"/>
-<!-- ASFALTO VERTICALE (striscia destra) -->
-<rect x="160" y="0" width="12" height="140" fill="#64748b"/>
-<line x1="166" y1="0" x2="166" y2="140" stroke="white" stroke-width=".8" stroke-dasharray="8,6" opacity=".6"/>
+<!-- TERRA / MARCIAPIEDE -->
+<rect y="132" width="220" height="28" fill="#a8956e"/>
+<!-- STRADA -->
+<rect y="133" width="220" height="16" fill="#475569"/>
+<!-- linea centrale tratteggiata -->
+<line x1="0" y1="141" x2="220" y2="141" stroke="white" stroke-width="1" stroke-dasharray="12,8" opacity=".5"/>
+<!-- strisce pedonali sx -->
+<rect x="12" y="133" width="3" height="16" fill="white" opacity=".3"/>
+<rect x="17" y="133" width="3" height="16" fill="white" opacity=".3"/>
+<rect x="22" y="133" width="3" height="16" fill="white" opacity=".3"/>
+<!-- strisce pedonali dx -->
+<rect x="188" y="133" width="3" height="16" fill="white" opacity=".3"/>
+<rect x="193" y="133" width="3" height="16" fill="white" opacity=".3"/>
+<rect x="198" y="133" width="3" height="16" fill="white" opacity=".3"/>
+<!-- marciapiede bordo -->
+<rect y="131" width="220" height="2" fill="#c4aa82"/>
+<rect y="149" width="220" height="2" fill="#c4aa82"/>
 
-<!-- ═══════════════════════════ EDIFICI ═══════════════════════════ -->
+<!-- ══════════════════ EDIFICI (vista frontale) ══════════════════ -->
 
-<!-- EDIFICIO A — palazzo residenziale alto (sx) -->
+<!-- EDIFICIO 1 — palazzo stretto alto, beige, sx -->
 <g class="b0">
-  <!-- corpo -->
-  <rect x="2" y="54" width="24" height="84" fill="#e2cba8" rx="1"/>
-  <!-- lato ombra isometrico -->
-  <polygon points="26,54 30,50 30,134 26,138" fill="#c9b08a"/>
-  <!-- tetto piano con bordo -->
-  <rect x="2" y="50" width="24" height="5" fill="#d4b98a"/>
-  <polygon points="26,50 30,46 30,50 26,54" fill="#b89a6e"/>
-  <!-- finestre -->
-  <rect class="w" x="5"  y="58" width="5" height="5" fill="#fde68a" rx=".5"/>
-  <rect class="w" x="13" y="58" width="5" height="5" fill="#fde68a" rx=".5"/>
-  <rect class="w" x="5"  y="68" width="5" height="5" fill="#fde68a" rx=".5"/>
-  <rect class="w" x="13" y="68" width="5" height="5" fill="#fde68a" rx=".5"/>
-  <rect class="w" x="5"  y="78" width="5" height="5" fill="#bae6fd" rx=".5"/>
-  <rect class="w" x="13" y="78" width="5" height="5" fill="#fde68a" rx=".5"/>
-  <rect class="w" x="5"  y="88" width="5" height="5" fill="#fde68a" rx=".5"/>
-  <rect class="w" x="13" y="88" width="5" height="5" fill="#bae6fd" rx=".5"/>
-  <rect class="w" x="5"  y="98" width="5" height="5" fill="#fde68a" rx=".5"/>
-  <rect class="w" x="13" y="98" width="5" height="5" fill="#fde68a" rx=".5"/>
+  <rect x="2" y="45" width="22" height="87" fill="#e8d5b7"/>
+  <!-- piano attico scuro -->
+  <rect x="2" y="45" width="22" height="8" fill="#d4b896"/>
+  <!-- cornicione -->
+  <rect x="0" y="43" width="26" height="3" fill="#c9a87a"/>
+  <!-- finestre 3 colonne x 6 righe -->
+  <rect class="w" x="5"  y="54" width="5" height="5" fill="#fde68a" rx=".4"/>
+  <rect class="w" x="13" y="54" width="5" height="5" fill="#fde68a" rx=".4"/>
+  <rect class="w" x="5"  y="64" width="5" height="5" fill="#bae6fd" rx=".4"/>
+  <rect class="w" x="13" y="64" width="5" height="5" fill="#fde68a" rx=".4"/>
+  <rect class="w" x="5"  y="74" width="5" height="5" fill="#fde68a" rx=".4"/>
+  <rect class="w" x="13" y="74" width="5" height="5" fill="#bae6fd" rx=".4"/>
+  <rect class="w" x="5"  y="84" width="5" height="5" fill="#fde68a" rx=".4"/>
+  <rect class="w" x="13" y="84" width="5" height="5" fill="#fde68a" rx=".4"/>
+  <rect class="w" x="5"  y="94" width="5" height="5" fill="#bae6fd" rx=".4"/>
+  <rect class="w" x="13" y="94" width="5" height="5" fill="#fde68a" rx=".4"/>
+  <rect class="w" x="5"  y="104" width="5" height="5" fill="#fde68a" rx=".4"/>
+  <rect class="w" x="13" y="104" width="5" height="5" fill="#fde68a" rx=".4"/>
   <!-- porta -->
-  <rect x="9" y="124" width="8" height="14" fill="#92400e" rx="1"/>
-  <rect x="12" y="128" width="2" height="4" fill="#78350f" rx=".3"/>
+  <rect x="8" y="118" width="8" height="14" fill="#7c3a1a" rx="1"/>
+  <rect x="11" y="122" width="2" height="4" fill="#5c2a0e" rx=".3"/>
 </g>
 
-<!-- EDIFICIO B — grattacielo uffici (sx-centro) -->
+<!-- EDIFICIO 2 — grattacielo vetro blu, sx-centro -->
 <g class="b1">
-  <rect x="46" y="28" width="20" height="110" fill="#93c5fd" rx="1"/>
-  <polygon points="66,28 71,23 71,133 66,138" fill="#60a5fa"/>
-  <rect x="46" y="24" width="20" height="5" fill="#7dd3fc"/>
-  <polygon points="66,24 71,19 71,23 66,28" fill="#3b82f6"/>
-  <!-- banda orizzontale -->
-  <rect x="46" y="68" width="20" height="2" fill="#3b82f6" opacity=".4"/>
-  <rect x="46" y="98" width="20" height="2" fill="#3b82f6" opacity=".4"/>
-  <!-- finestre a nastro -->
-  <rect class="w" x="48" y="30" width="16" height="4" fill="#e0f2fe" rx=".5" opacity=".9"/>
-  <rect class="w" x="48" y="38" width="16" height="4" fill="#e0f2fe" rx=".5"/>
-  <rect class="w" x="48" y="46" width="16" height="4" fill="#fde68a" rx=".5"/>
-  <rect class="w" x="48" y="54" width="16" height="4" fill="#e0f2fe" rx=".5"/>
-  <rect class="w" x="48" y="62" width="16" height="4" fill="#fde68a" rx=".5"/>
-  <rect class="w" x="48" y="72" width="16" height="4" fill="#e0f2fe" rx=".5"/>
-  <rect class="w" x="48" y="80" width="16" height="4" fill="#e0f2fe" rx=".5"/>
-  <rect class="w" x="48" y="88" width="16" height="4" fill="#fde68a" rx=".5"/>
-  <rect class="w" x="48" y="96" width="16" height="4" fill="#bae6fd" rx=".5"/>
-  <rect class="w" x="48" y="104" width="16" height="4" fill="#e0f2fe" rx=".5"/>
-  <rect class="w" x="48" y="112" width="16" height="4" fill="#fde68a" rx=".5"/>
+  <rect x="30" y="20" width="26" height="112" fill="#7dd3fc"/>
+  <!-- bande riflesso vetro -->
+  <rect x="30" y="20" width="26" height="4" fill="#38bdf8"/>
+  <rect x="30" y="50" width="26" height="2" fill="#0ea5e9" opacity=".3"/>
+  <rect x="30" y="80" width="26" height="2" fill="#0ea5e9" opacity=".3"/>
+  <rect x="30" y="110" width="26" height="2" fill="#0ea5e9" opacity=".3"/>
+  <!-- finestre nastro -->
+  <rect class="w" x="32" y="26" width="22" height="4" fill="#e0f2fe" rx=".3" opacity=".9"/>
+  <rect class="w" x="32" y="34" width="22" height="4" fill="#fde68a" rx=".3"/>
+  <rect class="w" x="32" y="42" width="22" height="4" fill="#e0f2fe" rx=".3"/>
+  <rect class="w" x="32" y="52" width="22" height="4" fill="#e0f2fe" rx=".3"/>
+  <rect class="w" x="32" y="60" width="22" height="4" fill="#fde68a" rx=".3"/>
+  <rect class="w" x="32" y="68" width="22" height="4" fill="#bae6fd" rx=".3"/>
+  <rect class="w" x="32" y="76" width="22" height="4" fill="#e0f2fe" rx=".3"/>
+  <rect class="w" x="32" y="84" width="22" height="4" fill="#fde68a" rx=".3"/>
+  <rect class="w" x="32" y="92" width="22" height="4" fill="#e0f2fe" rx=".3"/>
+  <rect class="w" x="32" y="100" width="22" height="4" fill="#e0f2fe" rx=".3"/>
+  <rect class="w" x="32" y="108" width="22" height="4" fill="#fde68a" rx=".3"/>
+  <rect class="w" x="32" y="116" width="22" height="4" fill="#bae6fd" rx=".3"/>
   <!-- ingresso -->
-  <rect x="53" y="126" width="10" height="12" fill="#1d4ed8" rx="1"/>
-  <!-- pensilina -->
-  <rect x="49" y="124" width="18" height="2" fill="#2563eb"/>
+  <rect x="39" y="122" width="10" height="10" fill="#0369a1" rx="1"/>
+  <rect x="36" y="120" width="16" height="3" fill="#0284c7"/>
 </g>
 
-<!-- EDIFICIO C — torre alta con gru in costruzione -->
+<!-- EDIFICIO 3 — torre in costruzione con gru, centro -->
 <g class="b2">
-  <!-- corpo torre -->
-  <rect x="76" y="10" width="22" height="128" fill="#d6d3d1" rx="1"/>
-  <polygon points="98,10 104,5 104,133 98,138" fill="#a8a29e"/>
-  <rect x="76" y="6" width="22" height="5" fill="#e7e5e4"/>
-  <polygon points="98,6 104,1 104,5 98,10" fill="#78716c"/>
-  <!-- piano tipo -->
-  <rect class="w" x="79" y="14" width="5" height="4" fill="#fde68a" rx=".4"/>
-  <rect class="w" x="87" y="14" width="5" height="4" fill="#bae6fd" rx=".4"/>
-  <rect class="w" x="79" y="22" width="5" height="4" fill="#fde68a" rx=".4"/>
-  <rect class="w" x="87" y="22" width="5" height="4" fill="#fde68a" rx=".4"/>
-  <rect class="w" x="79" y="30" width="5" height="4" fill="#bae6fd" rx=".4"/>
-  <rect class="w" x="87" y="30" width="5" height="4" fill="#fde68a" rx=".4"/>
-  <rect class="w" x="79" y="38" width="5" height="4" fill="#fde68a" rx=".4"/>
-  <rect class="w" x="87" y="38" width="5" height="4" fill="#fde68a" rx=".4"/>
-  <rect class="w" x="79" y="46" width="5" height="4" fill="#fde68a" rx=".4"/>
-  <rect class="w" x="87" y="46" width="5" height="4" fill="#bae6fd" rx=".4"/>
-  <rect class="w" x="79" y="54" width="5" height="4" fill="#fde68a" rx=".4"/>
-  <rect class="w" x="87" y="54" width="5" height="4" fill="#fde68a" rx=".4"/>
-  <rect class="w" x="79" y="62" width="5" height="4" fill="#bae6fd" rx=".4"/>
-  <rect class="w" x="87" y="62" width="5" height="4" fill="#fde68a" rx=".4"/>
-  <rect class="w" x="79" y="70" width="5" height="4" fill="#fde68a" rx=".4"/>
-  <rect class="w" x="87" y="70" width="5" height="4" fill="#fde68a" rx=".4"/>
-  <rect class="w" x="79" y="78" width="5" height="4" fill="#fde68a" rx=".4"/>
-  <rect class="w" x="87" y="78" width="5" height="4" fill="#bae6fd" rx=".4"/>
-  <rect class="w" x="79" y="86" width="5" height="4" fill="#fde68a" rx=".4"/>
-  <rect class="w" x="87" y="86" width="5" height="4" fill="#fde68a" rx=".4"/>
-  <!-- piano non ancora completato (cantiere) -->
-  <rect x="76" y="0" width="22" height="8" fill="#fbbf24" opacity=".6"/>
-  <line x1="76" y1="0" x2="98" y2="8" stroke="#92400e" stroke-width="1"/>
-  <line x1="98" y1="0" x2="76" y2="8" stroke="#92400e" stroke-width="1"/>
+  <rect x="64" y="12" width="28" height="120" fill="#d6d3d1"/>
+  <!-- linee piano -->
+  <rect x="64" y="30" width="28" height="1" fill="#a8a29e" opacity=".5"/>
+  <rect x="64" y="48" width="28" height="1" fill="#a8a29e" opacity=".5"/>
+  <rect x="64" y="66" width="28" height="1" fill="#a8a29e" opacity=".5"/>
+  <rect x="64" y="84" width="28" height="1" fill="#a8a29e" opacity=".5"/>
+  <rect x="64" y="102" width="28" height="1" fill="#a8a29e" opacity=".5"/>
+  <!-- finestre -->
+  <rect class="w" x="67" y="15" width="8" height="6" fill="#fde68a" rx=".4"/>
+  <rect class="w" x="79" y="15" width="8" height="6" fill="#bae6fd" rx=".4"/>
+  <rect class="w" x="67" y="33" width="8" height="6" fill="#fde68a" rx=".4"/>
+  <rect class="w" x="79" y="33" width="8" height="6" fill="#fde68a" rx=".4"/>
+  <rect class="w" x="67" y="51" width="8" height="6" fill="#bae6fd" rx=".4"/>
+  <rect class="w" x="79" y="51" width="8" height="6" fill="#fde68a" rx=".4"/>
+  <rect class="w" x="67" y="69" width="8" height="6" fill="#fde68a" rx=".4"/>
+  <rect class="w" x="79" y="69" width="8" height="6" fill="#bae6fd" rx=".4"/>
+  <rect class="w" x="67" y="87" width="8" height="6" fill="#fde68a" rx=".4"/>
+  <rect class="w" x="79" y="87" width="8" height="6" fill="#fde68a" rx=".4"/>
+  <!-- cantiere in cima: travi + ponteggio -->
+  <rect x="64" y="5" width="28" height="8" fill="#78716c" opacity=".4"/>
+  <line x1="64" y1="5" x2="92" y2="12" stroke="#fbbf24" stroke-width="1.5"/>
+  <line x1="92" y1="5" x2="64" y2="12" stroke="#fbbf24" stroke-width="1.5"/>
+  <!-- pilastro gru -->
+  <rect x="84" y="-4" width="3" height="18" fill="#f59e0b"/>
 </g>
-
-<!-- GRU (in cima all'edificio C) -->
+<!-- BRACCIO GRU animato -->
 <g class="b2">
-  <!-- montante gru -->
-  <rect x="94" y="-8" width="2" height="18" fill="#fbbf24"/>
-  <!-- braccio gru con animazione swing -->
-  <g class="arm" style="transform-origin:95px 0px">
-    <rect x="80" y="-8" width="34" height="1.5" fill="#fbbf24"/>
-    <!-- filo e gancio -->
-    <line x1="106" y1="-7" x2="106" y2="4" stroke="#374151" stroke-width=".7"/>
-    <rect x="104" y="4" width="4" height="2" fill="#6b7280" rx=".3"/>
+  <g class="arm" style="transform-origin:85.5px 5px">
+    <rect x="62" y="3.5" width="46" height="2" fill="#f59e0b"/>
+    <!-- filo -->
+    <line x1="100" y1="5" x2="100" y2="18" stroke="#374151" stroke-width=".8"/>
+    <rect x="98" y="17" width="5" height="2.5" fill="#6b7280" rx=".4"/>
     <!-- contrappeso -->
-    <rect x="79" y="-9" width="6" height="3" fill="#9ca3af" rx=".5"/>
+    <rect x="61" y="2" width="7" height="4" fill="#9ca3af" rx=".5"/>
   </g>
 </g>
 
-<!-- EDIFICIO D — palazzina bassa con tetto a falde -->
+<!-- EDIFICIO 4 — palazzina bassa con tetto spiovente, centro-dx -->
 <g class="b3">
-  <rect x="112" y="90" width="30" height="48" fill="#fca5a5" rx="1"/>
-  <polygon points="142,90 148,85 148,133 142,138" fill="#f87171"/>
+  <rect x="100" y="88" width="34" height="44" fill="#fca5a5"/>
   <!-- tetto a falde -->
-  <polygon points="108,90 142,90 126,76" fill="#dc2626"/>
-  <polygon points="142,90 148,85 130,71 126,76" fill="#b91c1c"/>
+  <polygon points="96,88 134,88 117,72" fill="#dc2626"/>
   <!-- finestre -->
-  <rect class="w" x="115" y="95"  width="8" height="7" fill="#fde68a" rx=".5"/>
-  <rect class="w" x="129" y="95"  width="8" height="7" fill="#fde68a" rx=".5"/>
-  <rect class="w" x="115" y="108" width="8" height="7" fill="#bae6fd" rx=".5"/>
-  <rect class="w" x="129" y="108" width="8" height="7" fill="#fde68a" rx=".5"/>
+  <rect class="w" x="103" y="93" width="10" height="8" fill="#fde68a" rx=".5"/>
+  <rect class="w" x="119" y="93" width="10" height="8" fill="#bae6fd" rx=".5"/>
+  <rect class="w" x="103" y="107" width="10" height="8" fill="#fde68a" rx=".5"/>
+  <rect class="w" x="119" y="107" width="10" height="8" fill="#fde68a" rx=".5"/>
   <!-- porta -->
-  <rect x="123" y="124" width="10" height="14" fill="#92400e" rx="1"/>
-  <circle cx="132" cy="131" r="1" fill="#fbbf24"/>
+  <rect x="111" y="118" width="11" height="14" fill="#7c3a1a" rx="1"/>
+  <circle cx="121" cy="125" r="1" fill="#fbbf24"/>
 </g>
 
-<!-- EDIFICIO E — edificio moderno (dx) -->
+<!-- EDIFICIO 5 — moderno verde facciata, dx -->
 <g class="b4">
-  <rect x="148" y="50" width="36" height="88" fill="#6ee7b7" rx="1"/>
-  <polygon points="184,50 190,44 190,132 184,138" fill="#34d399"/>
-  <rect x="148" y="44" width="36" height="7" fill="#a7f3d0"/>
-  <polygon points="184,44 190,38 190,44 184,50" fill="#10b981"/>
-  <!-- brise-soleil orizzontali -->
-  <rect x="148" y="66" width="36" height="1.5" fill="#10b981" opacity=".5"/>
-  <rect x="148" y="80" width="36" height="1.5" fill="#10b981" opacity=".5"/>
-  <rect x="148" y="94" width="36" height="1.5" fill="#10b981" opacity=".5"/>
-  <rect x="148" y="108" width="36" height="1.5" fill="#10b981" opacity=".5"/>
+  <rect x="142" y="38" width="40" height="94" fill="#6ee7b7"/>
+  <!-- pannelli facciata -->
+  <rect x="142" y="38" width="40" height="6" fill="#34d399"/>
+  <rect x="142" y="64" width="40" height="2" fill="#059669" opacity=".4"/>
+  <rect x="142" y="84" width="40" height="2" fill="#059669" opacity=".4"/>
+  <rect x="142" y="104" width="40" height="2" fill="#059669" opacity=".4"/>
   <!-- finestre grandi -->
-  <rect class="w" x="151" y="54" width="13" height="8" fill="#d1fae5" rx=".5"/>
-  <rect class="w" x="168" y="54" width="13" height="8" fill="#fde68a" rx=".5"/>
-  <rect class="w" x="151" y="68" width="13" height="8" fill="#fde68a" rx=".5"/>
-  <rect class="w" x="168" y="68" width="13" height="8" fill="#d1fae5" rx=".5"/>
-  <rect class="w" x="151" y="82" width="13" height="8" fill="#d1fae5" rx=".5"/>
-  <rect class="w" x="168" y="82" width="13" height="8" fill="#fde68a" rx=".5"/>
-  <rect class="w" x="151" y="96" width="13" height="8" fill="#bae6fd" rx=".5"/>
-  <rect class="w" x="168" y="96" width="13" height="8" fill="#d1fae5" rx=".5"/>
-  <rect class="w" x="151" y="110" width="13" height="8" fill="#fde68a" rx=".5"/>
-  <rect class="w" x="168" y="110" width="13" height="8" fill="#bae6fd" rx=".5"/>
-  <!-- ingresso con pensilina -->
-  <rect x="158" y="126" width="18" height="12" fill="#065f46" rx="1"/>
-  <rect x="155" y="124" width="24" height="3" fill="#059669"/>
+  <rect class="w" x="145" y="46" width="15" height="10" fill="#d1fae5" rx=".5"/>
+  <rect class="w" x="164" y="46" width="15" height="10" fill="#fde68a" rx=".5"/>
+  <rect class="w" x="145" y="66" width="15" height="10" fill="#fde68a" rx=".5"/>
+  <rect class="w" x="164" y="66" width="15" height="10" fill="#d1fae5" rx=".5"/>
+  <rect class="w" x="145" y="86" width="15" height="10" fill="#bae6fd" rx=".5"/>
+  <rect class="w" x="164" y="86" width="15" height="10" fill="#fde68a" rx=".5"/>
+  <rect class="w" x="145" y="106" width="15" height="10" fill="#d1fae5" rx=".5"/>
+  <rect class="w" x="164" y="106" width="15" height="10" fill="#bae6fd" rx=".5"/>
+  <!-- ingresso -->
+  <rect x="154" y="120" width="16" height="12" fill="#065f46" rx="1"/>
+  <rect x="150" y="118" width="24" height="3" fill="#059669"/>
 </g>
 
-<!-- EDIFICIO F — piccola chiesa / edificio storico -->
+<!-- EDIFICIO 6 — chiesa storica, dx-estremo -->
 <g class="b5">
-  <rect x="2" y="96" width="22" height="42" fill="#e8d5b7" rx="1"/>
-  <polygon points="24,96 28,92 28,132 24,138" fill="#d4b896"/>
-  <!-- frontone triangolare -->
-  <polygon points="0,96 24,96 12,84" fill="#f5e6d0"/>
-  <polygon points="24,96 28,92 14,80 12,84" fill="#e0c9a6"/>
+  <rect x="188" y="90" width="30" height="42" fill="#f5e6d0"/>
+  <!-- frontone -->
+  <polygon points="185,90 218,90 201,76" fill="#e8d0a8"/>
   <!-- occhio di bue -->
-  <circle cx="12" cy="91" r="3" fill="#bae6fd" opacity=".8"/>
+  <circle cx="201" cy="84" r="3" fill="#bae6fd" opacity=".8"/>
   <!-- campanile -->
-  <rect x="7" y="70" width="10" height="28" fill="#d4c4a0"/>
-  <polygon points="7,70 17,70 12,62" fill="#b8a882"/>
-  <!-- campanella -->
-  <circle cx="12" cy="75" r="2" fill="#fbbf24" opacity=".7"/>
+  <rect x="194" y="60" width="14" height="32" fill="#e0d0a8"/>
+  <polygon points="194,60 208,60 201,50" fill="#c9b07a"/>
+  <!-- campana -->
+  <circle cx="201" cy="66" r="2.5" fill="#fbbf24" opacity=".7"/>
+  <!-- arcate campanile -->
+  <path d="M196,64 Q201,58 206,64" fill="none" stroke="#b8a06a" stroke-width="1"/>
   <!-- finestre -->
-  <rect class="w" x="4"  y="100" width="6" height="8" fill="#fde68a" rx=".5"/>
-  <rect class="w" x="14" y="100" width="6" height="8" fill="#bae6fd" rx=".5"/>
-  <!-- porta ad arco -->
-  <path d="M7,138 L7,120 Q12,112 17,120 L17,138 Z" fill="#92400e"/>
+  <rect class="w" x="191" y="93" width="8" height="9" fill="#fde68a" rx=".5"/>
+  <rect class="w" x="204" y="93" width="8" height="9" fill="#bae6fd" rx=".5"/>
+  <!-- portale ad arco -->
+  <path d="M196,132 L196,112 Q201,104 206,112 L206,132 Z" fill="#7c3a1a"/>
 </g>
 
-<!-- ALBERI (isolati, vista frontale) -->
+<!-- ALBERI -->
 <g class="b6">
   <!-- albero 1 -->
-  <rect x="40" y="126" width="3" height="14" fill="#92400e"/>
-  <ellipse cx="41" cy="120" rx="8" ry="10" fill="#166534"/>
-  <ellipse cx="38" cy="118" rx="5" ry="7" fill="#15803d"/>
-  <ellipse cx="44" cy="116" rx="6" ry="8" fill="#16a34a"/>
+  <rect x="128" y="118" width="3" height="15" fill="#7c3a1a"/>
+  <ellipse cx="129" cy="111" rx="9" ry="11" fill="#166534"/>
+  <ellipse cx="125" cy="109" rx="6" ry="8" fill="#15803d"/>
+  <ellipse cx="133" cy="107" rx="7" ry="9" fill="#16a34a"/>
   <!-- albero 2 -->
-  <rect x="70" y="128" width="3" height="12" fill="#92400e"/>
-  <ellipse cx="71" cy="122" rx="7" ry="9" fill="#166534"/>
-  <ellipse cx="68" cy="120" rx="5" ry="6" fill="#15803d"/>
-  <!-- albero 3 -->
-  <rect x="130" y="128" width="3" height="12" fill="#92400e"/>
-  <ellipse cx="131" cy="122" rx="7" ry="9" fill="#166534"/>
-  <ellipse cx="134" cy="120" rx="5" ry="6" fill="#15803d"/>
-  <!-- abete sx -->
-  <rect x="136" y="128" width="2" height="12" fill="#92400e"/>
-  <polygon points="130,128 144,128 137,110" fill="#166534"/>
-  <polygon points="131,120 143,120 137,104" fill="#15803d"/>
+  <rect x="137" y="120" width="3" height="13" fill="#7c3a1a"/>
+  <ellipse cx="138" cy="113" rx="8" ry="10" fill="#166534"/>
+  <ellipse cx="142" cy="110" rx="6" ry="7" fill="#16a34a"/>
+</g>
+
+<!-- LAMPIONI -->
+<g class="b7">
+  <rect x="27" y="114" width="2" height="19" fill="#6b7280"/>
+  <rect x="21" y="112" width="9" height="2.5" fill="#6b7280" rx="1"/>
+  <circle cx="21" cy="112" r="2.5" fill="#fef08a" opacity=".9"/>
+  <rect x="96" y="118" width="2" height="15" fill="#6b7280"/>
+  <rect x="90" y="116" width="9" height="2.5" fill="#6b7280" rx="1"/>
+  <circle cx="90" cy="116" r="2.5" fill="#fef08a" opacity=".9"/>
+  <rect x="183" y="116" width="2" height="17" fill="#6b7280"/>
+  <rect x="177" y="114" width="9" height="2.5" fill="#6b7280" rx="1"/>
+  <circle cx="177" cy="114" r="2.5" fill="#fef08a" opacity=".9"/>
 </g>
 
 <!-- SEMAFORI -->
 <g class="b7">
-  <!-- palo sx -->
-  <rect x="26" y="133" width="1.5" height="8" fill="#374151"/>
-  <rect x="23" y="133" width="7" height="5" fill="#1f2937" rx=".5"/>
-  <circle cx="26.5" cy="134.5" r="1" class="tl"/>
-  <circle cx="26.5" cy="136.5" r="1" class="tl2"/>
-  <!-- palo dx -->
-  <rect x="159" y="133" width="1.5" height="8" fill="#374151"/>
-  <rect x="156" y="133" width="7" height="5" fill="#1f2937" rx=".5"/>
-  <circle cx="159.5" cy="134.5" r="1" class="tl2"/>
-  <circle cx="159.5" cy="136.5" r="1" class="tl"/>
+  <rect x="58" y="120" width="2" height="13" fill="#374151"/>
+  <rect x="55" y="120" width="8" height="7" fill="#1f2937" rx=".5"/>
+  <circle cx="59" cy="122" r="1.2" class="tl"/>
+  <circle cx="59" cy="125.5" r="1.2" class="tl2"/>
 </g>
 
-<!-- PANCHINA -->
-<g class="b7">
-  <rect x="44" y="137" width="12" height="2" fill="#92400e" rx=".5"/>
-  <rect x="45" y="139" width="2" height="2" fill="#78350f"/>
-  <rect x="53" y="139" width="2" height="2" fill="#78350f"/>
+<!-- PERSONE -->
+<g class="b8" opacity=".9">
+  <circle cx="50" cy="130" r="1.8" fill="#1e293b"/>
+  <rect x="49" y="131.5" width="2.5" height="5" fill="#2563eb" rx=".4"/>
+  <circle cx="113" cy="130" r="1.8" fill="#1e293b"/>
+  <rect x="112" y="131.5" width="2.5" height="5" fill="#dc2626" rx=".4"/>
 </g>
 
-<!-- LAMPIONI -->
-<g class="b8">
-  <rect x="22" y="122" width="1.5" height="18" fill="#6b7280"/>
-  <circle cx="22.5" cy="122" r="2" fill="#fbbf24" opacity=".85"/>
-  <rect x="157" y="122" width="1.5" height="18" fill="#6b7280"/>
-  <circle cx="157.5" cy="122" r="2" fill="#fbbf24" opacity=".85"/>
-  <rect x="108" y="125" width="1.5" height="15" fill="#6b7280"/>
-  <circle cx="108.5" cy="125" r="1.5" fill="#fbbf24" opacity=".85"/>
+<!-- MACCHINE sull'unica strada orizzontale -->
+<!-- auto rossa → destra, corsia superiore -->
+<g class="car-r" style="transform:translateX(-20px)">
+  <rect x="0" y="135" width="16" height="7" fill="#dc2626" rx="2"/>
+  <rect x="3" y="132" width="9" height="5" fill="#b91c1c" rx="1.5"/>
+  <rect x="3.5" y="132.5" width="3.5" height="3" fill="#bae6fd" rx=".3"/>
+  <rect x="7.5" y="132.5" width="3.5" height="3" fill="#bae6fd" rx=".3"/>
+  <circle cx="3.5" cy="142" r="2" fill="#1f2937"/>
+  <circle cx="12.5" cy="142" r="2" fill="#1f2937"/>
+  <rect x="14.5" y="136" width="2" height="2.5" fill="#fef3c7" rx=".3"/>
 </g>
-
-<!-- MACCHINE (in movimento sull'asfalto) -->
-<!-- macchina rossa → destra -->
-<g class="car-r" style="transform:translateX(-18px)">
-  <!-- carrozzeria -->
-  <rect x="0" y="143" width="14" height="6" fill="#dc2626" rx="1.5"/>
-  <!-- tettino -->
-  <rect x="3" y="140" width="8" height="4" fill="#b91c1c" rx="1"/>
-  <!-- finestrino -->
-  <rect x="4" y="140.5" width="3" height="2.5" fill="#bae6fd" rx=".3"/>
-  <rect x="8" y="140.5" width="3" height="2.5" fill="#bae6fd" rx=".3"/>
-  <!-- ruote -->
-  <circle cx="3"  cy="149" r="1.5" fill="#1f2937"/>
-  <circle cx="11" cy="149" r="1.5" fill="#1f2937"/>
-  <!-- fanali -->
-  <rect x="13" y="144" width="1.5" height="2" fill="#fef3c7" rx=".3"/>
-</g>
-<!-- furgone bianco ← sinistra -->
-<g class="car-l" style="transform:translateX(228px)">
-  <rect x="0" y="143" width="16" height="7" fill="#e5e7eb" rx="1.5"/>
-  <rect x="0" y="140" width="7" height="4" fill="#d1d5db" rx="1"/>
-  <rect x="1" y="140.5" width="5" height="2.5" fill="#bae6fd" rx=".3"/>
-  <circle cx="3"  cy="150" r="1.5" fill="#1f2937"/>
-  <circle cx="13" cy="150" r="1.5" fill="#1f2937"/>
-  <rect x="-1.5" y="144" width="1.5" height="2" fill="#fef3c7" rx=".3"/>
-</g>
-<!-- auto gialla verticale (strada laterale) -->
-<g class="car-v" style="transform:translateY(-18px)">
-  <rect x="31" y="0" width="6" height="11" fill="#fbbf24" rx="1.5"/>
-  <rect x="32" y="0" width="4" height="5" fill="#f59e0b" rx="1"/>
-  <rect x="32.5" y=".5" width="3" height="3" fill="#bae6fd" rx=".3"/>
-  <circle cx="32.5" cy="11" r="1.2" fill="#1f2937"/>
-  <circle cx="37.5" cy="11" r="1.2" fill="#1f2937"/>
-</g>
-
-<!-- PERSONE (piccole sagome) -->
-<g class="b9" opacity=".85">
-  <!-- persona 1 -->
-  <circle cx="38" cy="137" r="1.5" fill="#1e293b"/>
-  <rect x="37" y="138.5" width="2" height="4" fill="#3b82f6" rx=".4"/>
-  <!-- persona 2 -->
-  <circle cx="110" cy="137" r="1.5" fill="#1e293b"/>
-  <rect x="109" y="138.5" width="2" height="4" fill="#ef4444" rx=".4"/>
+<!-- furgone bianco ← sinistra, corsia inferiore -->
+<g class="car-l" style="transform:translateX(230px)">
+  <rect x="0" y="137" width="18" height="8" fill="#e5e7eb" rx="2"/>
+  <rect x="0" y="133" width="8" height="5" fill="#d1d5db" rx="1.5"/>
+  <rect x="1" y="133.5" width="6" height="3" fill="#bae6fd" rx=".3"/>
+  <circle cx="3.5" cy="145" r="2" fill="#1f2937"/>
+  <circle cx="14.5" cy="145" r="2" fill="#1f2937"/>
+  <rect x="-2" y="137.5" width="2" height="2.5" fill="#fef3c7" rx=".3"/>
 </g>
 
 </svg>
