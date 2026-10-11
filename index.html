@@ -3483,285 +3483,289 @@ function persist(){
 #ts-btn:hover{opacity:.87}
 </style>
 <div id="ts-panel"><div id="ts-box"><div id="ts-icon"></div><div id="ts-title"></div><div id="ts-msg"></div><div id="ts-spin">
-<svg viewBox="0 0 220 160" xmlns="http://www.w3.org/2000/svg" style="width:180px;height:131px;display:block;margin:0 auto">
+<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" style="width:144px;height:144px;display:block;margin:0 auto">
 <defs>
   <style>
-    .b0{animation:brise .5s .0s ease-out both}
-    .b1{animation:brise .5s .15s ease-out both}
-    .b2{animation:brise .5s .3s ease-out both}
-    .b3{animation:brise .5s .45s ease-out both}
-    .b4{animation:brise .5s .6s ease-out both}
-    .b5{animation:brise .5s .75s ease-out both}
-    .b6{animation:brise .5s .9s ease-out both}
-    .b7{animation:brise .5s 1.05s ease-out both}
-    .b8{animation:brise .5s 1.2s ease-out both}
-    @keyframes brise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-    .w{animation:won 4s ease-in-out infinite alternate}
-    .w:nth-child(2n){animation-delay:.7s}
-    .w:nth-child(3n){animation-delay:1.4s}
-    .w:nth-child(4n){animation-delay:2.1s}
-    @keyframes won{0%,60%{opacity:.2}100%{opacity:1}}
-    .car-r{animation:cdrv 2.8s linear infinite}
-    .car-l{animation:cdrv2 3.6s .9s linear infinite}
-    @keyframes cdrv {from{transform:translateX(-20px)}to{transform:translateX(230px)}}
-    @keyframes cdrv2{from{transform:translateX(230px)}to{transform:translateX(-20px)}}
-    .tl{animation:tlfx 4s linear infinite}
-    .tl2{animation:tlfx 4s 2s linear infinite}
-    @keyframes tlfx{0%,45%{fill:#22c55e}50%,95%{fill:#ef4444}100%{fill:#22c55e}}
-    .cld{animation:cldmv 14s linear infinite}
-    @keyframes cldmv{from{transform:translateX(240px)}to{transform:translateX(-80px)}}
-    .arm{animation:grumv 5s ease-in-out infinite alternate}
-    @keyframes grumv{from{transform:rotate(-15deg)}to{transform:rotate(10deg)}}
+    /* edifici e verde appaiono in sequenza */
+    .p0{animation:fadein .4s .0s  ease-out both}
+    .p1{animation:fadein .4s .1s  ease-out both}
+    .p2{animation:fadein .4s .2s  ease-out both}
+    .p3{animation:fadein .4s .35s ease-out both}
+    .p4{animation:fadein .4s .5s  ease-out both}
+    .p5{animation:fadein .4s .65s ease-out both}
+    .p6{animation:fadein .4s .8s  ease-out both}
+    .p7{animation:fadein .4s .95s ease-out both}
+    .p8{animation:fadein .4s 1.1s ease-out both}
+    .p9{animation:fadein .4s 1.25s ease-out both}
+    @keyframes fadein{from{opacity:0}to{opacity:1}}
+    /* auto orizzontali */
+    .car-e{animation:mve 3s linear infinite}
+    .car-w{animation:mvw 3.8s .6s linear infinite}
+    .car-e2{animation:mve 4.2s 1.4s linear infinite}
+    @keyframes mve{from{transform:translateX(-22px)}to{transform:translateX(210px)}}
+    @keyframes mvw{from{transform:translateX(210px)}to{transform:translateX(-22px)}}
+    /* auto verticali */
+    .car-s{animation:mvs 3.4s .3s linear infinite}
+    .car-n{animation:mvn 4s 1.1s linear infinite}
+    @keyframes mvs{from{transform:translateY(-22px)}to{transform:translateY(210px)}}
+    @keyframes mvn{from{transform:translateY(210px)}to{transform:translateY(-22px)}}
+    /* semafori */
+    .tla{animation:tlcyc 6s linear infinite}
+    .tlb{animation:tlcyc 6s 3s linear infinite}
+    @keyframes tlcyc{0%,40%{fill:#22c55e}45%,95%{fill:#ef4444}100%{fill:#22c55e}}
+    /* gru cantiere: ombra che ruota */
+    .crane-shadow{animation:crspin 4s linear infinite;transform-origin:105px 68px}
+    @keyframes crspin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
   </style>
-  <linearGradient id="sky2" x1="0" y1="0" x2="0" y2="1">
-    <stop offset="0%" stop-color="#93c5fd"/>
-    <stop offset="100%" stop-color="#dbeafe"/>
-  </linearGradient>
 </defs>
 
-<!-- CIELO -->
-<rect width="220" height="160" fill="url(#sky2)"/>
+<!-- ══ SFONDO: asfalto totale, poi verde pubblico ══ -->
+<rect width="200" height="200" fill="#94a3b8"/>
 
-<!-- NUVOLE -->
-<g class="cld" opacity=".8">
-  <ellipse cx="30" cy="18" rx="20" ry="9" fill="white"/>
-  <ellipse cx="46" cy="14" rx="14" ry="8" fill="white"/>
-  <ellipse cx="16" cy="21" rx="12" ry="7" fill="white"/>
-</g>
-<g class="cld" style="animation-delay:-7s" opacity=".6">
-  <ellipse cx="120" cy="13" rx="16" ry="7" fill="white"/>
-  <ellipse cx="134" cy="10" rx="10" ry="6" fill="white"/>
-</g>
+<!-- ══ VERDE PUBBLICO (isolati, parchi, cortili) ══ -->
+<!-- isolato NW -->
+<rect class="p0" x="0"   y="0"   width="76" height="76" fill="#86efac"/>
+<!-- isolato NE -->
+<rect class="p1" x="124" y="0"   width="76" height="76" fill="#86efac"/>
+<!-- isolato SW -->
+<rect class="p2" x="0"   y="124" width="76" height="76" fill="#86efac"/>
+<!-- isolato SE -->
+<rect class="p3" x="124" y="124" width="76" height="76" fill="#86efac"/>
+<!-- piccolo isolato centro-N -->
+<rect class="p1" x="88" y="0" width="24" height="34" fill="#86efac"/>
+<!-- piccolo isolato centro-S -->
+<rect class="p2" x="88" y="166" width="24" height="34" fill="#86efac"/>
 
-<!-- TERRA / MARCIAPIEDE -->
-<rect y="132" width="220" height="28" fill="#a8956e"/>
-<!-- STRADA -->
-<rect y="133" width="220" height="16" fill="#475569"/>
-<!-- linea centrale tratteggiata -->
-<line x1="0" y1="141" x2="220" y2="141" stroke="white" stroke-width="1" stroke-dasharray="12,8" opacity=".5"/>
-<!-- strisce pedonali sx -->
-<rect x="12" y="133" width="3" height="16" fill="white" opacity=".3"/>
-<rect x="17" y="133" width="3" height="16" fill="white" opacity=".3"/>
-<rect x="22" y="133" width="3" height="16" fill="white" opacity=".3"/>
-<!-- strisce pedonali dx -->
-<rect x="188" y="133" width="3" height="16" fill="white" opacity=".3"/>
-<rect x="193" y="133" width="3" height="16" fill="white" opacity=".3"/>
-<rect x="198" y="133" width="3" height="16" fill="white" opacity=".3"/>
-<!-- marciapiede bordo -->
-<rect y="131" width="220" height="2" fill="#c4aa82"/>
-<rect y="149" width="220" height="2" fill="#c4aa82"/>
+<!-- ══ STRADE: griglia ortogonale ══ -->
+<!-- arteria orizzontale principale (centro) -->
+<rect x="0" y="88" width="200" height="24" fill="#475569"/>
+<!-- linea tratteggiata centrale orizzontale -->
+<line x1="0" y1="100" x2="200" y2="100" stroke="white" stroke-width=".8" stroke-dasharray="10,7" opacity=".5"/>
+<!-- arteria verticale principale (centro) -->
+<rect x="88" y="0" width="24" height="200" fill="#475569"/>
+<!-- linea tratteggiata centrale verticale -->
+<line x1="100" y1="0" x2="100" y2="200" stroke="white" stroke-width=".8" stroke-dasharray="10,7" opacity=".5"/>
+<!-- marciapiedi orizzontali (bordi strada) -->
+<rect x="0" y="86"  width="200" height="2" fill="#cbd5e1"/>
+<rect x="0" y="112" width="200" height="2" fill="#cbd5e1"/>
+<!-- marciapiedi verticali -->
+<rect x="86"  y="0" width="2" height="200" fill="#cbd5e1"/>
+<rect x="112" y="0" width="2" height="200" fill="#cbd5e1"/>
 
-<!-- ══════════════════ EDIFICI (vista frontale) ══════════════════ -->
+<!-- ══ STRISCE PEDONALI ══ -->
+<!-- strisce orizzontali (attraversano strada verticale) -->
+<rect x="88"  y="56" width="4" height="8" fill="white" opacity=".5"/>
+<rect x="94"  y="56" width="4" height="8" fill="white" opacity=".5"/>
+<rect x="100" y="56" width="4" height="8" fill="white" opacity=".5"/>
+<rect x="106" y="56" width="4" height="8" fill="white" opacity=".5"/>
+<rect x="88"  y="136" width="4" height="8" fill="white" opacity=".5"/>
+<rect x="94"  y="136" width="4" height="8" fill="white" opacity=".5"/>
+<rect x="100" y="136" width="4" height="8" fill="white" opacity=".5"/>
+<rect x="106" y="136" width="4" height="8" fill="white" opacity=".5"/>
+<!-- strisce verticali (attraversano strada orizzontale) -->
+<rect x="56" y="88" width="8" height="4" fill="white" opacity=".5"/>
+<rect x="56" y="94" width="8" height="4" fill="white" opacity=".5"/>
+<rect x="56" y="100" width="8" height="4" fill="white" opacity=".5"/>
+<rect x="56" y="106" width="8" height="4" fill="white" opacity=".5"/>
+<rect x="136" y="88" width="8" height="4" fill="white" opacity=".5"/>
+<rect x="136" y="94" width="8" height="4" fill="white" opacity=".5"/>
+<rect x="136" y="100" width="8" height="4" fill="white" opacity=".5"/>
+<rect x="136" y="106" width="8" height="4" fill="white" opacity=".5"/>
 
-<!-- EDIFICIO 1 — palazzo stretto alto, beige, sx -->
-<g class="b0">
-  <rect x="2" y="45" width="22" height="87" fill="#e8d5b7"/>
-  <!-- piano attico scuro -->
-  <rect x="2" y="45" width="22" height="8" fill="#d4b896"/>
-  <!-- cornicione -->
-  <rect x="0" y="43" width="26" height="3" fill="#c9a87a"/>
-  <!-- finestre 3 colonne x 6 righe -->
-  <rect class="w" x="5"  y="54" width="5" height="5" fill="#fde68a" rx=".4"/>
-  <rect class="w" x="13" y="54" width="5" height="5" fill="#fde68a" rx=".4"/>
-  <rect class="w" x="5"  y="64" width="5" height="5" fill="#bae6fd" rx=".4"/>
-  <rect class="w" x="13" y="64" width="5" height="5" fill="#fde68a" rx=".4"/>
-  <rect class="w" x="5"  y="74" width="5" height="5" fill="#fde68a" rx=".4"/>
-  <rect class="w" x="13" y="74" width="5" height="5" fill="#bae6fd" rx=".4"/>
-  <rect class="w" x="5"  y="84" width="5" height="5" fill="#fde68a" rx=".4"/>
-  <rect class="w" x="13" y="84" width="5" height="5" fill="#fde68a" rx=".4"/>
-  <rect class="w" x="5"  y="94" width="5" height="5" fill="#bae6fd" rx=".4"/>
-  <rect class="w" x="13" y="94" width="5" height="5" fill="#fde68a" rx=".4"/>
-  <rect class="w" x="5"  y="104" width="5" height="5" fill="#fde68a" rx=".4"/>
-  <rect class="w" x="13" y="104" width="5" height="5" fill="#fde68a" rx=".4"/>
-  <!-- porta -->
-  <rect x="8" y="118" width="8" height="14" fill="#7c3a1a" rx="1"/>
-  <rect x="11" y="122" width="2" height="4" fill="#5c2a0e" rx=".3"/>
-</g>
-
-<!-- EDIFICIO 2 — grattacielo vetro blu, sx-centro -->
-<g class="b1">
-  <rect x="30" y="20" width="26" height="112" fill="#7dd3fc"/>
-  <!-- bande riflesso vetro -->
-  <rect x="30" y="20" width="26" height="4" fill="#38bdf8"/>
-  <rect x="30" y="50" width="26" height="2" fill="#0ea5e9" opacity=".3"/>
-  <rect x="30" y="80" width="26" height="2" fill="#0ea5e9" opacity=".3"/>
-  <rect x="30" y="110" width="26" height="2" fill="#0ea5e9" opacity=".3"/>
-  <!-- finestre nastro -->
-  <rect class="w" x="32" y="26" width="22" height="4" fill="#e0f2fe" rx=".3" opacity=".9"/>
-  <rect class="w" x="32" y="34" width="22" height="4" fill="#fde68a" rx=".3"/>
-  <rect class="w" x="32" y="42" width="22" height="4" fill="#e0f2fe" rx=".3"/>
-  <rect class="w" x="32" y="52" width="22" height="4" fill="#e0f2fe" rx=".3"/>
-  <rect class="w" x="32" y="60" width="22" height="4" fill="#fde68a" rx=".3"/>
-  <rect class="w" x="32" y="68" width="22" height="4" fill="#bae6fd" rx=".3"/>
-  <rect class="w" x="32" y="76" width="22" height="4" fill="#e0f2fe" rx=".3"/>
-  <rect class="w" x="32" y="84" width="22" height="4" fill="#fde68a" rx=".3"/>
-  <rect class="w" x="32" y="92" width="22" height="4" fill="#e0f2fe" rx=".3"/>
-  <rect class="w" x="32" y="100" width="22" height="4" fill="#e0f2fe" rx=".3"/>
-  <rect class="w" x="32" y="108" width="22" height="4" fill="#fde68a" rx=".3"/>
-  <rect class="w" x="32" y="116" width="22" height="4" fill="#bae6fd" rx=".3"/>
-  <!-- ingresso -->
-  <rect x="39" y="122" width="10" height="10" fill="#0369a1" rx="1"/>
-  <rect x="36" y="120" width="16" height="3" fill="#0284c7"/>
+<!-- ══ EDIFICI ISOLATO NW ══ -->
+<g class="p4">
+  <!-- palazzo grande -->
+  <rect x="4"  y="4"  width="34" height="48" fill="#fde68a" rx="1"/>
+  <rect x="6"  y="6"  width="8"  height="6"  fill="#92400e" opacity=".5"/>
+  <rect x="16" y="6"  width="8"  height="6"  fill="#92400e" opacity=".5"/>
+  <rect x="26" y="6"  width="8"  height="6"  fill="#92400e" opacity=".5"/>
+  <rect x="6"  y="16" width="8"  height="6"  fill="#92400e" opacity=".5"/>
+  <rect x="16" y="16" width="8"  height="6"  fill="#92400e" opacity=".5"/>
+  <rect x="26" y="16" width="8"  height="6"  fill="#92400e" opacity=".5"/>
+  <rect x="6"  y="26" width="8"  height="6"  fill="#92400e" opacity=".5"/>
+  <rect x="16" y="26" width="8"  height="6"  fill="#92400e" opacity=".5"/>
+  <rect x="26" y="26" width="8"  height="6"  fill="#92400e" opacity=".5"/>
+  <rect x="6"  y="36" width="8"  height="6"  fill="#92400e" opacity=".5"/>
+  <rect x="16" y="36" width="8"  height="6"  fill="#92400e" opacity=".5"/>
+  <rect x="26" y="36" width="8"  height="6"  fill="#92400e" opacity=".5"/>
+  <!-- palazzina piccola -->
+  <rect x="42" y="4"  width="28" height="30" fill="#bfdbfe" rx="1"/>
+  <rect x="44" y="6"  width="10" height="8"  fill="#1d4ed8" opacity=".4"/>
+  <rect x="57" y="6"  width="10" height="8"  fill="#1d4ed8" opacity=".4"/>
+  <rect x="44" y="18" width="10" height="8"  fill="#1d4ed8" opacity=".4"/>
+  <rect x="57" y="18" width="10" height="8"  fill="#1d4ed8" opacity=".4"/>
+  <!-- cortile interno verde -->
+  <rect x="42" y="38" width="28" height="34" fill="#4ade80" rx="1"/>
+  <!-- alberi cortile -->
+  <circle cx="52" cy="48" r="5" fill="#16a34a"/>
+  <circle cx="64" cy="60" r="4" fill="#15803d"/>
+  <circle cx="52" cy="65" r="3" fill="#166534"/>
 </g>
 
-<!-- EDIFICIO 3 — torre in costruzione con gru, centro -->
-<g class="b2">
-  <rect x="64" y="12" width="28" height="120" fill="#d6d3d1"/>
-  <!-- linee piano -->
-  <rect x="64" y="30" width="28" height="1" fill="#a8a29e" opacity=".5"/>
-  <rect x="64" y="48" width="28" height="1" fill="#a8a29e" opacity=".5"/>
-  <rect x="64" y="66" width="28" height="1" fill="#a8a29e" opacity=".5"/>
-  <rect x="64" y="84" width="28" height="1" fill="#a8a29e" opacity=".5"/>
-  <rect x="64" y="102" width="28" height="1" fill="#a8a29e" opacity=".5"/>
+<!-- ══ EDIFICI ISOLATO NE ══ -->
+<g class="p5">
+  <!-- torre uffici -->
+  <rect x="128" y="4" width="38" height="40" fill="#d1fae5" rx="1"/>
+  <rect x="130" y="6"  width="14" height="10" fill="#059669" opacity=".4"/>
+  <rect x="148" y="6"  width="14" height="10" fill="#059669" opacity=".4"/>
+  <rect x="130" y="20" width="14" height="10" fill="#059669" opacity=".4"/>
+  <rect x="148" y="20" width="14" height="10" fill="#059669" opacity=".4"/>
+  <rect x="130" y="32" width="14" height="8"  fill="#059669" opacity=".4"/>
+  <rect x="148" y="32" width="14" height="8"  fill="#059669" opacity=".4"/>
+  <!-- isolato con parco -->
+  <rect x="128" y="48" width="68" height="28" fill="#4ade80" rx="1"/>
+  <!-- vialetto parco -->
+  <rect x="156" y="48" width="4" height="28" fill="#d4c9b8" opacity=".6"/>
+  <!-- alberi parco -->
+  <circle cx="136" cy="56" r="5" fill="#16a34a"/>
+  <circle cx="146" cy="65" r="4" fill="#15803d"/>
+  <circle cx="170" cy="54" r="5" fill="#16a34a"/>
+  <circle cx="182" cy="62" r="4" fill="#166534"/>
+  <!-- palazzina dx -->
+  <rect x="170" y="4" width="26" height="38" fill="#fde68a" rx="1"/>
+  <rect x="172" y="6"  width="8"  height="8"  fill="#92400e" opacity=".5"/>
+  <rect x="184" y="6"  width="8"  height="8"  fill="#92400e" opacity=".5"/>
+  <rect x="172" y="18" width="8"  height="8"  fill="#92400e" opacity=".5"/>
+  <rect x="184" y="18" width="8"  height="8"  fill="#92400e" opacity=".5"/>
+  <rect x="172" y="30" width="8"  height="8"  fill="#92400e" opacity=".5"/>
+  <rect x="184" y="30" width="8"  height="8"  fill="#92400e" opacity=".5"/>
+</g>
+
+<!-- ══ EDIFICI ISOLATO SW ══ -->
+<g class="p6">
+  <!-- edificio industriale/commerciale -->
+  <rect x="4" y="128" width="48" height="48" fill="#fca5a5" rx="1"/>
+  <rect x="6"  y="130" width="18" height="14" fill="#dc2626" opacity=".35"/>
+  <rect x="28" y="130" width="18" height="14" fill="#dc2626" opacity=".35"/>
+  <rect x="6"  y="148" width="18" height="14" fill="#dc2626" opacity=".35"/>
+  <rect x="28" y="148" width="18" height="14" fill="#dc2626" opacity=".35"/>
+  <rect x="6"  y="164" width="18" height="8"  fill="#dc2626" opacity=".35"/>
+  <rect x="28" y="164" width="18" height="8"  fill="#dc2626" opacity=".35"/>
+  <!-- parcheggio + verde -->
+  <rect x="56" y="128" width="28" height="48" fill="#d4c9b8" rx="1"/>
+  <!-- stalli parcheggio -->
+  <line x1="56" y1="138" x2="84" y2="138" stroke="#94a3b8" stroke-width=".7"/>
+  <line x1="56" y1="148" x2="84" y2="148" stroke="#94a3b8" stroke-width=".7"/>
+  <line x1="56" y1="158" x2="84" y2="158" stroke="#94a3b8" stroke-width=".7"/>
+  <line x1="56" y1="168" x2="84" y2="168" stroke="#94a3b8" stroke-width=".7"/>
+  <line x1="68" y1="128" x2="68" y2="176" stroke="#94a3b8" stroke-width=".7"/>
+</g>
+
+<!-- ══ EDIFICI ISOLATO SE ══ -->
+<g class="p7">
+  <!-- chiesa / edificio storico (forma a croce) -->
+  <rect x="138" y="130" width="46" height="46" fill="#f5e6d0" rx="1"/>
+  <!-- bracci croce -->
+  <rect x="128" y="142" width="14" height="22" fill="#f5e6d0"/>
+  <rect x="150" y="126" width="22" height="14" fill="#f5e6d0"/>
+  <!-- cortile chiesa -->
+  <rect x="142" y="134" width="10" height="10" fill="#86efac"/>
   <!-- finestre -->
-  <rect class="w" x="67" y="15" width="8" height="6" fill="#fde68a" rx=".4"/>
-  <rect class="w" x="79" y="15" width="8" height="6" fill="#bae6fd" rx=".4"/>
-  <rect class="w" x="67" y="33" width="8" height="6" fill="#fde68a" rx=".4"/>
-  <rect class="w" x="79" y="33" width="8" height="6" fill="#fde68a" rx=".4"/>
-  <rect class="w" x="67" y="51" width="8" height="6" fill="#bae6fd" rx=".4"/>
-  <rect class="w" x="79" y="51" width="8" height="6" fill="#fde68a" rx=".4"/>
-  <rect class="w" x="67" y="69" width="8" height="6" fill="#fde68a" rx=".4"/>
-  <rect class="w" x="79" y="69" width="8" height="6" fill="#bae6fd" rx=".4"/>
-  <rect class="w" x="67" y="87" width="8" height="6" fill="#fde68a" rx=".4"/>
-  <rect class="w" x="79" y="87" width="8" height="6" fill="#fde68a" rx=".4"/>
-  <!-- cantiere in cima: travi + ponteggio -->
-  <rect x="64" y="5" width="28" height="8" fill="#78716c" opacity=".4"/>
-  <line x1="64" y1="5" x2="92" y2="12" stroke="#fbbf24" stroke-width="1.5"/>
-  <line x1="92" y1="5" x2="64" y2="12" stroke="#fbbf24" stroke-width="1.5"/>
-  <!-- pilastro gru -->
-  <rect x="84" y="-4" width="3" height="18" fill="#f59e0b"/>
+  <rect x="140" y="148" width="8"  height="8"  fill="#bae6fd" opacity=".7"/>
+  <rect x="152" y="148" width="8"  height="8"  fill="#bae6fd" opacity=".7"/>
+  <rect x="164" y="148" width="8"  height="8"  fill="#bae6fd" opacity=".7"/>
+  <rect x="140" y="160" width="8"  height="8"  fill="#bae6fd" opacity=".7"/>
+  <rect x="164" y="160" width="8"  height="8"  fill="#bae6fd" opacity=".7"/>
 </g>
-<!-- BRACCIO GRU animato -->
-<g class="b2">
-  <g class="arm" style="transform-origin:85.5px 5px">
-    <rect x="62" y="3.5" width="46" height="2" fill="#f59e0b"/>
-    <!-- filo -->
-    <line x1="100" y1="5" x2="100" y2="18" stroke="#374151" stroke-width=".8"/>
-    <rect x="98" y="17" width="5" height="2.5" fill="#6b7280" rx=".4"/>
-    <!-- contrappeso -->
-    <rect x="61" y="2" width="7" height="4" fill="#9ca3af" rx=".5"/>
+
+<!-- ══ CANTIERE (incrocio centro, isolato in costruzione) ══ -->
+<g class="p8">
+  <!-- base cantiere -->
+  <rect x="4" y="88" width="82" height="24" fill="#94a3b8"/>
+  <!-- recinto cantiere -->
+  <rect x="88" y="4" width="24" height="82" fill="#94a3b8"/>
+  <!-- piazzola cantiere NW-incrocio -->
+  <rect x="38" y="52" width="46" height="32" fill="#e5e7eb" rx="1"/>
+  <!-- recinzione -->
+  <rect x="38" y="52" width="46" height="2" fill="#f59e0b"/>
+  <rect x="38" y="82" width="46" height="2" fill="#f59e0b"/>
+  <rect x="38" y="52" width="2"  height="32" fill="#f59e0b"/>
+  <rect x="82" y="52" width="2"  height="32" fill="#f59e0b"/>
+  <!-- fondamenta -->
+  <rect x="42" y="56" width="40" height="24" fill="#d6d3d1" rx="1"/>
+  <!-- gru: colonna fissa -->
+  <rect x="76" y="48" width="4"  height="36" fill="#78716c"/>
+  <!-- braccio gru che ruota -->
+  <g style="transform-origin:78px 56px;animation:crspin 6s linear infinite">
+    <rect x="52" y="54.5" width="52" height="3" fill="#f59e0b"/>
+    <rect x="51" y="52" width="8"  height="5"  fill="#9ca3af" rx=".5"/>
+    <line x1="96" y1="57" x2="96" y2="72" stroke="#374151" stroke-width="1"/>
+    <rect x="93" y="72" width="6"  height="3"  fill="#6b7280" rx=".5"/>
   </g>
+  <!-- materiali cantiere -->
+  <rect x="44" y="68" width="10" height="6" fill="#fbbf24" opacity=".7"/>
+  <rect x="58" y="70" width="12" height="4" fill="#92400e" opacity=".6"/>
 </g>
 
-<!-- EDIFICIO 4 — palazzina bassa con tetto spiovente, centro-dx -->
-<g class="b3">
-  <rect x="100" y="88" width="34" height="44" fill="#fca5a5"/>
-  <!-- tetto a falde -->
-  <polygon points="96,88 134,88 117,72" fill="#dc2626"/>
-  <!-- finestre -->
-  <rect class="w" x="103" y="93" width="10" height="8" fill="#fde68a" rx=".5"/>
-  <rect class="w" x="119" y="93" width="10" height="8" fill="#bae6fd" rx=".5"/>
-  <rect class="w" x="103" y="107" width="10" height="8" fill="#fde68a" rx=".5"/>
-  <rect class="w" x="119" y="107" width="10" height="8" fill="#fde68a" rx=".5"/>
-  <!-- porta -->
-  <rect x="111" y="118" width="11" height="14" fill="#7c3a1a" rx="1"/>
-  <circle cx="121" cy="125" r="1" fill="#fbbf24"/>
+<!-- ══ VERDE STRADE: alberature e aiuole ══ -->
+<g class="p9">
+  <!-- filare alberi lungo strada orizzontale (nord) -->
+  <circle cx="20"  cy="84" r="3.5" fill="#16a34a"/>
+  <circle cx="40"  cy="84" r="3"   fill="#15803d"/>
+  <circle cx="60"  cy="84" r="3.5" fill="#16a34a"/>
+  <circle cx="140" cy="84" r="3"   fill="#15803d"/>
+  <circle cx="160" cy="84" r="3.5" fill="#16a34a"/>
+  <circle cx="180" cy="84" r="3"   fill="#15803d"/>
+  <!-- filare alberi lungo strada orizzontale (sud) -->
+  <circle cx="20"  cy="116" r="3.5" fill="#16a34a"/>
+  <circle cx="40"  cy="116" r="3"   fill="#15803d"/>
+  <circle cx="60"  cy="116" r="3.5" fill="#16a34a"/>
+  <circle cx="140" cy="116" r="3"   fill="#15803d"/>
+  <circle cx="160" cy="116" r="3.5" fill="#16a34a"/>
+  <circle cx="180" cy="116" r="3"   fill="#15803d"/>
+  <!-- filare alberi lungo strada verticale (ovest) -->
+  <circle cx="84" cy="20"  r="3.5" fill="#16a34a"/>
+  <circle cx="84" cy="40"  r="3"   fill="#15803d"/>
+  <circle cx="84" cy="60"  r="3.5" fill="#16a34a"/>
+  <circle cx="84" cy="140" r="3"   fill="#15803d"/>
+  <circle cx="84" cy="160" r="3.5" fill="#16a34a"/>
+  <circle cx="84" cy="180" r="3"   fill="#15803d"/>
+  <!-- filare alberi lungo strada verticale (est) -->
+  <circle cx="116" cy="20"  r="3.5" fill="#16a34a"/>
+  <circle cx="116" cy="40"  r="3"   fill="#15803d"/>
+  <circle cx="116" cy="60"  r="3.5" fill="#16a34a"/>
+  <circle cx="116" cy="140" r="3"   fill="#15803d"/>
+  <circle cx="116" cy="160" r="3.5" fill="#16a34a"/>
+  <circle cx="116" cy="180" r="3"   fill="#15803d"/>
+  <!-- aiuola rotatoria centrale -->
+  <circle cx="100" cy="100" r="9"  fill="#4ade80"/>
+  <circle cx="100" cy="100" r="5"  fill="#16a34a"/>
 </g>
 
-<!-- EDIFICIO 5 — moderno verde facciata, dx -->
-<g class="b4">
-  <rect x="142" y="38" width="40" height="94" fill="#6ee7b7"/>
-  <!-- pannelli facciata -->
-  <rect x="142" y="38" width="40" height="6" fill="#34d399"/>
-  <rect x="142" y="64" width="40" height="2" fill="#059669" opacity=".4"/>
-  <rect x="142" y="84" width="40" height="2" fill="#059669" opacity=".4"/>
-  <rect x="142" y="104" width="40" height="2" fill="#059669" opacity=".4"/>
-  <!-- finestre grandi -->
-  <rect class="w" x="145" y="46" width="15" height="10" fill="#d1fae5" rx=".5"/>
-  <rect class="w" x="164" y="46" width="15" height="10" fill="#fde68a" rx=".5"/>
-  <rect class="w" x="145" y="66" width="15" height="10" fill="#fde68a" rx=".5"/>
-  <rect class="w" x="164" y="66" width="15" height="10" fill="#d1fae5" rx=".5"/>
-  <rect class="w" x="145" y="86" width="15" height="10" fill="#bae6fd" rx=".5"/>
-  <rect class="w" x="164" y="86" width="15" height="10" fill="#fde68a" rx=".5"/>
-  <rect class="w" x="145" y="106" width="15" height="10" fill="#d1fae5" rx=".5"/>
-  <rect class="w" x="164" y="106" width="15" height="10" fill="#bae6fd" rx=".5"/>
-  <!-- ingresso -->
-  <rect x="154" y="120" width="16" height="12" fill="#065f46" rx="1"/>
-  <rect x="150" y="118" width="24" height="3" fill="#059669"/>
-</g>
+<!-- ══ SEMAFORI (agli incroci) ══ -->
+<circle cx="85"  cy="85"  r="2.5" fill="#1f2937"/>
+<circle cx="85"  cy="85"  r="1.5" class="tla"/>
+<circle cx="115" cy="85"  r="2.5" fill="#1f2937"/>
+<circle cx="115" cy="85"  r="1.5" class="tlb"/>
+<circle cx="85"  cy="115" r="2.5" fill="#1f2937"/>
+<circle cx="85"  cy="115" r="1.5" class="tlb"/>
+<circle cx="115" cy="115" r="2.5" fill="#1f2937"/>
+<circle cx="115" cy="115" r="1.5" class="tla"/>
 
-<!-- EDIFICIO 6 — chiesa storica, dx-estremo -->
-<g class="b5">
-  <rect x="188" y="90" width="30" height="42" fill="#f5e6d0"/>
-  <!-- frontone -->
-  <polygon points="185,90 218,90 201,76" fill="#e8d0a8"/>
-  <!-- occhio di bue -->
-  <circle cx="201" cy="84" r="3" fill="#bae6fd" opacity=".8"/>
-  <!-- campanile -->
-  <rect x="194" y="60" width="14" height="32" fill="#e0d0a8"/>
-  <polygon points="194,60 208,60 201,50" fill="#c9b07a"/>
-  <!-- campana -->
-  <circle cx="201" cy="66" r="2.5" fill="#fbbf24" opacity=".7"/>
-  <!-- arcate campanile -->
-  <path d="M196,64 Q201,58 206,64" fill="none" stroke="#b8a06a" stroke-width="1"/>
-  <!-- finestre -->
-  <rect class="w" x="191" y="93" width="8" height="9" fill="#fde68a" rx=".5"/>
-  <rect class="w" x="204" y="93" width="8" height="9" fill="#bae6fd" rx=".5"/>
-  <!-- portale ad arco -->
-  <path d="M196,132 L196,112 Q201,104 206,112 L206,132 Z" fill="#7c3a1a"/>
+<!-- ══ AUTOMOBILI ══ -->
+<!-- auto → est, corsia nord della strada orizzontale -->
+<g class="car-e" style="transform:translateX(-22px)">
+  <rect x="0" y="89" width="12" height="7" fill="#dc2626" rx="1.5"/>
+  <rect x="2" y="90.5" width="8" height="4" fill="#fca5a5" rx=".5"/>
 </g>
-
-<!-- ALBERI -->
-<g class="b6">
-  <!-- albero 1 -->
-  <rect x="128" y="118" width="3" height="15" fill="#7c3a1a"/>
-  <ellipse cx="129" cy="111" rx="9" ry="11" fill="#166534"/>
-  <ellipse cx="125" cy="109" rx="6" ry="8" fill="#15803d"/>
-  <ellipse cx="133" cy="107" rx="7" ry="9" fill="#16a34a"/>
-  <!-- albero 2 -->
-  <rect x="137" y="120" width="3" height="13" fill="#7c3a1a"/>
-  <ellipse cx="138" cy="113" rx="8" ry="10" fill="#166534"/>
-  <ellipse cx="142" cy="110" rx="6" ry="7" fill="#16a34a"/>
+<!-- auto ← ovest, corsia sud della strada orizzontale -->
+<g class="car-w" style="transform:translateX(210px)">
+  <rect x="0" y="104" width="12" height="7" fill="#2563eb" rx="1.5"/>
+  <rect x="2" y="105.5" width="8" height="4" fill="#93c5fd" rx=".5"/>
 </g>
-
-<!-- LAMPIONI -->
-<g class="b7">
-  <rect x="27" y="114" width="2" height="19" fill="#6b7280"/>
-  <rect x="21" y="112" width="9" height="2.5" fill="#6b7280" rx="1"/>
-  <circle cx="21" cy="112" r="2.5" fill="#fef08a" opacity=".9"/>
-  <rect x="96" y="118" width="2" height="15" fill="#6b7280"/>
-  <rect x="90" y="116" width="9" height="2.5" fill="#6b7280" rx="1"/>
-  <circle cx="90" cy="116" r="2.5" fill="#fef08a" opacity=".9"/>
-  <rect x="183" y="116" width="2" height="17" fill="#6b7280"/>
-  <rect x="177" y="114" width="9" height="2.5" fill="#6b7280" rx="1"/>
-  <circle cx="177" cy="114" r="2.5" fill="#fef08a" opacity=".9"/>
+<!-- seconda auto → est (offset temporale) -->
+<g class="car-e2" style="transform:translateX(-22px)">
+  <rect x="0" y="91" width="10" height="5" fill="#f59e0b" rx="1.2"/>
 </g>
-
-<!-- SEMAFORI -->
-<g class="b7">
-  <rect x="58" y="120" width="2" height="13" fill="#374151"/>
-  <rect x="55" y="120" width="8" height="7" fill="#1f2937" rx=".5"/>
-  <circle cx="59" cy="122" r="1.2" class="tl"/>
-  <circle cx="59" cy="125.5" r="1.2" class="tl2"/>
+<!-- auto ↓ sud, corsia ovest della strada verticale -->
+<g class="car-s" style="transform:translateY(-22px)">
+  <rect x="89" y="0" width="7" height="12" fill="#16a34a" rx="1.5"/>
+  <rect x="90.5" y="2" width="4" height="8" fill="#4ade80" rx=".5"/>
 </g>
-
-<!-- PERSONE -->
-<g class="b8" opacity=".9">
-  <circle cx="50" cy="130" r="1.8" fill="#1e293b"/>
-  <rect x="49" y="131.5" width="2.5" height="5" fill="#2563eb" rx=".4"/>
-  <circle cx="113" cy="130" r="1.8" fill="#1e293b"/>
-  <rect x="112" y="131.5" width="2.5" height="5" fill="#dc2626" rx=".4"/>
-</g>
-
-<!-- MACCHINE sull'unica strada orizzontale -->
-<!-- auto rossa → destra, corsia superiore -->
-<g class="car-r" style="transform:translateX(-20px)">
-  <rect x="0" y="135" width="16" height="7" fill="#dc2626" rx="2"/>
-  <rect x="3" y="132" width="9" height="5" fill="#b91c1c" rx="1.5"/>
-  <rect x="3.5" y="132.5" width="3.5" height="3" fill="#bae6fd" rx=".3"/>
-  <rect x="7.5" y="132.5" width="3.5" height="3" fill="#bae6fd" rx=".3"/>
-  <circle cx="3.5" cy="142" r="2" fill="#1f2937"/>
-  <circle cx="12.5" cy="142" r="2" fill="#1f2937"/>
-  <rect x="14.5" y="136" width="2" height="2.5" fill="#fef3c7" rx=".3"/>
-</g>
-<!-- furgone bianco ← sinistra, corsia inferiore -->
-<g class="car-l" style="transform:translateX(230px)">
-  <rect x="0" y="137" width="18" height="8" fill="#e5e7eb" rx="2"/>
-  <rect x="0" y="133" width="8" height="5" fill="#d1d5db" rx="1.5"/>
-  <rect x="1" y="133.5" width="6" height="3" fill="#bae6fd" rx=".3"/>
-  <circle cx="3.5" cy="145" r="2" fill="#1f2937"/>
-  <circle cx="14.5" cy="145" r="2" fill="#1f2937"/>
-  <rect x="-2" y="137.5" width="2" height="2.5" fill="#fef3c7" rx=".3"/>
+<!-- auto ↑ nord, corsia est della strada verticale -->
+<g class="car-n" style="transform:translateY(210px)">
+  <rect x="104" y="0" width="7" height="12" fill="#7c3aed" rx="1.5"/>
+  <rect x="105.5" y="2" width="4" height="8" fill="#c4b5fd" rx=".5"/>
 </g>
 
 </svg>
