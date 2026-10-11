@@ -1039,7 +1039,11 @@ function artCard(a, showEdit, showAllNotes) {
   var stepBadgeCls = a.status ? (SC[a.status] || 'b-gray') : 'b-gray';
 
   var _lmTxt = a.lastModified ? new Date(a.lastModified).toLocaleString('it-IT',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '';
+  var inSommarioBanner = (a.issue && a.issue !== '' && a.status !== 'Pubblicato' && a.status !== 'Rifiutato')
+    ? '<div style="background:var(--green-bg,#e8f5e9);border-left:3px solid var(--green-tx,#388e3c);padding:4px 10px;margin-bottom:6px;font-size:12px;font-weight:600;color:var(--green-tx,#388e3c);border-radius:4px 4px 0 0">📋 Articolo inserito nel sommario</div>'
+    : '';
   return '<div class="card">' +
+    inSommarioBanner +
     '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:6px">' +
       '<div style="flex:1">' +
         (_lmTxt ? '<div style="font-size:11px;color:#111;margin-bottom:3px">Ultima modifica: '+_lmTxt+'</div>' : '') +
@@ -3056,10 +3060,16 @@ function updateTabCounts() {
            (!a.editor || a.editor === '');
   }).length;
 
-  // Articoli in lavorazione: has editor, not Rifiutato, not Pubblicato, not step 19
+  // Articoli nel sommario (assegnati a un fascicolo, non pubblicati/rifiutati)
+  var sommarioCount = articles.filter(function(a){
+    return a.status !== 'Pubblicato' && a.status !== 'Rifiutato' && a.step !== '18' &&
+           a.editor && a.editor !== '' && a.issue && a.issue !== '';
+  }).length;
+
+  // Articoli in lavorazione: has editor, not Rifiutato, not Pubblicato, not step 18, NOT nel sommario
   var listaCount = articles.filter(function(a){
     return a.status !== 'Pubblicato' && a.status !== 'Rifiutato' && a.step !== '18' &&
-           a.editor && a.editor !== '';
+           a.editor && a.editor !== '' && (!a.issue || a.issue === '');
   }).length;
 
   // Rifiutati: status Rifiutato
@@ -3078,7 +3088,7 @@ function updateTabCounts() {
   document.querySelectorAll('.tab').forEach(function(btn){
     var tab = btn.dataset.tab;
     if (tab === 'gatekeeper') btn.textContent = 'GateKeeper evaluation (' + gkCount + ')';
-    if (tab === 'lista')      btn.textContent = 'Articoli in lavorazione (' + listaCount + ')';
+    if (tab === 'lista')      btn.textContent = 'Articoli in lavorazione (' + listaCount + (sommarioCount > 0 ? ' + ' + sommarioCount + ' in sommario' : '') + ')';
     if (tab === 'rifiutati')  btn.textContent = 'Rifiutati (' + rifCount + ')';
     if (tab === 'pubblicati') btn.textContent = 'Articoli pubblicati (' + pubCount + ')';
     if (tab === 'tutti')      updateTuttiTabLabel(tuttiCount);
