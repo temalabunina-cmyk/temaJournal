@@ -729,6 +729,7 @@ function loadData() {
         migrateSteps();
         migrateSteps4();
         migrateNotes();
+        migrateRevisoriAccettazione();
         var rifiutatoChanged = false;
         articles.forEach(function(a) {
           if (a.status === 'Rifiutato' && !a.dataRifiuto) {
@@ -951,6 +952,22 @@ function migrateNotes() {
     changed = true;
   });
   if (changed) { schedSave(); console.log('[TeMA] Note migrate:', articles.filter(function(a){return a.notesLog&&a.notesLog.length;}).length); }
+}
+
+function migrateRevisoriAccettazione() {
+  var changed = false;
+  articles.forEach(function(a) {
+    ['revisori','revisori2'].forEach(function(key) {
+      if (!a[key] || !a[key].length) return;
+      a[key].forEach(function(r) {
+        if (!r.accettazione || r.accettazione === '') {
+          r.accettazione = 'in attesa';
+          changed = true;
+        }
+      });
+    });
+  });
+  if (changed) { schedSave(); console.log('[TeMA] Revisori: accettazione impostata a "in attesa" dove mancante.'); }
 }
 
 function schedSave() { setSaving(true); clearTimeout(saveTimer); saveTimer = setTimeout(persist, 600); }
