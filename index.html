@@ -2841,12 +2841,15 @@ function saveArt() {
   };
   if (!data.id||!data.title){ alert('ID e Titolo sono obbligatori.'); return; }
   // Validazione: giudizio obbligatorio se revisore ha completato
-  var _revMissingGiudizio = (currentRevisori||[]).concat(currentRevisori2||[]).filter(function(r){
-    return r.accettazione === 'completato' && (!r.giudizio || r.giudizio === '');
-  });
+  var _revCompletati = (currentRevisori||[]).concat(currentRevisori2||[]).filter(function(r){ return r.accettazione === 'completato'; });
+  var _revMissingGiudizio = _revCompletati.filter(function(r){ return !r.giudizio || r.giudizio === ''; });
   if (_revMissingGiudizio.length > 0) {
-    var _nomi = _revMissingGiudizio.map(function(r){ return r.nome || 'Revisore'; }).join(', ');
-    alert('Compilare il campo Giudizio per: ' + _nomi);
+    alert('Compilare il campo Giudizio per: ' + _revMissingGiudizio.map(function(r){ return r.nome || 'Revisore'; }).join(', '));
+    return;
+  }
+  var _revMissingRating = _revCompletati.filter(function(r){ return !r.rating || r.rating === 0; });
+  if (_revMissingRating.length > 0) {
+    alert('Assegnare il Rating per: ' + _revMissingRating.map(function(r){ return r.nome || 'Revisore'; }).join(', '));
     return;
   }
   console.log('[TeMA] saveArt: id='+data.id+' step='+data.step+' origStep='+_origStep+' stepManuale='+(_newStep!==_origStep));
