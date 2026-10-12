@@ -1108,10 +1108,11 @@ function artCard(a, showEdit, showAllNotes) {
   var _simHigh = (a.similarity !== null && a.similarity !== undefined && a.similarity !== '') && parseFloat(a.similarity) > 30;
   var _aiHigh  = (a.aiPercent  !== null && a.aiPercent  !== undefined && a.aiPercent  !== '') && parseFloat(a.aiPercent)  > 30;
   var _gkPassed = parseInt(a.step) > 3;
-  var _cardBorder = a.highlight ? 'border:3px solid #f59e0b'
-                  : (_gkPassed && (_simHigh || _aiHigh)) ? 'border:2px solid #e53e3e'
-                  : '';
-  return '<div class="card"'+(_cardBorder?' style="'+_cardBorder+'"':'')+'>'+
+  var _cardStyle = a.highlight ? 'border:3px solid #f59e0b'
+                 : (_gkPassed && (_simHigh || _aiHigh)) ? 'background:#c6f6d5;border:2px solid #e53e3e'
+                 : _gkPassed ? 'background:#c6f6d5'
+                 : '';
+  return '<div class="card"'+(_cardStyle?' style="'+_cardStyle+'"':'')+'>'+
     inSommarioBanner +
     '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:6px">' +
       '<div style="flex:1">' +
