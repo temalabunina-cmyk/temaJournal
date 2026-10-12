@@ -1105,7 +1105,13 @@ function artCard(a, showEdit, showAllNotes) {
   var inSommarioBanner = (a.issue && a.issue !== '' && a.status !== 'Pubblicato' && a.status !== 'Rifiutato')
     ? '<div style="background:var(--green-bg,#e8f5e9);border-left:3px solid var(--green-tx,#388e3c);padding:4px 10px;margin-bottom:6px;font-size:12px;font-weight:600;color:var(--green-tx,#388e3c);border-radius:4px 4px 0 0">📋 Articolo inserito nel sommario</div>'
     : '';
-  return '<div class="card"'+(a.highlight?' style="border:3px solid #f59e0b"':'')+'>'+
+  var _simHigh = (a.similarity !== null && a.similarity !== undefined && a.similarity !== '') && parseFloat(a.similarity) > 30;
+  var _aiHigh  = (a.aiPercent  !== null && a.aiPercent  !== undefined && a.aiPercent  !== '') && parseFloat(a.aiPercent)  > 30;
+  var _gkPassed = parseInt(a.step) > 3;
+  var _cardBorder = a.highlight ? 'border:3px solid #f59e0b'
+                  : (_gkPassed && (_simHigh || _aiHigh)) ? 'border:2px solid #e53e3e'
+                  : '';
+  return '<div class="card"'+(_cardBorder?' style="'+_cardBorder+'"':'')+'>'+
     inSommarioBanner +
     '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:6px">' +
       '<div style="flex:1">' +
