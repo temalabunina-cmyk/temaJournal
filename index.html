@@ -1232,16 +1232,18 @@ function gkCard(a) {
   var bothLow = simVal && aiVal && parseFloat(a.similarity) < 30 && parseFloat(a.aiPercent) < 30;
   var card = artCard(a, true);
   var gkApproved = a.step === '3';
+  var gkValutato = simVal || aiVal; // il GK ha inserito almeno un valore
   if (gkApproved && (simHigh || aiHigh)) {
     // Approvato GK ma sim/AI >30%: sfondo verde + bordo rosso
     card = card.replace('<div class="card">', '<div class="card" style="background:#c6f6d5;border:2px solid #e53e3e;">');
-  } else if (simHigh || aiHigh) {
-    // Non supera Turnitin (non ancora approvato GK)
+  } else if (gkValutato && (simHigh || aiHigh)) {
+    // Valutato dal GK, non supera Turnitin
     card = card.replace('<div class="card">', '<div class="card" style="background:#ffe0e0;border-color:#e53e3e;border-width:2px;">');
   } else if (gkApproved) {
     // Verde: approvato dal GateKeeper, valori ok
     card = card.replace('<div class="card">', '<div class="card" style="background:#c6f6d5;border-color:#2f855a;border-width:2px;">');
   }
+  // Nessun colore: non ancora valutato dal GK
   // Senza colore: da valutare dal GateKeeper (bothLow ma non ancora approvato)
   // Impaginato badge (shown after Internazionale in GK cards)
   var impBadge = a.impaginato ? '<span class="badge b-ok" style="white-space:nowrap">Impaginato</span>' : '';
