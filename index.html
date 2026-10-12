@@ -1105,13 +1105,7 @@ function artCard(a, showEdit, showAllNotes) {
   var inSommarioBanner = (a.issue && a.issue !== '' && a.status !== 'Pubblicato' && a.status !== 'Rifiutato')
     ? '<div style="background:var(--green-bg,#e8f5e9);border-left:3px solid var(--green-tx,#388e3c);padding:4px 10px;margin-bottom:6px;font-size:12px;font-weight:600;color:var(--green-tx,#388e3c);border-radius:4px 4px 0 0">📋 Articolo inserito nel sommario</div>'
     : '';
-  var _simHigh = (a.similarity !== null && a.similarity !== undefined && a.similarity !== '') && parseFloat(a.similarity) > 30;
-  var _aiHigh  = (a.aiPercent  !== null && a.aiPercent  !== undefined && a.aiPercent  !== '') && parseFloat(a.aiPercent)  > 30;
-  var _gkPassed = parseInt(a.step) > 3;
-  var _cardStyle = a.highlight ? 'border:3px solid #f59e0b'
-                 : (_gkPassed && (_simHigh || _aiHigh)) ? 'background:#c6f6d5;border:2px solid #e53e3e'
-                 : _gkPassed ? 'background:#c6f6d5'
-                 : '';
+  var _cardStyle = a.highlight ? 'border:3px solid #f59e0b' : '';
   return '<div class="card"'+(_cardStyle?' style="'+_cardStyle+'"':'')+'>'+
     inSommarioBanner +
     '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:6px">' +
@@ -1238,11 +1232,14 @@ function gkCard(a) {
   var bothLow = simVal && aiVal && parseFloat(a.similarity) < 30 && parseFloat(a.aiPercent) < 30;
   var card = artCard(a, true);
   var gkApproved = a.step === '3';
-  if (simHigh || aiHigh) {
-    // Rosso: non supera Turnitin
+  if (gkApproved && (simHigh || aiHigh)) {
+    // Approvato GK ma sim/AI >30%: sfondo verde + bordo rosso
+    card = card.replace('<div class="card">', '<div class="card" style="background:#c6f6d5;border:2px solid #e53e3e;">');
+  } else if (simHigh || aiHigh) {
+    // Non supera Turnitin (non ancora approvato GK)
     card = card.replace('<div class="card">', '<div class="card" style="background:#ffe0e0;border-color:#e53e3e;border-width:2px;">');
   } else if (gkApproved) {
-    // Verde: approvato dal GateKeeper
+    // Verde: approvato dal GateKeeper, valori ok
     card = card.replace('<div class="card">', '<div class="card" style="background:#c6f6d5;border-color:#2f855a;border-width:2px;">');
   }
   // Senza colore: da valutare dal GateKeeper (bothLow ma non ancora approvato)
