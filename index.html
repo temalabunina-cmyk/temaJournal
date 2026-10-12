@@ -2900,7 +2900,7 @@ function saveArt() {
     dataAccettazione2:fVal('fDataAccettazione2', _orig.dataAccettazione2 || '')
   };
   if (!data.id||!data.title){ alert('ID e Titolo sono obbligatori.'); return; }
-  if (data.step === '18') {
+  if (data.step === '17') {
     if (!confirm('⚠️ Ricorda di aggiornare i dati relativi alle reference (numero totale, citazioni TeMA, JCR, ecc.) con i valori presenti nella versione finale dell\'articolo prima di procedere.\n\nVuoi continuare con il salvataggio?')) return;
   }
   // Validazione: giudizio obbligatorio se revisore ha completato
