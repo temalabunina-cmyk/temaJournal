@@ -366,7 +366,7 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
     </select>    </div>
   </div>
   <div id="step18MsgBox" style="display:none;margin-top:8px;background:#fef9c3;border:1px solid #f5c518;border-radius:6px;padding:10px 12px">
-    <div style="font-size:13px;font-weight:700;margin-bottom:6px;color:#854d0e">📋 Messaggio da inviare agli autori (Step 18)</div>
+    <div style="font-size:13px;font-weight:700;margin-bottom:6px;color:#854d0e">📋 Messaggio da inviare all'editor (Step 18)</div>
     <textarea id="step18MsgText" rows="6" style="width:100%;box-sizing:border-box;font-size:13px;font-family:inherit;border:1px solid #e5e7eb;border-radius:4px;padding:6px;resize:vertical"></textarea>
     <button onclick="(function(){ var t=document.getElementById('step18MsgText'); t.select(); document.execCommand('copy'); })()" style="margin-top:6px;background:#854d0e;color:#fff;border:none;border-radius:4px;padding:4px 12px;cursor:pointer;font-size:13px">📋 Copia testo</button>
   </div>
@@ -3409,13 +3409,14 @@ function bootApp() {
       var art = editingArtId ? articles.find(function(a){ return a.id === editingArtId; }) : null;
       var titolo = art && art.title ? art.title : '[titolo articolo]';
       var autori = art && art.authors ? art.authors : '[nome autori]';
+      var editor = art && art.editor ? art.editor : '[nome editor]';
       ta.value =
-        'Gentili Autori,\n\n' +
-        'siamo lieti di comunicarvi che il vostro contributo\n\n' +
+        'Caro ' + editor + ',\n\n' +
+        'l\'articolo\n\n' +
         '«' + titolo + '»\n\n' +
-        'è stato accettato per la pubblicazione sul prossimo numero di TeMA – Journal of Land Use, Mobility and Environment.\n\n' +
-        'Prima della pubblicazione definitiva, vi chiediamo cortesemente di verificare e aggiornare le informazioni bibliografiche relative alle vostre reference (autori, anno, titolo, rivista, volume, numero, pagine, DOI), assicurandovi che siano complete e aggiornate.\n\n' +
-        'Cordiali saluti,\nLa Redazione di TeMA';
+        'di ' + autori + ' è in fase di pubblicazione (Step 18).\n\n' +
+        'Ti ricordiamo di verificare con gli autori che le informazioni bibliografiche relative alle reference siano complete e aggiornate (autori, anno, titolo, rivista, volume, numero, pagine, DOI).\n\n' +
+        'Grazie,\nLa Redazione di TeMA';
       box.style.display = 'block';
     } else {
       box.style.display = 'none';
