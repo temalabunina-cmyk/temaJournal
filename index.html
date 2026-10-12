@@ -2446,15 +2446,14 @@ function renderRevList2() {
             '<option value="rifiutato"'+(r.accettazione==='rifiutato'?' selected':'')+'>Rifiutato</option>' +
             '<option value="completato"'+(r.accettazione==='completato'?' selected':'')+'>Completato</option>' +
           '</select></div>' +
-        (r.accettazione==='completato' ?
-          '<div class="fr" style="margin-bottom:6px"><label>Rating revisore</label>' +
+        '<div class="fr" style="margin-bottom:6px"><label>Rating revisore</label>' +
           '<div style="display:flex;gap:4px;align-items:center">' +
           [1,2,3,4,5].map(function(n){
             var f=(r.rating||0)>=n;
-            return '<span onclick="currentRevisori['+i+'].rating='+n+';renderRevList()" style="cursor:pointer;font-size:24px;color:'+(f?'#f5a623':'#ddd')+'" title="'+n+' stelle">'+(f?'★':'☆')+'</span>';
+            return '<span onclick="currentRevisori2['+i+'].rating='+n+';renderRevList2()" style="cursor:pointer;font-size:24px;color:'+(f?'#f5a623':'#ddd')+'" title="'+n+' stelle">'+(f?'★':'☆')+'</span>';
           }).join('')+
           (r.rating?'<span style="margin-left:6px;font-size:13px;color:#888">'+r.rating+'/5</span>':'')+
-          '</div></div>' : '') +
+          '</div></div>' +
         '<div class="fr" style="margin-bottom:6px"><label>Data proroga</label>' +
           '<input type="date" value="'+esc(r.dataProroga||'')+'" oninput="currentRevisori2['+i+'].dataProroga=this.value"></div>' +
       '</div>' +
@@ -2500,15 +2499,14 @@ function renderRevList() {
             '<option value="rifiutato"'+(r.accettazione==='rifiutato'?' selected':'')+'>Rifiutato</option>' +
             '<option value="completato"'+(r.accettazione==='completato'?' selected':'')+'>Completato</option>' +
           '</select></div>' +
-        (r.accettazione==='completato' ?
-          '<div class="fr" style="margin-bottom:6px"><label>Rating revisore</label>' +
+        '<div class="fr" style="margin-bottom:6px"><label>Rating revisore</label>' +
           '<div style="display:flex;gap:4px;align-items:center">' +
           [1,2,3,4,5].map(function(n){
             var f=(r.rating||0)>=n;
             return '<span onclick="currentRevisori['+i+'].rating='+n+';renderRevList()" style="cursor:pointer;font-size:24px;color:'+(f?'#f5a623':'#ddd')+'" title="'+n+' stelle">'+(f?'★':'☆')+'</span>';
           }).join('')+
           (r.rating?'<span style="margin-left:6px;font-size:13px;color:#888">'+r.rating+'/5</span>':'')+
-          '</div></div>' : '') +
+          '</div></div>' +
         '<div class="fr" style="margin-bottom:6px"><label>Data proroga</label>' +
           '<input type="date" value="'+esc(r.dataProroga||'')+'" oninput="currentRevisori['+i+'].dataProroga=this.value"></div>' +
       '</div>' +
