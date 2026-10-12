@@ -2370,8 +2370,7 @@ function renderRevList2() {
           '<input type="date" value="'+esc(r.dataConsegna||'')+'" oninput="currentRevisori2['+i+'].dataConsegna=this.value"></div>' +
         '<div class="fr" style="margin-bottom:6px"><label>Stato revisione</label>' +
           '<select onchange="currentRevisori2['+i+'].accettazione=this.value">' +
-            '<option value=""'+((!r.accettazione)?' selected':'')+'>&#8212;</option>' +
-            '<option value="in attesa"'+(r.accettazione==='in attesa'?' selected':'')+'>In attesa</option>' +
+            '<option value="in attesa"'+(((!r.accettazione)||r.accettazione==='in attesa')?' selected':'')+'>In attesa</option>' +
             '<option value="accettato"'+(r.accettazione==='accettato'?' selected':'')+'>Accettato</option>' +
             '<option value="rifiutato"'+(r.accettazione==='rifiutato'?' selected':'')+'>Rifiutato</option>' +
             '<option value="completato"'+(r.accettazione==='completato'?' selected':'')+'>Completato</option>' +
@@ -2425,8 +2424,7 @@ function renderRevList() {
           '<input type="date" value="'+esc(r.dataConsegna||'')+'" oninput="currentRevisori['+i+'].dataConsegna=this.value"></div>' +
         '<div class="fr" style="margin-bottom:6px"><label>Stato revisione</label>' +
           '<select onchange="currentRevisori['+i+'].accettazione=this.value">' +
-            '<option value=""'+((!r.accettazione)?' selected':'')+'>&#8212;</option>' +
-            '<option value="in attesa"'+(r.accettazione==='in attesa'?' selected':'')+'>In attesa</option>' +
+            '<option value="in attesa"'+(((!r.accettazione)||r.accettazione==='in attesa')?' selected':'')+'>In attesa</option>' +
             '<option value="accettato"'+(r.accettazione==='accettato'?' selected':'')+'>Accettato</option>' +
             '<option value="rifiutato"'+(r.accettazione==='rifiutato'?' selected':'')+'>Rifiutato</option>' +
             '<option value="completato"'+(r.accettazione==='completato'?' selected':'')+'>Completato</option>' +
