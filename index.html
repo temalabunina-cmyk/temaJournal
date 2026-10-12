@@ -1016,15 +1016,17 @@ function artCard(a, showEdit, showAllNotes) {
     return '<span class="mm" style="'+revBg+'">'+esc(r.nome||'Revisore')+(r.affiliazione?' &middot; '+esc(r.affiliazione):'')+(r.accettazione?' &middot; '+esc(r.accettazione):'')+(r.dataConsegna?' &middot; Consegna: '+new Date(r.dataConsegna).toLocaleDateString('it-IT'):'')+
       (r.dataProroga?' &middot; <strong>Proroga: '+new Date(r.dataProroga).toLocaleDateString('it-IT')+'</strong>':'')+'</span>';
   }
-  if (a.revisori && a.revisori.length) {
+  var inSecondoCiclo = (a.step === '15') && a.revisori2 && a.revisori2.length;
+  if (inSecondoCiclo) {
     revHtml = '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">';
-    a.revisori.forEach(function(r){ revHtml += _revSpan(r); });
-    revHtml += '</div>';
-  }
-  if (a.revisori2 && a.revisori2.length) {
-    revHtml += '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px">';
     a.revisori2.forEach(function(r){ revHtml += _revSpan(r); });
     revHtml += '</div>';
+  } else {
+    if (a.revisori && a.revisori.length) {
+      revHtml = '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">';
+      a.revisori.forEach(function(r){ revHtml += _revSpan(r); });
+      revHtml += '</div>';
+    }
   }
 
   var metaHtml = '';
