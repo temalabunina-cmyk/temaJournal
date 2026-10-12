@@ -851,19 +851,56 @@ function renderNotesLog(log) {
   el.innerHTML = log.map(function(n, i) {
     var d = n.date ? new Date(n.date).toLocaleString('it-IT',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '';
     var canDel = adminMode || currentUser === n.author;
+    var canEdit = adminMode || currentUser === n.author;
     var canDiscuss = currentUser === 'DirettoreTeMA' || adminMode;
     var discussBg = n.discuss ? 'background:#e3f2fd;border-left:3px solid #1976d2;' : 'background:var(--sur);';
-    return '<div style="'+discussBg+'border:1px solid var(--brd);border-radius:var(--r);padding:8px 10px;font-size:14px">'
+    var editedLabel = n.edited ? '<span style="font-size:11px;color:#aaa;font-style:italic"> · modificata</span>' : '';
+    return '<div id="note-row-'+i+'" style="'+discussBg+'border:1px solid var(--brd);border-radius:var(--r);padding:8px 10px;font-size:14px">'
       + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">'
-      + '<span style="font-size:12px;color:#888"><strong>'+esc(n.author||'')+'</strong> &middot; '+d+'</span>'
+      + '<span style="font-size:12px;color:#888"><strong>'+esc(n.author||'')+'</strong> &middot; '+d+editedLabel+'</span>'
       + '<div style="display:flex;gap:6px;align-items:center">'
       + (canDiscuss ? '<button onclick="toggleDiscuss(\''+editingArtId+'\','+i+')" style="background:none;border:1px solid #1976d2;border-radius:4px;color:#1976d2;cursor:pointer;font-size:12px;padding:2px 6px" title="Segna da discutere">'+(n.discuss?'📌 Da discutere':'📌')+'</button>' : '')
+      + (canEdit ? '<button onclick="startEditNote('+i+')" id="note-edit-btn-'+i+'" style="background:none;border:1px solid #888;border-radius:4px;color:#555;cursor:pointer;font-size:12px;padding:2px 6px" title="Modifica nota">✏️</button>' : '')
       + (canDel ? '<button onclick="deleteNote(\''+editingArtId+'\','+i+')" style="background:none;border:none;color:#e53e3e;cursor:pointer;font-size:14px" title="Elimina nota">✕</button>' : '')
       + '</div>'
       + '</div>'
-      + '<div style="white-space:pre-wrap">'+esc(n.text)+'</div>'
+      + '<div id="note-text-'+i+'" style="white-space:pre-wrap">'+esc(n.text)+'</div>'
+      + '<div id="note-edit-'+i+'" style="display:none;margin-top:6px">'
+      + '<textarea id="note-ta-'+i+'" rows="3" style="width:100%;box-sizing:border-box;font-size:14px;padding:6px;border:1px solid var(--brd);border-radius:var(--r);resize:vertical">'+esc(n.text)+'</textarea>'
+      + '<div style="display:flex;gap:6px;margin-top:4px">'
+      + '<button onclick="saveEditNote('+i+')" style="background:#2563eb;color:#fff;border:none;border-radius:4px;padding:4px 10px;cursor:pointer;font-size:13px">Salva</button>'
+      + '<button onclick="cancelEditNote('+i+')" style="background:none;border:1px solid #aaa;border-radius:4px;padding:4px 10px;cursor:pointer;font-size:13px">Annulla</button>'
+      + '</div>'
+      + '</div>'
       + '</div>';
   }).join('');
+}
+
+function startEditNote(i) {
+  document.getElementById('note-text-'+i).style.display = 'none';
+  document.getElementById('note-edit-'+i).style.display = 'block';
+  var btn = document.getElementById('note-edit-btn-'+i);
+  if (btn) btn.style.display = 'none';
+}
+
+function cancelEditNote(i) {
+  document.getElementById('note-text-'+i).style.display = '';
+  document.getElementById('note-edit-'+i).style.display = 'none';
+  var btn = document.getElementById('note-edit-btn-'+i);
+  if (btn) btn.style.display = '';
+}
+
+function saveEditNote(i) {
+  var idx = articles.findIndex(function(a){ return a.id === editingArtId; });
+  if (idx < 0) return;
+  var ta = document.getElementById('note-ta-'+i);
+  if (!ta) return;
+  var newText = ta.value.trim();
+  if (!newText) return;
+  articles[idx].notesLog[i].text = newText;
+  articles[idx].notesLog[i].edited = true;
+  renderNotesLog(articles[idx].notesLog);
+  schedSave();
 }
 
 
