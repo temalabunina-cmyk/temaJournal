@@ -1011,12 +1011,19 @@ function artCard(a, showEdit, showAllNotes) {
   var hasAi  = (a.aiPercent  !== null && a.aiPercent  !== undefined && a.aiPercent  !== '');
 
   var revHtml = '';
+  function _revSpan(r) {
+    var revBg = r.accettazione==='completato' ? 'background:#d1fae5;color:#065f46;border-color:#6ee7b7' : r.accettazione==='accettato' ? 'background:#fef9c3;color:#854d0e;border-color:#fde047' : '';
+    return '<span class="mm" style="'+revBg+'">'+esc(r.nome||'Revisore')+(r.affiliazione?' &middot; '+esc(r.affiliazione):'')+(r.accettazione?' &middot; '+esc(r.accettazione):'')+(r.dataConsegna?' &middot; Consegna: '+new Date(r.dataConsegna).toLocaleDateString('it-IT'):'')+
+      (r.dataProroga?' &middot; <strong>Proroga: '+new Date(r.dataProroga).toLocaleDateString('it-IT')+'</strong>':'')+'</span>';
+  }
   if (a.revisori && a.revisori.length) {
     revHtml = '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px">';
-    a.revisori.forEach(function(r) {
-      revHtml += '<span class="mm">'+esc(r.nome||'Revisore')+(r.affiliazione?' &middot; '+esc(r.affiliazione):'')+(r.accettazione?' &middot; '+esc(r.accettazione):'')+(r.dataConsegna?' &middot; Consegna: '+new Date(r.dataConsegna).toLocaleDateString('it-IT'):'')+
-      (r.dataProroga?' &middot; <strong>Proroga: '+new Date(r.dataProroga).toLocaleDateString('it-IT')+'</strong>':'')+'</span>';
-    });
+    a.revisori.forEach(function(r){ revHtml += _revSpan(r); });
+    revHtml += '</div>';
+  }
+  if (a.revisori2 && a.revisori2.length) {
+    revHtml += '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px">';
+    a.revisori2.forEach(function(r){ revHtml += _revSpan(r); });
     revHtml += '</div>';
   }
 
