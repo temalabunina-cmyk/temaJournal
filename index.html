@@ -2840,6 +2840,15 @@ function saveArt() {
     dataAccettazione2:fVal('fDataAccettazione2', _orig.dataAccettazione2 || '')
   };
   if (!data.id||!data.title){ alert('ID e Titolo sono obbligatori.'); return; }
+  // Validazione: giudizio obbligatorio se revisore ha completato
+  var _revMissingGiudizio = (currentRevisori||[]).concat(currentRevisori2||[]).filter(function(r){
+    return r.accettazione === 'completato' && (!r.giudizio || r.giudizio === '');
+  });
+  if (_revMissingGiudizio.length > 0) {
+    var _nomi = _revMissingGiudizio.map(function(r){ return r.nome || 'Revisore'; }).join(', ');
+    alert('Compilare il campo Giudizio per: ' + _nomi);
+    return;
+  }
   console.log('[TeMA] saveArt: id='+data.id+' step='+data.step+' origStep='+_origStep+' stepManuale='+(_newStep!==_origStep));
   // Se l'utente ha cambiato lo step manualmente, proteggilo da autoStep
   if (_newStep !== '' && _newStep !== _origStep) data._stepManuale = true;
