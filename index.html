@@ -2099,7 +2099,11 @@ function renderVerbale() {
         '<p style="margin:.4rem 0 .1rem"><strong>Revisori:</strong></p>' +
         '<ul style="margin:.2rem 0 .4rem 1.2rem;padding:0">' +
         a.revisori.map(function(r, ri) {
-          var parts = ['<strong>'+(ri+1)+'. '+esc(r.nome||'Revisore')+'</strong>'];
+          var revStyle = r.accettazione==='completato' ? 'background:#d1fae5;color:#065f46;padding:0 4px;border-radius:3px'
+                       : r.accettazione==='accettato'  ? 'background:#fef9c3;color:#854d0e;padding:0 4px;border-radius:3px'
+                       : r.accettazione==='rifiutato'  ? 'background:#fee2e2;color:#991b1b;padding:0 4px;border-radius:3px'
+                       : '';
+          var parts = ['<strong>'+(ri+1)+'. <span style="'+revStyle+'">'+esc(r.nome||'Revisore')+'</span></strong>'];
           if (r.affiliazione) parts.push(esc(r.affiliazione));
           if (r.accettazione) parts.push('Stato: <em>'+esc(r.accettazione)+'</em>');
           if (r.dataConsegna) parts.push('Consegna: '+new Date(r.dataConsegna).toLocaleDateString('it-IT'));
@@ -2111,7 +2115,11 @@ function renderVerbale() {
         '<p style="margin:.4rem 0 .1rem"><strong>Revisori 2° round:</strong></p>' +
         '<ul style="margin:.2rem 0 .4rem 1.2rem;padding:0">' +
         a.revisori2.map(function(r, ri) {
-          var parts = ['<strong>'+(ri+1)+'. '+esc(r.nome||'Revisore')+'</strong>'];
+          var revStyle = r.accettazione==='completato' ? 'background:#d1fae5;color:#065f46;padding:0 4px;border-radius:3px'
+                       : r.accettazione==='accettato'  ? 'background:#fef9c3;color:#854d0e;padding:0 4px;border-radius:3px'
+                       : r.accettazione==='rifiutato'  ? 'background:#fee2e2;color:#991b1b;padding:0 4px;border-radius:3px'
+                       : '';
+          var parts = ['<strong>'+(ri+1)+'. <span style="'+revStyle+'">'+esc(r.nome||'Revisore')+'</span></strong>'];
           if (r.affiliazione) parts.push(esc(r.affiliazione));
           if (r.accettazione) parts.push('Stato: <em>'+esc(r.accettazione)+'</em>');
           if (r.dataConsegna) parts.push('Consegna: '+new Date(r.dataConsegna).toLocaleDateString('it-IT'));
