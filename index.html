@@ -2693,6 +2693,10 @@ function openEditArt(id) {
   renderNotesLog(a.notesLog||[]);
   document.getElementById('fNewNote').value='';
   document.getElementById('fHighlight').checked=!!(a.highlight);
+  var _canHighlight = adminMode || currentUser==='RedazioneTeMA' || currentUser==='DirettoreTeMA';
+  document.getElementById('fHighlight').disabled = !_canHighlight;
+  document.getElementById('fHighlight').closest('label').style.opacity = _canHighlight ? '' : '0.4';
+  document.getElementById('fHighlight').closest('label').style.cursor = _canHighlight ? 'pointer' : 'not-allowed';
   // OneDrive link
   var _od = a.oneDrive||'';
   document.getElementById('fOneDrive').value = _od;
@@ -2871,7 +2875,7 @@ function saveArt() {
     length:parseInt(fVal('fLen', _orig.length || 0))||0,
     impaginato:document.getElementById('fImpaginato').checked,
     notesLog: (_origIdx>=0 && articles[_origIdx].notesLog) ? articles[_origIdx].notesLog : [],
-    highlight:document.getElementById('fHighlight').checked,
+    highlight:(adminMode||currentUser==='RedazioneTeMA'||currentUser==='DirettoreTeMA') ? document.getElementById('fHighlight').checked : !!(_orig&&_orig.highlight),
     oneDrive:fVal('fOneDrive', _orig.oneDrive || ''),
     section:fVal('fSecArt', _orig.section || 'Focus'),
     status:fVal('fStatus', _orig.status || 'Sottomesso'),
