@@ -1903,9 +1903,9 @@ function renderRifGk() {
 
 function renderTeam() {
   var h = '<div style="font-size:16px;font-weight:700;margin-bottom:1rem">GateKeeper</div>';
-  var gk = articles.filter(function(a){ return a.gatekeeper==='Lilli Gargiulo' && (!a.editor||a.editor==='') &&
+  var gk = articles.filter(function(a){ return a.gatekeeper==='Lilli Gargiulo' &&
     a.status !== 'Rifiutato' && a.status !== 'Pubblicato' && a.step !== '18' &&
-    a.step==='3'; });
+    a.step !== '3'; });
   h += '<div class="card"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:'+(gk.length?'10px':'0')+'">' +
     '<div style="font-size:20px;font-weight:700">Lilli Gargiulo</div>' +
     '<span style="font-size:20px;font-weight:600;color:var(--orange)">'+gk.length+' articoli in valutazione</span>' +
