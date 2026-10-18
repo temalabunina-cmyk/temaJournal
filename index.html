@@ -1918,9 +1918,26 @@ function renderTeam() {
         '</div>';
     }).join('')+'</div>' : '') + '</div>';
 
+  // Sezione "Da assegnare": approvati GK (step==='3') senza editor
+  var daAssegnare = articles.filter(function(a){
+    return a.step === '3' && (!a.editor || a.editor === '') && a.status !== 'Rifiutato' && a.status !== 'Pubblicato';
+  });
+  if (daAssegnare.length) {
+    h += '<div style="font-size:16px;font-weight:700;margin:1.5rem 0 1rem;color:var(--green)">Da assegnare</div>';
+    h += '<div class="card" style="border-color:#2f855a">';
+    h += '<div style="font-size:20px;font-weight:600;color:var(--green);margin-bottom:8px">'+daAssegnare.length+' articol'+(daAssegnare.length===1?'o':'i')+' in attesa di assegnazione</div>';
+    h += '<div>'+daAssegnare.map(function(a){
+      return '<div style="font-size:20px;padding:5px 0;border-bottom:1px solid var(--brd);display:flex;gap:8px;align-items:center">'
+        + '<span style="font-family:monospace;color:var(--tx3);font-size:16px;flex-shrink:0">#'+esc(a.id)+'</span>'
+        + '<span style="flex:1;line-height:1.4">'+(a.title.length>65?a.title.slice(0,65)+'...':a.title)+'</span>'
+        + '<span class="badge" style="background:var(--green-bg);color:var(--green-tx);white-space:nowrap">Approvato GK</span>'
+        + '</div>';
+    }).join('')+'</div></div>';
+  }
+
   h += '<div style="font-size:16px;font-weight:700;margin:1.5rem 0 1rem">Editor</div>';
   EDITORS.forEach(function(ed) {
-    var mine = articles.filter(function(a){ return a.editor===ed && a.status !== 'Pubblicato' && a.step !== '18' && a.step !== '8b' && a.step !== '7b' && a.status !== 'Rifiutato'; }).sort(function(a,b){
+    var mine = articles.filter(function(a){ return a.editor===ed && (!a.copyeditor||a.copyeditor==='') && a.status !== 'Pubblicato' && a.step !== '18' && a.step !== '8b' && a.step !== '7b' && a.status !== 'Rifiutato'; }).sort(function(a,b){
       var sa = parseFloat(a.step)||0, sb = parseFloat(b.step)||0;
       return sb - sa;
     });
