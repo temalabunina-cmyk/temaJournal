@@ -2468,7 +2468,11 @@ function renderRevList2() {
     c.innerHTML = '<div style="font-size:20px;color:var(--tx3);padding:4px 0">Nessun revisore inserito.</div>';
     return;
   }
-  var h = '';
+  var revKnown2 = buildRevMap();
+  var dlId2 = 'dl_revisori2';
+  var h = '<datalist id="'+dlId2+'">'
+    + Object.keys(revKnown2).sort().map(function(n){ return '<option value="'+esc(n)+'">'+esc(revKnown2[n])+'</option>'; }).join('')
+    + '</datalist>';
   currentRevisori2.forEach(function(r, i) {
     h += '<div class="rev-card">' +
       '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">' +
@@ -2477,9 +2481,9 @@ function renderRevList2() {
       '</div>' +
       '<div class="g2" style="gap:8px">' +
         '<div class="fr" style="margin-bottom:6px"><label>Nome e Cognome</label>' +
-          '<input value="'+esc(r.nome||'')+'" oninput="currentRevisori2['+i+'].nome=this.value" placeholder="es. Mario Rossi"></div>' +
+          '<input list="'+dlId2+'" value="'+esc(r.nome||'')+'" oninput="currentRevisori2['+i+'].nome=this.value;autoFillRevAff('+i+',this.value,\'2\')" placeholder="es. Mario Rossi"></div>' +
         '<div class="fr" style="margin-bottom:6px"><label>Affiliazione</label>' +
-          '<input value="'+esc(r.affiliazione||'')+'" oninput="currentRevisori2['+i+'].affiliazione=this.value"></div>' +
+          '<input id="revAff2_'+i+'" value="'+esc(r.affiliazione||'')+'" oninput="currentRevisori2['+i+'].affiliazione=this.value"></div>' +
         '<div class="fr" style="margin-bottom:6px"><label>Data consegna revisione</label>' +
           '<input type="date" value="'+esc(r.dataConsegna||'')+'" oninput="currentRevisori2['+i+'].dataConsegna=this.value"></div>' +
         '<div class="fr" style="margin-bottom:6px"><label>Stato revisione</label>' +
@@ -2515,13 +2519,46 @@ function renderRevList2() {
 }
 function removeRev2(i) { currentRevisori2.splice(i,1); renderRevList2(); }
 
+// Mappa nome→affiliazione da tutti gli articoli (usata per autocompletamento)
+function buildRevMap() {
+  var map = {};
+  articles.forEach(function(a) {
+    [(a.revisori||[]), (a.revisori2||[])].forEach(function(list) {
+      list.forEach(function(r) {
+        var n = (r.nome||'').trim();
+        if (n && !map[n]) map[n] = r.affiliazione||'';
+      });
+    });
+  });
+  return map;
+}
+
+// Quando si seleziona un nome dal datalist, riempie automaticamente l'affiliazione
+function autoFillRevAff(i, nome, round) {
+  var map = buildRevMap();
+  var aff = map[(nome||'').trim()];
+  if (!aff) return;
+  var arrKey = round==='2' ? currentRevisori2 : currentRevisori;
+  if (arrKey[i] && !arrKey[i].affiliazione) {
+    arrKey[i].affiliazione = aff;
+    var el = document.getElementById('revAff'+round+'_'+i);
+    if (el) el.value = aff;
+  }
+}
+
 function renderRevList() {
   var c = document.getElementById('revList');
   if (!currentRevisori.length) {
     c.innerHTML = '<div style="font-size:20px;color:var(--tx3);padding:4px 0">Nessun revisore inserito.</div>';
     return;
   }
-  var h = '';
+  var revKnown = buildRevMap();
+  var dlId = 'dl_revisori';
+  var datalistHtml = '<datalist id="'+dlId+'">'
+    + Object.keys(revKnown).sort().map(function(n){ return '<option value="'+esc(n)+'">'+esc(revKnown[n])+'</option>'; }).join('')
+    + '</datalist>';
+
+  var h = datalistHtml;
   currentRevisori.forEach(function(r, i) {
     h += '<div class="rev-card">' +
       '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">' +
@@ -2530,9 +2567,9 @@ function renderRevList() {
       '</div>' +
       '<div class="g2" style="gap:8px">' +
         '<div class="fr" style="margin-bottom:6px"><label>Nome e Cognome</label>' +
-          '<input value="'+esc(r.nome||'')+'" oninput="currentRevisori['+i+'].nome=this.value" placeholder="es. Mario Rossi"></div>' +
+          '<input list="'+dlId+'" value="'+esc(r.nome||'')+'" oninput="currentRevisori['+i+'].nome=this.value;autoFillRevAff('+i+',this.value,\'1\')" placeholder="es. Mario Rossi"></div>' +
         '<div class="fr" style="margin-bottom:6px"><label>Affiliazione</label>' +
-          '<input value="'+esc(r.affiliazione||'')+'" oninput="currentRevisori['+i+'].affiliazione=this.value"></div>' +
+          '<input id="revAff1_'+i+'" value="'+esc(r.affiliazione||'')+'" oninput="currentRevisori['+i+'].affiliazione=this.value"></div>' +
         '<div class="fr" style="margin-bottom:6px"><label>Data consegna revisione</label>' +
           '<input type="date" value="'+esc(r.dataConsegna||'')+'" oninput="currentRevisori['+i+'].dataConsegna=this.value"></div>' +
         '<div class="fr" style="margin-bottom:6px"><label>Stato revisione</label>' +
