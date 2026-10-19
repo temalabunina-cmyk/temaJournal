@@ -1951,6 +1951,7 @@ function toggleBanRevisore(nome) {
   } else {
     bannedRevisori.push(nome);
   }
+  _lastSavedArtId = null; // forza saveAll così bannedRevisori viene sempre inviato
   schedSave();
   renderRevisori();
 }
