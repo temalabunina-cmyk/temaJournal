@@ -2555,10 +2555,10 @@ function renderRevList2() {
       '<div class="g2" style="gap:8px">' +
         '<div class="fr" style="margin-bottom:6px"><label>Nome e Cognome</label>' +
           '<input id="revNome2_'+i+'" list="'+dlId2+'" value="'+esc(r.nome||'')+'" oninput="currentRevisori2['+i+'].nome=this.value;autoFillRevAff('+i+',this.value,\'2\');checkBannedRevInput(this,this.value)" placeholder="es. Mario Rossi"></div>' +
-        '<div class="fr" style="margin-bottom:6px"><label>Affiliazione</label>' +
-          '<input id="revAff2_'+i+'" value="'+esc(r.affiliazione||'')+'" oninput="currentRevisori2['+i+'].affiliazione=this.value"></div>' +
-        '<div class="fr" style="margin-bottom:6px"><label>Data consegna revisione</label>' +
-          '<input type="date" value="'+esc(r.dataConsegna||'')+'" oninput="currentRevisori2['+i+'].dataConsegna=this.value"></div>' +
+        '<div class="fr" style="margin-bottom:6px"><label>Affiliazione <span style="color:#e53e3e">*</span></label>' +
+          '<input id="revAff2_'+i+'" value="'+esc(r.affiliazione||'')+'" oninput="currentRevisori2['+i+'].affiliazione=this.value;this.style.borderColor=this.value.trim()?\'\':\'#e53e3e\'" style="'+(((r.nome||'').trim()&&!(r.affiliazione||'').trim())?'border-color:#e53e3e;':'')+'"></div>' +
+        '<div class="fr" style="margin-bottom:6px"><label>Data consegna revisione <span style="color:#e53e3e">*</span></label>' +
+          '<input type="date" value="'+esc(r.dataConsegna||'')+'" oninput="currentRevisori2['+i+'].dataConsegna=this.value;this.style.borderColor=this.value?\'\':\'#e53e3e\'" style="'+(((r.nome||'').trim()&&!(r.dataConsegna||'').trim())?'border-color:#e53e3e;':'')+'"></div>' +
         '<div class="fr" style="margin-bottom:6px"><label>Stato revisione</label>' +
           '<select onchange="currentRevisori2['+i+'].accettazione=this.value">' +
             '<option value="in attesa"'+(((!r.accettazione)||r.accettazione==='in attesa')?' selected':'')+'>In attesa</option>' +
@@ -2641,10 +2641,10 @@ function renderRevList() {
       '<div class="g2" style="gap:8px">' +
         '<div class="fr" style="margin-bottom:6px"><label>Nome e Cognome</label>' +
           '<input id="revNome1_'+i+'" list="'+dlId+'" value="'+esc(r.nome||'')+'" oninput="currentRevisori['+i+'].nome=this.value;autoFillRevAff('+i+',this.value,\'1\');checkBannedRevInput(this,this.value)" placeholder="es. Mario Rossi"></div>' +
-        '<div class="fr" style="margin-bottom:6px"><label>Affiliazione</label>' +
-          '<input id="revAff1_'+i+'" value="'+esc(r.affiliazione||'')+'" oninput="currentRevisori['+i+'].affiliazione=this.value"></div>' +
-        '<div class="fr" style="margin-bottom:6px"><label>Data consegna revisione</label>' +
-          '<input type="date" value="'+esc(r.dataConsegna||'')+'" oninput="currentRevisori['+i+'].dataConsegna=this.value"></div>' +
+        '<div class="fr" style="margin-bottom:6px"><label>Affiliazione <span style="color:#e53e3e">*</span></label>' +
+          '<input id="revAff1_'+i+'" value="'+esc(r.affiliazione||'')+'" oninput="currentRevisori['+i+'].affiliazione=this.value;this.style.borderColor=this.value.trim()?\'\':\'#e53e3e\'" style="'+(((r.nome||'').trim()&&!(r.affiliazione||'').trim())?'border-color:#e53e3e;':'')+'"></div>' +
+        '<div class="fr" style="margin-bottom:6px"><label>Data consegna revisione <span style="color:#e53e3e">*</span></label>' +
+          '<input type="date" value="'+esc(r.dataConsegna||'')+'" oninput="currentRevisori['+i+'].dataConsegna=this.value;this.style.borderColor=this.value?\'\':\'#e53e3e\'" style="'+(((r.nome||'').trim()&&!(r.dataConsegna||'').trim())?'border-color:#e53e3e;':'')+'"></div>' +
         '<div class="fr" style="margin-bottom:6px"><label>Stato revisione</label>' +
           '<select onchange="currentRevisori['+i+'].accettazione=this.value">' +
             '<option value="in attesa"'+(((!r.accettazione)||r.accettazione==='in attesa')?' selected':'')+'>In attesa</option>' +
@@ -3060,6 +3060,19 @@ function saveArt() {
   if (data.step === '17') {
     if (!confirm('⚠️ Ricorda di aggiornare i dati relativi alle reference (numero totale, citazioni TeMA, JCR, ecc.) con i valori presenti nella versione finale dell\'articolo prima di procedere.\n\nVuoi continuare con il salvataggio?')) return;
   }
+  // Validazione: affiliazione e data consegna obbligatorie se nome revisore inserito
+  var _tuttiRevisori = (currentRevisori||[]).concat(currentRevisori2||[]).filter(function(r){ return (r.nome||'').trim() !== ''; });
+  var _revMissingAff = _tuttiRevisori.filter(function(r){ return !r.affiliazione || r.affiliazione.trim() === ''; });
+  if (_revMissingAff.length > 0) {
+    alert('Compilare il campo Affiliazione per: ' + _revMissingAff.map(function(r){ return r.nome; }).join(', '));
+    return;
+  }
+  var _revMissingData = _tuttiRevisori.filter(function(r){ return !r.dataConsegna || r.dataConsegna === ''; });
+  if (_revMissingData.length > 0) {
+    alert('Compilare la Data di consegna revisione per: ' + _revMissingData.map(function(r){ return r.nome; }).join(', '));
+    return;
+  }
+
   // Validazione: giudizio obbligatorio se revisore ha completato
   var _revCompletati = (currentRevisori||[]).concat(currentRevisori2||[]).filter(function(r){ return r.accettazione === 'completato'; });
   var _revMissingGiudizio = _revCompletati.filter(function(r){ return !r.giudizio || r.giudizio === ''; });
