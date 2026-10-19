@@ -725,6 +725,7 @@ function loadData() {
           citeScoreTrackerSubLabel = gsData.citeScore.trackerSubLabel || citeScoreTrackerSubLabel;
         }
         articles = gsData.articles;
+        bannedRevisori = gsData.bannedRevisori && Array.isArray(gsData.bannedRevisori) ? gsData.bannedRevisori : [];
         _gsVersion = gsData._version || gsData._ts || Date.now();
         migrateSteps();
         migrateSteps4();
@@ -1824,6 +1825,8 @@ function renderRevisori() {
   if (!names.length) {
     html = '<p style="color:#888;font-size:14px">Nessun revisore trovato.</p>';
   } else {
+    var canBan = adminMode || currentUser === 'RedazioneTeMA';
+
     html += '<table style="width:100%;border-collapse:collapse;font-size:14px">';
     html += '<thead><tr style="background:var(--sur);border-bottom:2px solid var(--brd)">'
       + '<th '+thClick('nome')+' style="text-align:left;padding:6px 8px">Revisore'+arrow('nome')+'</th>'
@@ -1836,10 +1839,12 @@ function renderRevisori() {
       + '<th '+thClick('att')+' style="text-align:center;padding:6px 8px">In attesa'+arrow('att')+'</th>'
       + '<th '+thClick('rif')+' style="text-align:center;padding:6px 8px">Rifiutato'+arrow('rif')+'</th>'
       + '<th style="text-align:left;padding:6px 8px">Articoli</th>'
+      + (canBan ? '<th style="text-align:center;padding:6px 8px">Stato</th>' : '')
       + '</tr></thead><tbody>';
 
     names.forEach(function(nome) {
       var rev = revMap[nome];
+      var isBanned = bannedRevisori.indexOf(nome) >= 0;
       // Filter inviti by year if fAnno is set
       var invitiFiltered = fAnno ? rev.inviti.filter(function(i){
         var d = i.dataConsegna ? new Date(i.dataConsegna).getFullYear() : null;
@@ -1866,8 +1871,25 @@ function renderRevisori() {
       var artCell = '<details><summary style="cursor:pointer;font-size:13px;color:var(--purple-tx)">'+nTot+' articol'+(rev.inviti.length===1?'o':'i')+'</summary>'
         + '<div style="margin-top:4px;padding:4px 8px;background:var(--sur);border-radius:4px">'+artItems+'</div></details>';
 
-      html += '<tr style="border-bottom:1px solid var(--brd);vertical-align:middle">'
-        + '<td style="padding:6px 8px;font-weight:600;font-size:14px">'+esc(nome)+'</td>'
+      var rowStyle = isBanned
+        ? 'border-bottom:1px solid #fca5a5;vertical-align:middle;background:#fff5f5;'
+        : 'border-bottom:1px solid var(--brd);vertical-align:middle;';
+      var nameStyle = isBanned
+        ? 'padding:6px 8px;font-weight:600;font-size:14px;color:#dc2626;text-decoration:line-through'
+        : 'padding:6px 8px;font-weight:600;font-size:14px';
+      var bannedBadge = isBanned ? ' <span style="font-size:11px;background:#dc2626;color:#fff;padding:1px 5px;border-radius:3px;font-weight:600;vertical-align:middle">BANNATO</span>' : '';
+
+      var banBtn = '';
+      if (canBan) {
+        if (isBanned) {
+          banBtn = '<td style="padding:6px 8px;text-align:center"><button onclick="toggleBanRevisore('+JSON.stringify(nome)+')" style="font-size:12px;padding:3px 8px;border-radius:4px;border:1px solid #22c55e;background:#f0fdf4;color:#16a34a;cursor:pointer">✓ Riabilita</button></td>';
+        } else {
+          banBtn = '<td style="padding:6px 8px;text-align:center"><button onclick="toggleBanRevisore('+JSON.stringify(nome)+')" style="font-size:12px;padding:3px 8px;border-radius:4px;border:1px solid #fca5a5;background:#fff5f5;color:#dc2626;cursor:pointer">🚫 Banna</button></td>';
+        }
+      }
+
+      html += '<tr style="'+rowStyle+'">'
+        + '<td style="'+nameStyle+'">'+esc(nome)+bannedBadge+'</td>'
         + (function(){
             var rts=rev.inviti.filter(function(i){return i.rating;}).map(function(i){return i.rating;});
             if (!rts.length) return '<td style="padding:6px 8px;text-align:center;color:#ccc">—</td>';
@@ -1883,12 +1905,40 @@ function renderRevisori() {
         + '<td style="padding:6px 8px;text-align:center">'+(!nAtt?'&mdash;':nAtt)+'</td>'
         + '<td style="padding:6px 8px;text-align:center">'+(!nRif?'&mdash;':nRif)+'</td>'
         + '<td style="padding:6px 8px">'+artCell+'</td>'
+        + banBtn
         + '</tr>';
     });
     html += '</tbody></table>';
-    html += '<p style="color:#888;font-size:12px;margin-top:8px">'+names.length+' revisori trovati</p>';
+    html += '<p style="color:#888;font-size:12px;margin-top:8px">'+names.length+' revisori trovati'+(bannedRevisori.length?' &nbsp;·&nbsp; <span style="color:#dc2626">'+bannedRevisori.length+' bannati</span>':'')+'</p>';
   }
   document.getElementById('revEl').innerHTML = html;
+}
+
+function checkBannedRevInput(inputEl, nome) {
+  var trimmed = (nome||'').trim();
+  var warnId = inputEl.id ? 'warn_'+inputEl.id : null;
+  // Remove old warning if any
+  var existing = warnId ? document.getElementById(warnId) : null;
+  if (existing) existing.remove();
+  if (!trimmed) return;
+  if (bannedRevisori.indexOf(trimmed) >= 0) {
+    var warn = document.createElement('div');
+    warn.style.cssText = 'color:#dc2626;font-size:12px;margin-top:3px;font-weight:600;padding:4px 8px;background:#fff5f5;border:1px solid #fca5a5;border-radius:4px';
+    warn.innerHTML = '⚠️ Revisore bannato – non utilizzare!';
+    if (warnId) warn.id = warnId;
+    inputEl.parentNode.appendChild(warn);
+  }
+}
+
+function toggleBanRevisore(nome) {
+  var idx = bannedRevisori.indexOf(nome);
+  if (idx >= 0) {
+    bannedRevisori.splice(idx, 1);
+  } else {
+    bannedRevisori.push(nome);
+  }
+  schedSave();
+  renderRevisori();
 }
 
 function renderRifRef() {
@@ -2496,7 +2546,7 @@ function renderRevList2() {
       '</div>' +
       '<div class="g2" style="gap:8px">' +
         '<div class="fr" style="margin-bottom:6px"><label>Nome e Cognome</label>' +
-          '<input list="'+dlId2+'" value="'+esc(r.nome||'')+'" oninput="currentRevisori2['+i+'].nome=this.value;autoFillRevAff('+i+',this.value,\'2\')" placeholder="es. Mario Rossi"></div>' +
+          '<input id="revNome2_'+i+'" list="'+dlId2+'" value="'+esc(r.nome||'')+'" oninput="currentRevisori2['+i+'].nome=this.value;autoFillRevAff('+i+',this.value,\'2\');checkBannedRevInput(this,this.value)" placeholder="es. Mario Rossi"></div>' +
         '<div class="fr" style="margin-bottom:6px"><label>Affiliazione</label>' +
           '<input id="revAff2_'+i+'" value="'+esc(r.affiliazione||'')+'" oninput="currentRevisori2['+i+'].affiliazione=this.value"></div>' +
         '<div class="fr" style="margin-bottom:6px"><label>Data consegna revisione</label>' +
@@ -2582,7 +2632,7 @@ function renderRevList() {
       '</div>' +
       '<div class="g2" style="gap:8px">' +
         '<div class="fr" style="margin-bottom:6px"><label>Nome e Cognome</label>' +
-          '<input list="'+dlId+'" value="'+esc(r.nome||'')+'" oninput="currentRevisori['+i+'].nome=this.value;autoFillRevAff('+i+',this.value,\'1\')" placeholder="es. Mario Rossi"></div>' +
+          '<input id="revNome1_'+i+'" list="'+dlId+'" value="'+esc(r.nome||'')+'" oninput="currentRevisori['+i+'].nome=this.value;autoFillRevAff('+i+',this.value,\'1\');checkBannedRevInput(this,this.value)" placeholder="es. Mario Rossi"></div>' +
         '<div class="fr" style="margin-bottom:6px"><label>Affiliazione</label>' +
           '<input id="revAff1_'+i+'" value="'+esc(r.affiliazione||'')+'" oninput="currentRevisori['+i+'].affiliazione=this.value"></div>' +
         '<div class="fr" style="margin-bottom:6px"><label>Data consegna revisione</label>' +
@@ -3334,6 +3384,7 @@ function initFilters() {
 
 var adminMode = false;
 var currentUser = '';
+var bannedRevisori = [];
 var EDITOR_ACCOUNTS = ['EditorTeMA','Carmen Guida','Floriana Zucaro','Gerardo Carpentieri',
   'Peppe Mazzeo','Romano Fistola','Rosa Anna La Rocca','Rosaria Battarra','Stefano Franco'];
 function isEditorAccount() { return EDITOR_ACCOUNTS.indexOf(currentUser) >= 0; }
@@ -3598,7 +3649,7 @@ function persist(){
   var artId=_lastSavedArtId,snap=null;
   if(artId){var a0=articles.find(function(a){return a.id===artId;});if(a0)snap=JSON.parse(JSON.stringify(a0));}
   _lastSavedArtId=null;
-  var saveData=snap?JSON.stringify({action:'saveArticle',article:snap}):JSON.stringify({action:'saveAll',issues:issues,articles:articles});
+  var saveData=snap?JSON.stringify({action:'saveArticle',article:snap}):JSON.stringify({action:'saveAll',issues:issues,articles:articles,bannedRevisori:bannedRevisori});
   var url=GS_URL+'?m=save&d='+encodeURIComponent(saveData)+'&_t='+Date.now();
   var useGet=url.length<7000;
   ssShow('','Salvataggio in corso...','Invio dati a Google Sheets...',false,'#2563eb');
