@@ -1881,11 +1881,15 @@ function renderRevisori() {
 
       var banBtn = '';
       if (canBan) {
-        if (isBanned) {
-          banBtn = '<td style="padding:6px 8px;text-align:center"><button onclick="toggleBanRevisore('+JSON.stringify(nome)+')" style="font-size:12px;padding:3px 8px;border-radius:4px;border:1px solid #22c55e;background:#f0fdf4;color:#16a34a;cursor:pointer">✓ Riabilita</button></td>';
-        } else {
-          banBtn = '<td style="padding:6px 8px;text-align:center"><button onclick="toggleBanRevisore('+JSON.stringify(nome)+')" style="font-size:12px;padding:3px 8px;border-radius:4px;border:1px solid #fca5a5;background:#fff5f5;color:#dc2626;cursor:pointer">🚫 Banna</button></td>';
-        }
+        var banBtnStyle = isBanned
+          ? 'font-size:12px;padding:3px 8px;border-radius:4px;border:1px solid #22c55e;background:#f0fdf4;color:#16a34a;cursor:pointer'
+          : 'font-size:12px;padding:3px 8px;border-radius:4px;border:1px solid #fca5a5;background:#fff5f5;color:#dc2626;cursor:pointer';
+        var banBtnLabel = isBanned ? '✓ Riabilita' : '🚫 Banna';
+        var banIdx = bannedRevisori.indexOf(nome) >= 0 ? bannedRevisori.indexOf(nome) : -1;
+        var banBtnUid = 'banBtn_'+nome.replace(/\W/g,'_');
+        banBtn = '<td style="padding:6px 8px;text-align:center">'
+          + '<button id="'+banBtnUid+'" data-rev-nome="'+esc(nome)+'" onclick="toggleBanRevisore(this.getAttribute(\'data-rev-nome\'))" style="'+banBtnStyle+'">'+banBtnLabel+'</button>'
+          + '</td>';
       }
 
       html += '<tr style="'+rowStyle+'">'
