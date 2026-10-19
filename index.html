@@ -2554,7 +2554,9 @@ function renderRevList2() {
       '</div>' +
       '<div class="g2" style="gap:8px">' +
         '<div class="fr" style="margin-bottom:6px"><label>Nome e Cognome</label>' +
-          '<input id="revNome2_'+i+'" list="'+dlId2+'" value="'+esc(r.nome||'')+'" oninput="currentRevisori2['+i+'].nome=this.value;autoFillRevAff('+i+',this.value,\'2\');checkBannedRevInput(this,this.value)" placeholder="es. Mario Rossi"></div>' +
+          '<input id="revNome2_'+i+'" list="'+dlId2+'" value="'+esc(r.nome||'')+'" oninput="currentRevisori2['+i+'].nome=this.value;autoFillRevAff('+i+',this.value,\'2\');checkBannedRevInput(this,this.value)" placeholder="es. Mario Rossi">' +
+          (bannedRevisori.indexOf((r.nome||'').trim()) >= 0 && (r.nome||'').trim() ? '<div style="color:#dc2626;font-size:12px;margin-top:3px;font-weight:600;padding:4px 8px;background:#fff5f5;border:1px solid #fca5a5;border-radius:4px">⚠️ Revisore bannato dalla Redazione – non utilizzare!</div>' : '') +
+          '</div>' +
         '<div class="fr" style="margin-bottom:6px"><label>Affiliazione <span style="color:#e53e3e">*</span></label>' +
           '<input id="revAff2_'+i+'" value="'+esc(r.affiliazione||'')+'" oninput="currentRevisori2['+i+'].affiliazione=this.value;this.style.borderColor=this.value.trim()?\'\':\'#e53e3e\'" style="'+(((r.nome||'').trim()&&!(r.affiliazione||'').trim())?'border-color:#e53e3e;':'')+'"></div>' +
         '<div class="fr" style="margin-bottom:6px"><label>Data consegna revisione <span style="color:#e53e3e">*</span></label>' +
@@ -2640,7 +2642,9 @@ function renderRevList() {
       '</div>' +
       '<div class="g2" style="gap:8px">' +
         '<div class="fr" style="margin-bottom:6px"><label>Nome e Cognome</label>' +
-          '<input id="revNome1_'+i+'" list="'+dlId+'" value="'+esc(r.nome||'')+'" oninput="currentRevisori['+i+'].nome=this.value;autoFillRevAff('+i+',this.value,\'1\');checkBannedRevInput(this,this.value)" placeholder="es. Mario Rossi"></div>' +
+          '<input id="revNome1_'+i+'" list="'+dlId+'" value="'+esc(r.nome||'')+'" oninput="currentRevisori['+i+'].nome=this.value;autoFillRevAff('+i+',this.value,\'1\');checkBannedRevInput(this,this.value)" placeholder="es. Mario Rossi">' +
+          (bannedRevisori.indexOf((r.nome||'').trim()) >= 0 && (r.nome||'').trim() ? '<div style="color:#dc2626;font-size:12px;margin-top:3px;font-weight:600;padding:4px 8px;background:#fff5f5;border:1px solid #fca5a5;border-radius:4px">⚠️ Revisore bannato dalla Redazione – non utilizzare!</div>' : '') +
+          '</div>' +
         '<div class="fr" style="margin-bottom:6px"><label>Affiliazione <span style="color:#e53e3e">*</span></label>' +
           '<input id="revAff1_'+i+'" value="'+esc(r.affiliazione||'')+'" oninput="currentRevisori['+i+'].affiliazione=this.value;this.style.borderColor=this.value.trim()?\'\':\'#e53e3e\'" style="'+(((r.nome||'').trim()&&!(r.affiliazione||'').trim())?'border-color:#e53e3e;':'')+'"></div>' +
         '<div class="fr" style="margin-bottom:6px"><label>Data consegna revisione <span style="color:#e53e3e">*</span></label>' +
