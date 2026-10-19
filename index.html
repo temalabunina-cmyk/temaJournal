@@ -1881,7 +1881,9 @@ function renderRevisori() {
       var nameStyle = isBanned
         ? 'padding:6px 8px;font-weight:600;font-size:14px;color:#dc2626;text-decoration:line-through'
         : 'padding:6px 8px;font-weight:600;font-size:14px';
-      var bannedBadge = isBanned ? ' <span style="font-size:11px;background:#dc2626;color:#fff;padding:1px 5px;border-radius:3px;font-weight:600;vertical-align:middle">BANNATO</span>' : '';
+      var bannedBadge = isBanned
+        ? ' <span style="font-size:11px;background:#dc2626;color:#fff;padding:2px 7px;border-radius:3px;font-weight:600;vertical-align:middle" title="Revisore rimosso dalla Redazione — non assegnare">🚫 NON UTILIZZARE</span>'
+        : '';
 
       var banBtn = '';
       if (canBan) {
@@ -1896,8 +1898,12 @@ function renderRevisori() {
           + '</td>';
       }
 
+      var bannedNote = (isBanned && !canBan)
+        ? '<div style="font-size:11px;color:#dc2626;margin-top:2px;font-weight:400">Rimosso dalla Redazione</div>'
+        : '';
+
       html += '<tr style="'+rowStyle+'">'
-        + '<td style="'+nameStyle+'">'+esc(nome)+bannedBadge+'</td>'
+        + '<td style="'+nameStyle+'">'+esc(nome)+bannedBadge+bannedNote+'</td>'
         + (function(){
             var rts=rev.inviti.filter(function(i){return i.rating;}).map(function(i){return i.rating;});
             if (!rts.length) return '<td style="padding:6px 8px;text-align:center;color:#ccc">—</td>';
