@@ -1814,6 +1814,7 @@ function renderRevisori() {
       + '<th '+thClick('nome')+' style="text-align:left;padding:6px 8px">Revisore'+arrow('nome')+'</th>'
       + '<th '+thClick('rat')+' style="text-align:center;padding:6px 8px">Rating'+arrow('rat')+'</th>'
       + '<th '+thClick('aff')+' style="text-align:left;padding:6px 8px">Affiliazione'+arrow('aff')+'</th>'
+      + '<th style="text-align:center;padding:6px 8px;white-space:nowrap">Ultima richiesta</th>'
       + '<th '+thClick('tot')+' style="text-align:center;padding:6px 8px">Inviti'+arrow('tot')+'</th>'
       + '<th '+thClick('acc')+' style="text-align:center;padding:6px 8px">Accettato'+arrow('acc')+'</th>'
       + '<th '+thClick('comp')+' style="text-align:center;padding:6px 8px">Completato'+arrow('comp')+'</th>'
@@ -1831,6 +1832,7 @@ function renderRevisori() {
         return String(d)===fAnno || String(p)===fAnno;
       }) : rev.inviti;
 
+      var lastData = invitiFiltered.reduce(function(max, i){ return i.dataConsegna && i.dataConsegna > max ? i.dataConsegna : max; }, '');
       var nAcc  = invitiFiltered.filter(function(i){ return i.stato.indexOf('accettato')>=0; }).length;
       var nComp = invitiFiltered.filter(function(i){ return i.stato.indexOf('completato')>=0; }).length;
       var nAtt  = invitiFiltered.filter(function(i){ return i.stato===''||i.stato==='in attesa'; }).length;
@@ -1859,6 +1861,7 @@ function renderRevisori() {
             return '<td style="padding:6px 8px;text-align:center;color:#f5a623;white-space:nowrap">'+stars+'<span style="color:#888;font-size:11px"> '+avg.toFixed(1)+'</span></td>';
           })()
         + '<td style="padding:6px 8px;color:#666;font-size:13px">'+esc(rev.affiliazione)+'</td>'
+        + '<td style="padding:6px 8px;text-align:center;font-size:13px;white-space:nowrap;color:var(--tx2)">'+(lastData ? new Date(lastData).toLocaleDateString('it-IT') : '&mdash;')+'</td>'
         + '<td style="padding:6px 8px;text-align:center;font-weight:700">'+nTot+'</td>'
         + '<td style="padding:6px 8px;text-align:center">'+(!nAcc?'&mdash;':nAcc)+'</td>'
         + '<td style="padding:6px 8px;text-align:center">'+(!nComp?'&mdash;':nComp)+'</td>'
