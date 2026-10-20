@@ -1881,9 +1881,7 @@ function renderRevisori() {
       var nameStyle = isBanned
         ? 'padding:6px 8px;font-weight:600;font-size:14px;color:#dc2626'
         : 'padding:6px 8px;font-weight:600;font-size:14px';
-      var bannedBadge = isBanned
-        ? ' <span style="font-size:11px;background:#dc2626;color:#fff;padding:2px 7px;border-radius:3px;font-weight:600;vertical-align:middle" title="Revisore rimosso dalla Redazione — non assegnare">🚫 NON UTILIZZARE</span>'
-        : '';
+      var bannedBadge = isBanned ? ' 🚫' : '';
 
       var banBtn = '';
       if (canBan) {
