@@ -1250,9 +1250,12 @@ function gkCard(a) {
   var gkApproved = a.step === '3';
   var gkSt5      = a.step === '5'; // Approvato GK ma verifica AI non superata
   var gkValutato = simVal || aiVal; // il GK ha inserito almeno un valore
-  if (gkSt5) {
-    // Step 5: approvato GK ma non supera verifica AI → verde + bordo rosso
+  if (gkSt5 && (simHigh || aiHigh)) {
+    // Step 5: approvato GK ma verifica AI ancora alta → verde + bordo rosso
     card = card.replace('<div class="card">', '<div class="card" style="background:#c6f6d5;border:4px solid #e53e3e;">');
+  } else if (gkSt5 && bothLow) {
+    // Step 5 ma nuovi valori AI ora ok → verde con bordo verde (approvato)
+    card = card.replace('<div class="card">', '<div class="card" style="background:#c6f6d5;border-color:#2f855a;border-width:2px;">');
   } else if (gkApproved && (simHigh || aiHigh)) {
     // Approvato GK ma sim/AI >30%: sfondo verde + bordo rosso
     card = card.replace('<div class="card">', '<div class="card" style="background:#c6f6d5;border:4px solid #e53e3e;">');
