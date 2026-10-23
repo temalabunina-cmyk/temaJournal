@@ -2444,7 +2444,7 @@ function renderVerbale() {
       h += '<table style="width:100%;border-collapse:collapse;font-size:10pt;margin-top:1rem">';
       h += '<tr style="background:#f0f0f0"><th style="text-align:left;padding:4px 6px;border:1px solid #ccc;width:22%">Editor</th><th style="text-align:left;padding:4px 6px;border:1px solid #ccc">Articoli per Step</th></tr>';
       EDS.forEach(function(ed){
-        var arts = articles.filter(function(a){ return a.editor===ed&&a.status!=='Pubblicato'&&a.status!=='Rifiutato'&&a.step!=='18'; });
+        var arts = articles.filter(function(a){ return a.editor===ed&&a.status!=='Pubblicato'&&a.status!=='Rifiutato'&&a.step!=='18'&&a.step!=='17'; });
         if (!arts.length) return;
         // Group by step
         var byStep = {};
