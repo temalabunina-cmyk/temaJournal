@@ -2186,7 +2186,8 @@ function renderVerbale() {
     var other = ia.filter(function(a){return a.section!=='Focus'&&a.section!=='LUME'&&a.section!=='RNs';}).sort(function(a,b){return (a.articleNum||999)-(b.articleNum||999);});
     var dl = iss.deadline ? new Date(iss.deadline).toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'}) : 'TBD';
     var artRow = function(a) {
-      return '<tr>' +
+      var _trBg = a.vistoRedazione ? ' style="background:#d1fae5"' : '';
+      return '<tr'+_trBg+'>' +
         '<td style="width:28px;text-align:right;padding:4px 6px;color:#666;font-size:11pt;vertical-align:top;font-family:monospace">'+(a.articleNum||'&#8212;')+'</td>' +
         '<td style="padding:4px 8px;border-bottom:1px solid #eee">' +
           '<div style="font-size:11pt;font-weight:bold">'+esc(a.title)+'</div>' +
