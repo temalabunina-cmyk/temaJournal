@@ -3107,13 +3107,22 @@ function saveArt() {
     if (articles.find(function(a){ return a.id===data.id; })){ alert('ID gi\u00e0 esistente.'); return; }
     // Controllo duplicati: titolo simile o stessi autori
     var _normTitle = function(s){ return (s||'').toLowerCase().replace(/[^a-z0-9]/g,' ').replace(/\s+/g,' ').trim(); };
-    var _normAuth  = function(s){ return (s||'').toLowerCase().replace(/[^a-z]/g,' ').replace(/\s+/g,' ').trim(); };
+    // Normalizza autori: split per virgola/punto e virgola/&, ordina alfabeticamente, riunisce
+    var _normAuthSet = function(s) {
+      return (s||'').toLowerCase()
+        .split(/[,;&\n]+/)
+        .map(function(p){ return p.replace(/[^a-z]/g,' ').replace(/\s+/g,' ').trim(); })
+        .filter(function(p){ return p.length > 1; })
+        .sort()
+        .join('|');
+    };
     var _newTitle  = _normTitle(data.title);
-    var _newAuths  = _normAuth(data.authors);
+    var _newAuths  = _normAuthSet(data.authors);
     var _dupTitle  = null, _dupAuth = null;
     articles.forEach(function(a) {
       if (_normTitle(a.title) === _newTitle && _newTitle.length > 5) _dupTitle = a;
-      if (_normAuth(a.authors)  === _newAuths  && _newAuths.length  > 3) _dupAuth  = a;
+      var _aAuths = _normAuthSet(a.authors);
+      if (_aAuths === _newAuths && _newAuths.length > 3) _dupAuth = a;
     });
     if (_dupTitle || _dupAuth) {
       var msg = '\u26a0\ufe0f Possibile duplicato rilevato:\n\n';
