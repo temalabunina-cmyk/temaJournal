@@ -2072,7 +2072,6 @@ function renderTeam() {
       return '<div style="font-size:20px;'+_rowBg+'border-bottom:1px solid var(--brd);display:flex;gap:8px;align-items:center">'
         + '<span style="font-family:monospace;color:var(--tx3);font-size:16px;flex-shrink:0">#'+esc(a.id)+'</span>'
         + '<span style="flex:1;line-height:1.4">'+(a.title.length>55?a.title.slice(0,55)+'...':a.title)+'</span>'
-        + (a.vistoRedazione?'<span style="font-size:13px;font-weight:700;color:#065f46;white-space:nowrap;flex-shrink:0">✓ Visto</span>':'')
         + (a.editor?'<span style="font-size:18px;color:var(--blue-tx);white-space:nowrap;flex-shrink:0">'+esc(a.editor)+'</span>':'')
         + '</div>';
     }).join('');
