@@ -3105,6 +3105,23 @@ function saveArt() {
     if (idx>=0) articles[idx]=data;
   } else {
     if (articles.find(function(a){ return a.id===data.id; })){ alert('ID gi\u00e0 esistente.'); return; }
+    // Controllo duplicati: titolo simile o stessi autori
+    var _normTitle = function(s){ return (s||'').toLowerCase().replace(/[^a-z0-9]/g,' ').replace(/\s+/g,' ').trim(); };
+    var _normAuth  = function(s){ return (s||'').toLowerCase().replace(/[^a-z]/g,' ').replace(/\s+/g,' ').trim(); };
+    var _newTitle  = _normTitle(data.title);
+    var _newAuths  = _normAuth(data.authors);
+    var _dupTitle  = null, _dupAuth = null;
+    articles.forEach(function(a) {
+      if (_normTitle(a.title) === _newTitle && _newTitle.length > 5) _dupTitle = a;
+      if (_normAuth(a.authors)  === _newAuths  && _newAuths.length  > 3) _dupAuth  = a;
+    });
+    if (_dupTitle || _dupAuth) {
+      var msg = '\u26a0\ufe0f Possibile duplicato rilevato:\n\n';
+      if (_dupTitle) msg += '\u2022 Titolo identico all\'articolo #' + _dupTitle.id + ' ("' + _dupTitle.title + '")\n';
+      if (_dupAuth)  msg += '\u2022 Stessi autori dell\'articolo #' + _dupAuth.id  + ' ("' + _dupAuth.title  + '")\n';
+      msg += '\nVuoi inserire l\'articolo comunque?';
+      if (!confirm(msg)) return;
+    }
     if (!data.step || data.step === '') data.step = '1';
     articles.push(data);
     sendNotification('insert', data.id, data.title);
