@@ -2470,7 +2470,11 @@ function renderVerbale() {
       CPS.forEach(function(ce){
         var arts = articles.filter(function(a){ return a.copyeditor===ce&&a.status!=='Rifiutato'&&a.status!=='Pubblicato'; });
         if (!arts.length) return;
-        var items = arts.map(function(a){ return '#'+esc(a.id); }).join(' &nbsp;|&nbsp; ');
+        var items = arts.map(function(a){
+          return a.vistoRedazione
+            ? '<span style="background:#d1fae5;color:#065f46;font-weight:700;padding:1px 4px;border-radius:3px">#'+esc(a.id)+'</span>'
+            : '#'+esc(a.id);
+        }).join(' &nbsp;|&nbsp; ');
         h += '<tr><td style="padding:4px 6px;border:1px solid #ddd;font-weight:bold">'+esc(ce)+' ('+arts.length+')</td>'
           +'<td style="padding:4px 6px;border:1px solid #ddd">'+items+'</td></tr>';
       });
