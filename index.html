@@ -2577,7 +2577,7 @@ function renderRevList2() {
       '</div>' +
       '<div class="g2" style="gap:8px">' +
         '<div class="fr" style="margin-bottom:6px"><label>Nome e Cognome</label>' +
-          '<input id="revNome2_'+i+'" list="'+dlId2+'" value="'+esc(r.nome||'')+'" oninput="currentRevisori2['+i+'].nome=this.value;autoFillRevAff('+i+',this.value,\'2\');checkBannedRevInput(this,this.value)" placeholder="es. Mario Rossi">' +
+          '<input id="revNome2_'+i+'" list="'+dlId2+'" value="'+esc(r.nome||'')+'" oninput="currentRevisori2['+i+'].nome=this.value;autoFillRevAff('+i+',this.value,\'2\');checkBannedRevInput(this,this.value)" onchange="autoFillRevAff('+i+',this.value,\'2\');checkBannedRevInput(this,this.value)" placeholder="es. Mario Rossi">' +
           (bannedRevisori.indexOf((r.nome||'').trim()) >= 0 && (r.nome||'').trim() ? '<div style="color:#dc2626;font-size:12px;margin-top:3px;font-weight:600;padding:4px 8px;background:#fff5f5;border:1px solid #fca5a5;border-radius:4px">⚠️ Revisore bannato dalla Redazione – non utilizzare!</div>' : '') +
           '</div>' +
         '<div class="fr" style="margin-bottom:6px"><label>Affiliazione <span style="color:#e53e3e">*</span></label>' +
@@ -2631,16 +2631,20 @@ function buildRevMap() {
   return map;
 }
 
-// Quando si seleziona un nome dal datalist, riempie automaticamente l'affiliazione
+// Quando si seleziona un nome dal datalist, riempie automaticamente nome e affiliazione
 function autoFillRevAff(i, nome, round) {
   var map = buildRevMap();
-  var aff = map[(nome||'').trim()];
-  if (!aff) return;
+  var nomeTrim = (nome||'').trim();
+  var aff = map[nomeTrim];
   var arrKey = round==='2' ? currentRevisori2 : currentRevisori;
-  if (arrKey[i] && !arrKey[i].affiliazione) {
+  if (!arrKey[i]) return;
+  // Aggiorna il nome nell'array (già fatto dall'oninput, ma lo confermiamo)
+  arrKey[i].nome = nomeTrim;
+  // Compila l'affiliazione dal DB se il nome è riconosciuto
+  if (aff) {
     arrKey[i].affiliazione = aff;
-    var el = document.getElementById('revAff'+round+'_'+i);
-    if (el) el.value = aff;
+    var elAff = document.getElementById('revAff'+round+'_'+i);
+    if (elAff) { elAff.value = aff; elAff.style.borderColor = ''; }
   }
 }
 
@@ -2665,7 +2669,7 @@ function renderRevList() {
       '</div>' +
       '<div class="g2" style="gap:8px">' +
         '<div class="fr" style="margin-bottom:6px"><label>Nome e Cognome</label>' +
-          '<input id="revNome1_'+i+'" list="'+dlId+'" value="'+esc(r.nome||'')+'" oninput="currentRevisori['+i+'].nome=this.value;autoFillRevAff('+i+',this.value,\'1\');checkBannedRevInput(this,this.value)" placeholder="es. Mario Rossi">' +
+          '<input id="revNome1_'+i+'" list="'+dlId+'" value="'+esc(r.nome||'')+'" oninput="currentRevisori['+i+'].nome=this.value;autoFillRevAff('+i+',this.value,\'1\');checkBannedRevInput(this,this.value)" onchange="autoFillRevAff('+i+',this.value,\'1\');checkBannedRevInput(this,this.value)" placeholder="es. Mario Rossi">' +
           (bannedRevisori.indexOf((r.nome||'').trim()) >= 0 && (r.nome||'').trim() ? '<div style="color:#dc2626;font-size:12px;margin-top:3px;font-weight:600;padding:4px 8px;background:#fff5f5;border:1px solid #fca5a5;border-radius:4px">⚠️ Revisore bannato dalla Redazione – non utilizzare!</div>' : '') +
           '</div>' +
         '<div class="fr" style="margin-bottom:6px"><label>Affiliazione <span style="color:#e53e3e">*</span></label>' +
