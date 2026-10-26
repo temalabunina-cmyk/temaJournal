@@ -179,7 +179,7 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
   </div>
   <div class="toolbar"><input class="srch" type="text" id="srchGk" placeholder="Cerca..."></div>
   <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
-    <select id="fGkStep" onchange="renderGk()" style="font-size:20px;padding:6px 10px;border:1px solid var(--brd);border-radius:var(--r);background:var(--sur)"><option value="">Tutti gli step</option><option value="1">St.1</option><option value="2">St.2</option><option value="4">St.3</option><option value="5">St.5</option><option value="5a">St.5a · Approvato GK</option></select>
+    <select id="fGkStep" onchange="renderGk()" style="font-size:20px;padding:6px 10px;border:1px solid var(--brd);border-radius:var(--r);background:var(--sur)"><option value="">Tutti gli step</option><option value="1">St.1</option><option value="2">St.2</option><option value="3">St.3</option><option value="5">St.5</option></select>
     <select id="fGkSec" onchange="renderGk()" style="font-size:20px;padding:6px 10px;border:1px solid var(--brd);border-radius:var(--r);background:var(--sur)"><option value="">Tutte le sezioni</option><option>Focus</option><option>LUME</option><option>RNs</option><option>SI</option></select>
     <select id="fGkIntl" onchange="renderGk()" style="font-size:20px;padding:6px 10px;border:1px solid var(--brd);border-radius:var(--r);background:var(--sur)"><option value="">Tutti</option><option value="si">Internazionale</option><option value="no">Italia</option></select>
   </div>
@@ -2029,7 +2029,7 @@ function renderTeam() {
 
   h += '<div style="font-size:16px;font-weight:700;margin:1.5rem 0 1rem">Editor</div>';
   EDITORS.forEach(function(ed) {
-    var mine = articles.filter(function(a){ return a.editor===ed && (!a.copyeditor||a.copyeditor==='') && a.status !== 'Pubblicato' && a.step !== '18' && a.step !== '8b' && a.step !== '7b' && a.step !== '17' && a.status !== 'Rifiutato'; }).sort(function(a,b){
+    var mine = articles.filter(function(a){ return a.editor===ed && (!a.copyeditor||a.copyeditor==='') && a.status !== 'Pubblicato' && a.step !== '18' && a.step !== '17' && a.status !== 'Rifiutato'; }).sort(function(a,b){
       var sa = parseFloat(a.step)||0, sb = parseFloat(b.step)||0;
       return sb - sa;
     });
@@ -3002,13 +3002,13 @@ function autoStep(a) {
   // → St.9: almeno un revisore individuato
   if (a.revisori && a.revisori.length > 0) advance('9');
 
-  // → St.10/11: revisori accettati
+  // → St.11/12: revisori accettati
   if (a.revisori) {
     var accettati = a.revisori.filter(function(r){
       return r.accettazione === 'accettato' || r.accettazione === 'completato';
     }).length;
-    if (accettati >= 1) advance('10');
-    if (accettati >= 2) advance('11');
+    if (accettati >= 1) advance('11');
+    if (accettati >= 2) advance('12');
   }
 
   // → St.12: decisione editor
