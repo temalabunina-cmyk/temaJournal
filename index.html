@@ -3154,6 +3154,12 @@ function saveArt() {
     alert('Assegnare il Rating per: ' + _revMissingRating.map(function(r){ return r.nome || 'Revisore'; }).join(', '));
     return;
   }
+  // Validazione: St.18 riservata a RedazioneTeMA e admin
+  if (_newStep === '18' && _newStep !== _origStep && !adminMode && currentUser !== 'RedazioneTeMA') {
+    alert('⚙ St.18 · Pubblicazione è di competenza esclusiva della Redazione.\n\nSolo RedazioneTeMA può portare un articolo in questo step.');
+    document.getElementById('fStep').value = _origStep || '';
+    return;
+  }
   // Validazione: St.18 richiede fascicolo assegnato
   if (document.getElementById('fStep').value === '18') {
     var _issVal = document.getElementById('fIssArt').value;
