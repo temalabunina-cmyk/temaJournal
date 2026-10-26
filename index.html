@@ -347,22 +347,22 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
       <select id="fStep">
       <option value="">—</option>
       <option value="1">St 1 · Ricevimento dell'articolo</option>
-      <option value="2">St 2 · Assegnazione al GateKeeper</option>
+      <option value="2" style="color:#aaa">⚙ St 2 · Assegnazione al GateKeeper</option>
       <option value="3">St 3 · Approvazione GateKeeper</option>
       <option value="4">St 4 · Rifiuto GateKeeper</option>
-      <option value="5">St 5 · Comunicazione Turnitin agli autori</option>
+      <option value="5" style="color:#aaa">⚙ St 5 · Comunicazione Turnitin agli autori</option>
       <option value="6">St 6 · Comunicazione del rifiuto (&gt;30% Turnitin)</option>
-      <option value="7">St 7 · Assegnazione all'Editor</option>
+      <option value="7" style="color:#aaa">⚙ St 7 · Assegnazione all'Editor</option>
       <option value="8">St 8 · Invito agli autori ad integrare l'articolo</option>
       <option value="9">St 9 · Ricevimento delle modifiche</option>
-      <option value="10">St 10 · Individuazione dei revisori</option>
-      <option value="11">St 11 · Accettazione incarico di 1 revisore</option>
-      <option value="12">St 12 · Accettazione incarico di 2 revisori</option>
-      <option value="13">St 13 · Invio agli autori per le modifiche necessarie</option>
+      <option value="10" style="color:#aaa">⚙ St 10 · Individuazione dei revisori</option>
+      <option value="11" style="color:#aaa">⚙ St 11 · Accettazione incarico di 1 revisore</option>
+      <option value="12" style="color:#aaa">⚙ St 12 · Accettazione incarico di 2 revisori</option>
+      <option value="13" style="color:#aaa">⚙ St 13 · Invio agli autori per le modifiche necessarie</option>
       <option value="14">St 14 · Ricevimento articolo revisionato</option>
-      <option value="15">St 15 · Secondo ciclo di revisione</option>
+      <option value="15" style="color:#aaa">⚙ St 15 · Secondo ciclo di revisione</option>
       <option value="16">St 16 · Verifica finale dell'Editor</option>
-      <option value="17">St 17 · Impaginazione</option>
+      <option value="17" style="color:#aaa">⚙ St 17 · Impaginazione</option>
       <option value="18">St 18 · Pubblicazione</option>
     </select>    </div>
   </div>
@@ -582,6 +582,9 @@ const STEPS = {
   '17': 'St.17 · Impaginazione',
   '18': 'St.18 · Pubblicazione'
 };
+// Step gestiti automaticamente da autoStep() — non vanno impostati manualmente
+const AUTO_STEPS = {'2':1,'5':1,'7':1,'10':1,'11':1,'12':1,'13':1,'15':1,'17':1};
+
 const SC = {
   'GateKeeper evaluation':'b-gk','Sottomesso':'b-sub','In referaggio':'b-ref',
   'Revisione autore':'b-rev','Copyediting':'b-copy',
@@ -3139,6 +3142,11 @@ function saveArt() {
     return;
   }
   console.log('[TeMA] saveArt: id='+data.id+' step='+data.step+' origStep='+_origStep+' stepManuale='+(_newStep!==_origStep));
+  // Avvisa se un non-admin tenta di impostare manualmente uno step automatico
+  if (!adminMode && _newStep !== '' && _newStep !== _origStep && AUTO_STEPS[_newStep]) {
+    var _stepLabel = STEPS[_newStep] || ('St.' + _newStep);
+    if (!confirm('⚙ ' + _stepLabel + ' è uno step automatico.\n\nQuesto step viene impostato automaticamente dal sistema in base alle informazioni inserite nell\'articolo (GK, editor, revisori, decisione, copyeditor).\n\nSe hai aggiornato i dati rilevanti, il sistema aggiornerà lo step da solo al salvataggio.\n\nVuoi comunque impostarlo manualmente?')) return;
+  }
   // Se l'utente ha cambiato lo step manualmente, proteggilo da autoStep
   if (_newStep !== '' && _newStep !== _origStep) data._stepManuale = true;
   data = autoStep(data);
