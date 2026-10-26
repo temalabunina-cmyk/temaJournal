@@ -3013,12 +3013,12 @@ function autoStep(a) {
     if (accettati >= 2) set('12');
   }
 
-  // St.12 da decisione editor (se non già a St.12 da revisori)
+  // St.13: decisione editor inserita (Revisions required o Resubmit for Review)
   var dec1 = a.decisioneEditor || '';
   var dec2 = a.decisioneEditor2 || '';
   if (dec1 === 'Revisions required' || dec1 === 'Resubmit for Review' ||
       dec2 === 'Revisions required' || dec2 === 'Resubmit for Review') {
-    if (parseInt(computed) < 12) set('12');
+    set('13');
   }
 
   // St.15: secondo round revisori
@@ -3031,8 +3031,8 @@ function autoStep(a) {
   if (a.copyeditor && a.copyeditor !== '') set('17');
 
   // Applica lo step calcolato solo se l'attuale è uno step "automatico"
-  // (non uno step manuale che autoStep non gestisce: 8,9,13,14,16,18)
-  var manuali = {'8':1,'9':1,'13':1,'14':1,'16':1,'18':1};
+  // (non uno step manuale che autoStep non gestisce: 8,9,14,16,18)
+  var manuali = {'8':1,'9':1,'14':1,'16':1,'18':1};
   if (!manuali[a.step]) {
     a.step = computed;
   } else {
