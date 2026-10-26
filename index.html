@@ -3000,8 +3000,8 @@ function autoStep(a) {
   // → St.7: editor assegnato
   if (a.editor && a.editor !== '') advance('7');
 
-  // → St.9: almeno un revisore individuato
-  if (a.revisori && a.revisori.length > 0) advance('9');
+  // → St.10: almeno un revisore individuato (invitato)
+  if (a.revisori && a.revisori.length > 0) advance('10');
 
   // → St.11/12: revisori accettati
   if (a.revisori) {
