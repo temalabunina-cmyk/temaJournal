@@ -347,22 +347,22 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
       <select id="fStep">
       <option value="">—</option>
       <option value="1">St 1 · Ricevimento dell'articolo</option>
-      <option value="2" style="color:#aaa">St 2 · Assegnazione al GateKeeper (automatico)</option>
+      <option value="2">St 2 · Assegnazione al GateKeeper (automatico)</option>
       <option value="3">St 3 · Approvazione GateKeeper</option>
       <option value="4">St 4 · Rifiuto GateKeeper</option>
-      <option value="5" style="color:#aaa">St 5 · Comunicazione Turnitin agli autori (automatico)</option>
+      <option value="5">St 5 · Comunicazione Turnitin agli autori (automatico)</option>
       <option value="6">St 6 · Comunicazione del rifiuto (&gt;30% Turnitin)</option>
-      <option value="7" style="color:#aaa">St 7 · Assegnazione all'Editor (automatico)</option>
+      <option value="7">St 7 · Assegnazione all'Editor (automatico)</option>
       <option value="8">St 8 · Invito agli autori ad integrare l'articolo</option>
       <option value="9">St 9 · Ricevimento delle modifiche</option>
-      <option value="10" style="color:#aaa">St 10 · Individuazione dei revisori (automatico)</option>
-      <option value="11" style="color:#aaa">St 11 · Accettazione incarico di 1 revisore (automatico)</option>
-      <option value="12" style="color:#aaa">St 12 · Accettazione incarico di 2 revisori (automatico)</option>
-      <option value="13" style="color:#aaa">St 13 · Invio agli autori per le modifiche necessarie (automatico)</option>
+      <option value="10">St 10 · Individuazione dei revisori (automatico)</option>
+      <option value="11">St 11 · Accettazione incarico di 1 revisore (automatico)</option>
+      <option value="12">St 12 · Accettazione incarico di 2 revisori (automatico)</option>
+      <option value="13">St 13 · Invio agli autori per le modifiche necessarie (automatico)</option>
       <option value="14">St 14 · Ricevimento articolo revisionato</option>
-      <option value="15" style="color:#aaa">St 15 · Secondo ciclo di revisione (automatico)</option>
+      <option value="15">St 15 · Secondo ciclo di revisione (automatico)</option>
       <option value="16">St 16 · Verifica finale dell'Editor</option>
-      <option value="17" style="color:#aaa">St 17 · Impaginazione (automatico)</option>
+      <option value="17">St 17 · Impaginazione (automatico)</option>
       <option value="18">St 18 · Pubblicazione</option>
     </select>    </div>
   </div>
@@ -2858,6 +2858,7 @@ function openNewArt() {
     }
   }
   document.getElementById('artModal').classList.add('open');
+  styleStepSelect();
 }
 function openEditArt(id) {
   var a = articles.find(function(x){ return x.id===id; });
@@ -2966,6 +2967,18 @@ function openEditArt(id) {
     }
   }
   document.getElementById('artModal').classList.add('open');
+  styleStepSelect();
+}
+function styleStepSelect() {
+  var sel = document.getElementById('fStep');
+  if (!sel) return;
+  Array.prototype.forEach.call(sel.options, function(opt) {
+    if (AUTO_STEPS[opt.value]) {
+      opt.style.color = '#999';
+    } else {
+      opt.style.color = '';
+    }
+  });
 }
 function autoStep(a) {
   // Decline submission: priorità assoluta
@@ -3142,10 +3155,23 @@ function saveArt() {
     return;
   }
   console.log('[TeMA] saveArt: id='+data.id+' step='+data.step+' origStep='+_origStep+' stepManuale='+(_newStep!==_origStep));
-  // Avvisa se un non-admin tenta di impostare manualmente uno step automatico
+  // Blocca se un non-admin tenta di impostare manualmente uno step automatico
   if (!adminMode && _newStep !== '' && _newStep !== _origStep && AUTO_STEPS[_newStep]) {
     var _stepLabel = STEPS[_newStep] || ('St.' + _newStep);
-    if (!confirm('⚙ ' + _stepLabel + ' è uno step automatico.\n\nQuesto step viene impostato automaticamente dal sistema in base alle informazioni inserite nell\'articolo (GK, editor, revisori, decisione, copyeditor).\n\nSe hai aggiornato i dati rilevanti, il sistema aggiornerà lo step da solo al salvataggio.\n\nVuoi comunque impostarlo manualmente?')) return;
+    var _autoHints = {
+      '2':  'Assegna un GateKeeper nel campo apposito.',
+      '5':  'Inserisci i valori Similarity e AI% (entrambi > 30%) e spunta "Comunicazione inviata".',
+      '7':  'Assegna un Editor nel campo apposito.',
+      '10': 'Aggiungi almeno un revisore nella sezione Revisori.',
+      '11': 'Imposta lo stato di almeno 1 revisore su "Accettato" o "Completato".',
+      '12': 'Imposta lo stato di almeno 2 revisori su "Accettato" o "Completato".',
+      '13': 'Inserisci la Decisione dell\'Editor (Revisions required o Resubmit for Review).',
+      '15': 'Imposta la Decisione su "Resubmit for Review" e aggiungi revisori nel secondo ciclo.',
+      '17': 'Assegna un Copyeditor nel campo apposito.'
+    };
+    alert('⚙ ' + _stepLabel + ' è uno step automatico e non può essere impostato manualmente.\n\nPer far avanzare l\'articolo a questo step:\n→ ' + (_autoHints[_newStep] || 'Aggiorna i dati rilevanti dell\'articolo.'));
+    document.getElementById('fStep').value = _origStep || '';
+    return;
   }
   // Se l'utente ha cambiato lo step manualmente, proteggilo da autoStep
   if (_newStep !== '' && _newStep !== _origStep) data._stepManuale = true;
