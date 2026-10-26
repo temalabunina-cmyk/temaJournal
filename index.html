@@ -2971,6 +2971,9 @@ function autoStep(a) {
   // St.3 (Approvazione GK) impostato solo dal pulsante — non toccare
   if (a.step === '3') return a;
 
+  // St.4 (Rifiuto GK), St.6 (Rifiuto Turnitin): step terminali, non toccare
+  if (a.step === '4' || a.step === '6') return a;
+
   var sim   = parseFloat(a.similarity);
   var ai    = parseFloat(a.aiPercent);
   var simOk = !isNaN(sim) && a.similarity !== null && a.similarity !== '';
@@ -2979,55 +2982,59 @@ function autoStep(a) {
   // Se lo step è stato cambiato manualmente, non sovrascriverlo mai
   if (a._stepManuale) return a;
 
-  // Funzione helper: avanza lo step solo se il nuovo è maggiore dell'attuale
-  function advance(newStep) {
-    if (parseInt(newStep) > parseInt(a.step)) a.step = newStep;
-  }
+  // Calcola lo step corretto partendo da '1' e applicando tutte le regole
+  // in sequenza — sovrascrive sempre, quindi può anche retrocedere.
+  // Gli step manuali (8, 9, 13, 14, 16, 18) non vengono mai impostati qui.
+  var computed = '1';
+  function set(s) { computed = s; }
 
-  // St.1 → St.2: GateKeeper assegnato
-  if (a.gatekeeper && a.gatekeeper !== '') advance('2');
+  // St.2: GateKeeper assegnato
+  if (a.gatekeeper && a.gatekeeper !== '') set('2');
 
-  // St.3/4 → St.5: comunicazione Turnitin inviata (valori >30)
-  if (simOk && aiOk && (sim > 30 || ai > 30) && a.comunicazioneInviata) advance('5');
+  // St.5: comunicazione Turnitin inviata (sim o AI >30)
+  if (simOk && aiOk && (sim > 30 || ai > 30) && a.comunicazioneInviata) set('5');
 
-  // St.5 → St.6: rifiuto Turnitin
-  if ((sim > 30 || ai > 30) && a.rispostaAutori === 'ritirato') {
-    advance('6');
-    a.status = 'Rifiutato';
-    if (!a.dataRifiuto) a.dataRifiuto = new Date().toISOString();
-  }
+  // St.7: editor assegnato
+  if (a.editor && a.editor !== '') set('7');
 
-  // → St.7: editor assegnato
-  if (a.editor && a.editor !== '') advance('7');
+  // St.10: almeno un revisore individuato (invitato)
+  if (a.revisori && a.revisori.length > 0) set('10');
 
-  // → St.10: almeno un revisore individuato (invitato)
-  if (a.revisori && a.revisori.length > 0) advance('10');
-
-  // → St.11/12: revisori accettati
+  // St.11/12: revisori accettati o completati
   if (a.revisori) {
     var accettati = a.revisori.filter(function(r){
       return r.accettazione === 'accettato' || r.accettazione === 'completato';
     }).length;
-    if (accettati >= 1) advance('11');
-    if (accettati >= 2) advance('12');
+    if (accettati >= 1) set('11');
+    if (accettati >= 2) set('12');
   }
 
-  // → St.12: decisione editor
+  // St.12 da decisione editor (se non già a St.12 da revisori)
   var dec1 = a.decisioneEditor || '';
   var dec2 = a.decisioneEditor2 || '';
   if (dec1 === 'Revisions required' || dec1 === 'Resubmit for Review' ||
       dec2 === 'Revisions required' || dec2 === 'Resubmit for Review') {
-    advance('12');
+    if (parseInt(computed) < 12) set('12');
   }
 
-  // → St.15: secondo round revisori
+  // St.15: secondo round revisori
   if ((dec1 === 'Resubmit for Review' || dec2 === 'Resubmit for Review') &&
       a.revisori2 && a.revisori2.length > 0) {
-    advance('15');
+    set('15');
   }
 
-  // → St.17: copyeditor assegnato
-  if (a.copyeditor && a.copyeditor !== '') advance('17');
+  // St.17: copyeditor assegnato
+  if (a.copyeditor && a.copyeditor !== '') set('17');
+
+  // Applica lo step calcolato solo se l'attuale è uno step "automatico"
+  // (non uno step manuale che autoStep non gestisce: 8,9,13,14,16,18)
+  var manuali = {'8':1,'9':1,'13':1,'14':1,'16':1,'18':1};
+  if (!manuali[a.step]) {
+    a.step = computed;
+  } else {
+    // Step manuale: aggiorna solo se computed è maggiore
+    if (parseInt(computed) > parseInt(a.step)) a.step = computed;
+  }
 
   return a;
 }
