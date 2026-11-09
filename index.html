@@ -2339,6 +2339,8 @@ function renderVerbale() {
   document.getElementById('verbalePreview').innerHTML =
     '<div class="vprev" id="verbaleContent">' +
     '<h1>Verbale n. '+esc(num)+' della riunione della Redazione di TeMA<br><span style="font-size:16px;font-weight:400">'+esc(dateStr)+'</span></h1>' +
+    // Note editoriali in apertura del verbale
+    (vDriveText ? '<h2>NOTE EDITORIALI</h2><div class="drive-doc">'+vDriveText+'</div>' : '') +
     (intro?'<h2>TEMI AFFRONTATI</h2><p>'+esc(intro).replace(/\n/g,'<br>')+'</p>':'') +
     '<h2>PROSSIMI NUMERI</h2>' +
     (issues.length ? fascicoliHtml : '<p>Nessun fascicolo definito.</p>') +
@@ -2487,7 +2489,6 @@ function renderVerbale() {
       h += '</table>';
       return h;
     })() +
-    (vDriveText ? '<h2>NOTE EDITORIALI</h2><div class="drive-doc">'+vDriveText+'</div>' : '') +
     '<p style="margin-top:2rem;text-align:right"><em>'+oggi+'<br>Verbale '+esc(num)+'</em></p>' +
     '</div>';
 }
