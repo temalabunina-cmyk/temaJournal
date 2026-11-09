@@ -154,6 +154,7 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
     <button class="btn btn-p" id="btnNuovo">+ Nuovo articolo</button>
     <button class="btn" onclick="backupData()" title="Scarica backup JSON" style="padding:7px 10px;font-size:13px">&#128229; Backup</button>
     <button class="btn" id="btnRicalcolaStep" onclick="ricalcolaStepTutti()" title="Ricalcola automaticamente lo step di tutti gli articoli in base ai dati presenti" style="padding:7px 10px;font-size:13px;display:none">&#9881; Ricalcola step</button>
+    <button class="btn" id="btnConvertiEsiti" onclick="convertiEsitiFinali()" title="Trasferisce accettazioni e rifiuti registrati nei cicli di revisione nella nuova sezione Decisione finale" style="padding:7px 10px;font-size:13px;display:none">&#9881; Converti decisioni finali</button>
   </div>
 </div>
 <input type="file" id="importFile" accept=".json" style="display:none">
@@ -473,9 +474,8 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
   <div id="revList"></div>
   <button class="btn" id="btnAddRev" style="margin-bottom:10px;font-size:20px">+ Aggiungi revisore</button>
   <div class="g2" style="margin-top:6px;margin-bottom:12px;align-items:end">
-    <div class="fr" style="margin-bottom:0"><label>Decisione dell'editor</label><select id="fDecisioneEditor" onchange="checkDecisioneEditor()"><option value="">&#8212;</option><option value="Accept submission">Accept submission</option><option value="Revisions required">Revisions required</option><option value="Resubmit for Review">Resubmit for Review</option><option value="Resubmit Elsewhere">Resubmit Elsewhere</option><option value="Decline submission">Decline submission</option></select></div>
+    <div class="fr" style="margin-bottom:0"><label>Decisione dell'editor</label><select id="fDecisioneEditor" onchange="checkDecisioneEditor()"><option value="">&#8212;</option><option value="Revisions required">Revisions required</option><option value="Resubmit for Review">Resubmit for Review</option><option value="Resubmit Elsewhere">Resubmit Elsewhere</option><option value="Decline submission">Decline submission</option></select></div>
     <div class="fr" id="fDataRevisioneWrap" style="margin-bottom:0;display:none"><label>Data consegna versione revisionata</label><input type="date" id="fDataRevisione"></div>
-  <div class="fr" id="fDataAccettazioneWrap" style="margin-bottom:0;display:none"><label>Data di accettazione</label><input type="date" id="fDataAccettazione"></div>
   </div>
   <!-- Secondo processo di revisione (visibile solo con Resubmit for Review) -->
   <div id="rev2Section" style="display:none;border-top:1.5px dashed var(--brd);padding-top:1rem;margin-top:.5rem">
@@ -483,11 +483,16 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
     <div id="revList2"></div>
     <button class="btn" id="btnAddRev2" style="margin-bottom:10px;font-size:20px">+ Aggiungi revisore (2° round)</button>
     <div class="g2" style="margin-top:6px;align-items:end">
-      <div class="fr" style="margin-bottom:0"><label>Decisione dell'editor (2° round)</label><select id="fDecisioneEditor2" onchange="checkDecisioneEditor2()"><option value="">&#8212;</option><option value="Accept submission">Accept submission</option><option value="Revisions required">Revisions required</option><option value="Resubmit for Review">Resubmit for Review</option><option value="Resubmit Elsewhere">Resubmit Elsewhere</option><option value="Decline submission">Decline submission</option></select></div>
+      <div class="fr" style="margin-bottom:0"><label>Decisione dell'editor (2° round)</label><select id="fDecisioneEditor2" onchange="checkDecisioneEditor2()"><option value="">&#8212;</option><option value="Revisions required">Revisions required</option><option value="Resubmit for Review">Resubmit for Review</option><option value="Resubmit Elsewhere">Resubmit Elsewhere</option><option value="Decline submission">Decline submission</option></select></div>
       <div class="fr" id="fDataRevisione2Wrap" style="margin-bottom:0;display:none"><label>Data consegna versione revisionata (2°)</label><input type="date" id="fDataRevisione2"></div>
-    <div class="fr" id="fDataAccettazione2Wrap" style="margin-bottom:0;display:none"><label>Data di accettazione (2°)</label><input type="date" id="fDataAccettazione2"></div>
     </div>
   </div>
+  <div class="fsl">Decisione finale</div>
+  <div class="g2" style="margin-bottom:6px;align-items:end">
+    <div class="fr" style="margin-bottom:0"><label>Esito finale</label><select id="fEsitoFinale" onchange="checkEsitoFinale()"><option value="">&#8212; (in corso)</option><option value="Accettato">Accettato</option><option value="Rifiutato">Rifiutato</option></select></div>
+    <div class="fr" id="fDataEsitoWrap" style="margin-bottom:0;display:none"><label id="fDataEsitoLbl">Data di accettazione</label><input type="date" id="fDataEsitoFinale"></div>
+  </div>
+  <div id="fEsitoHint" style="font-size:13px;color:var(--tx3);margin-bottom:12px"></div>
   <div class="fsl">Note</div>
   <div class="fr">
     <div style="display:flex;flex-direction:column;gap:6px">
@@ -1174,8 +1179,9 @@ function artCard(a, showEdit, showAllNotes) {
       if (a.decisioneEditor2 && a.decisioneEditor2 !== '') info.push('<strong>Decisione 2°:</strong> '+esc(a.decisioneEditor2));
       if (a.dataRevisione && a.dataRevisione !== '') info.push('<strong>Consegna rev.:</strong> '+new Date(a.dataRevisione).toLocaleDateString('it-IT'));
       if (a.dataRevisione2 && a.dataRevisione2 !== '') info.push('<strong>Consegna 2°:</strong> '+new Date(a.dataRevisione2).toLocaleDateString('it-IT'));
-      if (a.dataAccettazione && a.dataAccettazione !== '') info.push('<strong style="color:var(--green-tx)">✓ Accettato il:</strong> '+new Date(a.dataAccettazione).toLocaleDateString('it-IT'));
-      if (a.dataAccettazione2 && a.dataAccettazione2 !== '') info.push('<strong style="color:var(--green-tx)">✓ Accettato (2°) il:</strong> '+new Date(a.dataAccettazione2).toLocaleDateString('it-IT'));
+      var _ef = esitoFinaleDi(a);
+      if (_ef.esito === 'Accettato') info.push('<strong style="color:var(--green-tx)">✓ Accettato'+(_ef.data?' il:':'')+'</strong> '+(_ef.data?new Date(_ef.data).toLocaleDateString('it-IT'):''));
+      if (_ef.esito === 'Rifiutato') info.push('<strong style="color:var(--red-tx)">✗ Rifiutato'+(_ef.data?' il:':'')+'</strong> '+(_ef.data?new Date(_ef.data).toLocaleDateString('it-IT'):''));
       if (!info.length) return '';
       return '<div style="font-size:20px;margin-top:6px;padding:5px 10px;background:var(--sur2);border-radius:var(--r);display:flex;flex-wrap:wrap;gap:10px">'+info.join(' &middot; ')+'</div>';
     })() +
@@ -1968,7 +1974,7 @@ function toggleBanRevisore(nome) {
 function renderRifRef() {
   var q = (document.getElementById('srchRifRef').value||'').toLowerCase();
   var f = articles.filter(function(a) {
-    var isDeclined = a.decisioneEditor === 'Decline submission' || a.decisioneEditor2 === 'Decline submission';
+    var isDeclined = esitoFinaleDi(a).esito === 'Rifiutato';
     if (!isDeclined && a.step !== '13') return false;
     if (a.status !== 'Rifiutato') return false;
     if (q       && (a.id+' '+a.title+' '+a.authors).toLowerCase().indexOf(q) < 0) return false;
@@ -2223,8 +2229,8 @@ function renderVerbale() {
     if (a.dataRevisione && a.dataRevisione !== '') info.push('<strong>Consegna rev.:</strong> '+new Date(a.dataRevisione).toLocaleDateString('it-IT'));
     if (a.decisioneEditor2 && a.decisioneEditor2 !== '') info.push('<strong>Decisione editor 2°:</strong> '+esc(a.decisioneEditor2));
     if (a.dataRevisione2 && a.dataRevisione2 !== '') info.push('<strong>Consegna rev. 2°:</strong> '+new Date(a.dataRevisione2).toLocaleDateString('it-IT'));
-    if (a.dataAccettazione && a.dataAccettazione !== '') info.push('<strong>Data accettazione:</strong> '+new Date(a.dataAccettazione).toLocaleDateString('it-IT'));
-    if (a.dataAccettazione2 && a.dataAccettazione2 !== '') info.push('<strong>Data accettazione 2°:</strong> '+new Date(a.dataAccettazione2).toLocaleDateString('it-IT'));
+    var _ef2 = esitoFinaleDi(a);
+    if (_ef2.esito) info.push('<strong>Esito finale:</strong> '+_ef2.esito+(_ef2.data?' il '+new Date(_ef2.data).toLocaleDateString('it-IT'):''));
     if (a.deadline && a.deadline !== '') info.push('<strong>Deadline:</strong> '+new Date(a.deadline).toLocaleDateString('it-IT'));
 
     return '<div class="ae'+(a.highlight?' hl':'')+'">' +
@@ -2382,14 +2388,13 @@ function renderVerbale() {
       // Categoria 1: rifiutati dal referaggio (Decline submission o step=14)
       var rifRef = rifAll.filter(function(a){
         var d = rifDate(a);
-        var isDeclined = a.decisioneEditor==='Decline submission' || a.decisioneEditor2==='Decline submission';
+        var isDeclined = esitoFinaleDi(a).esito === 'Rifiutato';
         return (isDeclined || a.step==='13') && d && d >= cutoff;
       });
       // Categoria 2: rifiutati dal GK
       var rifGk = rifAll.filter(function(a){
         var d = rifDate(a);
-        return a.step==='4' && d && d >= cutoff &&
-               a.decisioneEditor!=='Decline submission' && a.decisioneEditor2!=='Decline submission';
+        return a.step==='4' && d && d >= cutoff && esitoFinaleDi(a).esito !== 'Rifiutato';
       });
       // Categoria 3: rifiutati Turnitin (step=4)
       var rifTur = rifAll.filter(function(a){
@@ -2544,16 +2549,65 @@ function checkDecisioneEditor() {
   if (sec) sec.style.display = (val === 'Resubmit for Review') ? 'block' : 'none';
   var wrap = document.getElementById('fDataRevisioneWrap');
   if (wrap) wrap.style.display = (val === 'Revisions required') ? 'block' : 'none';
-  var wrapAcc = document.getElementById('fDataAccettazioneWrap');
-  if (wrapAcc) wrapAcc.style.display = (val === 'Accept submission') ? 'block' : 'none';
+  _proponiRifiutoFinale(val);
 }
 
 function checkDecisioneEditor2() {
   var val = document.getElementById('fDecisioneEditor2').value;
   var wrap = document.getElementById('fDataRevisione2Wrap');
   if (wrap) wrap.style.display = (val === 'Revisions required') ? 'block' : 'none';
-  var wrapAcc = document.getElementById('fDataAccettazione2Wrap');
-  if (wrapAcc) wrapAcc.style.display = (val === 'Accept submission') ? 'block' : 'none';
+  _proponiRifiutoFinale(val);
+}
+
+// ── Decisione finale (esito ufficiale: Accettato / Rifiutato + data) ──
+// Se l'articolo ha dati del vecchio sistema (Accept o data di accettazione
+// in un ciclo, oppure Decline in un ciclo) li traduce nell'esito finale.
+function esitoFinaleDi(a) {
+  if (a.esitoFinale) return { esito: a.esitoFinale, data: a.dataEsitoFinale || '' };
+  var accData = a.dataAccettazione2 || a.dataAccettazione || '';
+  if (accData || a.decisioneEditor === 'Accept submission' || a.decisioneEditor2 === 'Accept submission')
+    return { esito: 'Accettato', data: accData, legacy: true };
+  if (a.decisioneEditor === 'Decline submission' || a.decisioneEditor2 === 'Decline submission')
+    return { esito: 'Rifiutato', data: (a.dataRifiuto || '').slice(0, 10), legacy: true };
+  return { esito: '', data: '' };
+}
+function puoDecidereFinale(editorArticolo) {
+  return adminMode || (!!editorArticolo && currentUser === editorArticolo);
+}
+function checkEsitoFinale() {
+  var val = document.getElementById('fEsitoFinale').value;
+  var wrap = document.getElementById('fDataEsitoWrap');
+  var inp = document.getElementById('fDataEsitoFinale');
+  wrap.style.display = val ? 'block' : 'none';
+  document.getElementById('fDataEsitoLbl').textContent = val === 'Rifiutato' ? 'Data di rifiuto' : 'Data di accettazione';
+  if (val && !inp.value && !inp.disabled) inp.value = new Date().toISOString().slice(0, 10);
+  if (!val) inp.value = '';
+}
+function _proponiRifiutoFinale(val) {
+  var sel = document.getElementById('fEsitoFinale');
+  if (val === 'Decline submission' && sel && !sel.disabled && !sel.value) {
+    sel.value = 'Rifiutato'; checkEsitoFinale();
+  }
+}
+function impostaEsitoFinaleForm(a, editorArticolo) {
+  var ef = esitoFinaleDi(a || {});
+  var sel = document.getElementById('fEsitoFinale'), inp = document.getElementById('fDataEsitoFinale');
+  sel.value = ef.esito; inp.value = ef.data;
+  var ok = puoDecidereFinale(editorArticolo);
+  sel.disabled = !ok; inp.disabled = !ok;
+  document.getElementById('fEsitoHint').textContent = ok ? ''
+    : 'Solo l\'editor dell\'articolo' + (editorArticolo ? ' (' + editorArticolo + ')' : '') + ' o l\'admin possono registrare l\'esito finale.';
+  checkEsitoFinale();
+}
+// Mantiene nel menu un valore storico non più tra le opzioni (es. "Accept submission")
+function _selectConStorico(id, val) {
+  var sel = document.getElementById(id);
+  Array.prototype.slice.call(sel.querySelectorAll('option[data-storico]')).forEach(function(o){ o.remove(); });
+  if (val && !Array.prototype.some.call(sel.options, function(o){ return o.value === val; })) {
+    var o = document.createElement('option'); o.value = val; o.textContent = val + ' (storico)';
+    o.setAttribute('data-storico', '1'); sel.appendChild(o);
+  }
+  sel.value = val || '';
 }
 
 function renderRevList2() {
@@ -2817,12 +2871,11 @@ function openNewArt() {
   document.getElementById('stepHint').textContent='';
   currentRevisori=[]; renderRevList();
   currentRevisori2=[]; renderRevList2();
-  document.getElementById('fDecisioneEditor').value='';
-  document.getElementById('fDecisioneEditor2').value='';
+  _selectConStorico('fDecisioneEditor','');
+  _selectConStorico('fDecisioneEditor2','');
   document.getElementById('fDataRevisione').value='';
   document.getElementById('fDataRevisione2').value='';
-  document.getElementById('fDataAccettazione').value='';
-  document.getElementById('fDataAccettazione2').value='';
+  impostaEsitoFinaleForm({}, '');
   checkDecisioneEditor(); checkDecisioneEditor2();
   buildIssOpts('fIssArt','');
   // Visto Redazione — solo per RedazioneTeMA e admin
@@ -2836,7 +2889,7 @@ function openNewArt() {
     // Editor accounts can change step and editorial decisions
     if (isEditorAccount()) {
       ['fStep','fDecisioneEditor','fDecisioneEditor2',
-       'fDataRevisione','fDataRevisione2','fDataAccettazione','fDataAccettazione2',
+       'fDataRevisione','fDataRevisione2',
        'fDataComunicazione','fRispostaAutori','fComunicazioneInviata','fNewNote'].forEach(function(id) {
         var el = document.getElementById(id);
         if (el) el.disabled = false;
@@ -2929,12 +2982,11 @@ function openEditArt(id) {
   document.getElementById('stepHint').textContent=a.step&&STEPS[a.step]?STEPS[a.step]:'';
   currentRevisori=JSON.parse(JSON.stringify(a.revisori||[])); renderRevList();
   currentRevisori2=JSON.parse(JSON.stringify(a.revisori2||[])); renderRevList2();
-  document.getElementById('fDecisioneEditor').value=a.decisioneEditor||'';
-  document.getElementById('fDecisioneEditor2').value=a.decisioneEditor2||'';
+  _selectConStorico('fDecisioneEditor', a.decisioneEditor||'');
+  _selectConStorico('fDecisioneEditor2', a.decisioneEditor2||'');
   document.getElementById('fDataRevisione').value=a.dataRevisione||'';
   document.getElementById('fDataRevisione2').value=a.dataRevisione2||'';
-  document.getElementById('fDataAccettazione').value=a.dataAccettazione||'';
-  document.getElementById('fDataAccettazione2').value=a.dataAccettazione2||'';
+  impostaEsitoFinaleForm(a, a.editor||'');
   checkDecisioneEditor(); checkDecisioneEditor2();
   buildIssOpts('fIssArt',a.issue||'');
   // Visto Redazione — solo per RedazioneTeMA e admin
@@ -2947,7 +2999,7 @@ function openEditArt(id) {
     lockAllGroups();
     if (isEditorAccount()) {
       ['fStep','fDecisioneEditor','fDecisioneEditor2',
-       'fDataRevisione','fDataRevisione2','fDataAccettazione','fDataAccettazione2',
+       'fDataRevisione','fDataRevisione2',
        'fDataComunicazione','fRispostaAutori','fComunicazioneInviata','fNewNote'].forEach(function(id) {
         var el = document.getElementById(id);
         if (el) el.disabled = false;
@@ -2978,8 +3030,8 @@ function styleStepSelect() {
 }
 function autoStep(a) {
   // Decline submission: priorità assoluta
-  if (a.decisioneEditor === 'Decline submission' || a.decisioneEditor2 === 'Decline submission') {
-    if (a.status !== 'Rifiutato') a.dataRifiuto = new Date().toISOString();
+  if (a.esitoFinale === 'Rifiutato' || a.decisioneEditor === 'Decline submission' || a.decisioneEditor2 === 'Decline submission') {
+    if (a.status !== 'Rifiutato') a.dataRifiuto = a.dataEsitoFinale ? new Date(a.dataEsitoFinale).toISOString() : new Date().toISOString();
     a.step = '13';
     a.status = 'Rifiutato';
     return a;
@@ -3118,6 +3170,8 @@ function saveArt() {
     dataRevisione2:fVal('fDataRevisione2', _orig.dataRevisione2 || ''),
     dataAccettazione:fVal('fDataAccettazione', _orig.dataAccettazione || ''),
     dataAccettazione2:fVal('fDataAccettazione2', _orig.dataAccettazione2 || ''),
+    esitoFinale:fVal('fEsitoFinale', _orig.esitoFinale || ''),
+    dataEsitoFinale:fVal('fDataEsitoFinale', _orig.dataEsitoFinale || ''),
     vistoRedazione: (adminMode || currentUser === 'RedazioneTeMA')
       ? document.getElementById('fVistoRedazione').checked
       : !!(_orig && _orig.vistoRedazione)
@@ -3150,6 +3204,21 @@ function saveArt() {
   if (_revMissingRating.length > 0) {
     alert('Assegnare il Rating per: ' + _revMissingRating.map(function(r){ return r.nome || 'Revisore'; }).join(', '));
     return;
+  }
+  // Validazione: esito finale richiede la data
+  if (data.esitoFinale && !data.dataEsitoFinale) {
+    alert('Inserisci la data ' + (data.esitoFinale === 'Rifiutato' ? 'di rifiuto' : 'di accettazione') + ' nella sezione Decisione finale.');
+    return;
+  }
+  // Validazione: il copyeditor (impaginazione) si assegna solo ad articoli accettati
+  if (data.copyeditor && data.copyeditor !== (_orig.copyeditor || '') && esitoFinaleDi(data).esito !== 'Accettato') {
+    alert('⚙ Non è possibile assegnare il Copyeditor: l\'articolo non risulta accettato.\n\nPrima registra "Accettato" con la data nella sezione Decisione finale (editor dell\'articolo o admin).');
+    return;
+  }
+  // Esito finale "Rifiutato": stato e data di rifiuto coerenti
+  if (data.esitoFinale === 'Rifiutato') {
+    data.status = 'Rifiutato';
+    data.dataRifiuto = new Date(data.dataEsitoFinale).toISOString();
   }
   // Validazione: St.18 riservata a RedazioneTeMA e admin
   if (_newStep === '18' && _newStep !== _origStep && !adminMode && currentUser !== 'RedazioneTeMA') {
@@ -3496,6 +3565,29 @@ function refresh() {
   if (active) switchTab(active.dataset.tab);
   var btnR = document.getElementById('btnRicalcolaStep');
   if (btnR) btnR.style.display = adminMode ? '' : 'none';
+  var btnC = document.getElementById('btnConvertiEsiti');
+  if (btnC) btnC.style.display = adminMode ? '' : 'none';
+}
+
+function convertiEsitiFinali() {
+  if (!adminMode) return;
+  var lista = [];
+  articles.forEach(function(a) {
+    if (a.esitoFinale) return;
+    var ef = esitoFinaleDi(a);
+    if (ef.legacy) lista.push({ a: a, ef: ef });
+  });
+  if (!lista.length) { alert('Nessun articolo da convertire: le decisioni finali sono già tutte nella nuova sezione.'); return; }
+  var senzaData = lista.filter(function(x){ return !x.ef.data; }).length;
+  var msg = 'Verranno registrati ' + lista.length + ' esiti finali:\n\n' +
+    lista.map(function(x){ return '#' + x.a.id + '  ' + x.ef.esito + (x.ef.data ? ' il ' + new Date(x.ef.data).toLocaleDateString('it-IT') : '  (data mancante)') + '\n' + (x.a.title.length > 50 ? x.a.title.slice(0,50)+'...' : x.a.title); }).join('\n\n') +
+    (senzaData ? '\n\nAttenzione: ' + senzaData + ' articoli non hanno una data; andrà inserita a mano.' : '') +
+    '\n\nConfermi?';
+  if (!confirm(msg)) return;
+  lista.forEach(function(x){ x.a.esitoFinale = x.ef.esito; x.a.dataEsitoFinale = x.ef.data; });
+  _lastSavedArtId = null;
+  schedSave();
+  refresh();
 }
 
 function ricalcolaStepTutti() {
