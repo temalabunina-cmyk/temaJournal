@@ -921,15 +921,10 @@ function saveEditNote(i) {
 function migrateSteps() { /* no-op */ }
 
 function migrateSteps4() {
-  // St.9 'Ricevimento delle modifiche' inserito tra St.8 e vecchio St.9
-  // Rimappatura: vecchio 9→10, 10→11, 11→12, 12→13
-  var stepMap = { '9':'10', '10':'11', '11':'12', '12':'13' };
-  articles.forEach(function(a) {
-    if (a._stepMigrated4) return;
-    var mapped = stepMap[String(a.step)];
-    if (mapped !== undefined) a.step = mapped;
-    a._stepMigrated4 = true;
-  });
+  /* Disattivata. Era una migrazione una-tantum (vecchio 9→10, 10→11, 11→12,
+     12→13) protetta dal flag _stepMigrated4, ma saveArt() ricostruisce
+     l'articolo senza quel flag: a ogni ricaricamento gli articoli salvati di
+     recente venivano spostati di uno step in avanti (es. St.10 → St.11). */
 }
 
 function migrateNotes() {
