@@ -738,6 +738,7 @@ function loadData() {
         articles = gsData.articles;
         bannedRevisori = gsData.bannedRevisori && Array.isArray(gsData.bannedRevisori) ? gsData.bannedRevisori : [];
         _gsVersion = gsData._version || gsData._ts || Date.now();
+        _setBaseline(gsData.articles, gsData.issues || [], bannedRevisori);
         migrateSteps();
         migrateSteps4();
         migrateNotes();
@@ -3828,11 +3829,118 @@ function persistNote(artId,note){
   tryNote();
 }
 
+
+// ── Unione a tre vie con i dati del foglio ─────────────────────────────
+// _baseArts: com'era ogni articolo sul foglio quando questa pagina l'ha letto.
+// Prima di salvare si rileggono i dati: ciò che è cambiato solo sul foglio
+// (modifiche di altri utenti) viene incorporato, ciò che è cambiato solo qui
+// viene inviato; se entrambi hanno cambiato lo stesso campo vince questa pagina.
+var _baseArts = {}, _baseIssues = '[]', _baseBanned = '[]';
+function _setBaseline(arts, iss, banned) {
+  _baseArts = {};
+  (arts || []).forEach(function(a){ if (a && a.id != null) _baseArts[String(a.id)] = JSON.stringify(a); });
+  _baseIssues = JSON.stringify(iss || []);
+  _baseBanned = JSON.stringify(banned || []);
+}
+function _js(v) { return v === undefined ? undefined : JSON.stringify(v); }
+function _noteKey(n) { return (n && (n.date + '|' + (n.author || ''))) || ''; }
+function _mergeNotes(base, loc, srv) {
+  base = base || []; loc = loc || []; srv = srv || [];
+  var bMap = {}, lMap = {}, sMap = {};
+  base.forEach(function(n){ bMap[_noteKey(n)] = n; });
+  loc.forEach(function(n){ lMap[_noteKey(n)] = n; });
+  srv.forEach(function(n){ sMap[_noteKey(n)] = n; });
+  var keys = {}, out = [];
+  Object.keys(lMap).concat(Object.keys(sMap)).forEach(function(k){ keys[k] = 1; });
+  Object.keys(keys).forEach(function(k) {
+    var inB = k in bMap, inL = k in lMap, inS = k in sMap;
+    if (inB && (!inL || !inS)) return;          // eliminata da qualcuno
+    if (inL && inS && inB) {                    // modificata? vince chi l'ha cambiata
+      out.push(_js(lMap[k]) !== _js(bMap[k]) ? lMap[k] : sMap[k]);
+    } else out.push(inL ? lMap[k] : sMap[k]);  // nuova da una delle due parti
+  });
+  out.sort(function(a, b){ return new Date(b.date) - new Date(a.date); });
+  return out;
+}
+function _mergeArticle(base, loc, srv, info) {
+  var out = {}, keys = {};
+  Object.keys(loc).concat(Object.keys(srv)).forEach(function(k){ keys[k] = 1; });
+  Object.keys(keys).forEach(function(k) {
+    if (k === 'notesLog') {
+      var m = _mergeNotes(base.notesLog, loc.notesLog, srv.notesLog);
+      if (_js(m) !== _js(loc.notesLog || [])) info.altri++;
+      out.notesLog = m; return;
+    }
+    var b = _js(base[k]), l = _js(loc[k]), sv = _js(srv[k]);
+    if (l === b) {                              // non toccato qui: prendi il foglio
+      if (sv !== b) info.altri++;
+      if (k in srv) out[k] = srv[k];
+    } else {                                    // toccato qui: vince questa pagina
+      if (sv !== b && sv !== l) info.conflitti++;
+      if (k in loc) out[k] = loc[k];
+    }
+  });
+  return out;
+}
+function _fetchJSON(url) {
+  return fetch(url, { redirect: 'follow', cache: 'no-store' })
+    .then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
+    .then(function(t){ var j = JSON.parse(t); return j; });
+}
+function _mergeWithServer(artId) {
+  var info = { altri: 0, conflitti: 0, ok: false };
+  if (artId) {
+    var idx = articles.findIndex(function(a){ return a.id === artId; });
+    var baseS = _baseArts[String(artId)];
+    if (idx < 0 || !baseS) return Promise.resolve(info);   // articolo nuovo: niente da unire
+    return _fetchJSON(GS_URL + '?action=getArticle&artId=' + encodeURIComponent(artId) + '&_t=' + Date.now())
+      .then(function(r) {
+        if (r && r.article) articles[idx] = _mergeArticle(JSON.parse(baseS), articles[idx], r.article, info);
+        info.ok = true; return info;
+      })
+      .catch(function(e){ console.warn('[TeMA] Unione non riuscita, salvo senza unire:', e); return info; });
+  }
+  return _fetchJSON(GS_URL + '?_t=' + Date.now())
+    .then(function(g) {
+      if (!g || !Array.isArray(g.articles) || !g.articles.length) throw new Error('risposta non valida');
+      var srvMap = {}; g.articles.forEach(function(a){ srvMap[String(a.id)] = a; });
+      var out = [], seen = {};
+      articles.forEach(function(loc) {
+        var id = String(loc.id), baseS = _baseArts[id], srv = srvMap[id];
+        seen[id] = 1;
+        if (baseS && !srv) {                      // eliminato sul foglio da altri
+          if (_js(loc) === baseS) { info.altri++; return; }
+          out.push(loc); return;                  // ma modificato qui: tienilo
+        }
+        if (baseS && srv) { out.push(_mergeArticle(JSON.parse(baseS), loc, srv, info)); return; }
+        out.push(loc);                            // nuovo qui
+      });
+      g.articles.forEach(function(srv) {
+        var id = String(srv.id);
+        if (seen[id]) return;
+        if (_baseArts[id]) return;                // eliminato qui: resta eliminato
+        out.push(srv); info.altri++;              // aggiunto sul foglio da altri
+      });
+      articles = out;
+      if (_js(issues) === _baseIssues && g.issues && _js(g.issues) !== _baseIssues) { issues = g.issues; info.altri++; }
+      var gb = Array.isArray(g.bannedRevisori) ? g.bannedRevisori : [];
+      if (_js(bannedRevisori) === _baseBanned && _js(gb) !== _baseBanned) { bannedRevisori = gb; info.altri++; }
+      info.ok = true; return info;
+    })
+    .catch(function(e){ console.warn('[TeMA] Unione non riuscita, salvo senza unire:', e); return info; });
+}
+
 function persist(){
   setSaving(true);document.getElementById('saveLbl').textContent='Salvataggio...';
-  var artId=_lastSavedArtId,snap=null;
+  var artId=_lastSavedArtId; _lastSavedArtId=null;
+  ssShow('','Salvataggio in corso...','Controllo le modifiche degli altri utenti...',false,'#2563eb');
+  _mergeWithServer(artId).then(function(info){ persistSend_(artId, info); });
+}
+
+function persistSend_(artId, mergeInfo){
+  var snap=null;
   if(artId){var a0=articles.find(function(a){return a.id===artId;});if(a0)snap=JSON.parse(JSON.stringify(a0));}
-  _lastSavedArtId=null;
+  var _altri = mergeInfo && mergeInfo.altri ? ' Incorporate anche '+mergeInfo.altri+' modifiche di altri utenti.' : '';
   var saveData=snap?JSON.stringify({action:'saveArticle',article:snap}):JSON.stringify({action:'saveAll',issues:issues,articles:articles,bannedRevisori:bannedRevisori});
   var url=GS_URL+'?m=save&d='+encodeURIComponent(saveData)+'&_t='+Date.now();
   var useGet=url.length<7000;
@@ -3850,7 +3958,8 @@ function persist(){
         setSaving(false);document.getElementById('saveLbl').textContent='\u26a0 Errore';
         ssShow('\u274c','Errore di salvataggio','Google Sheets non ha risposto dopo 3 tentativi. Riprova.',true,'#dc2626');return;
       }
-      if(!snap){refresh();setSaving(false);document.getElementById('saveLbl').textContent='Salvato \u2713';ssShow('\u2705','Salvato!','Dati aggiornati correttamente su Google Sheets.',true,'#16a34a');return;}
+      if(!snap){_setBaseline(articles, issues, bannedRevisori);refresh();setSaving(false);document.getElementById('saveLbl').textContent='Salvato \u2713';ssShow('\u2705','Salvato!','Dati aggiornati correttamente su Google Sheets.'+_altri,true,'#16a34a');return;}
+      _baseArts[String(snap.id)] = JSON.stringify(snap);
       ssShow('\U0001f50d','Verifica in corso...','Controllo che le modifiche siano state registrate...',false,'#2563eb');
       setTimeout(function(){
         var vxhr=new XMLHttpRequest();
@@ -3863,7 +3972,8 @@ function persist(){
             if(s&&String(s.step)===String(snap.step)&&String(s.status)===String(snap.status)){
               var ci=articles.findIndex(function(a){return a.id===s.id;});if(ci>=0)articles[ci]=s;
               refresh();document.getElementById('saveLbl').textContent='Salvato e verificato \u2713';
-              ssShow('\u2705','Salvato e verificato!','Articolo #'+snap.id+' aggiornato correttamente su Google Sheets.',true,'#16a34a');
+              _baseArts[String(s.id)] = JSON.stringify(s);
+              ssShow('\u2705','Salvato e verificato!','Articolo #'+snap.id+' aggiornato correttamente su Google Sheets.'+_altri,true,'#16a34a');
             }else{
               document.getElementById('saveLbl').textContent='\u274c Verifica fallita';
               ssShow('\u274c','Verifica fallita','I dati non corrispondono su Google Sheets. Riprova.',true,'#dc2626');
