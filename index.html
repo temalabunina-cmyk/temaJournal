@@ -2988,8 +2988,9 @@ function autoStep(a) {
     a.status = 'Rifiutato';
     return a;
   }
-  // St.3 (Approvazione GK) impostato solo dal pulsante — non toccare
-  if (a.step === '3') return a;
+  // St.3 (Approvazione GK) si imposta solo dal pulsante; autoStep non lo fa
+  // mai retrocedere, ma lo fa avanzare quando arrivano dati successivi
+  // (editor, revisori, ecc.) — vedi la mappa "manuali" sotto.
 
   // St.4 (Rifiuto GK), St.6 (Rifiuto Turnitin): step terminali, non toccare
   if (a.step === '4' || a.step === '6') return a;
@@ -3047,8 +3048,8 @@ function autoStep(a) {
   if (a.copyeditor && a.copyeditor !== '') set('17');
 
   // Applica lo step calcolato solo se l'attuale è uno step "automatico"
-  // (non uno step manuale che autoStep non gestisce: 8,9,14,16,18)
-  var manuali = {'8':1,'9':1,'14':1,'16':1,'18':1};
+  // (non uno step manuale che autoStep non gestisce: 3,8,9,14,16,18)
+  var manuali = {'3':1,'8':1,'9':1,'14':1,'16':1,'18':1};
   if (!manuali[a.step]) {
     a.step = computed;
   } else {
@@ -3174,7 +3175,7 @@ function saveArt() {
     var _stepLabel = STEPS[_newStep] || ('St.' + _newStep);
     var _autoHints = {
       '2':  'Assegna un GateKeeper nel campo apposito.',
-      '5':  'Inserisci i valori Similarity e AI% (entrambi > 30%) e spunta "Comunicazione inviata".',
+      '5':  'Inserisci i valori Similarity e AI% (almeno uno dei due > 30%) e spunta "Comunicazione inviata".',
       '7':  'Assegna un Editor nel campo apposito.',
       '10': 'Aggiungi almeno un revisore nella sezione Revisori.',
       '11': 'Imposta lo stato di almeno 1 revisore su "Accettato" o "Completato".',
@@ -3504,11 +3505,11 @@ function ricalcolaStepTutti() {
   if (!attivi.length) { alert('Nessun articolo attivo da ricalcolare.'); return; }
   var cambiati = [];
   attivi.forEach(function(a) {
-    var stepOld = a.step;
-    var aCopy = JSON.parse(JSON.stringify(a));
-    aCopy = autoStep(aCopy);
-    if (aCopy.step !== stepOld) {
-      cambiati.push({ id: a.id, titolo: a.title, da: stepOld, a: aCopy.step });
+    var aCopy = autoStep(JSON.parse(JSON.stringify(a)));
+    if (aCopy.step !== a.step || aCopy.status !== a.status) {
+      cambiati.push({ id: a.id, titolo: a.title, da: a.step, a: aCopy.step,
+                      statoDa: a.status, statoA: aCopy.status,
+                      orig: JSON.parse(JSON.stringify(a)) });
       var idx = articles.findIndex(function(x){ return x.id === a.id; });
       if (idx >= 0) articles[idx] = aCopy;
     }
@@ -3518,14 +3519,13 @@ function ricalcolaStepTutti() {
     return;
   }
   var msg = 'Verranno aggiornati ' + cambiati.length + ' articoli:\n\n' +
-    cambiati.map(function(c){ return '#' + c.id + ' St.' + c.da + ' → St.' + c.a + '\n' + (c.titolo.length > 50 ? c.titolo.slice(0,50)+'...' : c.titolo); }).join('\n\n') +
+    cambiati.map(function(c){ return '#' + c.id + ' St.' + c.da + ' → St.' + c.a + (c.statoDa !== c.statoA ? '  (stato: ' + c.statoDa + ' → ' + c.statoA + ')' : '') + '\n' + (c.titolo.length > 50 ? c.titolo.slice(0,50)+'...' : c.titolo); }).join('\n\n') +
     '\n\nConfermi il salvataggio?';
   if (!confirm(msg)) {
     // Annulla: ricarica i dati originali
     articles = articles.map(function(a) {
-      var orig = cambiati.find(function(c){ return c.id === a.id; });
-      if (orig) { a.step = orig.da; }
-      return a;
+      var c = cambiati.find(function(x){ return x.id === a.id; });
+      return c ? c.orig : a;
     });
     return;
   }
