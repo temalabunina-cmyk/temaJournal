@@ -4052,7 +4052,7 @@ function persistSend_(artId, mergeInfo){
       }
       if(!snap){_setBaseline(articles, issues, bannedRevisori);refresh();setSaving(false);document.getElementById('saveLbl').textContent='Salvato \u2713';ssShow('\u2705','Salvato!','Dati aggiornati correttamente su Google Sheets.'+_altri,true,'#16a34a');return;}
       _baseArts[String(snap.id)] = JSON.stringify(snap);
-      ssShow('\U0001f50d','Verifica in corso...','Controllo che le modifiche siano state registrate...',false,'#2563eb');
+      ssShow('\u{1F50D}','Verifica in corso...','Controllo che le modifiche siano state registrate...',false,'#2563eb');
       setTimeout(function(){
         var vxhr=new XMLHttpRequest();
         vxhr.open('GET',GS_URL+'?action=getArticle&artId='+encodeURIComponent(snap.id)+'&_t='+Date.now(),true);
