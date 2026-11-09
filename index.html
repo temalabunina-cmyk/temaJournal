@@ -3973,10 +3973,14 @@ function persistNote(artId,note){
   ssShow('','Salvataggio nota...','Aggiunta nota a Google Sheets...',false,'#2563eb');
   var sd=JSON.stringify({action:'appendNote',artId:artId,note:note});
   var url=GS_URL+'?m=save&d='+encodeURIComponent(sd)+'&_t='+Date.now();
+  // Prima via POST (evita "URI malformed" con testi contenenti '%'); se lo script non
+  // risponde OK al POST, i tentativi successivi ripiegano sul vecchio canale GET.
   var att=0;
   function tryNote(){
     att++;
-    var xhr=new XMLHttpRequest();xhr.open('GET',url,true);xhr.timeout=20000;
+    var usePost=(att===1);
+    var xhr=new XMLHttpRequest();xhr.timeout=20000;
+    if(usePost){xhr.open('POST',GS_URL,true);xhr.setRequestHeader('Content-Type','text/plain');}else{xhr.open('GET',url,true);}
     xhr.onload=function(){
       setSaving(false);
       try{
@@ -3989,13 +3993,15 @@ function persistNote(artId,note){
           if(att<3){setSaving(true);ssShow('','Riprovo ('+att+'/3)...','Nuovo tentativo...',false,'#d97706');setTimeout(tryNote,2500);return;}
           ssShow('\u274c','Errore nota','La nota non \u00e8 stata salvata dopo 3 tentativi. Riprova.',true,'#dc2626');
         }
-      }catch(e){document.getElementById('saveLbl').textContent='Nota salvata \u2713';ssShow('\u2705','Nota salvata','Nota inviata correttamente.',true,'#16a34a');}
+      }catch(e){
+        if(usePost&&(xhr.responseText||'').trim()!=='OK'){setSaving(true);ssShow('','Riprovo (1/3)...','Nuovo tentativo...',false,'#d97706');setTimeout(tryNote,1500);return;}
+        document.getElementById('saveLbl').textContent='Nota salvata \u2713';ssShow('\u2705','Nota salvata','Nota inviata correttamente.',true,'#16a34a');}
     };
     xhr.onerror=xhr.ontimeout=function(){
       if(att<3){setSaving(true);ssShow('','Riprovo ('+att+'/3)...','Errore rete, nuovo tentativo...',false,'#d97706');setTimeout(tryNote,3000);return;}
       setSaving(false);ssShow('\u274c','Errore di rete','Impossibile salvare la nota dopo 3 tentativi.',true,'#dc2626');
     };
-    xhr.send();
+    xhr.send(usePost?sd:null);
   }
   tryNote();
 }
@@ -4113,8 +4119,9 @@ function persistSend_(artId, mergeInfo){
   if(artId){var a0=articles.find(function(a){return a.id===artId;});if(a0)snap=JSON.parse(JSON.stringify(a0));}
   var _altri = mergeInfo && mergeInfo.altri ? ' Incorporate anche '+mergeInfo.altri+' modifiche di altri utenti.' : '';
   var saveData=snap?JSON.stringify({action:'saveArticle',article:snap}):JSON.stringify({action:'saveAll',issues:issues,articles:articles,bannedRevisori:bannedRevisori});
-  var url=GS_URL+'?m=save&d='+encodeURIComponent(saveData)+'&_t='+Date.now();
-  var useGet=url.length<7000;
+  // Sempre POST: con GET lo script fa decodeURIComponent su un parametro gia' decodificato
+  // e un testo che contiene '%' genera "URI malformed".
+  var useGet=false, url='';
   ssShow('','Salvataggio in corso...','Invio dati a Google Sheets...',false,'#2563eb');
   var att=0;
   function trySave(){
