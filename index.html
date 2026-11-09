@@ -155,6 +155,7 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
     <button class="btn" onclick="backupData()" title="Scarica backup JSON" style="padding:7px 10px;font-size:13px">&#128229; Backup</button>
     <button class="btn" id="btnRicalcolaStep" onclick="ricalcolaStepTutti()" title="Ricalcola automaticamente lo step di tutti gli articoli in base ai dati presenti" style="padding:7px 10px;font-size:13px;display:none">&#9881; Ricalcola step</button>
     <button class="btn" id="btnConvertiEsiti" onclick="convertiEsitiFinali()" title="Trasferisce accettazioni e rifiuti registrati nei cicli di revisione nella nuova sezione Decisione finale" style="padding:7px 10px;font-size:13px;display:none">&#9881; Converti decisioni finali</button>
+    <button class="btn" id="btnControlloDati" onclick="controlloDati()" title="Elenca gli articoli a cui mancano dati obbligatori" style="padding:7px 10px;font-size:13px;display:none">&#128269; Controllo dati</button>
   </div>
 </div>
 <input type="file" id="importFile" accept=".json" style="display:none">
@@ -2592,7 +2593,7 @@ function _proponiRifiutoFinale(val) {
 function impostaEsitoFinaleForm(a, editorArticolo) {
   var ef = esitoFinaleDi(a || {});
   var sel = document.getElementById('fEsitoFinale'), inp = document.getElementById('fDataEsitoFinale');
-  sel.value = ef.esito; inp.value = ef.data;
+  sel.value = ef.esito; inp.value = toInputDate(ef.data);
   var ok = puoDecidereFinale(editorArticolo);
   sel.disabled = !ok; inp.disabled = !ok;
   document.getElementById('fEsitoHint').textContent = ok ? ''
@@ -2842,6 +2843,21 @@ function checkAntiplagio() {
   if (box) box.style.display = (sim > 30 || ai > 30) ? 'block' : 'none';
 }
 
+// I campi <input type="date"> accettano solo AAAA-MM-GG: qualsiasi altro
+// formato (es. 10/01/2026 o 2026-01-10T00:00:00Z) li lascia vuoti e il
+// salvataggio successivo cancellava la data. Qui la si converte sempre.
+function toInputDate(v) {
+  if (!v) return '';
+  v = String(v).trim();
+  var m = v.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (m) return m[1] + '-' + m[2] + '-' + m[3];
+  m = v.match(/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{2,4})$/);
+  if (m) { var y = parseInt(m[3]); if (y < 100) y += 2000;
+           return y + '-' + ('0' + m[2]).slice(-2) + '-' + ('0' + m[1]).slice(-2); }
+  var d = new Date(v);
+  return isNaN(d.getTime()) ? '' : d.toISOString().slice(0, 10);
+}
+
 function openNewArt() {
   editingArtId = null;
   document.getElementById('artModalTitle').textContent = 'Nuovo articolo';
@@ -2908,6 +2924,9 @@ function openNewArt() {
   }
   document.getElementById('artModal').classList.add('open');
   styleStepSelect();
+  // Nuovo articolo: la data di sottomissione (obbligatoria) dev'essere compilabile da tutti
+  document.getElementById('fDataSottomissione').disabled = false;
+  document.getElementById('btnUnlockDataSott').disabled = true;
 }
 function openEditArt(id) {
   var a = articles.find(function(x){ return x.id===id; });
@@ -2917,7 +2936,7 @@ function openEditArt(id) {
   document.getElementById('artModalTitle').innerHTML = 'Modifica articolo #'+esc(id) +
     (_lm ? '<span style="font-size:13px;font-weight:400;color:#bbb;margin-left:10px">Ultima modifica: '+_lm+'</span>' : '');
   document.getElementById('fId').value=a.id;
-  document.getElementById('fDataSottomissione').value=a.dataSottomissione||'';
+  document.getElementById('fDataSottomissione').value=toInputDate(a.dataSottomissione);
   document.getElementById('fTitle').value=a.title;
   document.getElementById('fAuthors').value=a.authors||'';
   document.getElementById('fAffil').value=a.affiliation||'';
@@ -2957,7 +2976,7 @@ function openEditArt(id) {
   document.getElementById('fStep').value=a.step||'';
 
   document.getElementById('fStatus').value=a.status||'Sottomesso';
-  document.getElementById('fDead').value=a.deadline||'';
+  document.getElementById('fDead').value=toInputDate(a.deadline);
   document.getElementById('fArtNum').value=a.articleNum||'';
   document.getElementById('fEd2').value=a.editor||'';
   document.getElementById('fCopy').value=a.copyeditor||'';
@@ -2970,7 +2989,7 @@ function openEditArt(id) {
   document.getElementById('fCJCR').value=a.citeJCR||'';
   document.getElementById('fCJCR2y').value=a.citeJCR2y||'';
   document.getElementById('fComunicazioneInviata').checked=!!(a.comunicazioneInviata);
-  document.getElementById('fDataComunicazione').value=a.dataComunicazione||'';
+  document.getElementById('fDataComunicazione').value=toInputDate(a.dataComunicazione);
   document.getElementById('fRispostaAutori').value=a.rispostaAutori||'';
   checkAntiplagio();
   document.getElementById('gkRow').style.display=(a.editor&&a.editor!=='')?'none':'block';
@@ -2984,8 +3003,8 @@ function openEditArt(id) {
   currentRevisori2=JSON.parse(JSON.stringify(a.revisori2||[])); renderRevList2();
   _selectConStorico('fDecisioneEditor', a.decisioneEditor||'');
   _selectConStorico('fDecisioneEditor2', a.decisioneEditor2||'');
-  document.getElementById('fDataRevisione').value=a.dataRevisione||'';
-  document.getElementById('fDataRevisione2').value=a.dataRevisione2||'';
+  document.getElementById('fDataRevisione').value=toInputDate(a.dataRevisione);
+  document.getElementById('fDataRevisione2').value=toInputDate(a.dataRevisione2);
   impostaEsitoFinaleForm(a, a.editor||'');
   checkDecisioneEditor(); checkDecisioneEditor2();
   buildIssOpts('fIssArt',a.issue||'');
@@ -3204,6 +3223,15 @@ function saveArt() {
   if (_revMissingRating.length > 0) {
     alert('Assegnare il Rating per: ' + _revMissingRating.map(function(r){ return r.nome || 'Revisore'; }).join(', '));
     return;
+  }
+  // Data di sottomissione: obbligatoria, e non si cancella mai una data esistente
+  if (!data.dataSottomissione && _orig.dataSottomissione) data.dataSottomissione = _orig.dataSottomissione;
+  if (!data.dataSottomissione) {
+    if (!editingArtId) {
+      alert('Inserisci la Data di sottomissione: è un dato obbligatorio.');
+      return;
+    }
+    if (!confirm('⚠️ Questo articolo non ha la Data di sottomissione, che è un dato obbligatorio.\n\nPer inserirla usa il lucchetto accanto al campo.\n\nSalvare comunque senza data?')) return;
   }
   // Validazione: esito finale richiede la data
   if (data.esitoFinale && !data.dataEsitoFinale) {
@@ -3567,6 +3595,57 @@ function refresh() {
   if (btnR) btnR.style.display = adminMode ? '' : 'none';
   var btnC = document.getElementById('btnConvertiEsiti');
   if (btnC) btnC.style.display = adminMode ? '' : 'none';
+  var btnD = document.getElementById('btnControlloDati');
+  if (btnD) btnD.style.display = adminMode ? '' : 'none';
+}
+
+// ── Controllo dei dati obbligatori mancanti ──
+function _vuoto(v) { return v === undefined || v === null || String(v).trim() === '' || String(v).trim() === '—'; }
+function datiMancanti(a) {
+  var m = [], st = parseInt(a.step) || 0;
+  var rifGk = a.step === '4' || a.step === '6';
+  if (_vuoto(a.dataSottomissione)) m.push('Data di sottomissione');
+  if (_vuoto(a.title)) m.push('Titolo');
+  if (_vuoto(a.authors)) m.push('Autori');
+  if (_vuoto(a.affiliation)) m.push('Affiliazione');
+  if (_vuoto(a.nationality)) m.push('Nazionalità');
+  if (_vuoto(a.section)) m.push('Sezione');
+  if (!rifGk && st >= 7 && _vuoto(a.editor)) m.push('Editor');
+  (a.revisori || []).concat(a.revisori2 || []).forEach(function(r) {
+    var n = r.nome || 'revisore senza nome';
+    if ((r.accettazione === 'accettato' || r.accettazione === 'completato') && _vuoto(r.dataConsegna)) m.push('Data consegna revisione (' + n + ')');
+    if (r.accettazione === 'completato' && _vuoto(r.giudizio)) m.push('Giudizio (' + n + ')');
+  });
+  var ef = esitoFinaleDi(a);
+  if (ef.esito && _vuoto(ef.data)) m.push('Data ' + (ef.esito === 'Accettato' ? 'di accettazione' : 'di rifiuto'));
+  if ((a.step === '18' || a.status === 'Pubblicato') && _vuoto(a.issue)) m.push('Fascicolo');
+  return m;
+}
+function controlloDati() {
+  if (!adminMode) return;
+  var righe = articles.map(function(a){ return { a: a, m: datiMancanti(a) }; })
+                      .filter(function(x){ return x.m.length; })
+                      .sort(function(x, y){ return parseInt(y.a.id) - parseInt(x.a.id); });
+  var conta = {};
+  righe.forEach(function(x){ x.m.forEach(function(c){ var k = c.replace(/ \(.*\)$/, ''); conta[k] = (conta[k] || 0) + 1; }); });
+  var riepilogo = Object.keys(conta).sort(function(x, y){ return conta[y] - conta[x]; })
+    .map(function(k){ return '<span class="mm">' + esc(k) + ': <b>' + conta[k] + '</b></span>'; }).join(' ');
+  var html = '<div style="font-size:15px;margin-bottom:10px">' + righe.length + ' articoli su ' + articles.length + ' hanno dati mancanti. Clicca su un articolo per aprirlo.</div>' +
+    '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px">' + riepilogo + '</div>' +
+    righe.map(function(x) {
+      return '<div onclick="document.getElementById(\'cdPanel\').remove();openEditArt(\'' + esc(x.a.id) + '\')" style="cursor:pointer;padding:8px 10px;border:1px solid var(--brd);border-radius:var(--r);margin-bottom:6px;background:var(--sur)">' +
+        '<b>#' + esc(x.a.id) + '</b> · St.' + esc(x.a.step || '?') + ' · ' + esc((x.a.title || '').slice(0, 70)) +
+        '<div style="font-size:13px;color:var(--red-tx);margin-top:3px">Manca: ' + x.m.map(esc).join(', ') + '</div></div>';
+    }).join('');
+  var old = document.getElementById('cdPanel'); if (old) old.remove();
+  var p = document.createElement('div'); p.id = 'cdPanel';
+  p.style.cssText = 'position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center';
+  p.innerHTML = '<div style="background:var(--bg);border-radius:12px;padding:20px 22px;width:min(820px,94vw);max-height:86vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.25)">' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><div style="font-size:20px;font-weight:700">Controllo dati obbligatori</div>' +
+    '<button class="btn" onclick="document.getElementById(\'cdPanel\').remove()">Chiudi</button></div>' +
+    (righe.length ? html : '<div style="font-size:15px">Nessun dato obbligatorio mancante.</div>') + '</div>';
+  p.addEventListener('click', function(e){ if (e.target === p) p.remove(); });
+  document.body.appendChild(p);
 }
 
 function convertiEsitiFinali() {
