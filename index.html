@@ -3224,6 +3224,9 @@ function saveArt() {
   }
 
   document.getElementById('artModal').classList.remove('open');
+  // Salva solo questo articolo (saveArticle), non l'intero database:
+  // così non si sovrascrivono le modifiche fatte nel frattempo da altri utenti.
+  _lastSavedArtId = data.id;
   schedSave(); refresh();
 }
 function accettazioneGK() {
