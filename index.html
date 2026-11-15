@@ -146,7 +146,7 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
 <div class="topbar">
   <div>
       <div class="brand-name">TeMA Journal</div>
-      <div class="brand-sub">Gestione editoriale <span class="app-ver" id="appVersion" title="Versione dell'artefatto (aumenta di uno a ogni aggiornamento)">v.132 &middot; 15/11/2026</span></div>
+      <div class="brand-sub">Gestione editoriale <span class="app-ver" id="appVersion" title="Versione dell'artefatto (aumenta di uno a ogni aggiornamento)">v.133 &middot; 15/11/2026</span></div>
     </div>
   </div>
   <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
@@ -762,14 +762,12 @@ function loadData() {
         migrateNotes();
         migrateRevisoriAccettazione();
         migrateRevisoriNomi();
-        var rifiutatoChanged = false;
         articles.forEach(function(a) {
           if (a.status === 'Rifiutato' && !a.dataRifiuto) {
             a.dataRifiuto = a.lastModified || new Date().toISOString();
-            rifiutatoChanged = true;
+            _lastSavedArtId = a.id; schedSave();
           }
         });
-        if (rifiutatoChanged) schedSave();
         setSaving(false);
         document.getElementById('saveLbl').textContent = 'Sincronizzati (' + articles.length + ' articoli)';
         rebuildIssFilters();
@@ -866,6 +864,7 @@ function toggleDiscuss(artId, noteIdx) {
   if (!note) return;
   note.discuss = !note.discuss;
   renderNotesLog(articles[idx].notesLog);
+  _lastSavedArtId = artId;
   schedSave();
 }
 
@@ -874,6 +873,7 @@ function deleteNote(artId, noteIdx) {
   if (idx < 0) return;
   articles[idx].notesLog.splice(noteIdx, 1);
   renderNotesLog(articles[idx].notesLog);
+  _lastSavedArtId = artId;
   schedSave();
 }
 
@@ -933,6 +933,7 @@ function saveEditNote(i) {
   articles[idx].notesLog[i].text = newText;
   articles[idx].notesLog[i].edited = true;
   renderNotesLog(articles[idx].notesLog);
+  _lastSavedArtId = articles[idx].id;
   schedSave();
 }
 
@@ -1011,7 +1012,15 @@ function migrateRevisoriAccettazione() {
   if (changed) { schedSave(); console.log('[TeMA] Revisori: accettazione impostata a "in attesa" dove mancante.'); }
 }
 
-function schedSave() { setSaving(true); clearTimeout(saveTimer); saveTimer = setTimeout(persist, 600); }
+// Coda dei salvataggi (v.133): ogni azione su un articolo salva SOLO quell'articolo (saveArticle);
+// il salvataggio completo (saveAll) resta solo per le operazioni che toccano piu' articoli o i fascicoli.
+var _pendingArtIds = [], _pendingAll = false, _persistBusy = false;
+function schedSave() {
+  if (_lastSavedArtId) { if (_pendingArtIds.indexOf(_lastSavedArtId) < 0) _pendingArtIds.push(_lastSavedArtId); }
+  else _pendingAll = true;
+  _lastSavedArtId = null;
+  setSaving(true); clearTimeout(saveTimer); saveTimer = setTimeout(persist, 600);
+}
 
 function requirePwd(action) {
   pendingAction = action;
@@ -3363,6 +3372,7 @@ function rifiutoGK() {
     if (idx >= 0) {
       articles[idx].step = '4';
       articles[idx].status = 'Rifiutato';
+      _lastSavedArtId = capturedId;
     }
     document.getElementById('artModal').classList.remove('open');
     editingArtId = null;
@@ -3384,6 +3394,7 @@ function rifiutoTurnitin() {
       if (!articles[idx].dataComunicazione) {
         articles[idx].dataComunicazione = new Date().toISOString().slice(0,10);
       }
+      _lastSavedArtId = capturedId;
     }
     document.getElementById('artModal').classList.remove('open');
     editingArtId = null;
@@ -4126,10 +4137,16 @@ function _mergeWithServer(artId) {
 }
 
 function persist(){
+  if (_persistBusy) { clearTimeout(saveTimer); saveTimer = setTimeout(persist, 800); return; }
+  var artId = null;
+  if (_pendingAll) { _pendingAll = false; _pendingArtIds = []; }      // il salvataggio completo include tutto
+  else if (_pendingArtIds.length) artId = _pendingArtIds.shift();
+  else return;
+  _persistBusy = true;
   setSaving(true);document.getElementById('saveLbl').textContent='Salvataggio...';
-  var artId=_lastSavedArtId; _lastSavedArtId=null;
   ssShow('','Salvataggio in corso...','Controllo le modifiche degli altri utenti...',false,'#2563eb');
-  _mergeWithServer(artId).then(function(info){ persistSend_(artId, info); });
+  var done = function(){ _persistBusy = false; if (!_saveBlocked && (_pendingAll || _pendingArtIds.length)) { clearTimeout(saveTimer); saveTimer = setTimeout(persist, 300); } };
+  _mergeWithServer(artId).then(function(info){ persistSend_(artId, info, done); }, function(){ persistSend_(artId, null, done); });
 }
 
 function _bloccaSalvataggio_(motivo){
@@ -4138,16 +4155,17 @@ function _bloccaSalvataggio_(motivo){
   ssShow('\u26d4','Salvataggio bloccato',motivo+' Per proteggere i dati non ho salvato nulla. Ricarica la pagina e avvisa la Redazione prima di continuare.',true,'#dc2626');
   console.error('[TeMA] Salvataggio bloccato:', motivo);
 }
-function persistSend_(artId, mergeInfo){
-  if (_saveBlocked) { _bloccaSalvataggio_(_saveBlocked); return; }
-  if (mergeInfo && mergeInfo.blocked) { _bloccaSalvataggio_(mergeInfo.blocked); return; }
+function persistSend_(artId, mergeInfo, done){
+  var _fine = function(){ if (done) { var d = done; done = null; d(); } };
+  if (_saveBlocked) { _bloccaSalvataggio_(_saveBlocked); _fine(); return; }
+  if (mergeInfo && mergeInfo.blocked) { _bloccaSalvataggio_(mergeInfo.blocked); _fine(); return; }
   if (!artId) {
     var attesi = _baseCount() - Object.keys(_deletedIds).length;
     if (_baseCount() >= 10 && articles.length < attesi - 2) {
-      _bloccaSalvataggio_('Stavo per salvare ' + articles.length + ' articoli invece di ' + attesi + '.'); return;
+      _bloccaSalvataggio_('Stavo per salvare ' + articles.length + ' articoli invece di ' + attesi + '.'); _fine(); return;
     }
     if (_baseIssues !== '[]' && (!issues || !issues.length)) {
-      _bloccaSalvataggio_("L'elenco dei fascicoli risulta vuoto."); return;
+      _bloccaSalvataggio_("L'elenco dei fascicoli risulta vuoto."); _fine(); return;
     }
   }
   var snap=null;
@@ -4168,9 +4186,9 @@ function persistSend_(artId, mergeInfo){
       if(!ok){
         if(att<3){ssShow('','Riprovo ('+att+'/3)...','Nuovo tentativo...',false,'#d97706');setTimeout(trySave,2500);return;}
         setSaving(false);document.getElementById('saveLbl').textContent='\u26a0 Errore';
-        ssShow('\u274c','Errore di salvataggio','Google Sheets non ha risposto dopo 3 tentativi. Riprova.',true,'#dc2626');return;
+        ssShow('\u274c','Errore di salvataggio','Google Sheets non ha risposto dopo 3 tentativi. Riprova.',true,'#dc2626');_fine();return;
       }
-      if(!snap){_setBaseline(articles, issues, bannedRevisori);try{localStorage.setItem('tema_nArticoli',String(articles.length));}catch(e){}refresh();setSaving(false);document.getElementById('saveLbl').textContent='Salvato \u2713';ssShow('\u2705','Salvato!','Dati aggiornati correttamente su Google Sheets.'+_altri,true,'#16a34a');return;}
+      if(!snap){_setBaseline(articles, issues, bannedRevisori);try{localStorage.setItem('tema_nArticoli',String(articles.length));}catch(e){}refresh();setSaving(false);document.getElementById('saveLbl').textContent='Salvato \u2713';ssShow('\u2705','Salvato!','Dati aggiornati correttamente su Google Sheets.'+_altri,true,'#16a34a');_fine();return;}
       _baseArts[String(snap.id)] = JSON.stringify(snap);
       ssShow('\u{1F50D}','Verifica in corso...','Controllo che le modifiche siano state registrate...',false,'#2563eb');
       setTimeout(function(){
@@ -4178,7 +4196,7 @@ function persistSend_(artId, mergeInfo){
         vxhr.open('GET',GS_URL+'?action=getArticle&artId='+encodeURIComponent(snap.id)+'&_t='+Date.now(),true);
         vxhr.timeout=12000;
         vxhr.onload=function(){
-          setSaving(false);
+          setSaving(false);_fine();
           try{
             var r=JSON.parse(vxhr.responseText),s=r.article;
             if(s&&String(s.step)===String(snap.step)&&String(s.status)===String(snap.status)){
@@ -4192,14 +4210,14 @@ function persistSend_(artId, mergeInfo){
             }
           }catch(e){document.getElementById('saveLbl').textContent='Salvato \u2713';ssShow('\u2705','Salvato','Dati inviati correttamente.',true,'#16a34a');}
         };
-        vxhr.onerror=vxhr.ontimeout=function(){setSaving(false);document.getElementById('saveLbl').textContent='\u26a0 Non verificato';ssShow('\u26a0\ufe0f','Salvato (non verificato)','Dati inviati ma verifica non riuscita. Ricarica per confermare.',true,'#d97706');};
+        vxhr.onerror=vxhr.ontimeout=function(){setSaving(false);_fine();document.getElementById('saveLbl').textContent='\u26a0 Non verificato';ssShow('\u26a0\ufe0f','Salvato (non verificato)','Dati inviati ma verifica non riuscita. Ricarica per confermare.',true,'#d97706');};
         vxhr.send();
       },2500);
     };
     xhr.onerror=xhr.ontimeout=function(){
       if(att<3){ssShow('','Riprovo ('+att+'/3)...','Errore rete, nuovo tentativo...',false,'#d97706');setTimeout(trySave,3000);return;}
       setSaving(false);document.getElementById('saveLbl').textContent='\u26a0 Errore rete';
-      ssShow('\u274c','Errore di rete','Impossibile raggiungere Google Sheets dopo 3 tentativi.',true,'#dc2626');
+      ssShow('\u274c','Errore di rete','Impossibile raggiungere Google Sheets dopo 3 tentativi.',true,'#dc2626');_fine();
     };
     xhr.send(useGet?null:saveData);
   }
