@@ -146,7 +146,7 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
 <div class="topbar">
   <div>
       <div class="brand-name">TeMA Journal</div>
-      <div class="brand-sub">Gestione editoriale <span class="app-ver" id="appVersion" title="Versione dell'artefatto (aumenta di uno a ogni aggiornamento)">v.131 &middot; 15/11/2026</span></div>
+      <div class="brand-sub">Gestione editoriale <span class="app-ver" id="appVersion" title="Versione dell'artefatto (aumenta di uno a ogni aggiornamento)">v.132 &middot; 15/11/2026</span></div>
     </div>
   </div>
   <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
@@ -746,6 +746,17 @@ function loadData() {
         bannedRevisori = gsData.bannedRevisori && Array.isArray(gsData.bannedRevisori) ? gsData.bannedRevisori : [];
         _gsVersion = gsData._version || gsData._ts || Date.now();
         _setBaseline(gsData.articles, gsData.issues || [], bannedRevisori);
+        _saveBlocked = '';
+        try {
+          var _prev = parseInt(localStorage.getItem('tema_nArticoli') || '0', 10) || 0;
+          var _now = gsData.articles.length;
+          if (_prev >= 10 && _now < _prev * 0.8) {
+            _saveBlocked = 'Il foglio contiene ' + _now + ' articoli, ma l\'ultima volta erano ' + _prev + '.';
+            setTimeout(function(){ _bloccaSalvataggio_(_saveBlocked); }, 300);
+          } else {
+            localStorage.setItem('tema_nArticoli', String(_now));
+          }
+        } catch (e) {}
         migrateSteps();
         migrateSteps4();
         migrateNotes();
@@ -3387,6 +3398,7 @@ function deleteArt() {
   requirePwd(function() {
     var delArt = articles.find(function(a){ return a.id === capturedId; });
     articles = articles.filter(function(a){ return a.id !== capturedId; });
+    _deletedIds[String(capturedId)] = 1;
     if (delArt) sendNotification('delete', delArt.id, delArt.title);
     document.getElementById('artModal').classList.remove('open');
     editingArtId = null;
@@ -3971,6 +3983,7 @@ function ssShow(icon,title,msg,done,color){
 }
 
 function persistNote(artId,note){
+  if (_saveBlocked) { _bloccaSalvataggio_(_saveBlocked); return; }
   setSaving(true);document.getElementById('saveLbl').textContent='Salvataggio nota...';
   ssShow('','Salvataggio nota...','Aggiunta nota a Google Sheets...',false,'#2563eb');
   var sd=JSON.stringify({action:'appendNote',artId:artId,note:note});
@@ -4009,11 +4022,15 @@ function persistNote(artId,note){
 // (modifiche di altri utenti) viene incorporato, ciò che è cambiato solo qui
 // viene inviato; se entrambi hanno cambiato lo stesso campo vince questa pagina.
 var _baseArts = {}, _baseIssues = '[]', _baseBanned = '[]';
+// Protezione contro la perdita di dati (v.132)
+var _deletedIds = {}, _saveBlocked = '';
+function _baseCount() { return Object.keys(_baseArts).length; }
 function _setBaseline(arts, iss, banned) {
   _baseArts = {};
   (arts || []).forEach(function(a){ if (a && a.id != null) _baseArts[String(a.id)] = JSON.stringify(a); });
   _baseIssues = JSON.stringify(iss || []);
   _baseBanned = JSON.stringify(banned || []);
+  _deletedIds = {};
 }
 function _js(v) { return v === undefined ? undefined : JSON.stringify(v); }
 function _noteKey(n) { return (n && (n.date + '|' + (n.author || ''))) || ''; }
@@ -4077,6 +4094,11 @@ function _mergeWithServer(artId) {
     .then(function(g) {
       if (!g || !Array.isArray(g.articles) || !g.articles.length) throw new Error('risposta non valida');
       var srvMap = {}; g.articles.forEach(function(a){ srvMap[String(a.id)] = a; });
+      var mancanti = Object.keys(_baseArts).filter(function(id){ return !srvMap[id]; }).length;
+      if (mancanti > 2) {
+        info.blocked = 'Sul foglio mancano ' + mancanti + ' articoli rispetto a quelli caricati (' + g.articles.length + ' invece di ' + _baseCount() + ').';
+        return info;
+      }
       var out = [], seen = {};
       articles.forEach(function(loc) {
         var id = String(loc.id), baseS = _baseArts[id], srv = srvMap[id];
@@ -4110,7 +4132,24 @@ function persist(){
   _mergeWithServer(artId).then(function(info){ persistSend_(artId, info); });
 }
 
+function _bloccaSalvataggio_(motivo){
+  _saveBlocked = motivo;
+  setSaving(false);document.getElementById('saveLbl').textContent='\u26d4 Salvataggio bloccato';
+  ssShow('\u26d4','Salvataggio bloccato',motivo+' Per proteggere i dati non ho salvato nulla. Ricarica la pagina e avvisa la Redazione prima di continuare.',true,'#dc2626');
+  console.error('[TeMA] Salvataggio bloccato:', motivo);
+}
 function persistSend_(artId, mergeInfo){
+  if (_saveBlocked) { _bloccaSalvataggio_(_saveBlocked); return; }
+  if (mergeInfo && mergeInfo.blocked) { _bloccaSalvataggio_(mergeInfo.blocked); return; }
+  if (!artId) {
+    var attesi = _baseCount() - Object.keys(_deletedIds).length;
+    if (_baseCount() >= 10 && articles.length < attesi - 2) {
+      _bloccaSalvataggio_('Stavo per salvare ' + articles.length + ' articoli invece di ' + attesi + '.'); return;
+    }
+    if (_baseIssues !== '[]' && (!issues || !issues.length)) {
+      _bloccaSalvataggio_("L'elenco dei fascicoli risulta vuoto."); return;
+    }
+  }
   var snap=null;
   if(artId){var a0=articles.find(function(a){return a.id===artId;});if(a0)snap=JSON.parse(JSON.stringify(a0));}
   var _altri = mergeInfo && mergeInfo.altri ? ' Incorporate anche '+mergeInfo.altri+' modifiche di altri utenti.' : '';
@@ -4131,7 +4170,7 @@ function persistSend_(artId, mergeInfo){
         setSaving(false);document.getElementById('saveLbl').textContent='\u26a0 Errore';
         ssShow('\u274c','Errore di salvataggio','Google Sheets non ha risposto dopo 3 tentativi. Riprova.',true,'#dc2626');return;
       }
-      if(!snap){_setBaseline(articles, issues, bannedRevisori);refresh();setSaving(false);document.getElementById('saveLbl').textContent='Salvato \u2713';ssShow('\u2705','Salvato!','Dati aggiornati correttamente su Google Sheets.'+_altri,true,'#16a34a');return;}
+      if(!snap){_setBaseline(articles, issues, bannedRevisori);try{localStorage.setItem('tema_nArticoli',String(articles.length));}catch(e){}refresh();setSaving(false);document.getElementById('saveLbl').textContent='Salvato \u2713';ssShow('\u2705','Salvato!','Dati aggiornati correttamente su Google Sheets.'+_altri,true,'#16a34a');return;}
       _baseArts[String(snap.id)] = JSON.stringify(snap);
       ssShow('\u{1F50D}','Verifica in corso...','Controllo che le modifiche siano state registrate...',false,'#2563eb');
       setTimeout(function(){
