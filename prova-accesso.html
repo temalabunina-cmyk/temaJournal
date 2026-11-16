@@ -854,7 +854,7 @@ function setSaving(s) {
   else   { dot.classList.remove('saving'); lbl.textContent = 'Dati salvati'; }
 }
 // ── Report degli editor (app web separata "TeMA Report") ──────────────
-var REPORT_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbw2ehm-aTGnbVDAE-y3rm-7uXWDccdir9cPmf8Rd4uDeID0zn4U9MhO4IuLe3DXg3xk/exec';
+var REPORT_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbw3lIrMQHtjhQ27ejx_ar4rJdsMoJjRAsBoted8ho9dPELNx4uWLZoxeFH8BKlTvgqc7Q/exec';
 function _repCfg() {
   var c = { url: REPORT_URL_DEFAULT, key: '' };
   try { c.key = localStorage.getItem('tema_reportKey') || ''; localStorage.removeItem('tema_reportUrl'); } catch (e) {}
