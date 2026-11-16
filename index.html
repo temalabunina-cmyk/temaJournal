@@ -146,7 +146,7 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
 <div class="topbar">
   <div>
       <div class="brand-name">TeMA Journal</div>
-      <div class="brand-sub">Gestione editoriale <span class="app-ver" id="appVersion" title="Versione dell'artefatto (aumenta di uno a ogni aggiornamento)">v.135 &middot; 16/11/2026</span></div>
+      <div class="brand-sub">Gestione editoriale <span class="app-ver" id="appVersion" title="Versione dell'artefatto (aumenta di uno a ogni aggiornamento)">v.136 &middot; 16/11/2026</span></div>
     </div>
   </div>
   <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
@@ -841,7 +841,7 @@ function _repMostraStato(info) {
   if (!info) return;
   document.getElementById('repStato').innerHTML =
     '<b>Destinatari:</b> ' + esc(info.direttore) + (info.copia && info.copia.length ? ' &middot; in copia: ' + info.copia.map(esc).join(', ') : '') + '<br>' +
-    '<b>Invio automatico:</b> ' + (info.attivatore ? 'attivo, ogni luned&igrave; alle 8' : '<span style="color:#b45309">non attivo</span>') +
+    '<b>Invio automatico:</b> ' + (info.attivatore ? 'attivo, ogni luned&igrave; alle ' + esc(info.orario || '8:30') : '<span style="color:#b45309">non attivo</span>') +
     ' &middot; ultimo: ' + _repFmt(info.ultimoAutomatico) +
     ' &middot; <b>ultimo invio manuale:</b> ' + _repFmt(info.ultimoManuale) + (info.ultimoManualeDa ? ' (' + esc(info.ultimoManualeDa) + ')' : '');
 }
