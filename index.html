@@ -70,6 +70,7 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
 .tb-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:38px;padding:0 14px;font-size:14px;line-height:1;white-space:nowrap;border-radius:8px}
 .tb-main{font-weight:600}
 .tb-ic{font-size:15px;line-height:1;opacity:.8}
+.flags{font-family:'Twemoji Country Flags','Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif;font-size:1.05em;line-height:1;white-space:nowrap;cursor:default;display:inline-flex;gap:3px;align-items:center}
 .rep-info{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:15px;line-height:1.4;background:var(--sur2,#f6f6f4);border:1px solid var(--brd);border-radius:10px;padding:12px 14px;margin:6px 0 12px}
 .rep-info:empty{display:none}
 .rep-info dt{font-weight:600;color:var(--tx);white-space:nowrap}
@@ -180,7 +181,7 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
 <div class="topbar">
   <div>
       <div class="brand-name">TeMA Journal</div>
-      <div class="brand-sub">Gestione editoriale <span class="app-ver" id="appVersion" title="Versione dell'artefatto (aumenta di uno a ogni aggiornamento)">v.140 &middot; 16/11/2026</span></div>
+      <div class="brand-sub">Gestione editoriale <span class="app-ver" id="appVersion" title="Versione dell'artefatto (aumenta di uno a ogni aggiornamento)">v.141 &middot; 16/11/2026</span></div>
     </div>
   </div>
   <div class="tb-actions">
@@ -1183,6 +1184,51 @@ function checkPwd() {
   });
 }
 
+// ── Bandiere della nazionalità degli autori (v.141) ────────────────────
+var _PAESI = {
+  'italia':'IT','italy':'IT','albania':'AL','australia':'AU','algeria':'DZ','qatar':'QA','arabia saudita':'SA','saudi arabia':'SA',
+  'azerbaijan':'AZ','azerbaigian':'AZ','russia':'RU','federazione russa':'RU','bangladesh':'BD','belgio':'BE','belgium':'BE','turchia':'TR','turkey':'TR','turkiye':'TR',
+  'bolivia':'BO','spagna':'ES','spain':'ES','camerun':'CM','cameroon':'CM','cina':'CN','china':'CN','colombia':'CO','croazia':'HR','croatia':'HR',
+  'egitto':'EG','egypt':'EG','etiopia':'ET','ethiopia':'ET','filippine':'PH','philippines':'PH','francia':'FR','france':'FR','ghana':'GH','india':'IN',
+  'indonesia':'ID','iran':'IR','messico':'MX','mexico':'MX','svezia':'SE','sweden':'SE','uk':'GB','regno unito':'GB','united kingdom':'GB','inghilterra':'GB','gran bretagna':'GB',
+  'kazakhstan':'KZ','kenya':'KE','malesia':'MY','malaysia':'MY','malta':'MT','nigeria':'NG','pakistan':'PK','repubblica ceca':'CZ','czech republic':'CZ','cechia':'CZ',
+  'romania':'RO','sri lanka':'LK','stati uniti':'US','usa':'US','united states':'US','sud africa':'ZA','sudafrica':'ZA','south africa':'ZA',
+  'tailandia':'TH','thailandia':'TH','thailand':'TH','tanzania':'TZ','ucraina':'UA','ukraine':'UA','germania':'DE','germany':'DE',
+  'grecia':'GR','greece':'GR','portogallo':'PT','portugal':'PT','brasile':'BR','brazil':'BR','cile':'CL','chile':'CL','argentina':'AR','peru':'PE','ecuador':'EC',
+  'marocco':'MA','morocco':'MA','tunisia':'TN','libano':'LB','lebanon':'LB','giordania':'JO','jordan':'JO','emirati arabi uniti':'AE','emirati arabi':'AE','uae':'AE',
+  'iraq':'IQ','israele':'IL','israel':'IL','cipro':'CY','cyprus':'CY','giappone':'JP','japan':'JP','corea del sud':'KR','south korea':'KR','corea':'KR','vietnam':'VN',
+  'polonia':'PL','poland':'PL','paesi bassi':'NL','olanda':'NL','netherlands':'NL','svizzera':'CH','switzerland':'CH','austria':'AT','serbia':'RS','slovenia':'SI',
+  'ungheria':'HU','hungary':'HU','canada':'CA','irlanda':'IE','ireland':'IE','danimarca':'DK','denmark':'DK','norvegia':'NO','norway':'NO','finlandia':'FI','finland':'FI',
+  'bulgaria':'BG','slovacchia':'SK','slovakia':'SK','lituania':'LT','lettonia':'LV','estonia':'EE','uganda':'UG','zimbabwe':'ZW','sudan':'SD','nepal':'NP',
+  'afghanistan':'AF','singapore':'SG','taiwan':'TW','hong kong':'HK','nuova zelanda':'NZ','new zealand':'NZ','oman':'OM','kuwait':'KW','bahrain':'BH','siria':'SY',
+  'libia':'LY','senegal':'SN','costa d\'avorio':'CI','rwanda':'RW','mozambico':'MZ','angola':'AO','cuba':'CU','venezuela':'VE','uruguay':'UY','paraguay':'PY',
+  'bosnia ed erzegovina':'BA','bosnia':'BA','montenegro':'ME','macedonia del nord':'MK','kosovo':'XK','islanda':'IS','lussemburgo':'LU','georgia':'GE','armenia':'AM',
+  'uzbekistan':'UZ','mongolia':'MN','myanmar':'MM','cambogia':'KH','laos':'LA','iraq ':'IQ'
+};
+function _bandiera(cod) {
+  if (cod === 'XK') return '🇽🇰';
+  return String.fromCodePoint.apply(null, cod.split('').map(function (c) { return 0x1F1E6 + c.charCodeAt(0) - 65; }));
+}
+function _paesiDi(a) {
+  var t = String(a.nationality || '').trim();
+  if (!t) return [];
+  return t.split(/\s*(?:[;,\/]|\s+e\s+|\s+and\s+)\s*/).map(function (x) {
+    var k = x.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\s+/g, ' ').trim();
+    return { nome: x.trim(), cod: _PAESI[k] || '' };
+  }).filter(function (p) { return p.nome; });
+}
+// Bandierine: italiana per i nazionali, quella del paese (o dei paesi) per gli altri
+function bandiereHtml(a) {
+  var paesi = _paesiDi(a), tit, fl;
+  if (paesi.length) {
+    fl = paesi.map(function (p) { return '<span class="fl">' + (p.cod ? _bandiera(p.cod) : '🌐') + '</span>'; }).join('');
+    tit = (a.intl === 'si' ? 'Contributo internazionale: ' : (a.intl === 'no' ? 'Contributo nazionale: ' : '')) + paesi.map(function (p) { return p.nome; }).join(', ');
+  } else if (a.intl === 'no') { fl = _bandiera('IT'); tit = 'Contributo nazionale'; }
+  else if (a.intl === 'si') { fl = '🌐'; tit = 'Contributo internazionale (nazione non indicata)'; }
+  else return '';
+  return '<span class="flags" title="' + esc(tit) + '" aria-label="' + esc(tit) + '">' + fl + '</span>';
+}
+
 function stAbbr(s) {
   if (!s) return '';
   var label = STEPS[s] ? STEPS[s].replace(/^St\.\d+\s*·\s*/,'') : '';
@@ -1317,7 +1363,7 @@ function artCard(a, showEdit, showAllNotes) {
         '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:5px">' +
           (isslbl ? '<span class="badge b-amber">'+esc(isslbl.label)+(a.articleNum?' &middot; n.'+a.articleNum:'')+'</span>' : '') +
           (a.section && a.section !== '—' && a.section !== '-' ? '<span class="badge b-gray">'+esc(a.section)+'</span>' : '') +
-          (a.intl === 'si' ? '<span class="badge b-teal">Internazionale</span>' : '') +
+          (bandiereHtml(a) ? '<span class="badge ' + (a.intl === 'si' ? 'b-teal' : 'b-gray') + '" style="display:inline-flex;align-items:center;gap:6px">' + bandiereHtml(a) + (a.intl === 'si' ? 'Internazionale' : (a.intl === 'no' ? 'Nazionale' : '')) + '</span>' : '') +
         '</div>' +
       '</div>' +
       editBtn +
@@ -2272,7 +2318,7 @@ function renderNumeri() {
         '</div>' +
         '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;padding-top:2px">' +
           (a.step ? '<span style="font-size:20px;color:var(--purple-tx);font-weight:600;white-space:nowrap;text-align:right">'+stepFull(a.step)+'</span>' : '') +
-          (a.intl==='si'?'<span class="badge b-teal" style="white-space:nowrap">Intl.</span>':'') +
+          bandiereHtml(a) +
         '</div>' +
       '</div>';
     };
@@ -4654,5 +4700,9 @@ function persistSend_(artId, mergeInfo, done){
 
 </svg>
 </div><div id="ts-tip"><b>👋 Mi raccomando!</b><div id="ts-tip-text"></div></div><button id="ts-btn" onclick="document.getElementById('ts-panel').style.display='none'">OK</button></div></div>
+<script type="module">
+// Bandiere visibili anche su Windows (che non ha le emoji delle bandiere): carica un font apposito solo se serve
+try { import('https://cdn.jsdelivr.net/npm/country-flag-emoji-polyfill@0.1.8/dist/index.js').then(function (m) { m.polyfillCountryFlagEmojis(); }).catch(function () {}); } catch (e) {}
+</script>
 </body>
 </html>
