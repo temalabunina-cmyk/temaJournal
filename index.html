@@ -182,7 +182,7 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
 <div id="loginScreen">
   <div id="loginBox">
     <div style="font-size:22px;font-weight:700;margin-bottom:.25rem">TeMA Journal</div>
-    <div style="font-size:16px;color:var(--tx);margin-bottom:1.75rem">Gestione editoriale &mdash; Accesso riservato</div>
+    <div style="font-size:16px;color:var(--tx);margin-bottom:1.75rem">Gestione editoriale &mdash; Accesso riservato<br><span class="app-ver" id="loginVer" style="margin:6px 0 0"></span></div>
     <div class="fr">
       <label>Username</label>
       <input type="text" id="loginUser" placeholder="Username" autocomplete="username" onkeydown="if(event.key==='Enter')document.getElementById('loginPass').focus()">
@@ -205,7 +205,7 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
 <div class="topbar">
   <div class="tb-brand">
       <div class="brand-name">TeMA Journal</div>
-      <div class="brand-sub">Gestione editoriale <span class="app-ver" id="appVersion" title="Versione dell'artefatto (aumenta di uno a ogni aggiornamento)">v.150 &middot; 16/11/2026</span></div>
+      <div class="brand-sub">Gestione editoriale <span class="app-ver" id="appVersion" title="Versione dell'artefatto (aumenta di uno a ogni aggiornamento)">v.151 &middot; 16/11/2026</span></div>
   </div>
   <div class="tb-user" id="tbUser" style="display:none">
     <span class="tb-av" id="tbAv"></span>
@@ -4058,6 +4058,8 @@ function isEditorAccount() { return EDITOR_ACCOUNTS.indexOf(currentUser) >= 0; }
 // Le password sono verificate dall'app web "TeMA Report" (file Accesso.gs), che
 // restituisce un token di sessione valido 12 ore, salvato in questo browser.
 var AUTH_URL = REPORT_URL_DEFAULT;
+// Versione e data anche nella schermata di accesso (copiate dall'etichetta dell'intestazione)
+try { document.getElementById('loginVer').textContent = document.getElementById('appVersion').textContent; } catch (e) {}
 var _sessione = null;
 function _authPost(dati) {
   return fetch(AUTH_URL, { method: 'POST', redirect: 'follow', body: JSON.stringify(dati) })
