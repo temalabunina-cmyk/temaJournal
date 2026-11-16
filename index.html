@@ -165,14 +165,14 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
     <div style="font-size:16px;color:var(--tx);margin-bottom:1.75rem">Gestione editoriale &mdash; Accesso riservato</div>
     <div class="fr">
       <label>Username</label>
-      <input type="text" id="loginUser" placeholder="Username" autocomplete="username">
+      <input type="text" id="loginUser" placeholder="Username" autocomplete="username" onkeydown="if(event.key==='Enter')document.getElementById('loginPass').focus()">
     </div>
     <div class="fr">
       <label>Password</label>
-      <input type="password" id="loginPass" placeholder="Password" autocomplete="current-password">
+      <input type="password" id="loginPass" placeholder="Password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
     </div>
     <div id="loginErr" style="font-size:16px;color:var(--red);margin-bottom:12px;display:none">Username o password errati.</div>
-    <button class="btn btn-p" onclick="doLogin()" style="width:100%;padding:10px;font-size:16px">Accedi</button>
+    <button class="btn btn-p" id="btnLogin" onclick="doLogin()" style="width:100%;padding:10px;font-size:16px">Accedi</button>
   </div>
 </div>
 
@@ -180,7 +180,7 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
 <div class="topbar">
   <div>
       <div class="brand-name">TeMA Journal</div>
-      <div class="brand-sub">Gestione editoriale <span class="app-ver" id="appVersion" title="Versione dell'artefatto (aumenta di uno a ogni aggiornamento)">v.139 &middot; 16/11/2026</span></div>
+      <div class="brand-sub">Gestione editoriale <span class="app-ver" id="appVersion" title="Versione dell'artefatto (aumenta di uno a ogni aggiornamento)">v.140 &middot; 16/11/2026</span></div>
     </div>
   </div>
   <div class="tb-actions">
@@ -190,6 +190,7 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
     <button class="btn tb-btn" id="btnRicalcolaStep" onclick="ricalcolaStepTutti()" title="Ricalcola automaticamente lo step di tutti gli articoli in base ai dati presenti" style="display:none"><span class="tb-ic">&#8635;</span>Ricalcola step</button>
     <button class="btn tb-btn" id="btnConvertiEsiti" onclick="convertiEsitiFinali()" title="Trasferisce accettazioni e rifiuti registrati nei cicli di revisione nella nuova sezione Decisione finale" style="display:none"><span class="tb-ic">&#8644;</span>Converti decisioni finali</button>
     <button class="btn tb-btn" id="btnReportEditor" onclick="apriReportEditor()" title="Report degli avanzamenti della settimana da inviare al direttore e alla redazione" style="display:none"><span class="tb-ic">&#9993;</span>Report settimanale</button>
+    <button class="btn tb-btn" onclick="esci()" title="Chiude la sessione su questo browser"><span class="tb-ic">&#8618;</span>Esci</button>
     <button class="btn tb-btn" id="btnControlloDati" onclick="controlloDati()" title="Elenca gli articoli a cui mancano dati obbligatori" style="display:none"><span class="tb-ic">&#10003;</span>Controllo dati</button>
   </div>
 </div>
@@ -574,7 +575,7 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
   <div class="rep-actions">
     <button class="btn tb-btn" id="btnRepAnteprima" onclick="anteprimaReport()"><span class="tb-ic">&#128065;&#65039;</span>Anteprima</button>
     <button class="btn btn-p tb-btn" id="btnRepInvia" onclick="inviaReport(false)"><span class="tb-ic">&#9993;</span>Invia al direttore e alla redazione</button>
-    <button class="btn tb-btn rep-link" onclick="mostraConfigReport()"><span class="tb-ic">&#9881;</span>Codice</button>
+    <button class="btn tb-btn rep-link" onclick="mostraConfigReport()" style="display:none"><span class="tb-ic">&#9881;</span>Codice</button>
   </div>
   <div id="repConferma" style="display:none;background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:14px">
     Confermi l'invio del report adesso? Il report automatico del luned&igrave; resta invariato.
@@ -853,7 +854,7 @@ function setSaving(s) {
   else   { dot.classList.remove('saving'); lbl.textContent = 'Dati salvati'; }
 }
 // ── Report degli editor (app web separata "TeMA Report") ──────────────
-var REPORT_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbw2ehm-aTGnbVDAE-y3rm-7uXWDccdir9cPmf8Rd4uDeID0zn4U9MhO4IuLe3DXg3xk/exec';
+var REPORT_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbw3lIrMQHtjhQ27ejx_ar4rJdsMoJjRAsBoted8ho9dPELNx4uWLZoxeFH8BKlTvgqc7Q/exec';
 function _repCfg() {
   var c = { url: REPORT_URL_DEFAULT, key: '' };
   try { c.key = localStorage.getItem('tema_reportKey') || ''; localStorage.removeItem('tema_reportUrl'); } catch (e) {}
@@ -862,8 +863,9 @@ function _repCfg() {
 function _repMsg(html, col) { var m = document.getElementById('repMsg'); m.innerHTML = html || ''; m.style.color = col || ''; }
 function _repCall(azione, extra) {
   var c = _repCfg();
-  if (!c.url || !c.key) return Promise.reject(new Error('collegamento non configurato'));
-  var q = '?azione=' + encodeURIComponent(azione) + '&chiave=' + encodeURIComponent(c.key) + (extra || '') + '&_t=' + Date.now();
+  var auth = (_sessione && _sessione.token) ? '&token=' + encodeURIComponent(_sessione.token) : (c.key ? '&chiave=' + encodeURIComponent(c.key) : '');
+  if (!auth) return Promise.reject(new Error('accesso non disponibile'));
+  var q = '?azione=' + encodeURIComponent(azione) + auth + (extra || '') + '&_t=' + Date.now();
   return fetch(c.url + q, { redirect: 'follow', cache: 'no-store' })
     .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
     .then(function (t) { var j; try { j = JSON.parse(t); } catch (e) { throw new Error('risposta non valida dall\'app web'); } if (!j.ok) throw new Error(j.errore || 'errore'); return j; });
@@ -896,11 +898,11 @@ function apriReportEditor() {
   document.getElementById('repFrame').style.display = 'none';
   document.getElementById('repStato').innerHTML = '';
   var c = _repCfg();
-  if (!c.url || !c.key) { mostraConfigReport(); _repMsg('Prima di usare il report inserisci il collegamento.', ''); return; }
+  if (!(_sessione && _sessione.token) && !c.key) { mostraConfigReport(); _repMsg('Inserisci il codice del report.', ''); return; }
   document.getElementById('repConfig').style.display = 'none';
   _repMsg('Controllo il collegamento...', '');
   _repCall('stato').then(function (j) { _repMostraStato(j.info); _repMsg('', ''); })
-    .catch(function (e) { _repMsg('Collegamento non riuscito: ' + esc(e.message) + '. Controlla il codice.', '#dc2626'); mostraConfigReport(); });
+    .catch(function (e) { _repMsg('Collegamento non riuscito: ' + esc(e.message), '#dc2626'); });
 }
 function anteprimaReport() {
   _repMsg('Preparo l\'anteprima (pu&ograve; richiedere qualche secondo)...', '');
@@ -1161,16 +1163,24 @@ function requirePwd(action) {
   setTimeout(function(){ document.getElementById('pwdInput').focus(); }, 100);
 }
 function checkPwd() {
-  if (document.getElementById('pwdInput').value === '***PASSWORD-RIMOSSA***') {
-    document.getElementById('pwdModal').classList.remove('open');
-    var action = pendingAction;
-    pendingAction = null;
-    if (action) { setTimeout(function(){ action(); }, 50); }
-  } else {
-    document.getElementById('pwdErr').style.display = 'block';
-    document.getElementById('pwdInput').value = '';
-    document.getElementById('pwdInput').focus();
-  }
+  var inp = document.getElementById('pwdInput'), errEl = document.getElementById('pwdErr');
+  var pw = inp.value;
+  if (!pw) return;
+  if (!_sessione) { errEl.textContent = 'Sessione scaduta: ricarica la pagina.'; errEl.style.display = 'block'; return; }
+  inp.disabled = true;
+  _authPost({ azione: 'verificaAzione', token: _sessione.token, password: pw }).then(function (j) {
+    inp.disabled = false;
+    if (j.ok) {
+      document.getElementById('pwdModal').classList.remove('open');
+      var action = pendingAction; pendingAction = null;
+      if (action) { setTimeout(function(){ action(); }, 50); }
+    } else {
+      errEl.textContent = j.errore || 'Password non corretta'; errEl.style.display = 'block';
+      inp.value = ''; inp.focus();
+    }
+  }).catch(function (e) {
+    inp.disabled = false; errEl.textContent = 'Verifica non riuscita: ' + e.message; errEl.style.display = 'block';
+  });
 }
 
 function stAbbr(s) {
@@ -3902,75 +3912,58 @@ var EDITOR_ACCOUNTS = ['EditorTeMA','Carmen Guida','Floriana Zucaro','Gerardo Ca
   'Peppe Mazzeo','Romano Fistola','Rosa Anna La Rocca','Rosaria Battarra','Stefano Franco'];
 function isEditorAccount() { return EDITOR_ACCOUNTS.indexOf(currentUser) >= 0; }
 
+// ── Accesso verificato dal server (v.140): nessuna password nel codice ──
+// Le password sono verificate dall'app web "TeMA Report" (file Accesso.gs), che
+// restituisce un token di sessione valido 12 ore, salvato in questo browser.
+var AUTH_URL = REPORT_URL_DEFAULT;
+var _sessione = null;
+function _authPost(dati) {
+  return fetch(AUTH_URL, { method: 'POST', redirect: 'follow', body: JSON.stringify(dati) })
+    .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
+    .then(function (t) { try { return JSON.parse(t); } catch (e) { throw new Error('risposta non valida dal server di accesso'); } });
+}
+function _salvaSessione(s) { _sessione = s; try { if (s) localStorage.setItem('tema_sessione', JSON.stringify(s)); else localStorage.removeItem('tema_sessione'); } catch (e) {} }
+function _entra(s) {
+  _salvaSessione(s);
+  adminMode = s.ruolo === 'admin';
+  currentUser = s.utente;
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('mainApp').style.display = 'block';
+  bootApp();
+}
 function doLogin() {
   var u = document.getElementById('loginUser').value.trim();
   var p = document.getElementById('loginPass').value;
-  if (u === 'RedazioneTeMA' && p === '***PASSWORD-RIMOSSA***') {
-    adminMode = true; currentUser = 'RedazioneTeMA';
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('mainApp').style.display = 'block';
-    bootApp();
-  } else if (u === 'GateKeeper' && p === '***PASSWORD-RIMOSSA***') {
-    adminMode = false; currentUser = 'GateKeeper';
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('mainApp').style.display = 'block';
-    bootApp();
-  } else if (u === 'DirettoreTeMA' && p === '***PASSWORD-RIMOSSA***') {
-    adminMode = false; currentUser = 'DirettoreTeMA'; // same permissions as GateKeeper
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('mainApp').style.display = 'block';
-    bootApp();
-  } else if (u === 'EditorTeMA' && p === '***PASSWORD-RIMOSSA***') {
-    adminMode = false; currentUser = 'EditorTeMA';
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('mainApp').style.display = 'block';
-    bootApp();
-  } else if (u === 'Carmen Guida' && p === '***PASSWORD-RIMOSSA***') {
-    adminMode = false; currentUser = 'Carmen Guida';
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('mainApp').style.display = 'block';
-    bootApp();
-  } else if (u === 'Floriana Zucaro' && p === '***PASSWORD-RIMOSSA***') {
-    adminMode = false; currentUser = 'Floriana Zucaro';
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('mainApp').style.display = 'block';
-    bootApp();
-  } else if (u === 'Gerardo Carpentieri' && p === '***PASSWORD-RIMOSSA***') {
-    adminMode = false; currentUser = 'Gerardo Carpentieri';
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('mainApp').style.display = 'block';
-    bootApp();
-  } else if (u === 'Peppe Mazzeo' && p === '***PASSWORD-RIMOSSA***') {
-    adminMode = false; currentUser = 'Peppe Mazzeo';
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('mainApp').style.display = 'block';
-    bootApp();
-  } else if (u === 'Romano Fistola' && p === '***PASSWORD-RIMOSSA***') {
-    adminMode = false; currentUser = 'Romano Fistola';
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('mainApp').style.display = 'block';
-    bootApp();
-  } else if (u === 'Rosa Anna La Rocca' && p === '***PASSWORD-RIMOSSA***') {
-    adminMode = false; currentUser = 'Rosa Anna La Rocca';
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('mainApp').style.display = 'block';
-    bootApp();
-  } else if (u === 'Rosaria Battarra' && p === '***PASSWORD-RIMOSSA***') {
-    adminMode = false; currentUser = 'Rosaria Battarra';
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('mainApp').style.display = 'block';
-    bootApp();
-  } else if (u === 'Stefano Franco' && p === '***PASSWORD-RIMOSSA***') {
-    adminMode = false; currentUser = 'Stefano Franco';
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('mainApp').style.display = 'block';
-    bootApp();
-  } else {
-    document.getElementById('loginErr').style.display = 'block';
+  var err = document.getElementById('loginErr'), btn = document.getElementById('btnLogin');
+  if (!u || !p) { err.textContent = 'Inserisci username e password.'; err.style.display = 'block'; return; }
+  err.style.display = 'none'; if (btn) { btn.disabled = true; btn.textContent = 'Accesso in corso...'; }
+  _authPost({ azione: 'login', utente: u, password: p }).then(function (j) {
+    if (btn) { btn.disabled = false; btn.textContent = 'Accedi'; }
+    if (!j.ok) {
+      err.textContent = j.errore || 'Username o password errati.'; err.style.display = 'block';
+      document.getElementById('loginPass').value = ''; document.getElementById('loginPass').focus(); return;
+    }
     document.getElementById('loginPass').value = '';
-    document.getElementById('loginPass').focus();
-  }
+    _entra({ token: j.token, utente: j.utente, ruolo: j.ruolo, scade: j.scade });
+  }).catch(function (e) {
+    if (btn) { btn.disabled = false; btn.textContent = 'Accedi'; }
+    err.textContent = 'Impossibile verificare l\'accesso (' + e.message + '). Controlla la connessione e riprova.'; err.style.display = 'block';
+  });
 }
+function esci() {
+  var t = _sessione && _sessione.token;
+  _salvaSessione(null);
+  if (t) _authPost({ azione: 'logout', token: t }).catch(function () {});
+  location.reload();
+}
+// All'apertura: se in questo browser c'è una sessione ancora valida, entra senza chiedere la password
+(function () {
+  var s = null; try { s = JSON.parse(localStorage.getItem('tema_sessione') || 'null'); } catch (e) {}
+  if (!s || !s.token || !s.scade || new Date(s.scade) < new Date()) { _salvaSessione(null); return; }
+  _authPost({ azione: 'sessione', token: s.token }).then(function (j) {
+    if (j.ok) _entra({ token: s.token, utente: j.utente, ruolo: j.ruolo, scade: j.scade }); else _salvaSessione(null);
+  }).catch(function () {});
+})();
 
 function autoResize(el) {
   el.style.height = 'auto';
