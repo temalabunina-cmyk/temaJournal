@@ -70,6 +70,12 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
 .tb-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:38px;padding:0 14px;font-size:14px;line-height:1;white-space:nowrap;border-radius:8px}
 .tb-main{font-weight:600}
 .tb-ic{font-size:15px;line-height:1;opacity:.8}
+.nat-picker{display:flex;flex-wrap:wrap;align-items:center;gap:6px;min-height:44px;padding:5px 8px;border:1px solid var(--brd);border-radius:var(--r);background:var(--sur);cursor:text}
+.nat-picker input{flex:1;min-width:160px;border:none !important;outline:none;padding:4px 2px !important;background:transparent;font-size:18px}
+.nat-chips{display:contents}
+.nat-chip{display:inline-flex;align-items:center;gap:6px;padding:3px 6px 3px 9px;border-radius:999px;background:var(--sur2,#f1f0ec);border:1px solid var(--brd);font-size:16px;line-height:1.2;white-space:nowrap}
+.nat-chip button{border:none;background:none;cursor:pointer;font-size:16px;line-height:1;padding:0 3px;color:var(--tx2)}
+.nat-chip button:hover{color:var(--red,#b91c1c)}
 .flags{font-family:'Twemoji Country Flags','Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif;font-size:1.05em;line-height:1;white-space:nowrap;cursor:default;display:inline-flex;gap:3px;align-items:center}
 .rep-info{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:15px;line-height:1.4;background:var(--sur2,#f6f6f4);border:1px solid var(--brd);border-radius:10px;padding:12px 14px;margin:6px 0 12px}
 .rep-info:empty{display:none}
@@ -181,7 +187,7 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
 <div class="topbar">
   <div>
       <div class="brand-name">TeMA Journal</div>
-      <div class="brand-sub">Gestione editoriale <span class="app-ver" id="appVersion" title="Versione dell'artefatto (aumenta di uno a ogni aggiornamento)">v.141 &middot; 16/11/2026</span></div>
+      <div class="brand-sub">Gestione editoriale <span class="app-ver" id="appVersion" title="Versione dell'artefatto (aumenta di uno a ogni aggiornamento)">v.142 &middot; 16/11/2026</span></div>
     </div>
   </div>
   <div class="tb-actions">
@@ -416,7 +422,14 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
   <div class="fr"><label>Autori</label><input id="fAuthors"></div>
   <div class="fr"><label>Affiliazione</label><input id="fAffil"></div>
   <div class="g2">
-    <div class="fr"><label>Nazione</label><input id="fNat"></div>
+    <div class="fr"><label>Nazionalit&agrave; degli autori</label>
+      <input type="hidden" id="fNat">
+      <div class="nat-picker" onclick="document.getElementById('natInput').focus()">
+        <span id="natChips" class="nat-chips"></span>
+        <input id="natInput" list="natList" autocomplete="off" placeholder="Scrivi un paese e premi Invio" onkeydown="natKey(event)" onchange="natAggiungiDaInput()">
+      </div>
+      <datalist id="natList"></datalist>
+    </div>
     <div class="fr"><label>Internazionale</label><select id="fIntlArt"><option value="">—</option><option value="si">S&igrave;</option><option value="no">No</option></select></div>
   </div>
   <div class="fsl">Contenuto</div>
@@ -1213,10 +1226,68 @@ function _paesiDi(a) {
   var t = String(a.nationality || '').trim();
   if (!t) return [];
   return t.split(/\s*(?:[;,\/]|\s+e\s+|\s+and\s+)\s*/).map(function (x) {
-    var k = x.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/\s+/g, ' ').trim();
+    var k = _normPaese(x);
     return { nome: x.trim(), cod: _PAESI[k] || '' };
   }).filter(function (p) { return p.nome; });
 }
+// Nomi dei paesi proposti nel modulo (italiano), con il loro codice
+var _NOMI_PAESI = {
+  IT:'Italia',AF:'Afghanistan',AL:'Albania',DZ:'Algeria',AO:'Angola',SA:'Arabia Saudita',AR:'Argentina',AM:'Armenia',AU:'Australia',AT:'Austria',AZ:'Azerbaigian',
+  BH:'Bahrein',BD:'Bangladesh',BE:'Belgio',BO:'Bolivia',BA:'Bosnia ed Erzegovina',BR:'Brasile',BG:'Bulgaria',KH:'Cambogia',CM:'Camerun',CA:'Canada',CZ:'Repubblica Ceca',
+  CL:'Cile',CN:'Cina',CY:'Cipro',CO:'Colombia',KR:'Corea del Sud',CI:"Costa d'Avorio",HR:'Croazia',CU:'Cuba',DK:'Danimarca',EC:'Ecuador',EG:'Egitto',AE:'Emirati Arabi Uniti',
+  EE:'Estonia',ET:'Etiopia',PH:'Filippine',FI:'Finlandia',FR:'Francia',GE:'Georgia',DE:'Germania',GH:'Ghana',JP:'Giappone',JO:'Giordania',GR:'Grecia',HK:'Hong Kong',
+  IN:'India',ID:'Indonesia',IR:'Iran',IQ:'Iraq',IE:'Irlanda',IS:'Islanda',IL:'Israele',KZ:'Kazakistan',KE:'Kenya',XK:'Kosovo',KW:'Kuwait',LA:'Laos',LV:'Lettonia',
+  LB:'Libano',LY:'Libia',LT:'Lituania',LU:'Lussemburgo',MK:'Macedonia del Nord',MY:'Malesia',MT:'Malta',MA:'Marocco',MX:'Messico',MN:'Mongolia',ME:'Montenegro',
+  MZ:'Mozambico',MM:'Myanmar',NP:'Nepal',NG:'Nigeria',NO:'Norvegia',NZ:'Nuova Zelanda',NL:'Paesi Bassi',PK:'Pakistan',PY:'Paraguay',PE:'Perù',PL:'Polonia',PT:'Portogallo',
+  QA:'Qatar',GB:'Regno Unito',RO:'Romania',RU:'Russia',RW:'Ruanda',SN:'Senegal',RS:'Serbia',SG:'Singapore',SY:'Siria',SK:'Slovacchia',SI:'Slovenia',ES:'Spagna',
+  LK:'Sri Lanka',US:'Stati Uniti',ZA:'Sudafrica',SD:'Sudan',SE:'Svezia',CH:'Svizzera',TW:'Taiwan',TZ:'Tanzania',TH:'Thailandia',TN:'Tunisia',TR:'Turchia',UA:'Ucraina',
+  UG:'Uganda',HU:'Ungheria',UY:'Uruguay',UZ:'Uzbekistan',VE:'Venezuela',VN:'Vietnam',ZW:'Zimbabwe'
+};
+function _normPaese(x) { return String(x || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z' ]/g, ' ').replace(/\s+/g, ' ').trim(); }
+(function () { Object.keys(_NOMI_PAESI).forEach(function (c) { _PAESI[_normPaese(_NOMI_PAESI[c])] = c; }); _PAESI['kazakhstan'] = 'KZ'; _PAESI['bahrain'] = 'BH'; _PAESI['rwanda'] = 'RW'; })();
+
+// ── Selettore della nazionalità nel modulo (v.142): più paesi, con bandiera ──
+var _natLista = [];
+function natSet(valore) {
+  _natLista = _paesiDi({ nationality: valore }).map(function (p) { return p.cod ? _NOMI_PAESI[p.cod] || p.nome : p.nome; });
+  natRender(false);
+}
+function natRender(aggiornaIntl) {
+  var box = document.getElementById('natChips'); if (!box) return;
+  box.innerHTML = _natLista.map(function (n, i) {
+    var cod = _PAESI[_normPaese(n)];
+    return '<span class="nat-chip" title="' + esc(n) + '"><span class="flags">' + (cod ? _bandiera(cod) : '🌐') + '</span>' + esc(n) +
+      '<button type="button" onclick="event.stopPropagation();natRimuovi(' + i + ')" aria-label="Togli ' + esc(n) + '">&times;</button></span>';
+  }).join('');
+  document.getElementById('fNat').value = _natLista.join('; ');
+  var inp = document.getElementById('natInput'); if (inp) inp.placeholder = _natLista.length ? 'Aggiungi un altro paese' : 'Scrivi un paese e premi Invio';
+  if (aggiornaIntl && _natLista.length) {
+    var soloItalia = _natLista.every(function (n) { return _PAESI[_normPaese(n)] === 'IT'; });
+    var sel = document.getElementById('fIntlArt'); if (sel && !sel.disabled) sel.value = soloItalia ? 'no' : 'si';
+  }
+}
+function natRimuovi(i) { _natLista.splice(i, 1); natRender(true); }
+function natAggiungiDaInput() {
+  var inp = document.getElementById('natInput'); if (!inp) return;
+  var t = inp.value.trim();
+  if (!t) return;
+  t.split(/\s*[;,\/]\s*/).forEach(function (x) {
+    if (!x) return;
+    var cod = _PAESI[_normPaese(x)], nome = cod ? (_NOMI_PAESI[cod] || x) : x;
+    if (_natLista.map(_normPaese).indexOf(_normPaese(nome)) < 0) _natLista.push(nome);
+  });
+  inp.value = ''; natRender(true);
+}
+function natKey(e) {
+  if (e.key === 'Enter' || e.key === ',' || e.key === ';') { e.preventDefault(); natAggiungiDaInput(); }
+  else if (e.key === 'Backspace' && !e.target.value && _natLista.length) { _natLista.pop(); natRender(true); }
+}
+(function () {
+  var dl = document.getElementById('natList'); if (!dl) return;
+  dl.innerHTML = Object.keys(_NOMI_PAESI).map(function (c) { return _NOMI_PAESI[c]; }).sort(function (a, b) { return a.localeCompare(b, 'it'); })
+    .map(function (n) { return '<option value="' + n.replace(/"/g, '&quot;') + '">'; }).join('');
+})();
+
 // Bandierine: italiana per i nazionali, quella del paese (o dei paesi) per gli altri
 function bandiereHtml(a) {
   var paesi = _paesiDi(a), tit, fl;
@@ -3070,7 +3141,7 @@ function toInputDate(v) {
 function openNewArt() {
   editingArtId = null;
   document.getElementById('artModalTitle').textContent = 'Nuovo articolo';
-  ['fId','fTitle','fAuthors','fAffil','fNat','fAbstract'].forEach(function(id){ document.getElementById(id).value=''; });
+  ['fId','fTitle','fAuthors','fAffil','fNat','fAbstract'].forEach(function(id){ document.getElementById(id).value=''; }); natSet('');
   ['fLen','fArtNum','fRefs','fCTeMA','fCTeMA2226','fCJCR','fCJCR2y','fSim','fAi'].forEach(function(id){ document.getElementById(id).value=''; });
   document.getElementById('fDataSottomissione').value='';
   document.getElementById('fImpaginato').checked=false;
@@ -3149,7 +3220,7 @@ function openEditArt(id) {
   document.getElementById('fTitle').value=a.title;
   document.getElementById('fAuthors').value=a.authors||'';
   document.getElementById('fAffil').value=a.affiliation||'';
-  document.getElementById('fNat').value=a.nationality||'';
+  document.getElementById('fNat').value=a.nationality||''; natSet(a.nationality||'');
   document.getElementById('fIntlArt').value=a.intl||'';
   document.getElementById('fAbstract').value=a.abstract||'';
   setTimeout(function(){ autoResize(document.getElementById('fAbstract')); }, 0);
@@ -3359,7 +3430,7 @@ function saveArt() {
     title:fVal('fTitle', _orig.title || '').trim(),
     authors:fVal('fAuthors', _orig.authors || '').trim(),
     affiliation:fVal('fAffil', _orig.affiliation || '').trim(),
-    nationality:fVal('fNat', _orig.nationality || '').trim(),
+    nationality:(natAggiungiDaInput(), fVal('fNat', _orig.nationality || '')).trim(),
     intl:fVal('fIntlArt', _orig.intl || 'no'),
     abstract:fVal('fAbstract', _orig.abstract || '').trim(),
     length:parseInt(fVal('fLen', _orig.length || 0))||0,
