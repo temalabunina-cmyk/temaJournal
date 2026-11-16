@@ -64,6 +64,40 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
 .b-coral{background:var(--coral-bg);color:var(--coral-tx)}
 .btn{padding:7px 14px;border:1px solid var(--brd2);border-radius:var(--r);background:var(--sur);color:var(--tx);font-size:20px;cursor:pointer}
 .btn:hover{background:var(--sur2)}
+/* Barra delle azioni (v.138): pulsanti tutti della stessa altezza */
+.tb-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.tb-status{display:inline-flex;align-items:center;gap:8px;margin-right:4px;white-space:nowrap}
+.tb-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:38px;padding:0 14px;font-size:14px;line-height:1;white-space:nowrap;border-radius:8px}
+.tb-main{font-weight:600}
+.tb-ic{font-size:15px;line-height:1;opacity:.8}
+.rep-info{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:15px;line-height:1.4;background:var(--sur2,#f6f6f4);border:1px solid var(--brd);border-radius:10px;padding:12px 14px;margin:6px 0 12px}
+.rep-info:empty{display:none}
+.rep-info dt{font-weight:600;color:var(--tx);white-space:nowrap}
+.rep-info dd{margin:0;color:var(--tx)}
+.rep-ok{color:#166534;font-weight:600}.rep-no{color:#b45309;font-weight:600}
+.rep-actions{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.rep-link{margin-left:auto}
+@media(max-width:700px){.rep-info{grid-template-columns:1fr;gap:2px}.rep-info dd{margin-bottom:8px}.rep-actions .tb-btn{width:100%}.rep-link{margin-left:0}}
+@media(max-width:700px){
+  .topbar{flex-direction:column;align-items:stretch}
+  body{padding:0 14px}
+  .tb-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;justify-content:stretch}
+  .tb-status{grid-column:1/-1;justify-content:flex-start}
+  .tb-btn{width:100%;height:44px;font-size:14px;white-space:normal;text-align:center;line-height:1.15;padding:0 8px}
+  .tb-main{grid-column:1/-1;font-size:16px}
+  .stats-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:1rem}
+  .stat{padding:.6rem .5rem}
+  .stat-lbl,.stat-sub{font-size:14px}
+  .stat-val{font-size:22px}
+  .tabs{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin-bottom:1rem}
+  .tabs::-webkit-scrollbar{display:none}
+  .tab{font-size:15px;padding:8px 10px}
+  select,input,textarea{max-width:100%}
+  .card{padding:.8rem .9rem}
+  .brand-sub{font-size:16px}
+  .save-lbl{font-size:15px}
+  .modal{width:94vw;padding:1rem}
+}
 .btn-p{background:var(--tx);color:var(--sur);border-color:var(--tx)}
 .btn-p:hover{opacity:.85}
 .btn-d{background:var(--red-bg);color:var(--red-tx);border-color:#f5b7b1}
@@ -146,18 +180,17 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
 <div class="topbar">
   <div>
       <div class="brand-name">TeMA Journal</div>
-      <div class="brand-sub">Gestione editoriale <span class="app-ver" id="appVersion" title="Versione dell'artefatto (aumenta di uno a ogni aggiornamento)">v.137 &middot; 16/11/2026</span></div>
+      <div class="brand-sub">Gestione editoriale <span class="app-ver" id="appVersion" title="Versione dell'artefatto (aumenta di uno a ogni aggiornamento)">v.138 &middot; 16/11/2026</span></div>
     </div>
   </div>
-  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-    <span class="save-dot" id="saveDot"></span>
-    <span class="save-lbl" id="saveLbl">Dati salvati</span>
-    <button class="btn btn-p" id="btnNuovo">+ Nuovo articolo</button>
-    <button class="btn" onclick="backupData()" title="Scarica backup JSON" style="padding:7px 10px;font-size:13px">&#128229; Backup</button>
-    <button class="btn" id="btnRicalcolaStep" onclick="ricalcolaStepTutti()" title="Ricalcola automaticamente lo step di tutti gli articoli in base ai dati presenti" style="padding:7px 10px;font-size:13px;display:none">&#9881; Ricalcola step</button>
-    <button class="btn" id="btnConvertiEsiti" onclick="convertiEsitiFinali()" title="Trasferisce accettazioni e rifiuti registrati nei cicli di revisione nella nuova sezione Decisione finale" style="padding:7px 10px;font-size:13px;display:none">&#9881; Converti decisioni finali</button>
-    <button class="btn" id="btnReportEditor" onclick="apriReportEditor()" title="Report delle modifiche degli editor da inviare al direttore e alla redazione" style="padding:7px 10px;font-size:13px;display:none">&#9993;&#65039; Report editor</button>
-    <button class="btn" id="btnControlloDati" onclick="controlloDati()" title="Elenca gli articoli a cui mancano dati obbligatori" style="padding:7px 10px;font-size:13px;display:none">&#128269; Controllo dati</button>
+  <div class="tb-actions">
+    <div class="tb-status"><span class="save-dot" id="saveDot"></span><span class="save-lbl" id="saveLbl">Dati salvati</span></div>
+    <button class="btn btn-p tb-btn tb-main" id="btnNuovo">+ Nuovo articolo</button>
+    <button class="btn tb-btn" onclick="backupData()" title="Scarica backup JSON"><span class="tb-ic">&#8681;</span>Backup</button>
+    <button class="btn tb-btn" id="btnRicalcolaStep" onclick="ricalcolaStepTutti()" title="Ricalcola automaticamente lo step di tutti gli articoli in base ai dati presenti" style="display:none"><span class="tb-ic">&#8635;</span>Ricalcola step</button>
+    <button class="btn tb-btn" id="btnConvertiEsiti" onclick="convertiEsitiFinali()" title="Trasferisce accettazioni e rifiuti registrati nei cicli di revisione nella nuova sezione Decisione finale" style="display:none"><span class="tb-ic">&#8644;</span>Converti decisioni finali</button>
+    <button class="btn tb-btn" id="btnReportEditor" onclick="apriReportEditor()" title="Report degli avanzamenti della settimana da inviare al direttore e alla redazione" style="display:none"><span class="tb-ic">&#9993;</span>Report settimanale</button>
+    <button class="btn tb-btn" id="btnControlloDati" onclick="controlloDati()" title="Elenca gli articoli a cui mancano dati obbligatori" style="display:none"><span class="tb-ic">&#10003;</span>Controllo dati</button>
   </div>
 </div>
 <input type="file" id="importFile" accept=".json" style="display:none">
@@ -529,19 +562,19 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
 <div class="modal-bg" id="repModal">
 <div class="modal" style="max-width:820px">
   <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:.5rem">
-    <h3 style="margin:0">Report degli editor</h3>
-    <button class="btn" onclick="document.getElementById('repModal').classList.remove('open')">Chiudi</button>
+    <h3 style="margin:0;font-size:clamp(17px,4.5vw,20px)">Report avanzamenti settimanali</h3>
+    <button class="btn tb-btn" onclick="document.getElementById('repModal').classList.remove('open')">Chiudi</button>
   </div>
   <div id="repConfig" style="display:none;background:#f8fafc;border:1px solid var(--brd);border-radius:8px;padding:10px 12px;margin-bottom:10px">
     <div style="font-size:13px;margin-bottom:6px">Inserisci il codice del report (una volta per browser). L'URL dell'app web &egrave; gi&agrave; impostato.</div>
     <div class="fr"><label>Codice</label><input id="repKey" placeholder="codice dal log"></div>
     <button class="btn btn-p" onclick="salvaConfigReport()">Salva e collega</button>
   </div>
-  <div id="repStato" style="font-size:13px;color:var(--tx2,#555);margin-bottom:10px"></div>
-  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
-    <button class="btn" id="btnRepAnteprima" onclick="anteprimaReport()">&#128065;&#65039; Anteprima</button>
-    <button class="btn btn-p" id="btnRepInvia" onclick="inviaReport(false)">&#9993;&#65039; Invia al direttore e alla redazione</button>
-    <button class="btn" onclick="mostraConfigReport()" style="margin-left:auto;font-size:12px">&#9881; Collegamento</button>
+  <dl id="repStato" class="rep-info"></dl>
+  <div class="rep-actions">
+    <button class="btn tb-btn" id="btnRepAnteprima" onclick="anteprimaReport()"><span class="tb-ic">&#128065;&#65039;</span>Anteprima</button>
+    <button class="btn btn-p tb-btn" id="btnRepInvia" onclick="inviaReport(false)"><span class="tb-ic">&#9993;</span>Invia al direttore e alla redazione</button>
+    <button class="btn tb-btn rep-link" onclick="mostraConfigReport()"><span class="tb-ic">&#9881;</span>Codice</button>
   </div>
   <div id="repConferma" style="display:none;background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:14px">
     Confermi l'invio del report adesso? Il report automatico del luned&igrave; resta invariato.
@@ -838,11 +871,14 @@ function _repCall(azione, extra) {
 function _repFmt(iso) { if (!iso) return 'mai'; var d = new Date(iso); return isNaN(d) ? iso : d.toLocaleString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }); }
 function _repMostraStato(info) {
   if (!info) return;
-  document.getElementById('repStato').innerHTML =
-    '<b>Destinatari:</b> ' + esc(info.direttore) + (info.copia && info.copia.length ? ' &middot; in copia: ' + info.copia.map(esc).join(', ') : '') + '<br>' +
-    '<b>Invio automatico:</b> ' + (info.attivatore ? 'attivo, ogni luned&igrave; alle ' + esc(info.orario || '8:30') : '<span style="color:#b45309">non attivo</span>') +
-    ' &middot; ultimo: ' + _repFmt(info.ultimoAutomatico) +
-    ' &middot; <b>ultimo invio manuale:</b> ' + _repFmt(info.ultimoManuale) + (info.ultimoManualeDa ? ' (' + esc(info.ultimoManualeDa) + ')' : '');
+  var riga = function (t, v) { return '<dt>' + t + '</dt><dd>' + v + '</dd>'; };
+  var html =
+    riga('Destinatario', esc(info.direttore) + ' <span style="opacity:.7">(direttore)</span>') +
+    riga('In copia', info.copia && info.copia.length ? info.copia.map(esc).join('<br>') + ' <span style="opacity:.7">(redazione)</span>' : '&mdash;') +
+    riga('Invio automatico', info.attivatore ? '<span class="rep-ok">&#10003; attivo</span> &middot; ogni luned&igrave; alle ' + esc(info.orario || '8:30') : '<span class="rep-no">non attivo</span>') +
+    riga('Ultimo automatico', _repFmt(info.ultimoAutomatico)) +
+    riga('Ultimo manuale', _repFmt(info.ultimoManuale) + (info.ultimoManualeDa ? ' &middot; ' + esc(info.ultimoManualeDa) : ''));
+  document.getElementById('repStato').innerHTML = html;
 }
 function mostraConfigReport() {
   var c = _repCfg(); document.getElementById('repKey').value = c.key;
@@ -3694,6 +3730,7 @@ function updateTabCounts() {
 function switchTab(name) {
   updateTabCounts();
   document.querySelectorAll('.tab').forEach(function(t){ t.classList.toggle('active',t.dataset.tab===name); });
+  try { var _at = document.querySelector('.tab.active'); var _tb = _at && _at.parentNode; if (_tb && _tb.scrollWidth > _tb.clientWidth) _tb.scrollLeft = Math.max(0, _at.offsetLeft - _tb.offsetLeft - 16); } catch (e) {}
   document.querySelectorAll('.sec').forEach(function(s){ s.classList.toggle('active',s.id==='sec-'+name); });
   if (name==='tutti')         renderTutti();
   if (name==='gatekeeper')    renderGk();
