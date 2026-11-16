@@ -205,12 +205,12 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
 <div class="topbar">
   <div class="tb-brand">
       <div class="brand-name">TeMA Journal</div>
-      <div class="brand-sub">Gestione editoriale <span class="app-ver" id="appVersion" title="Versione dell'artefatto (aumenta di uno a ogni aggiornamento)">v.149 &middot; 16/11/2026</span></div>
+      <div class="brand-sub">Gestione editoriale <span class="app-ver" id="appVersion" title="Versione dell'artefatto (aumenta di uno a ogni aggiornamento)">v.150 &middot; 16/11/2026</span></div>
   </div>
   <div class="tb-user" id="tbUser" style="display:none">
     <span class="tb-av" id="tbAv"></span>
     <span class="tb-uinfo"><b id="tbUserName"></b><small id="tbUserRole"></small></span>
-    <select id="vediCome" class="tb-vedi" style="display:none" onchange="vediCome(this.value)" title="Vedi la dashboard come un altro account (sola lettura)"></select>
+    <select id="vediCome" class="tb-vedi" style="display:none" onchange="vediCome(this.value)" title="Vedi e lavora come un altro account"></select>
     <button class="btn tb-btn" onclick="esci()" title="Chiude la sessione su questo browser"><span class="tb-ic">&#8618;</span>Esci</button>
   </div>
   <div id="vediBanner" class="vedi-banner" style="display:none"></div>
@@ -1021,6 +1021,7 @@ function addNote() {
   var idx = articles.findIndex(function(a){ return a.id === editingArtId; });
   if (idx < 0) return;
   var note = { text: txt, date: new Date().toISOString(), author: currentUser || 'RedazioneTeMA' };
+  if (_vistaCome && _sessione) note.da = _sessione.utente;
   if (!articles[idx].notesLog) articles[idx].notesLog = [];
   articles[idx].notesLog.unshift(note);
   document.getElementById('fNewNote').value = '';
@@ -1061,7 +1062,7 @@ function renderNotesLog(log) {
     var editedLabel = n.edited ? '<span style="font-size:11px;color:#aaa;font-style:italic"> · modificata</span>' : '';
     return '<div id="note-row-'+i+'" style="'+discussBg+'border:1px solid var(--brd);border-radius:var(--r);padding:8px 10px;font-size:14px">'
       + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">'
-      + '<span style="font-size:12px;color:#888"><strong>'+esc(n.author||'')+'</strong> &middot; '+d+editedLabel+'</span>'
+      + '<span style="font-size:12px;color:#888"><strong>'+esc(n.author||'')+'</strong>'+(n.da?' (inserita da '+esc(n.da)+')':'')+' &middot; '+d+editedLabel+'</span>'
       + '<div style="display:flex;gap:6px;align-items:center">'
       + (canDiscuss ? '<button onclick="toggleDiscuss(\''+editingArtId+'\','+i+')" style="background:none;border:1px solid #1976d2;border-radius:4px;color:#1976d2;cursor:pointer;font-size:12px;padding:2px 6px" title="Segna da discutere">'+(n.discuss?'📌 Da discutere':'📌')+'</button>' : '')
       + (canEdit ? '<button onclick="startEditNote('+i+')" id="note-edit-btn-'+i+'" style="background:none;border:1px solid #888;border-radius:4px;color:#555;cursor:pointer;font-size:12px;padding:2px 6px" title="Modifica nota">✏️</button>' : '')
@@ -4084,8 +4085,8 @@ function _mostraUtente(s) {
   box.style.display = 'flex';
 }
 // ── "Vedi come" per la Redazione (v.149) ──────────────────────────────
-// La Redazione può vedere la dashboard con i permessi di un altro account, in SOLA LETTURA:
-// nessun salvataggio, nota o invio del report finché non si torna al proprio account.
+// La Redazione può vedere la dashboard con i permessi di un altro account e lavorare a suo nome
+// (dalla v.150 i salvataggi sono consentiti; le note registrano anche chi le ha scritte: campo 'da').
 var VEDI_ACCOUNT = [
   ['DirettoreTeMA', 'direttore'], ['GateKeeper', 'gatekeeper'], ['EditorTeMA', 'editor'],
   ['Carmen Guida', 'editor'], ['Floriana Zucaro', 'editor'], ['Gerardo Carpentieri', 'editor'], ['Peppe Mazzeo', 'editor'],
@@ -4101,6 +4102,7 @@ function vediCome(utente) {
   location.reload();
 }
 function _soloLettura(cosa) {
+  return false; // dalla v.150 la Redazione può salvare anche a nome dell'account che sta vedendo
   if (!_vistaCome) return false;
   setSaving(false); document.getElementById('saveLbl').textContent = '\u{1F441} Sola lettura';
   ssShow('\u{1F441}', 'Modalità "Vedi come"', 'Stai vedendo la dashboard come ' + _vistaCome.utente + ': ' + (cosa || 'le modifiche') + ' non vengono salvate. Torna al tuo account per lavorare.', true, '#d97706');
@@ -4114,7 +4116,7 @@ function _impostaVediCome(s) {
   }).join('');
   sel.style.display = '';
   if (_vistaCome) {
-    ban.innerHTML = '<span>\u{1F441} Stai vedendo la dashboard come <b>' + esc(_vistaCome.utente) + '</b> &mdash; sola lettura, nessuna modifica viene salvata.</span>' +
+    ban.innerHTML = '<span>\u{1F441} Stai vedendo la dashboard come <b>' + esc(_vistaCome.utente) + '</b> &mdash; le modifiche, le note e gli invii vengono salvati <b>a nome di ' + esc(_vistaCome.utente) + '</b>.</span>' +
       '<button class="btn tb-btn" onclick="vediCome(\'\')">Torna a ' + esc(s.utente) + '</button>';
     ban.style.display = 'flex';
   }
