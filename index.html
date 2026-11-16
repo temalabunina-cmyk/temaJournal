@@ -181,6 +181,10 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
     <label style="display:flex;align-items:center;gap:8px;font-size:15px;margin:2px 0 12px;cursor:pointer"><input type="checkbox" id="loginRicorda" style="width:18px;height:18px"> Resta collegato su questo computer (12 ore)</label>
     <div id="loginErr" style="font-size:16px;color:var(--red);margin-bottom:12px;display:none">Username o password errati.</div>
     <button class="btn btn-p" id="btnLogin" onclick="doLogin()" style="width:100%;padding:10px;font-size:16px">Accedi</button>
+    <div id="gAccesso" style="display:none;margin-top:16px">
+      <div style="display:flex;align-items:center;gap:10px;color:var(--tx3,#888);font-size:14px;margin-bottom:12px"><span style="flex:1;height:1px;background:var(--brd)"></span>oppure<span style="flex:1;height:1px;background:var(--brd)"></span></div>
+      <div id="gBtn" style="display:flex;justify-content:center"></div>
+    </div>
   </div>
 </div>
 
@@ -188,7 +192,7 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
 <div class="topbar">
   <div>
       <div class="brand-name">TeMA Journal</div>
-      <div class="brand-sub">Gestione editoriale <span class="app-ver" id="appVersion" title="Versione dell'artefatto (aumenta di uno a ogni aggiornamento)">v.143 &middot; 16/11/2026</span></div>
+      <div class="brand-sub">Gestione editoriale <span class="app-ver" id="appVersion" title="Versione dell'artefatto (aumenta di uno a ogni aggiornamento)">v.144 &middot; 16/11/2026</span></div>
     </div>
   </div>
   <div class="tb-actions">
@@ -4076,9 +4080,33 @@ function doLogin() {
     err.textContent = 'Impossibile verificare l\'accesso (' + e.message + '). Controlla la connessione e riprova.'; err.style.display = 'block';
   });
 }
+// ── Accesso con Google (v.144) ─────────────────────────────────────────
+// ID client OAuth pubblico (non è un segreto): lo stesso valore è in Accesso.gs.
+var GOOGLE_CLIENT_ID = '';
+function _googleCallback(resp) {
+  var err = document.getElementById('loginErr');
+  err.style.display = 'none';
+  if (!resp || !resp.credential) return;
+  _authPost({ azione: 'loginGoogle', credential: resp.credential }).then(function (j) {
+    if (!j.ok) { err.textContent = j.errore || 'Accesso con Google non riuscito.'; err.style.display = 'block'; return; }
+    var _ric = document.getElementById('loginRicorda');
+    _entra({ token: j.token, utente: j.utente, ruolo: j.ruolo, scade: j.scade }, !!(_ric && _ric.checked));
+  }).catch(function (e) { err.textContent = 'Impossibile verificare l\'accesso (' + e.message + ').'; err.style.display = 'block'; });
+}
+function _initGoogle() {
+  if (!GOOGLE_CLIENT_ID || !window.google || !google.accounts || !google.accounts.id) return;
+  google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: _googleCallback, auto_select: false, ux_mode: 'popup' });
+  google.accounts.id.renderButton(document.getElementById('gBtn'), { theme: 'outline', size: 'large', text: 'signin_with', shape: 'rectangular', locale: 'it', width: 300 });
+  document.getElementById('gAccesso').style.display = 'block';
+}
+if (GOOGLE_CLIENT_ID) {
+  (function () { var sc = document.createElement('script'); sc.src = 'https://accounts.google.com/gsi/client'; sc.async = true; sc.defer = true; sc.onload = _initGoogle; document.head.appendChild(sc); })();
+}
+
 function esci() {
   var t = _sessione && _sessione.token;
   _salvaSessione(null);
+  try { if (window.google && google.accounts && google.accounts.id) google.accounts.id.disableAutoSelect(); } catch (e) {}
   if (t) _authPost({ azione: 'logout', token: t }).catch(function () {});
   location.reload();
 }
