@@ -178,6 +178,7 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
       <label>Password</label>
       <input type="password" id="loginPass" placeholder="Password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
     </div>
+    <label style="display:flex;align-items:center;gap:8px;font-size:15px;margin:2px 0 12px;cursor:pointer"><input type="checkbox" id="loginRicorda" style="width:18px;height:18px"> Resta collegato su questo computer (12 ore)</label>
     <div id="loginErr" style="font-size:16px;color:var(--red);margin-bottom:12px;display:none">Username o password errati.</div>
     <button class="btn btn-p" id="btnLogin" onclick="doLogin()" style="width:100%;padding:10px;font-size:16px">Accedi</button>
   </div>
@@ -187,7 +188,7 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
 <div class="topbar">
   <div>
       <div class="brand-name">TeMA Journal</div>
-      <div class="brand-sub">Gestione editoriale <span class="app-ver" id="appVersion" title="Versione dell'artefatto (aumenta di uno a ogni aggiornamento)">v.142 &middot; 16/11/2026</span></div>
+      <div class="brand-sub">Gestione editoriale <span class="app-ver" id="appVersion" title="Versione dell'artefatto (aumenta di uno a ogni aggiornamento)">v.143 &middot; 16/11/2026</span></div>
     </div>
   </div>
   <div class="tb-actions">
@@ -4039,9 +4040,17 @@ function _authPost(dati) {
     .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
     .then(function (t) { try { return JSON.parse(t); } catch (e) { throw new Error('risposta non valida dal server di accesso'); } });
 }
-function _salvaSessione(s) { _sessione = s; try { if (s) localStorage.setItem('tema_sessione', JSON.stringify(s)); else localStorage.removeItem('tema_sessione'); } catch (e) {} }
-function _entra(s) {
-  _salvaSessione(s);
+// Senza "Resta collegato" la sessione vale solo per la scheda aperta (sessionStorage):
+// chiudendo la scheda o il browser, al link successivo si torna al login.
+function _salvaSessione(s, ricorda) {
+  _sessione = s;
+  try {
+    localStorage.removeItem('tema_sessione'); sessionStorage.removeItem('tema_sessione');
+    if (s) { s.ricorda = !!ricorda; (ricorda ? localStorage : sessionStorage).setItem('tema_sessione', JSON.stringify(s)); }
+  } catch (e) {}
+}
+function _entra(s, ricorda) {
+  _salvaSessione(s, ricorda);
   adminMode = s.ruolo === 'admin';
   currentUser = s.utente;
   document.getElementById('loginScreen').style.display = 'none';
@@ -4061,7 +4070,7 @@ function doLogin() {
       document.getElementById('loginPass').value = ''; document.getElementById('loginPass').focus(); return;
     }
     document.getElementById('loginPass').value = '';
-    _entra({ token: j.token, utente: j.utente, ruolo: j.ruolo, scade: j.scade });
+    var _ric = document.getElementById('loginRicorda'); _entra({ token: j.token, utente: j.utente, ruolo: j.ruolo, scade: j.scade }, !!(_ric && _ric.checked));
   }).catch(function (e) {
     if (btn) { btn.disabled = false; btn.textContent = 'Accedi'; }
     err.textContent = 'Impossibile verificare l\'accesso (' + e.message + '). Controlla la connessione e riprova.'; err.style.display = 'block';
@@ -4075,10 +4084,11 @@ function esci() {
 }
 // All'apertura: se in questo browser c'è una sessione ancora valida, entra senza chiedere la password
 (function () {
-  var s = null; try { s = JSON.parse(localStorage.getItem('tema_sessione') || 'null'); } catch (e) {}
+  var s = null, ricorda = false;
+  try { s = JSON.parse(sessionStorage.getItem('tema_sessione') || 'null'); if (!s) { s = JSON.parse(localStorage.getItem('tema_sessione') || 'null'); if (s && !s.ricorda) s = null; ricorda = !!s; } } catch (e) {}
   if (!s || !s.token || !s.scade || new Date(s.scade) < new Date()) { _salvaSessione(null); return; }
   _authPost({ azione: 'sessione', token: s.token }).then(function (j) {
-    if (j.ok) _entra({ token: s.token, utente: j.utente, ruolo: j.ruolo, scade: j.scade }); else _salvaSessione(null);
+    if (j.ok) _entra({ token: s.token, utente: j.utente, ruolo: j.ruolo, scade: j.scade }, ricorda); else _salvaSessione(null);
   }).catch(function () {});
 })();
 
