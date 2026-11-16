@@ -146,7 +146,7 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
 <div class="topbar">
   <div>
       <div class="brand-name">TeMA Journal</div>
-      <div class="brand-sub">Gestione editoriale <span class="app-ver" id="appVersion" title="Versione dell'artefatto (aumenta di uno a ogni aggiornamento)">v.134 &middot; 16/11/2026</span></div>
+      <div class="brand-sub">Gestione editoriale <span class="app-ver" id="appVersion" title="Versione dell'artefatto (aumenta di uno a ogni aggiornamento)">v.135 &middot; 16/11/2026</span></div>
     </div>
   </div>
   <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
@@ -533,7 +533,7 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
     <button class="btn" onclick="document.getElementById('repModal').classList.remove('open')">Chiudi</button>
   </div>
   <div id="repConfig" style="display:none;background:#f8fafc;border:1px solid var(--brd);border-radius:8px;padding:10px 12px;margin-bottom:10px">
-    <div style="font-size:13px;margin-bottom:6px">Configurazione del collegamento (una volta per browser): URL dell'app web "TeMA Report" e codice indicato nel log dell'installazione.</div>
+    <div style="font-size:13px;margin-bottom:6px">Inserisci il codice del report (una volta per browser). L'URL dell'app web &egrave; gi&agrave; impostato.</div>
     <div class="fr"><label>URL app web</label><input id="repUrl" placeholder="https://script.google.com/macros/s/.../exec"></div>
     <div class="fr"><label>Codice</label><input id="repKey" placeholder="codice dal log"></div>
     <button class="btn btn-p" onclick="salvaConfigReport()">Salva e collega</button>
@@ -821,9 +821,10 @@ function setSaving(s) {
   else   { dot.classList.remove('saving'); lbl.textContent = 'Dati salvati'; }
 }
 // ── Report degli editor (app web separata "TeMA Report") ──────────────
+var REPORT_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbx40x2X1P-DnTXAZvBPE3c_vGRJ5LvSF4RnDUz2SAM2_kXmDvrUmTOr2hB60riT6nA2/exec';
 function _repCfg() {
-  var c = { url: '', key: '' };
-  try { c.url = localStorage.getItem('tema_reportUrl') || ''; c.key = localStorage.getItem('tema_reportKey') || ''; } catch (e) {}
+  var c = { url: REPORT_URL_DEFAULT, key: '' };
+  try { c.url = localStorage.getItem('tema_reportUrl') || REPORT_URL_DEFAULT; c.key = localStorage.getItem('tema_reportKey') || ''; } catch (e) {}
   return c;
 }
 function _repMsg(html, col) { var m = document.getElementById('repMsg'); m.innerHTML = html || ''; m.style.color = col || ''; }
