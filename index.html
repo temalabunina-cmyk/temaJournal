@@ -205,7 +205,7 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
 <div class="topbar">
   <div class="tb-brand">
       <div class="brand-name">TeMA Journal</div>
-      <div class="brand-sub">Gestione editoriale <span class="app-ver" id="appVersion" title="Versione dell'artefatto (aumenta di uno a ogni aggiornamento)">v.153 &middot; 17/11/2026</span></div>
+      <div class="brand-sub">Gestione editoriale <span class="app-ver" id="appVersion" title="Versione dell'artefatto (aumenta di uno a ogni aggiornamento)">v.154 &middot; 17/11/2026</span></div>
   </div>
   <div class="tb-user" id="tbUser" style="display:none">
     <span class="tb-av" id="tbAv"></span>
@@ -698,7 +698,7 @@ const SC = {
 const EDITORS = ['Carmen Guida','Floriana Zucaro','Gerardo Carpentieri','Peppe Mazzeo','Romano Fistola','Rosa Anna La Rocca','Rosaria Battarra','Stefano Franco'];
 const COPYEDITORS = ['Gerardo Carpentieri','Laura Ascione','Stella Pennino','Tonia Stiuso','Valerio Martinelli'];
 const LS_KEY = 'tema-journal-v2';
-const GS_URL = 'https://script.google.com/macros/s/AKfycbyc7XUn3DYhWnPDNxgvT2ts0vqJ8c0gkG7O9kmYUnmqY_UDA8E3VUXp0sPWxBj5fVKX/exec';
+// Dalla v.154 i dati passano da _api() (app web TeMA Report, con controllo di accesso): il vecchio script del foglio non è più usato.
 
 let _lastSavedArtId = null;
 let issues = [], articles = [], editingArtId = null, editingIssKey = null;
@@ -777,13 +777,8 @@ function hydrateScopusMetrics(data) {
 
 async function loadScopusMetrics(forceRefresh) {
   try {
-    var url = GS_URL + '?action=scopusMetrics&sourceId=21101185191';
-    if (forceRefresh) url += '&_ts=' + Date.now();
-
-    var resp = await fetch(url, { method: 'GET', cache: 'no-store' });
-    if (!resp.ok) throw new Error('HTTP ' + resp.status);
-
-    var data = await resp.json();
+    if (!_sessione) return;
+    var data = await _api('dati.scopus');
     if (!data || data.ok === false) {
       throw new Error(data && data.error ? data.error : 'Dati Scopus non disponibili');
     }
@@ -801,12 +796,10 @@ function loadData() {
   document.getElementById('saveLbl').textContent = 'Caricamento...';
 
   function doFetch(attempt) {
-    fetch(GS_URL + '?_t=' + Date.now(), { redirect: 'follow' })
-      .then(function(r) {
-        if (!r.ok) throw new Error('HTTP ' + r.status);
-        return r.text();
-      })
-      .then(function(text) {
+    _api('dati.leggi')
+      .then(function(j) {
+        if (j && j.ok === false && j.errore) { setSaving(false); document.getElementById('saveLbl').textContent = '\u26a0 ' + j.errore; return; }
+        var text = JSON.stringify(j);
         if (!text || text.trim().startsWith('<')) {
           if (attempt < 3) {
             setTimeout(function(){ doFetch(attempt + 1); }, 2000);
@@ -894,13 +887,13 @@ function setSaving(s) {
 var REPORT_URL_DEFAULT = 'https://script.google.com/macros/s/AKfycbw3lIrMQHtjhQ27ejx_ar4rJdsMoJjRAsBoted8ho9dPELNx4uWLZoxeFH8BKlTvgqc7Q/exec';
 function _repCfg() {
   var c = { url: REPORT_URL_DEFAULT, key: '' };
-  try { c.key = localStorage.getItem('tema_reportKey') || ''; localStorage.removeItem('tema_reportUrl'); } catch (e) {}
+  try { localStorage.removeItem('tema_reportKey'); localStorage.removeItem('tema_reportUrl'); } catch (e) {}
   return c;
 }
 function _repMsg(html, col) { var m = document.getElementById('repMsg'); m.innerHTML = html || ''; m.style.color = col || ''; }
 function _repCall(azione, extra) {
   var c = _repCfg();
-  var auth = (_sessione && _sessione.token) ? '&token=' + encodeURIComponent(_sessione.token) : (c.key ? '&chiave=' + encodeURIComponent(c.key) : '');
+  var auth = (_sessione && _sessione.token) ? '&token=' + encodeURIComponent(_sessione.token) : '';
   if (!auth) return Promise.reject(new Error('accesso non disponibile'));
   var q = '?azione=' + encodeURIComponent(azione) + auth + (extra || '') + '&_t=' + Date.now();
   return fetch(c.url + q, { redirect: 'follow', cache: 'no-store' })
@@ -935,7 +928,7 @@ function apriReportEditor() {
   document.getElementById('repFrame').style.display = 'none';
   document.getElementById('repStato').innerHTML = '';
   var c = _repCfg();
-  if (!(_sessione && _sessione.token) && !c.key) { mostraConfigReport(); _repMsg('Inserisci il codice del report.', ''); return; }
+  if (!(_sessione && _sessione.token)) { _repMsg('Sessione scaduta: rientra nella dashboard.', '#dc2626'); return; }
   document.getElementById('repConfig').style.display = 'none';
   _repMsg('Controllo il collegamento...', '');
   _repCall('stato').then(function (j) { _repMostraStato(j.info); _repMsg('', ''); })
@@ -963,11 +956,7 @@ function inviaReport(confermato) {
     .then(function () { b.disabled = false; });
 }
 
-function sendNotification(action, artId, artTitle) {
-  var params = new URLSearchParams({action: action, artId: artId, artTitle: artTitle});
-  fetch(GS_URL + '?' + params.toString(), { method: 'POST', body: '' })
-    .catch(function() {});
-}
+function sendNotification(action, artId, artTitle) { /* dalla v.154 le notifiche email le invia il server (Dati.gs) */ }
 
 
 function backupData() {
@@ -989,9 +978,8 @@ async function loadDriveText() {
   var btn = document.querySelector('[onclick="loadDriveText()"]');
   if (btn) { btn.textContent = '⏳ Caricamento...'; btn.disabled = true; }
   try {
-    var resp = await fetch('https://script.google.com/macros/s/AKfycbwXJ3X8v7ol0xRfzSPuiife5RHIbYJFIFYTAAMoipMPMRhtss8YtKLDx6pUgvZLUGXM/exec?action=gdoc&fileId=' + DOC_ID, { cache: 'no-store' });
-    if (!resp.ok) throw new Error('HTTP ' + resp.status);
-    var data = await resp.json();
+    var data = await _api('dati.noteEditoriali');
+    if (!data || data.ok === false) throw new Error((data && data.errore) || 'note non disponibili');
     var txt = (data.html || data.text || '').trim();
     if (txt) {
       vDriveText = txt;
@@ -2316,7 +2304,7 @@ function renderTeam() {
     (gk.length ? '<div>'+gk.map(function(a){
       return '<div style="font-size:20px;padding:4px 0;border-bottom:1px solid var(--brd);display:flex;gap:8px;align-items:center">' +
         '<span style="font-family:monospace;color:var(--tx3);font-size:16px;flex-shrink:0">#'+esc(a.id)+'</span>' +
-        '<span style="flex:1;line-height:1.4">'+(a.title.length>70?a.title.slice(0,70)+'...':a.title)+'</span>' +
+        '<span style="flex:1;line-height:1.4">'+esc(a.title.length>70?a.title.slice(0,70)+'...':a.title)+'</span>' +
         '<span class="badge b-gk" style="white-space:nowrap">'+sl(a.step||'1')+'</span>' +
         '</div>';
     }).join('')+'</div>' : '') + '</div>';
@@ -2332,7 +2320,7 @@ function renderTeam() {
     h += '<div>'+daAssegnare.map(function(a){
       return '<div style="font-size:20px;padding:5px 0;border-bottom:1px solid var(--brd);display:flex;gap:8px;align-items:center">'
         + '<span style="font-family:monospace;color:var(--tx3);font-size:16px;flex-shrink:0">#'+esc(a.id)+'</span>'
-        + '<span style="flex:1;line-height:1.4">'+(a.title.length>65?a.title.slice(0,65)+'...':a.title)+'</span>'
+        + '<span style="flex:1;line-height:1.4">'+esc(a.title.length>65?a.title.slice(0,65)+'...':a.title)+'</span>'
         + ''
         + '</div>';
     }).join('')+'</div></div>';
@@ -2351,7 +2339,7 @@ function renderTeam() {
       (mine.length ? '<div>'+mine.map(function(a){
         return '<div style="font-size:20px;padding:4px 0;border-bottom:1px solid var(--brd);display:flex;gap:8px">' +
           '<span style="font-family:monospace;color:var(--tx3);font-size:16px">#'+esc(a.id)+'</span>' +
-          '<span style="flex:1">'+(a.title.length>65?a.title.slice(0,65)+'...':a.title)+'</span>' +
+          '<span style="flex:1">'+esc(a.title.length>65?a.title.slice(0,65)+'...':a.title)+'</span>' +
           '<span style="font-size:18px;color:var(--purple-tx);font-weight:600;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px;display:inline-block">'+stAbbr(a.step||'')+'</span>' +
           '</div>';
       }).join('')+'</div>' : '') + '</div>';
@@ -2369,7 +2357,7 @@ function renderTeam() {
     h += '<div>'+daCopy.map(function(a){
       return '<div style="font-size:20px;padding:5px 0;border-bottom:1px solid var(--brd);display:flex;gap:8px;align-items:center">'
         + '<span style="font-family:monospace;color:var(--tx3);font-size:16px;flex-shrink:0">#'+esc(a.id)+'</span>'
-        + '<span style="flex:1;line-height:1.4">'+(a.title.length>65?a.title.slice(0,65)+'...':a.title)+'</span>'
+        + '<span style="flex:1;line-height:1.4">'+esc(a.title.length>65?a.title.slice(0,65)+'...':a.title)+'</span>'
         + (a.editor?'<span style="font-size:18px;color:var(--blue-tx);white-space:nowrap">'+esc(a.editor)+'</span>':'')
         + '<span class="badge" style="background:var(--purple-bg);color:var(--purple-tx);white-space:nowrap">St.17</span>'
         + '</div>';
@@ -2382,7 +2370,7 @@ function renderTeam() {
       var _rowBg = a.vistoRedazione ? 'background:#d1fae5;border-radius:4px;padding:4px 6px;' : 'padding:4px 0;';
       return '<div style="font-size:20px;'+_rowBg+'border-bottom:1px solid var(--brd);display:flex;gap:8px;align-items:center">'
         + '<span style="font-family:monospace;color:var(--tx3);font-size:16px;flex-shrink:0">#'+esc(a.id)+'</span>'
-        + '<span style="flex:1;line-height:1.4">'+(a.title.length>55?a.title.slice(0,55)+'...':a.title)+'</span>'
+        + '<span style="flex:1;line-height:1.4">'+esc(a.title.length>55?a.title.slice(0,55)+'...':a.title)+'</span>'
         + (a.editor?'<span style="font-size:18px;color:var(--blue-tx);white-space:nowrap;flex-shrink:0">'+esc(a.editor)+'</span>':'')
         + '</div>';
     }).join('');
@@ -2407,7 +2395,7 @@ function renderNumeri() {
         '<div>' +
           '<div style="display:flex;align-items:baseline;gap:6px;margin-bottom:2px">' +
             '<span style="font-size:16px;font-weight:700;color:var(--tx3);font-family:monospace;flex-shrink:0">#'+esc(a.id)+'</span>' +
-            '<span style="font-size:20px;font-weight:600;line-height:1.4">'+(a.title.length>80?a.title.slice(0,80)+'...':a.title)+'</span>' +
+            '<span style="font-size:20px;font-weight:600;line-height:1.4">'+esc(a.title.length>80?a.title.slice(0,80)+'...':a.title)+'</span>' +
           '</div>' +
           '<div style="font-size:20px;color:var(--tx2);margin-top:2px">'+esc(a.authors)+(a.affiliation?' &middot; '+esc(a.affiliation):'')+'</div>' +
           (a.editor ? '<div style="font-size:20px;color:var(--blue-tx);font-weight:600;margin-top:2px">'+esc(a.editor)+'</div>' : '') +
@@ -4058,6 +4046,18 @@ function isEditorAccount() { return EDITOR_ACCOUNTS.indexOf(currentUser) >= 0; }
 // Le password sono verificate dall'app web "TeMA Report" (file Accesso.gs), che
 // restituisce un token di sessione valido 12 ore, salvato in questo browser.
 var AUTH_URL = REPORT_URL_DEFAULT;
+// ── Dati tramite l'app web con controllo di accesso (v.154) ────────────
+// Ogni lettura e salvataggio passa da TeMA Report (Dati.gs) con il token di sessione.
+function _api(azione, dati) {
+  var corpo = Object.assign({ azione: azione, token: _sessione && _sessione.token }, dati || {});
+  return fetch(AUTH_URL, { method: 'POST', redirect: 'follow', body: JSON.stringify(corpo) })
+    .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
+    .then(function (t) {
+      var j; try { j = JSON.parse(t); } catch (e) { throw new Error('risposta non valida: ' + _rispostaServer(t)); }
+      if (j && j.sessioneScaduta) { _salvaSessione(null); setTimeout(function () { alert('La sessione è scaduta: rientra nella dashboard.'); location.reload(); }, 50); }
+      return j;
+    });
+}
 // Versione e data anche nella schermata di accesso (copiate dall'etichetta dell'intestazione)
 try { document.getElementById('loginVer').textContent = document.getElementById('appVersion').textContent; } catch (e) {}
 var _sessione = null;
@@ -4364,31 +4364,23 @@ function persistNote(artId,note){
   if (_saveBlocked) { _bloccaSalvataggio_(_saveBlocked); return; }
   setSaving(true);document.getElementById('saveLbl').textContent='Salvataggio nota...';
   ssShow('','Salvataggio nota...','Aggiunta nota a Google Sheets...',false,'#2563eb');
-  var sd=JSON.stringify({action:'appendNote',artId:artId,note:note});
-  var url=GS_URL+'?m=save&d='+encodeURIComponent(_senzaPercento(sd))+'&_t='+Date.now();
   var att=0;
   function tryNote(){
     att++;
-    var xhr=new XMLHttpRequest();xhr.open('GET',url,true);xhr.timeout=20000;
-    xhr.onload=function(){
+    _api('dati.nota',{artId:artId,note:note}).then(function(j){
       setSaving(false);
-      try{
-        var j=JSON.parse(xhr.responseText);
-        if(j.result==='OK'){
-          document.getElementById('saveLbl').textContent='Nota salvata \u2713';
-          ssShow('\u2705','Nota salvata!','La nota \u00e8 stata aggiunta correttamente.',true,'#16a34a');
-          if(j.notesLog){var i2=articles.findIndex(function(a){return a.id===artId;});if(i2>=0){articles[i2].notesLog=j.notesLog;renderNotesLog(j.notesLog);}}
-        }else{
-          if(att<3){setSaving(true);ssShow('','Riprovo ('+att+'/3)...','Nuovo tentativo...',false,'#d97706');setTimeout(tryNote,2500);return;}
-          ssShow('\u274c','Errore nota','La nota non \u00e8 stata salvata dopo 3 tentativi. Riprova.',true,'#dc2626');
-        }
-      }catch(e){document.getElementById('saveLbl').textContent='Nota salvata \u2713';ssShow('\u2705','Nota salvata','Nota inviata correttamente.',true,'#16a34a');}
-    };
-    xhr.onerror=xhr.ontimeout=function(){
+      if(j.ok){
+        document.getElementById('saveLbl').textContent='Nota salvata ✓';
+        ssShow('✅','Nota salvata!','La nota è stata aggiunta correttamente.',true,'#16a34a');
+        if(j.notesLog){var i2=articles.findIndex(function(a){return a.id===artId;});if(i2>=0){articles[i2].notesLog=j.notesLog;_baseArts[String(artId)]=JSON.stringify(articles[i2]);renderNotesLog(j.notesLog);}}
+      }else{
+        document.getElementById('saveLbl').textContent='⚠ Nota non salvata';
+        ssShow('❌','Nota non salvata',esc(j.errore||'Errore sconosciuto'),true,'#dc2626');
+      }
+    }).catch(function(e){
       if(att<3){setSaving(true);ssShow('','Riprovo ('+att+'/3)...','Errore rete, nuovo tentativo...',false,'#d97706');setTimeout(tryNote,3000);return;}
-      setSaving(false);ssShow('\u274c','Errore di rete','Impossibile salvare la nota dopo 3 tentativi.',true,'#dc2626');
-    };
-    xhr.send();
+      setSaving(false);ssShow('❌','Errore di rete','Impossibile salvare la nota: '+esc(e.message),true,'#dc2626');
+    });
   }
   tryNote();
 }
@@ -4461,14 +4453,14 @@ function _mergeWithServer(artId) {
     var idx = articles.findIndex(function(a){ return a.id === artId; });
     var baseS = _baseArts[String(artId)];
     if (idx < 0 || !baseS) return Promise.resolve(info);   // articolo nuovo: niente da unire
-    return _fetchJSON(GS_URL + '?action=getArticle&artId=' + encodeURIComponent(artId) + '&_t=' + Date.now())
+    return _api('dati.articolo', { artId: artId })
       .then(function(r) {
         if (r && r.article) articles[idx] = _mergeArticle(JSON.parse(baseS), articles[idx], r.article, info);
         info.ok = true; return info;
       })
       .catch(function(e){ console.warn('[TeMA] Unione non riuscita, salvo senza unire:', e); return info; });
   }
-  return _fetchJSON(GS_URL + '?_t=' + Date.now())
+  return _api('dati.leggi')
     .then(function(g) {
       if (!g || !Array.isArray(g.articles) || !g.articles.length) throw new Error('risposta non valida');
       var srvMap = {}; g.articles.forEach(function(a){ srvMap[String(a.id)] = a; });
@@ -4555,55 +4547,43 @@ function persistSend_(artId, mergeInfo, done){
   var snap=null;
   if(artId){var a0=articles.find(function(a){return a.id===artId;});if(a0)snap=JSON.parse(JSON.stringify(a0));}
   var _altri = mergeInfo && mergeInfo.altri ? ' Incorporate anche '+mergeInfo.altri+' modifiche di altri utenti.' : '';
-  var saveData=snap?JSON.stringify({action:'saveArticle',article:snap}):JSON.stringify({action:'saveAll',issues:issues,articles:articles,bannedRevisori:bannedRevisori});
-  var url=GS_URL+'?m=save&d='+encodeURIComponent(_senzaPercento(saveData))+'&_t='+Date.now();
-  var useGet=url.length<7000;
+  if (!snap && !(adminMode || (_sessione && _sessione.ruolo === 'admin'))) {
+    // salvataggio completo riservato alla Redazione: gli altri account non lo inviano
+    setSaving(false); document.getElementById('saveLbl').textContent='Operazione riservata alla Redazione'; _fine(); return;
+  }
+  var azione = snap ? 'dati.salvaArticolo' : 'dati.salvaTutto';
+  var payload = snap ? { article: snap } : { issues: issues, articles: articles, bannedRevisori: bannedRevisori, eliminati: Object.keys(_deletedIds) };
   ssShow('','Salvataggio in corso...','Invio dati a Google Sheets...',false,'#2563eb');
   var att=0;
   function trySave(){
     att++;
-    var xhr=new XMLHttpRequest();xhr.timeout=20000;
-    if(useGet){xhr.open('GET',url,true);}else{xhr.open('POST',GS_URL,true);xhr.setRequestHeader('Content-Type','text/plain');}
-    xhr.onload=function(){
-      var txt=xhr.responseText||'',ok=false;
-      try{var j=JSON.parse(txt);ok=j.result==='OK'||j.saved>=0;}catch(e){ok=txt.trim()==='OK';}
-      if(!ok){
-        if(att<3){ssShow('','Riprovo ('+att+'/3)...','Nuovo tentativo...',false,'#d97706');setTimeout(trySave,2500);return;}
-        setSaving(false);document.getElementById('saveLbl').textContent='\u26a0 Errore';
-        console.error('[TeMA] Salvataggio rifiutato, risposta:', txt);ssShow('\u274c','Errore di salvataggio','Il salvataggio non \u00e8 andato a buon fine dopo 3 tentativi. Risposta del server: '+esc(_rispostaServer(txt)),true,'#dc2626');_fine();return;
+    _api(azione, payload).then(function(j){
+      if(!j || !j.ok){
+        setSaving(false);document.getElementById('saveLbl').textContent='⚠ Non salvato';
+        console.error('[TeMA] Salvataggio rifiutato:', j);
+        ssShow('❌','Salvataggio non riuscito',esc((j&&j.errore)||'Risposta non valida'),true,'#dc2626');_fine();return;
       }
-      if(!snap){_setBaseline(articles, issues, bannedRevisori);try{localStorage.setItem('tema_nArticoli',String(articles.length));}catch(e){}refresh();setSaving(false);document.getElementById('saveLbl').textContent='Salvato \u2713';ssShow('\u2705','Salvato!','Dati aggiornati correttamente su Google Sheets.'+_altri,true,'#16a34a');_fine();return;}
+      if(!snap){_setBaseline(articles, issues, bannedRevisori);try{localStorage.setItem('tema_nArticoli',String(articles.length));}catch(e){}refresh();setSaving(false);document.getElementById('saveLbl').textContent='Salvato ✓';ssShow('✅','Salvato!','Dati aggiornati correttamente su Google Sheets.'+_altri,true,'#16a34a');_fine();return;}
       _baseArts[String(snap.id)] = JSON.stringify(snap);
       ssShow('\u{1F50D}','Verifica in corso...','Controllo che le modifiche siano state registrate...',false,'#2563eb');
-      setTimeout(function(){
-        var vxhr=new XMLHttpRequest();
-        vxhr.open('GET',GS_URL+'?action=getArticle&artId='+encodeURIComponent(snap.id)+'&_t='+Date.now(),true);
-        vxhr.timeout=12000;
-        vxhr.onload=function(){
-          setSaving(false);_fine();
-          try{
-            var r=JSON.parse(vxhr.responseText),s=r.article;
-            if(s&&String(s.step)===String(snap.step)&&String(s.status)===String(snap.status)){
-              var ci=articles.findIndex(function(a){return a.id===s.id;});if(ci>=0)articles[ci]=s;
-              refresh();document.getElementById('saveLbl').textContent='Salvato e verificato \u2713';
-              _baseArts[String(s.id)] = JSON.stringify(s);
-              ssShow('\u2705','Salvato e verificato!','Articolo #'+snap.id+' aggiornato correttamente su Google Sheets.'+_altri,true,'#16a34a');
-            }else{
-              document.getElementById('saveLbl').textContent='\u274c Verifica fallita';
-              ssShow('\u274c','Verifica fallita','I dati non corrispondono su Google Sheets. Riprova.',true,'#dc2626');
-            }
-          }catch(e){document.getElementById('saveLbl').textContent='Salvato \u2713';ssShow('\u2705','Salvato','Dati inviati correttamente.',true,'#16a34a');}
-        };
-        vxhr.onerror=vxhr.ontimeout=function(){setSaving(false);_fine();document.getElementById('saveLbl').textContent='\u26a0 Non verificato';ssShow('\u26a0\ufe0f','Salvato (non verificato)','Dati inviati ma verifica non riuscita. Ricarica per confermare.',true,'#d97706');};
-        vxhr.send();
-      },2500);
-    };
-    xhr.onerror=xhr.ontimeout=function(){
+      _api('dati.articolo',{artId:snap.id}).then(function(r){
+        setSaving(false);_fine();
+        var sv=r&&r.article;
+        if(sv&&String(sv.step)===String(snap.step)&&String(sv.status)===String(snap.status)){
+          var ci=articles.findIndex(function(a){return a.id===sv.id;});if(ci>=0)articles[ci]=sv;
+          refresh();document.getElementById('saveLbl').textContent='Salvato e verificato ✓';
+          _baseArts[String(sv.id)] = JSON.stringify(sv);
+          ssShow('✅','Salvato e verificato!','Articolo #'+esc(snap.id)+' aggiornato correttamente su Google Sheets.'+_altri,true,'#16a34a');
+        }else{
+          document.getElementById('saveLbl').textContent='❌ Verifica fallita';
+          ssShow('❌','Verifica fallita','I dati non corrispondono su Google Sheets. Riprova.',true,'#dc2626');
+        }
+      }).catch(function(){setSaving(false);_fine();document.getElementById('saveLbl').textContent='⚠ Non verificato';ssShow('⚠️','Salvato (non verificato)','Dati inviati ma verifica non riuscita. Ricarica per confermare.',true,'#d97706');});
+    }).catch(function(e){
       if(att<3){ssShow('','Riprovo ('+att+'/3)...','Errore rete, nuovo tentativo...',false,'#d97706');setTimeout(trySave,3000);return;}
-      setSaving(false);document.getElementById('saveLbl').textContent='\u26a0 Errore rete';
-      ssShow('\u274c','Errore di rete','Impossibile raggiungere Google Sheets dopo 3 tentativi.',true,'#dc2626');_fine();
-    };
-    xhr.send(useGet?null:saveData);
+      setSaving(false);document.getElementById('saveLbl').textContent='⚠ Errore rete';
+      ssShow('❌','Errore di rete','Impossibile raggiungere Google Sheets dopo 3 tentativi ('+esc(e.message)+').',true,'#dc2626');_fine();
+    });
   }
   trySave();
 }
