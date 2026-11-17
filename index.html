@@ -205,7 +205,7 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
 <div class="topbar">
   <div class="tb-brand">
       <div class="brand-name">TeMA Journal</div>
-      <div class="brand-sub">Gestione editoriale <span class="app-ver" id="appVersion" title="Versione dell'artefatto (aumenta di uno a ogni aggiornamento)">v.151 &middot; 16/11/2026</span></div>
+      <div class="brand-sub">Gestione editoriale <span class="app-ver" id="appVersion" title="Versione dell'artefatto (aumenta di uno a ogni aggiornamento)">v.152 &middot; 17/11/2026</span></div>
   </div>
   <div class="tb-user" id="tbUser" style="display:none">
     <span class="tb-av" id="tbAv"></span>
@@ -4522,6 +4522,17 @@ function _bloccaSalvataggio_(motivo){
   ssShow('\u26d4','Salvataggio bloccato',motivo+' Per proteggere i dati non ho salvato nulla. Ricarica la pagina e avvisa la Redazione prima di continuare.',true,'#dc2626');
   console.error('[TeMA] Salvataggio bloccato:', motivo);
 }
+// Testo leggibile della risposta del server, per capire perché un salvataggio fallisce (v.152)
+function _rispostaServer(txt) {
+  txt = String(txt || '').trim();
+  if (!txt) return 'risposta vuota';
+  if (/^<!doctype|^<html/i.test(txt)) {
+    var t = (txt.match(/<title>([^<]*)<\/title>/i) || [])[1] || '';
+    var m = txt.replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/gi, ' ').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+    return 'pagina HTML' + (t ? ' "' + t + '"' : '') + ': ' + m.slice(0, 220);
+  }
+  return txt.slice(0, 300);
+}
 function persistSend_(artId, mergeInfo, done){
   var _fine = function(){ if (done) { var d = done; done = null; d(); } };
   if (_soloLettura('le modifiche')) { _fine(); return; }
@@ -4554,7 +4565,7 @@ function persistSend_(artId, mergeInfo, done){
       if(!ok){
         if(att<3){ssShow('','Riprovo ('+att+'/3)...','Nuovo tentativo...',false,'#d97706');setTimeout(trySave,2500);return;}
         setSaving(false);document.getElementById('saveLbl').textContent='\u26a0 Errore';
-        ssShow('\u274c','Errore di salvataggio','Google Sheets non ha risposto dopo 3 tentativi. Riprova.',true,'#dc2626');_fine();return;
+        console.error('[TeMA] Salvataggio rifiutato, risposta:', txt);ssShow('\u274c','Errore di salvataggio','Il salvataggio non \u00e8 andato a buon fine dopo 3 tentativi. Risposta del server: '+esc(_rispostaServer(txt)),true,'#dc2626');_fine();return;
       }
       if(!snap){_setBaseline(articles, issues, bannedRevisori);try{localStorage.setItem('tema_nArticoli',String(articles.length));}catch(e){}refresh();setSaving(false);document.getElementById('saveLbl').textContent='Salvato \u2713';ssShow('\u2705','Salvato!','Dati aggiornati correttamente su Google Sheets.'+_altri,true,'#16a34a');_fine();return;}
       _baseArts[String(snap.id)] = JSON.stringify(snap);
