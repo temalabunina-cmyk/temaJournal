@@ -205,7 +205,7 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
 <div class="topbar">
   <div class="tb-brand">
       <div class="brand-name">TeMA Journal</div>
-      <div class="brand-sub">Gestione editoriale <span class="app-ver" id="appVersion" title="Versione dell'artefatto (aumenta di uno a ogni aggiornamento)">v.152 &middot; 17/11/2026</span></div>
+      <div class="brand-sub">Gestione editoriale <span class="app-ver" id="appVersion" title="Versione dell'artefatto (aumenta di uno a ogni aggiornamento)">v.153 &middot; 17/11/2026</span></div>
   </div>
   <div class="tb-user" id="tbUser" style="display:none">
     <span class="tb-av" id="tbAv"></span>
@@ -4365,7 +4365,7 @@ function persistNote(artId,note){
   setSaving(true);document.getElementById('saveLbl').textContent='Salvataggio nota...';
   ssShow('','Salvataggio nota...','Aggiunta nota a Google Sheets...',false,'#2563eb');
   var sd=JSON.stringify({action:'appendNote',artId:artId,note:note});
-  var url=GS_URL+'?m=save&d='+encodeURIComponent(sd)+'&_t='+Date.now();
+  var url=GS_URL+'?m=save&d='+encodeURIComponent(_senzaPercento(sd))+'&_t='+Date.now();
   var att=0;
   function tryNote(){
     att++;
@@ -4522,6 +4522,11 @@ function _bloccaSalvataggio_(motivo){
   ssShow('\u26d4','Salvataggio bloccato',motivo+' Per proteggere i dati non ho salvato nulla. Ricarica la pagina e avvisa la Redazione prima di continuare.',true,'#dc2626');
   console.error('[TeMA] Salvataggio bloccato:', motivo);
 }
+// Lo script del foglio applica decodeURIComponent a un parametro già decodificato: un '%' nel testo
+// (es. "AI 30%") faceva fallire il salvataggio con "URI malformed". Nel JSON il '%' si può scrivere
+// come \u0025: lo script non lo vede come '%' e JSON.parse lo ritrasforma in '%' (v.153).
+function _senzaPercento(json) { return String(json).replace(/%/g, '\\u0025'); }
+
 // Testo leggibile della risposta del server, per capire perché un salvataggio fallisce (v.152)
 function _rispostaServer(txt) {
   txt = String(txt || '').trim();
@@ -4551,7 +4556,7 @@ function persistSend_(artId, mergeInfo, done){
   if(artId){var a0=articles.find(function(a){return a.id===artId;});if(a0)snap=JSON.parse(JSON.stringify(a0));}
   var _altri = mergeInfo && mergeInfo.altri ? ' Incorporate anche '+mergeInfo.altri+' modifiche di altri utenti.' : '';
   var saveData=snap?JSON.stringify({action:'saveArticle',article:snap}):JSON.stringify({action:'saveAll',issues:issues,articles:articles,bannedRevisori:bannedRevisori});
-  var url=GS_URL+'?m=save&d='+encodeURIComponent(saveData)+'&_t='+Date.now();
+  var url=GS_URL+'?m=save&d='+encodeURIComponent(_senzaPercento(saveData))+'&_t='+Date.now();
   var useGet=url.length<7000;
   ssShow('','Salvataggio in corso...','Invio dati a Google Sheets...',false,'#2563eb');
   var att=0;
