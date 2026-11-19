@@ -197,7 +197,7 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
 <div class="topbar">
   <div class="tb-brand">
       <div class="brand-name">TeMA Journal</div>
-      <div class="brand-sub">Gestione editoriale <span class="app-ver" id="appVersion" title="Versione dell'artefatto (aumenta di uno a ogni aggiornamento)">v.155 &middot; 19/11/2026</span></div>
+      <div class="brand-sub">Gestione editoriale <span class="app-ver" id="appVersion" title="Versione dell'artefatto (aumenta di uno a ogni aggiornamento)">v.156 &middot; 19/11/2026</span></div>
   </div>
   <div class="tb-user" id="tbUser" style="display:none">
     <span class="tb-av" id="tbAv"></span>
@@ -4101,6 +4101,8 @@ function _entra(s, ricorda) {
   bootApp();
 }
 // (v.155) login con username e password eliminato: si entra solo con "Accedi con Google"
+// ID client OAuth pubblico (non è un segreto): lo stesso valore è in Accesso.gs.
+var GOOGLE_CLIENT_ID = '593645723165-lkkem8madpr06hue9n6lpjji28irsbta.apps.googleusercontent.com';
 function _googleCallback(resp) {
   var err = document.getElementById('loginErr');
   err.style.display = 'none';
