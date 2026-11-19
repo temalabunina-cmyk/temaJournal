@@ -183,20 +183,12 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
   <div id="loginBox">
     <div style="font-size:22px;font-weight:700;margin-bottom:.25rem">TeMA Journal</div>
     <div style="font-size:16px;color:var(--tx);margin-bottom:1.75rem">Gestione editoriale &mdash; Accesso riservato<br><span class="app-ver" id="loginVer" style="margin:6px 0 0"></span></div>
-    <div class="fr">
-      <label>Username</label>
-      <input type="text" id="loginUser" placeholder="Username" autocomplete="username" onkeydown="if(event.key==='Enter')document.getElementById('loginPass').focus()">
-    </div>
-    <div class="fr">
-      <label>Password</label>
-      <input type="password" id="loginPass" placeholder="Password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
-    </div>
-    <label style="display:flex;align-items:center;gap:8px;font-size:15px;margin:2px 0 12px;cursor:pointer"><input type="checkbox" id="loginRicorda" style="width:18px;height:18px"> Resta collegato su questo computer (12 ore)</label>
-    <div id="loginErr" style="font-size:16px;color:var(--red);margin-bottom:12px;display:none">Username o password errati.</div>
-    <button class="btn btn-p" id="btnLogin" onclick="doLogin()" style="width:100%;padding:10px;font-size:16px">Accedi</button>
-    <div id="gAccesso" style="display:none;margin-top:16px">
-      <div style="display:flex;align-items:center;gap:10px;color:var(--tx3,#888);font-size:14px;margin-bottom:12px"><span style="flex:1;height:1px;background:var(--brd)"></span>oppure<span style="flex:1;height:1px;background:var(--brd)"></span></div>
-      <div id="gBtn" style="display:flex;justify-content:center"></div>
+    <label style="display:flex;align-items:center;gap:8px;font-size:15px;margin:2px 0 14px;cursor:pointer"><input type="checkbox" id="loginRicorda" style="width:18px;height:18px"> Resta collegato su questo computer (12 ore)</label>
+    <div id="loginErr" style="font-size:16px;color:var(--red);margin-bottom:12px;display:none"></div>
+    <div id="gAccesso" style="margin-top:4px">
+
+      <div id="gBtn" style="display:flex;justify-content:center;min-height:44px"></div>
+      <div style="font-size:13px;color:var(--tx2);text-align:center;margin-top:10px">Accesso consentito solo agli account Google autorizzati dalla Redazione.</div>
     </div>
   </div>
 </div>
@@ -205,7 +197,7 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
 <div class="topbar">
   <div class="tb-brand">
       <div class="brand-name">TeMA Journal</div>
-      <div class="brand-sub">Gestione editoriale <span class="app-ver" id="appVersion" title="Versione dell'artefatto (aumenta di uno a ogni aggiornamento)">v.154 &middot; 17/11/2026</span></div>
+      <div class="brand-sub">Gestione editoriale <span class="app-ver" id="appVersion" title="Versione dell'artefatto (aumenta di uno a ogni aggiornamento)">v.155 &middot; 19/11/2026</span></div>
   </div>
   <div class="tb-user" id="tbUser" style="display:none">
     <span class="tb-av" id="tbAv"></span>
@@ -648,20 +640,7 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
 </div>
 </div>
 
-<!-- PASSWORD MODAL -->
-<div class="modal-bg" id="pwdModal" style="z-index:200">
-<div class="modal" style="max-width:340px;text-align:center">
-  <div style="font-size:28px;margin-bottom:.5rem">&#128274;</div>
-  <h3 style="margin-bottom:.5rem">Accesso riservato</h3>
-  <p style="font-size:20px;color:var(--tx2);margin-bottom:1rem;font-family:sans-serif">Inserisci la password per procedere.</p>
-  <div class="fr" style="text-align:left"><label>Password</label><input type="password" id="pwdInput"></div>
-  <div id="pwdErr" style="font-size:20px;color:var(--red);margin-top:4px;display:none;font-family:sans-serif">Password errata.</div>
-  <div style="display:flex;gap:8px;justify-content:center;margin-top:1rem;padding-top:1rem;border-top:1px solid var(--brd)">
-    <button class="btn" id="btnPwdCancel">Annulla</button>
-    <button class="btn btn-p" id="btnPwdOk">Accedi</button>
-  </div>
-</div>
-</div>
+<!-- (v.155) finestra della password eliminata: le operazioni protette dipendono dal ruolo dell'account Google -->
 
 <script>
 const DEF_ISSUES=[{"key":"01/2026","label":"TeMA 01/2026","type":"ordinario","year":2026,"num":1,"theme":"The city challenges and external agents","deadline":"2026-04-30","note":"Pubblicazione prevista 30/04/2026"}];
@@ -1182,32 +1161,12 @@ function schedSave() {
   setSaving(true); clearTimeout(saveTimer); saveTimer = setTimeout(persist, 600);
 }
 
+// Operazioni protette (v.155): niente più password, decide il ruolo dell'account con cui si è entrati.
+// Il server controlla comunque i permessi su ogni salvataggio.
 function requirePwd(action) {
-  pendingAction = action;
-  document.getElementById('pwdInput').value = '';
-  document.getElementById('pwdErr').style.display = 'none';
-  document.getElementById('pwdModal').classList.add('open');
-  setTimeout(function(){ document.getElementById('pwdInput').focus(); }, 100);
-}
-function checkPwd() {
-  var inp = document.getElementById('pwdInput'), errEl = document.getElementById('pwdErr');
-  var pw = inp.value;
-  if (!pw) return;
-  if (!_sessione) { errEl.textContent = 'Sessione scaduta: ricarica la pagina.'; errEl.style.display = 'block'; return; }
-  inp.disabled = true;
-  _authPost({ azione: 'verificaAzione', token: _sessione.token, password: pw }).then(function (j) {
-    inp.disabled = false;
-    if (j.ok) {
-      document.getElementById('pwdModal').classList.remove('open');
-      var action = pendingAction; pendingAction = null;
-      if (action) { setTimeout(function(){ action(); }, 50); }
-    } else {
-      errEl.textContent = j.errore || 'Password non corretta'; errEl.style.display = 'block';
-      inp.value = ''; inp.focus();
-    }
-  }).catch(function (e) {
-    inp.disabled = false; errEl.textContent = 'Verifica non riuscita: ' + e.message; errEl.style.display = 'block';
-  });
+  var r = _sessione && _sessione.ruolo;
+  if (r === 'admin' || r === 'direttore' || r === 'gatekeeper') { if (action) setTimeout(action, 0); return; }
+  ssShow('\u{1F512}', 'Operazione riservata', 'Questa operazione è riservata a Redazione, Direttore e GateKeeper.', true, '#d97706');
 }
 
 // ── Bandiere della nazionalità degli autori (v.141) ────────────────────
@@ -4141,28 +4100,7 @@ function _entra(s, ricorda) {
   document.getElementById('mainApp').style.display = 'block';
   bootApp();
 }
-function doLogin() {
-  var u = document.getElementById('loginUser').value.trim();
-  var p = document.getElementById('loginPass').value;
-  var err = document.getElementById('loginErr'), btn = document.getElementById('btnLogin');
-  if (!u || !p) { err.textContent = 'Inserisci username e password.'; err.style.display = 'block'; return; }
-  err.style.display = 'none'; if (btn) { btn.disabled = true; btn.textContent = 'Accesso in corso...'; }
-  _authPost({ azione: 'login', utente: u, password: p }).then(function (j) {
-    if (btn) { btn.disabled = false; btn.textContent = 'Accedi'; }
-    if (!j.ok) {
-      err.textContent = j.errore || 'Username o password errati.'; err.style.display = 'block';
-      document.getElementById('loginPass').value = ''; document.getElementById('loginPass').focus(); return;
-    }
-    document.getElementById('loginPass').value = '';
-    var _ric = document.getElementById('loginRicorda'); _entra({ token: j.token, utente: j.utente, ruolo: j.ruolo, scade: j.scade }, !!(_ric && _ric.checked));
-  }).catch(function (e) {
-    if (btn) { btn.disabled = false; btn.textContent = 'Accedi'; }
-    err.textContent = 'Impossibile verificare l\'accesso (' + e.message + '). Controlla la connessione e riprova.'; err.style.display = 'block';
-  });
-}
-// ── Accesso con Google (v.144) ─────────────────────────────────────────
-// ID client OAuth pubblico (non è un segreto): lo stesso valore è in Accesso.gs.
-var GOOGLE_CLIENT_ID = '593645723165-lkkem8madpr06hue9n6lpjji28irsbta.apps.googleusercontent.com';
+// (v.155) login con username e password eliminato: si entra solo con "Accedi con Google"
 function _googleCallback(resp) {
   var err = document.getElementById('loginErr');
   err.style.display = 'none';
@@ -4208,12 +4146,6 @@ function autoResize(el) {
 
 function bootApp() {
 
-  document.getElementById('loginPass').addEventListener('keydown', function(e){
-    if (e.key === 'Enter') doLogin();
-  });
-  document.getElementById('loginUser').addEventListener('keydown', function(e){
-    if (e.key === 'Enter') document.getElementById('loginPass').focus();
-  });
 
   initFilters(); renderStats(); updateTabCounts(); 
   if (adminMode || currentUser === 'RedazioneTeMA' || currentUser === 'DirettoreTeMA') {
@@ -4317,20 +4249,10 @@ function bootApp() {
   document.getElementById('srchPub').addEventListener('input',renderPub);
   document.getElementById('fIssPub').addEventListener('change',renderPub);
   // rifiutati search handled via oninput in HTML
-  document.getElementById('btnPwdOk').addEventListener('click',checkPwd);
-  document.getElementById('btnPwdCancel').addEventListener('click',function(){ document.getElementById('pwdModal').classList.remove('open'); });
-  document.getElementById('pwdInput').addEventListener('keydown',function(e){ if(e.key==='Enter') checkPwd(); });
   ['artModal','issModal'].forEach(function(id){
     document.getElementById(id).addEventListener('click',function(e){
       if (e.target===this) this.classList.remove('open');
     });
-  });
-  // pwdModal backdrop does NOT close artModal/issModal
-  document.getElementById('pwdModal').addEventListener('click',function(e){
-    if (e.target===this) {
-      this.classList.remove('open');
-      pendingAction = null;
-    }
   });
 }
 
@@ -4354,7 +4276,7 @@ function ssShow(icon,title,msg,done,color){
   var btn=document.getElementById('ts-btn'),spin=document.getElementById('ts-spin'),tip=document.getElementById('ts-tip'),tipTxt=document.getElementById('ts-tip-text');
   btn.style.display=done?'inline-block':'none';btn.style.background=color||'#16a34a';
   spin.style.display=done?'none':'block';if(!done)spin.style.borderTopColor=color||'#2563eb';
-  if(done&&tip&&tipTxt){tipTxt.textContent=TIPS[Math.floor(Math.random()*TIPS.length)];tip.style.display='block';}
+  if(done&&tip&&tipTxt&&typeof TIPS!=='undefined'&&TIPS.length){tipTxt.textContent=TIPS[Math.floor(Math.random()*TIPS.length)];tip.style.display='block';}
   else if(tip){tip.style.display='none';}
   document.getElementById('ts-panel').style.display='flex';
 }
