@@ -197,7 +197,7 @@ body{font-family:'Roboto',sans-serif;background:var(--bg);color:var(--tx);font-s
 <div class="topbar">
   <div class="tb-brand">
       <div class="brand-name">TeMA Journal</div>
-      <div class="brand-sub">Gestione editoriale <span class="app-ver" id="appVersion" title="Versione dell'artefatto (aumenta di uno a ogni aggiornamento)">v.156 &middot; 19/11/2026</span></div>
+      <div class="brand-sub">Gestione editoriale <span class="app-ver" id="appVersion" title="Versione dell'artefatto (aumenta di uno a ogni aggiornamento)">v.157 &middot; 22/11/2026</span></div>
   </div>
   <div class="tb-user" id="tbUser" style="display:none">
     <span class="tb-av" id="tbAv"></span>
@@ -4009,7 +4009,11 @@ var AUTH_URL = REPORT_URL_DEFAULT;
 // Ogni lettura e salvataggio passa da TeMA Report (Dati.gs) con il token di sessione.
 function _api(azione, dati) {
   var corpo = Object.assign({ azione: azione, token: _sessione && _sessione.token }, dati || {});
-  return fetch(AUTH_URL, { method: 'POST', redirect: 'follow', body: JSON.stringify(corpo) })
+  var ctl = (typeof AbortController !== 'undefined') ? new AbortController() : null;   // v.157: massimo 90 s di attesa
+  var tmo = ctl ? setTimeout(function () { ctl.abort(); }, 90000) : null;
+  return fetch(AUTH_URL, { method: 'POST', redirect: 'follow', body: JSON.stringify(corpo), signal: ctl ? ctl.signal : undefined })
+    .catch(function (e) { throw (e && e.name === 'AbortError') ? new Error('il server non ha risposto entro 90 secondi') : e; })
+    .finally(function () { if (tmo) clearTimeout(tmo); })
     .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
     .then(function (t) {
       var j; try { j = JSON.parse(t); } catch (e) { throw new Error('risposta non valida: ' + _rispostaServer(t)); }
@@ -4021,7 +4025,12 @@ function _api(azione, dati) {
 try { document.getElementById('loginVer').textContent = document.getElementById('appVersion').textContent; } catch (e) {}
 var _sessione = null;
 function _authPost(dati) {
-  return fetch(AUTH_URL, { method: 'POST', redirect: 'follow', body: JSON.stringify(dati) })
+  // v.157: se il server non risponde entro 90 secondi la richiesta si interrompe (prima l'attesa poteva durare all'infinito)
+  var ctl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+  var tmo = ctl ? setTimeout(function () { ctl.abort(); }, 90000) : null;
+  return fetch(AUTH_URL, { method: 'POST', redirect: 'follow', body: JSON.stringify(dati), signal: ctl ? ctl.signal : undefined })
+    .catch(function (e) { throw (e && e.name === 'AbortError') ? new Error('il server non ha risposto entro 90 secondi') : e; })
+    .finally(function () { if (tmo) clearTimeout(tmo); })
     .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
     .then(function (t) { try { return JSON.parse(t); } catch (e) { throw new Error('risposta non valida dal server di accesso'); } });
 }
@@ -4419,12 +4428,17 @@ function _mergeWithServer(artId) {
     .catch(function(e){ console.warn('[TeMA] Unione non riuscita, salvo senza unire:', e); return info; });
 }
 
+function _puoSalvareTutto_(){ return !!(adminMode || (_sessione && _sessione.ruolo === 'admin')); }
 function persist(){
   if (_persistBusy) { clearTimeout(saveTimer); saveTimer = setTimeout(persist, 800); return; }
   var artId = null;
+  // v.157: il salvataggio completo è solo della Redazione. Per gli altri account le modifiche automatiche
+  // al caricamento (migrazioni) non si inviano, ma gli articoli in coda si salvano comunque uno per uno:
+  // prima il salvataggio completo saltato cancellava la coda e lasciava aperta la finestra "Salvataggio in corso".
+  if (_pendingAll && !_puoSalvareTutto_()) { _pendingAll = false; console.log('[TeMA] Salvataggio completo riservato alla Redazione: non inviato.'); }
   if (_pendingAll) { _pendingAll = false; _pendingArtIds = []; }      // il salvataggio completo include tutto
   else if (_pendingArtIds.length) artId = _pendingArtIds.shift();
-  else return;
+  else { setSaving(false); return; }
   _persistBusy = true;
   setSaving(true);document.getElementById('saveLbl').textContent='Salvataggio...';
   ssShow('','Salvataggio in corso...','Controllo le modifiche degli altri utenti...',false,'#2563eb');
@@ -4473,7 +4487,7 @@ function persistSend_(artId, mergeInfo, done){
   var _altri = mergeInfo && mergeInfo.altri ? ' Incorporate anche '+mergeInfo.altri+' modifiche di altri utenti.' : '';
   if (!snap && !(adminMode || (_sessione && _sessione.ruolo === 'admin'))) {
     // salvataggio completo riservato alla Redazione: gli altri account non lo inviano
-    setSaving(false); document.getElementById('saveLbl').textContent='Operazione riservata alla Redazione'; _fine(); return;
+    setSaving(false); document.getElementById('ts-panel').style.display='none'; _fine(); return;
   }
   var azione = snap ? 'dati.salvaArticolo' : 'dati.salvaTutto';
   var payload = snap ? { article: snap } : { issues: issues, articles: articles, bannedRevisori: bannedRevisori, eliminati: Object.keys(_deletedIds) };
